@@ -5,6 +5,7 @@
 package com.lekebilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class QVariant<T extends Object>{
 
@@ -90,6 +91,7 @@ public class QVariant<T extends Object>{
 	T data;
 	DataStreamVersion version;
 	QVariant.Type type = Type.Invalid;
+	String userTypeName = null;
 	public QVariant(T data){
 
 	}
@@ -130,8 +132,12 @@ public class QVariant<T extends Object>{
 			boolean is_null = false;
 			if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue())
 				is_null = src.readUnsignedByte()!=0;
+			
+			QVariant<U> ret = new QVariant<U>();
 			if (type == QVariant.Type.UserType.value) {
-				String name = (String)QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
+				String name = new String(((ByteBuffer)QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version)).array());
+				name = name.trim();
+				ret.userTypeName = name;
 				try{
 					type = QMetaTypeRegistry.instance().getTypeForName(name);
 				} catch (IllegalArgumentException e){
@@ -139,13 +145,14 @@ public class QVariant<T extends Object>{
 				}
 			}
 
-			QVariant<U> ret = new QVariant<U>();
+			
 			for(Type tpe : QVariant.Type.values()){
 				if(tpe.getValue() == type){
 					ret.type = tpe;
 					break;
 				}
 			}
+			System.out.println("Got type:"+ ret.type.name());
 			
 			if (ret.type==Type.Invalid || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
@@ -175,7 +182,7 @@ public class QVariant<T extends Object>{
 
 	}
 	public String getUserTypeName() {
-		return null;
+		return userTypeName;
 		//TODO: Implement user types
 	}
 }

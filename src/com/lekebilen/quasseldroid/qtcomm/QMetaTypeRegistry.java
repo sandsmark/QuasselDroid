@@ -5,10 +5,12 @@
 package com.lekebilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
+import com.lekebilen.quasseldroid.qtcomm.serializers.QByteArray;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QString;
@@ -23,6 +25,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Object>(QMetaType.Type.Void.getValue(),"void"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Bool.getValue(),"bool"));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.Int.getValue(),"int", new QInteger()));
+	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(), "BufferId", new QInteger()));
 	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"uint", new UnsignedInteger()));
 	    
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qlonglong"));
@@ -34,7 +37,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<String>(QMetaType.Type.QString.getValue(),"QString", new QString()));
 	    types.add(new QMetaType<List<String> >(QMetaType.Type.QStringList.getValue(),"QStringList", new QList<String>(QMetaType.Type.QString.getValue())));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QStringList.getValue(),"QStringList"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.QByteArray.getValue(),"QByteArray"));
+	    types.add(new QMetaType<ByteBuffer>(QMetaType.Type.QByteArray.getValue(),"QByteArray", new QByteArray()));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QBitArray.getValue(),"QBitArray"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QDate.getValue(),"QDate"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QTime.getValue(),"QTime"));
@@ -121,7 +124,7 @@ public class QMetaTypeRegistry {
 	}
 	public synchronized int getTypeForName(String name){
 		for(QMetaType type: types){
-			if(type.name == name)
+			if(type.name.equals(name))
 				return type.id;
 		}
 		throw new IllegalArgumentException();

@@ -2,7 +2,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
@@ -11,7 +10,6 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 import com.lekebilen.quasseldroid.qtcomm.QVariant.Type;
-import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
 
 
 public class TestProxy {

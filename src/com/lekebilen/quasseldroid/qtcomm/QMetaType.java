@@ -100,7 +100,9 @@ public class QMetaType<T extends Object> extends Object{
     	LastCoreExtType(138),
 
     	QReal(6),//double
-    	User(256);
+    	User(256),
+    	UserType(127);//From qvariant
+    	
         int value;
         Type(int value){
         	this.value = value;
