@@ -126,8 +126,11 @@ public class QMetaType<T extends Object> extends Object{
 		this.serializer = serializer;
 		
 	}
-	public QMetaTypeSerializer<T> getSerializer(){
-		System.out.println(id);
+	public QMetaTypeSerializer<T> getSerializer() {
+		if (serializer == null) {
+			System.err.println("Unimplemented serializer!: " + this.name);
+		}
+
 		return serializer;
 	}
 }
