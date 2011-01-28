@@ -28,7 +28,7 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 	public List<T> unserialize(QDataInputStream stream, DataStreamVersion version)
 			throws IOException {
 		List<T> list = makeList();
-		int len = (int)stream.readUInt();
+		int len = (int)stream.readUInt(32);
 		for(int i=0;i<len;i++){
 			list.add((T)QMetaTypeRegistry.instance().getTypeForId(elementType).getSerializer().unserialize(stream, version));
 		}
@@ -39,7 +39,7 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 	@Override
 	public void serialize(QDataOutputStream stream, List<T> data,
 			DataStreamVersion version) throws IOException {
-		stream.writeUInt(data.size());
+		stream.writeUInt(data.size(), 32);
 		for(T element: data){
 			((QMetaTypeSerializer<Object>)QMetaTypeRegistry.instance().getTypeForId(elementType).getSerializer()).serialize(stream, (Object)element, version);
 		}

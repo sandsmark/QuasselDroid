@@ -121,7 +121,7 @@ public class QVariant<T extends Object>{
 		@SuppressWarnings("unchecked")
 		@Override
 		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException{	    
-			int type = (int)src.readUInt();
+			int type = (int)src.readUInt(32);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?
 				/*if (u >= MapFromThreeCount)
@@ -152,7 +152,6 @@ public class QVariant<T extends Object>{
 					break;
 				}
 			}
-			System.out.println("Got type:"+ ret.type.name());
 			
 			if (ret.type==Type.Invalid || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
@@ -168,7 +167,7 @@ public class QVariant<T extends Object>{
 		@SuppressWarnings("unchecked")
 		@Override
 		public void serialize(QDataOutputStream stream, QVariant<U> data, DataStreamVersion version) throws IOException {
-			stream.writeUInt(data.type.getValue());
+			stream.writeUInt(data.type.getValue(), 32);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?
 			}
@@ -176,7 +175,7 @@ public class QVariant<T extends Object>{
 				stream.writeByte(data==null?1:0);
 			if (data.type == QVariant.Type.UserType) {
 				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
-			}			
+			}
 			QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(stream, data.data,version);
 		}
 
@@ -184,5 +183,19 @@ public class QVariant<T extends Object>{
 	public String getUserTypeName() {
 		return userTypeName;
 		//TODO: Implement user types
+	}
+	
+	public String toString() {
+		switch (type) {
+		case String:
+			return (String)data;
+		case UInt:
+		case Bool:
+			return data.toString();
+		default:
+			return type.toString();
+		}
+		
+			
 	}
 }

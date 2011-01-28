@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
+import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QByteArray;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
+import com.lekebilen.quasseldroid.qtcomm.serializers.QMap;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QString;
 import com.lekebilen.quasseldroid.qtcomm.serializers.UnsignedInteger;
 
@@ -23,16 +26,16 @@ public class QMetaTypeRegistry {
 	private QMetaTypeRegistry(){
 		//:%s/QT_ADD_STATIC_METATYPE(\(\"[^\"]\+\"\)\, QMetaType::\([^)]\+\)),/types.add(new QMetaType(QMetaType.Type.\2.getValue(),\1));/g
 	    types.add(new QMetaType<Object>(QMetaType.Type.Void.getValue(),"void"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.Bool.getValue(),"bool"));
+	    types.add(new QMetaType<Boolean>(QMetaType.Type.Bool.getValue(),"bool", new Bool()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.Int.getValue(),"int", new QInteger()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(), "BufferId", new QInteger()));
-	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"uint", new UnsignedInteger()));
+	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"uint", new UnsignedInteger(32)));
 	    
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qlonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.ULongLong.getValue(),"qulonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Double.getValue(),"double"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QChar.getValue(),"QChar"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.QVariantMap.getValue(),"QVariantMap"));
+	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.QVariantMap.getValue(),"QVariantMap", new QMap<String, QVariant<?>>(QMetaType.Type.QString.getValue(), QMetaType.Type.QVariant.getValue())));
 	    types.add(new QMetaType<List<QVariant<?>> >(QMetaType.Type.QVariantList.getValue(),"QVariantList", new QList<QVariant<?>>(QMetaType.Type.QVariant.getValue())));
 	    types.add(new QMetaType<String>(QMetaType.Type.QString.getValue(),"QString", new QString()));
 	    types.add(new QMetaType<List<String> >(QMetaType.Type.QStringList.getValue(),"QStringList", new QList<String>(QMetaType.Type.QString.getValue())));
@@ -103,15 +106,14 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"long long"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.ULongLong.getValue(),"unsigned long long"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Char.getValue(),"qint8"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.UChar.getValue(),"quint8"));
+	    types.add(new QMetaType<Long>(QMetaType.Type.UChar.getValue(),"quint8", new UnsignedInteger(8)));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Short.getValue(),"qint16"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.UShort.getValue(),"quint16"));
+	    types.add(new QMetaType<Long>(QMetaType.Type.UShort.getValue(),"quint16", new UnsignedInteger(16)));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Int.getValue(),"qint32"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.UInt.getValue(),"quint32"));
+	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"quint32", new UnsignedInteger(32)));
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qint64"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.ULongLong.getValue(),"quint64"));
+	    types.add(new QMetaType<Long>(QMetaType.Type.ULongLong.getValue(),"quint64", new UnsignedInteger(32)));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QVariantList.getValue(),"QList<QVariant>"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.QVariantMap.getValue(),"QMap<QString,QVariant>"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QVariantHash.getValue(),"QHash<QString,QVariant>"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QReal.getValue(),"qreal"));
 

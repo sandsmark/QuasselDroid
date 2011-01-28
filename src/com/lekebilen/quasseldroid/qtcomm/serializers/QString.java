@@ -17,9 +17,9 @@ public class QString implements QMetaTypeSerializer<String> {
 	public void serialize(QDataOutputStream stream, String data,
 			DataStreamVersion version) throws IOException {
 		if(data==null){
-			stream.writeUInt(0xFFFFFFFF);
+			stream.writeUInt(0xFFFFFFFF, 32);
 		}else{
-			stream.writeUInt(data.getBytes("UTF-16BE").length);
+			stream.writeUInt(data.getBytes("UTF-16BE").length, 32);
 			stream.write(data.getBytes("UTF-16BE"));
 		}
 	}
@@ -27,11 +27,10 @@ public class QString implements QMetaTypeSerializer<String> {
 	@Override
 	public String unserialize(QDataInputStream stream, DataStreamVersion version)
 			throws IOException {
-		int len = (int)stream.readUInt();
+		int len = (int)stream.readUInt(32);
 		if(len == 0xFFFFFFFF)
 			return null;
 		byte data[] = new byte[len];
-		System.out.println("Len:"+len);
 		stream.readFully(data);
 		return new String(data,"UTF-16BE");
 	}
