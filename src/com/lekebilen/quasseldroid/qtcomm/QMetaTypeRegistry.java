@@ -25,7 +25,7 @@ public class QMetaTypeRegistry {
 	List<QMetaType<?>> types = new ArrayList<QMetaType<?>>();  
 	private QMetaTypeRegistry(){
 		//:%s/QT_ADD_STATIC_METATYPE(\(\"[^\"]\+\"\)\, QMetaType::\([^)]\+\)),/types.add(new QMetaType(QMetaType.Type.\2.getValue(),\1));/g
-	    types.add(new QMetaType<Object>(QMetaType.Type.Void.getValue(),"void"));
+	    types.add(new QMetaType<java.lang.Void>(QMetaType.Type.Void.getValue(), "void", new com.lekebilen.quasseldroid.qtcomm.serializers.Void()));
 	    types.add(new QMetaType<Boolean>(QMetaType.Type.Bool.getValue(),"bool", new Bool()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.Int.getValue(),"int", new QInteger()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(), "BufferId", new QInteger()));

@@ -24,11 +24,11 @@ class TestCore {
             	(ServerSocketFactory) ServerSocketFactory.getDefault();
             ServerSocket serversocket =
             	(ServerSocket) serversocketfactory.createServerSocket(4242);
+            System.out.println("Waiting for connection...");
             Socket socket = (Socket) serversocket.accept();
 
             
             QDataInputStream is = new QDataInputStream(socket.getInputStream());
-            
             int len = is.readInt();
             System.out.println("We are getting this many bytesis: " + len);
             

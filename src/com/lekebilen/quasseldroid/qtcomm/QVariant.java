@@ -92,8 +92,9 @@ public class QVariant<T extends Object>{
 	DataStreamVersion version;
 	QVariant.Type type = Type.Invalid;
 	String userTypeName = null;
-	public QVariant(T data){
-
+	public QVariant(T data, Type t){
+		this.data = data;
+		this.type = t;
 	}
 	private void clear(){
 		data = null;
@@ -194,8 +195,6 @@ public class QVariant<T extends Object>{
 			return data.toString();
 		default:
 			return type.toString();
-		}
-		
-			
+		}	
 	}
 }
