@@ -29,6 +29,7 @@ public class QDataInputStream extends DataInputStream{
 		case 8:
 			return readUnsignedByte();
 		default:
+			System.err.println("No support for reading unsigned ints of size " + size);
 			return 0; // fuck you too
 		}
 	}

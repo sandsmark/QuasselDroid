@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 import javax.net.SocketFactory;
 
+import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
@@ -20,7 +22,7 @@ public class TestClient {
 	public static void main(String[] args) {
 		try {
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
-			Socket socket = (Socket)factory.createSocket("localhost", 4242);
+			Socket socket = (Socket)factory.createSocket("mts.ms", 4242);
 			QDataOutputStream ss = new QDataOutputStream(socket.getOutputStream());
 			
 			Map<String, QVariant<?>> initial = new HashMap<String, QVariant<?>>();
@@ -37,8 +39,36 @@ public class TestClient {
 			QDataOutputStream bos = new QDataOutputStream(new ByteArrayOutputStream());
 			QVariant<Map<String, QVariant<?>>> bufstruct = new QVariant<Map<String, QVariant<?>>>(initial, QVariant.Type.Map);
 			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, bos, bufstruct);
+			
+			// Tell the other end how much data to expect
 			ss.writeUInt(bos.size(), 32);
-			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, ss, bufstruct);			
+			// Send data 
+			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, ss, bufstruct);
+			
+			// Time to read from the core
+			QDataInputStream is = new QDataInputStream(socket.getInputStream());
+			int len = is.readInt();
+			System.out.println("We're getting this many bytesies from the core: " + len);
+            
+			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("c:\\users\\sandsmark\\kek"));
+			byte [] buffer = new byte[len];
+			is.read(buffer);
+			outstream.write(buffer);
+			return;
+				
+
+			/*
+			Map<String, QVariant<?>> init;
+			QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
+
+			init = (Map<String, QVariant<?>>)v.getData();
+			System.out.println("Got answer from server: ");
+			for (String key : init.keySet()) {
+				System.out.println("\t" + key + " : " + init.get(key));
+			}
+			
+*/
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

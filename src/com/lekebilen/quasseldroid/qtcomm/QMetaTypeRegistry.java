@@ -7,12 +7,14 @@ package com.lekebilen.quasseldroid.qtcomm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
 import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QByteArray;
+import com.lekebilen.quasseldroid.qtcomm.serializers.QDateTime;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QMap;
@@ -44,7 +46,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Object>(QMetaType.Type.QBitArray.getValue(),"QBitArray"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QDate.getValue(),"QDate"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QTime.getValue(),"QTime"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.QDateTime.getValue(),"QDateTime"));
+	    types.add(new QMetaType<Calendar>(QMetaType.Type.QDateTime.getValue(),"QDateTime", new QDateTime()));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QUrl.getValue(),"QUrl"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QLocale.getValue(),"QLocale"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QRect.getValue(),"QRect"));
