@@ -193,6 +193,7 @@ public class QVariant<T extends Object>{
 		case String:
 			return (String)data;
 		case UInt:
+		case Int:
 		case Bool:
 			return data.toString();
 		default:

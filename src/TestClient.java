@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
@@ -66,6 +67,13 @@ public class TestClient {
 			for (String key : init.keySet()) {
 				System.out.println("\t" + key + " : " + init.get(key));
 			}
+			
+			 // We should check that the core is new and dandy here. 
+			 
+			// Now SMACK DAB ENCRYPTION YO
+			SSLSocketFactory sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+			socket = sslSocketFactory.createSocket(socket, "mts.ms", 4242, true);
+			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
