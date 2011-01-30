@@ -41,6 +41,7 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
 		long julianDay = stream.readUInt(32);
 		long secondsSinceMidnight = stream.readUInt(32);
 		long isUTC = stream.readUInt(8);
+		System.out.println("JD:" + julianDay + ", MS:" + secondsSinceMidnight + ", UTC:" + isUTC);
 		
 		double J = (double)(julianDay) + 0.5f;
 		long j = (int) (J + 32044);
@@ -60,9 +61,10 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
 		int month = (int) ((m+2) % 12 + 1);
 		int day = (int) (d + 1);
 		
-		int hour = (int) (secondsSinceMidnight / 3600);
-		int minute = (int)((secondsSinceMidnight - (hour*3600))/60);
-		int second = (int)((secondsSinceMidnight - (hour*3600) - (minute*60)));
+		int hour = (int) (secondsSinceMidnight / 3600000);
+		int minute = (int)((secondsSinceMidnight - (hour*3600000))/60000);
+		int second = (int)((secondsSinceMidnight - (hour*3600000) - (minute*60000))/1000);
+		int millis = (int)((secondsSinceMidnight - (hour*3600000) - (minute*60000) - (second * 1000)));
 		
 		TimeZone zone;
 		if (isUTC == 1)
@@ -72,8 +74,10 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
 		
 		Calendar cal = Calendar.getInstance(zone);
 		cal.set(year, month, day, hour, minute, second);
-		System.out.println("Julian day:" + julianDay + " Seconds since midnight: " + secondsSinceMidnight);
 		System.out.println("Deserialized date: " + day + "." + month + "." + year + "  " + hour + ":" + minute + ":" + second);
 		return cal;
 	}
+	
+	public static int JGREG= 15 + 31*(10+12*1582);
+	public static double HALFSECOND = 0.5;
 }

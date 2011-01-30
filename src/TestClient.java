@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.Socket;
 import java.text.DateFormat;
@@ -30,7 +31,7 @@ public class TestClient {
 			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
 			Date date = new Date();
 			initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariant.Type.String));
-			initial.put("UseSsl", new QVariant<Boolean>(false, QVariant.Type.Bool));
+			initial.put("UseSsl", new QVariant<Boolean>(true, QVariant.Type.Bool));
 			initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariant.Type.String));
 			initial.put("UseCompression", new QVariant<Boolean>(false, QVariant.Type.Bool));
 			initial.put("MsgType", new QVariant<String>("ClientInit", QVariant.Type.String));
@@ -47,17 +48,16 @@ public class TestClient {
 			
 			// Time to read from the core
 			QDataInputStream is = new QDataInputStream(socket.getInputStream());
+			//QDataInputStream is = new QDataInputStream(new FileInputStream("/home/sandsmark/tmp/qvariant/file2.dat"));
 			int len = is.readInt();
 			System.out.println("We're getting this many bytesies from the core: " + len);
             
-			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("c:\\users\\sandsmark\\kek"));
+/*			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("c:\\users\\sandsmark\\kek"));
 			byte [] buffer = new byte[len];
 			is.read(buffer);
 			outstream.write(buffer);
-			return;
+			return;*/
 				
-
-			/*
 			Map<String, QVariant<?>> init;
 			QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
 
@@ -66,8 +66,6 @@ public class TestClient {
 			for (String key : init.keySet()) {
 				System.out.println("\t" + key + " : " + init.get(key));
 			}
-			
-*/
 			
 		} catch (Exception e) {
 			e.printStackTrace();

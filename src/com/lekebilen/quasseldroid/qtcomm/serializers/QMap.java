@@ -42,6 +42,7 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
 		Map map = new HashMap<String, T>();
 		
 		int len = (int) stream.readUInt(32);
+		
 		for (int i=0; i<len; i++) {
 			T key = (T)QMetaTypeRegistry.instance().getTypeForId(element1Type).getSerializer().unserialize(stream, version);
 			V value = (V)QMetaTypeRegistry.instance().getTypeForId(element2Type).getSerializer().unserialize(stream, version);
