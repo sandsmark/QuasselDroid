@@ -31,7 +31,10 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Boolean>(QMetaType.Type.Bool.getValue(),"bool", new Bool()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.Int.getValue(),"int", new QInteger()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(), "BufferId", new QInteger()));
+	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"NetworkId", new QInteger()));
 	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"uint", new UnsignedInteger(32)));
+	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.UserType.getValue(),"Identity", new QMap<String, QVariant<?>>(QMetaType.Type.QString.getValue(), QMetaType.Type.QVariant.getValue())));
+
 	    
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qlonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.ULongLong.getValue(),"qulonglong"));

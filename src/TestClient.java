@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
@@ -27,10 +28,14 @@ import com.lekebilen.quasseldroid.qtcomm.QVariant;
 public class TestClient {
 	public static void main(String[] args) {
 		try {
+			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 			Socket socket = (Socket)factory.createSocket("localhost", 4242);
 			QDataOutputStream ss = new QDataOutputStream(socket.getOutputStream());
+			// END CREATE SOCKETS 
+
 			
+			// START CLIENT INFO
 			Map<String, QVariant<?>> initial = new HashMap<String, QVariant<?>>();
 			
 			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
@@ -50,18 +55,13 @@ public class TestClient {
 			ss.writeUInt(bos.size(), 32);
 			// Send data 
 			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, ss, bufstruct);
+			// END CLIENT INFO
 			
-			// Time to read from the core
+			
+			// START CORE INFO
 			QDataInputStream is = new QDataInputStream(socket.getInputStream());
-			//QDataInputStream is = new QDataInputStream(new FileInputStream("/home/sandsmark/tmp/qvariant/file2.dat"));
 			int len = is.readInt();
 			System.out.println("We're getting this many bytesies from the core: " + len);
-            
-/*			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("c:\\users\\sandsmark\\kek"));
-			byte [] buffer = new byte[len];
-			is.read(buffer);
-			outstream.write(buffer);
-			return;*/
 				
 			Map<String, QVariant<?>> init;
 			QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
@@ -71,14 +71,14 @@ public class TestClient {
 			for (String key : init.keySet()) {
 				System.out.println("\t" + key + " : " + init.get(key));
 			}
-			
 			 // We should check that the core is new and dandy here. 
-			 
-			// Now SMACK DAB ENCRYPTION YO
+			// END CORE INFO
+
+			
+			// START SSL CONNECTION
 			SSLContext sslContext = SSLContext.getInstance("SSL");
 			TrustManager[] myTMs = new TrustManager [] {
                     new CustomTrustManager() };
-			//sslContext.init(null, new CustomTrustManager[] {}, null);
 			sslContext.init(null, myTMs, null);
 
 			
@@ -91,9 +91,10 @@ public class TestClient {
 			}
 			sslSocket.setUseClientMode(true);
 			sslSocket.startHandshake();
+			// FINISHED SSL CONNECTION
 			
 			
-			// Start login
+			// START LOGIN
 			Map<String, QVariant<?>> login = new HashMap<String, QVariant<?>>();
 			login.put("MsgType", new QVariant<String>("ClientLogin", QVariant.Type.String));
 			login.put("User", new QVariant<String>("test", QVariant.Type.String));
@@ -106,8 +107,37 @@ public class TestClient {
 			ss.writeUInt(bos.size(), 32);
 			// Send data 
 			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, ss, bufstruct);
-
+			// FINISH LOGIN
 			
+			
+			// START LOGIN ACK 
+			is = new QDataInputStream(sslSocket.getInputStream());
+			len = is.readInt();
+			System.out.println("We're getting this many bytesies from the core: " + len);
+			v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
+
+			init = (Map<String, QVariant<?>>)v.getData();
+			System.out.println("Got answer from server: ");
+			for (String key : init.keySet()) {
+				System.out.println("\t" + key + " : " + init.get(key));
+			}
+			// END LOGIN ACK
+			
+			// START SESSION INIT
+			is = new QDataInputStream(sslSocket.getInputStream());
+			len = is.readInt();
+			System.out.println("We're getting this many bytesies from the core: " + len);
+			v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
+
+			init = (Map<String, QVariant<?>>)v.getData();
+			System.out.println("Got answer from server: ");
+			for (String key : init.keySet()) {
+				System.out.println("\t" + key + " : " + init.get(key));
+			}
+			// END SESSION INIT
+			
+			
+			// Now the fun part starts, where we play signal proxy
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

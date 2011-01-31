@@ -6,6 +6,9 @@ package com.lekebilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.List;
+
 
 public class QVariant<T extends Object>{
 
@@ -144,7 +147,7 @@ public class QVariant<T extends Object>{
 				try{
 					type = QMetaTypeRegistry.instance().getTypeForName(name);
 				} catch (IllegalArgumentException e){
-					throw new IOException("Corrupt data", e);
+					throw new IOException("Corrupt data" + name, e);
 				}
 			}
 
@@ -196,8 +199,24 @@ public class QVariant<T extends Object>{
 		case Int:
 		case Bool:
 			return data.toString();
+		case Map:
+			String ret = "( ";
+			Map<Object, Object> map = (Map<Object, Object>)data;
+			for (Object key : map.keySet()) {
+				ret += key.toString() + " : " + map.get(key).toString() + ", ";
+			}
+			ret += " )";
+			return ret;
+		case List:
+			String r = "( ";
+			List<Object> list = (List<Object>)data;
+			for (Object o : list) {
+				r += o.toString() + ", ";
+			}
+			r += " )";
+			return r;
 		default:
-			return type.toString();
-		}	
+			return "/" + type.toString() + "/";
+		}
 	}
 }
