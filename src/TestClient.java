@@ -1,5 +1,4 @@
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
@@ -77,7 +76,11 @@ public class TestClient {
 			 
 			// Now SMACK DAB ENCRYPTION YO
 			SSLContext sslContext = SSLContext.getInstance("SSL");
-			sslContext.init(null, new CustomTrustManager[] {}, null);
+			TrustManager[] myTMs = new TrustManager [] {
+                    new CustomTrustManager() };
+			//sslContext.init(null, new CustomTrustManager[] {}, null);
+			sslContext.init(null, myTMs, null);
+
 			
 			SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 			
@@ -96,7 +99,7 @@ public class TestClient {
 		}
 	}
 	
-	private class CustomTrustManager implements javax.net.ssl.X509TrustManager {
+	private static class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	     /*
 	      * The default X509TrustManager returned by SunX509.  We'll delegate
 	      * decisions to it, and fall back to the logic in this class if the
@@ -108,8 +111,8 @@ public class TestClient {
 	         // create a "default" JSSE X509TrustManager.
 	 
 	         KeyStore ks = KeyStore.getInstance("JKS");
-	         ks.load(new FileInputStream("trustedCerts"),
-	             "passphrase".toCharArray());
+	         //ks.load(new FileInputStream("trustedCerts"),
+	         //    "passphrase".toCharArray());
 	 
 	         TrustManagerFactory tmf =
 	TrustManagerFactory.getInstance("SunX509", "SunJSSE");
@@ -144,7 +147,7 @@ public class TestClient {
 	         try {
 	             sunJSSEX509TrustManager.checkClientTrusted(chain, authType);
 	         } catch (CertificateException excep) {
-	             // do any special handling here, or rethrow exception.
+
 	         }
 	     }
 	 
@@ -156,10 +159,9 @@ public class TestClient {
 	         try {
 	             sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
 	         } catch (CertificateException excep) {
-	             /*
-	              * Possibly pop up a dialog box asking whether to trust the
-	              * cert chain.
-	              */
+	             for (X509Certificate cert : chain) {
+	            	 System.out.println(cert.getEncoded());
+	             }
 	         }
 	     }
 	 
