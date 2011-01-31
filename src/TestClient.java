@@ -93,6 +93,20 @@ public class TestClient {
 			sslSocket.startHandshake();
 			
 			
+			// Start login
+			Map<String, QVariant<?>> login = new HashMap<String, QVariant<?>>();
+			login.put("MsgType", new QVariant<String>("ClientLogin", QVariant.Type.String));
+			login.put("User", new QVariant<String>("test", QVariant.Type.String));
+			login.put("Password", new QVariant<String>("test", QVariant.Type.String));
+			
+			bos = new QDataOutputStream(new ByteArrayOutputStream());
+			bufstruct = new QVariant<Map<String, QVariant<?>>>(login, QVariant.Type.Map);
+			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, bos, bufstruct);
+			ss = new QDataOutputStream(sslSocket.getOutputStream());
+			ss.writeUInt(bos.size(), 32);
+			// Send data 
+			QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, ss, bufstruct);
+
 			
 		} catch (Exception e) {
 			e.printStackTrace();
