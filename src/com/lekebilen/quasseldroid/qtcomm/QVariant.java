@@ -1,5 +1,7 @@
 /**
- * Copyright Frederik M.J.V. 2010 - LGPL 2.1 / GPLv3
+ * Copyright Frederik M.J.V. 2010 
+ * Copyright Martin Sandsmark 2011
+ * LGPL 2.1 / GPLv3
  */
 
 package com.lekebilen.quasseldroid.qtcomm;
@@ -145,9 +147,9 @@ public class QVariant<T extends Object>{
 				name = name.trim();
 				ret.userTypeName = name;
 				try{
-					type = QMetaTypeRegistry.instance().getTypeForName(name);
+					type = QMetaTypeRegistry.instance().getIdForName(name);
 				} catch (IllegalArgumentException e){
-					throw new IOException("Corrupt data" + name, e);
+					throw new IOException("Corrupt data, unable to unserialize this: " + name, e);
 				}
 			}
 
@@ -158,6 +160,7 @@ public class QVariant<T extends Object>{
 					break;
 				}
 			}
+//			System.out.println(ret.type);
 			
 			if (ret.type==Type.Invalid || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
@@ -166,7 +169,11 @@ public class QVariant<T extends Object>{
 				return ret;
 			}    
 			//Unchecked cast so we can read unknown qvariants at run time and then inspect the contents
-			ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(type).getSerializer().unserialize(src, version);
+			if (ret.type == Type.UserType) {
+				ret.data = (U) QMetaTypeRegistry.instance().getTypeForName(ret.userTypeName).getSerializer().unserialize(src, version);
+			} else {
+				ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(type).getSerializer().unserialize(src, version);
+			}
 			return ret;
 		}
 
@@ -179,10 +186,13 @@ public class QVariant<T extends Object>{
 			}
 			if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue())
 				stream.writeByte(data==null?1:0);
+			
 			if (data.type == QVariant.Type.UserType) {
 				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
+				QMetaTypeRegistry.instance().getTypeForName(data.getUserTypeName()).getSerializer().serialize(stream, data.data, version);
+			} else {
+				QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(stream, data.data, version);
 			}
-			QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(stream, data.data,version);
 		}
 
 	}
@@ -215,6 +225,8 @@ public class QVariant<T extends Object>{
 			}
 			r += " )";
 			return r;
+		case UserType:
+			return userTypeName + data;
 		default:
 			return "/" + type.toString() + "/";
 		}

@@ -28,6 +28,7 @@ public class QString implements QMetaTypeSerializer<String> {
 	public String unserialize(QDataInputStream stream, DataStreamVersion version)
 			throws IOException {
 		int len = (int)stream.readUInt(32);
+//		System.out.println("BAMAN BAMAN BAMAN: " + len);
 		if(len == 0xFFFFFFFF)
 			return null;
 		byte data[] = new byte[len];

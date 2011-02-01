@@ -74,7 +74,6 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
 		
 		Calendar cal = Calendar.getInstance(zone);
 		cal.set(year, month, day, hour, minute, second);
-		System.out.println("Deserialized date: " + day + "." + month + "." + year + "  " + hour + ":" + minute + ":" + second);
 		return cal;
 	}
 	

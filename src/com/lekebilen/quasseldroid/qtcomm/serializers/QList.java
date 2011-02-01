@@ -1,5 +1,7 @@
 /**
- * Copyright Frederik M.J.V. 2010 - LGPL 2.1 / GPLv3
+ * Copyright Frederik M.J.V. 2010 
+ * Copyright Martin Sandsmark 2011
+ * LGPL 2.1 / GPLv3
  */
 
 package com.lekebilen.quasseldroid.qtcomm.serializers;
@@ -14,10 +16,11 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeSerializer;
+import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 public class QList<T> implements QMetaTypeSerializer<List<T>> {
-	int elementType=0;
-	public QList(int elementType){
+	String elementType;
+	public QList(String elementType){
 		this.elementType = elementType;
 	}
 	protected List<T> makeList(){
@@ -30,7 +33,7 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 		List<T> list = makeList();
 		int len = (int)stream.readUInt(32);
 		for(int i=0;i<len;i++){
-			list.add((T)QMetaTypeRegistry.instance().getTypeForId(elementType).getSerializer().unserialize(stream, version));
+			list.add((T)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer().unserialize(stream, version));
 		}
 		return list;
 	}
@@ -41,7 +44,7 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 			DataStreamVersion version) throws IOException {
 		stream.writeUInt(data.size(), 32);
 		for(T element: data){
-			((QMetaTypeSerializer<Object>)QMetaTypeRegistry.instance().getTypeForId(elementType).getSerializer()).serialize(stream, (Object)element, version);
+			((QMetaTypeSerializer<Object>)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer()).serialize(stream, (Object)element, version);
 		}
 	}
 }

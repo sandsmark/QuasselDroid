@@ -1,5 +1,7 @@
 /**
- * Copyright Frederik M.J.V. 2010 - LGPL 2.1 / GPLv3
+ * Copyright Frederik M.J.V. 2010
+ * Copyright Martin Sandsmark 2011 
+ * LGPL 2.1 / GPLv3
  */
 
 package com.lekebilen.quasseldroid.qtcomm;

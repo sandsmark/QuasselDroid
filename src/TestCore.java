@@ -1,13 +1,13 @@
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
 import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
 
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
+import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
@@ -16,13 +16,6 @@ public
 class TestCore {
     public static void main(String[] string) {
         try {
-            /*SSLServerSocketFactory sslserversocketfactory =
-                    (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-            SSLServerSocket sslserversocket =
-                    (SSLServerSocket) sslserversocketfactory.createServerSocket(4242);
-            SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
-            QDataInputStream is = new QDataInputStream(sslsocket.getInputStream());*/
-
             ServerSocketFactory serversocketfactory =
             	(ServerSocketFactory) ServerSocketFactory.getDefault();
             ServerSocket serversocket =
@@ -44,8 +37,13 @@ class TestCore {
 				System.out.println("\t" + key + " : " + init.get(key));
 			}
 			
-			Map<String, QVariant<?>> reply;
+            QDataInputStream file = new QDataInputStream(new FileInputStream("/home/sandsmark/quasseldroid/sessioninit-core.dump"));
 			
+			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("/home/sandsmark/projects/quasseldroid/syncinit-client.dump"));
+			byte [] buffer = new byte[len];
+			is.read(buffer);
+			outstream.write(buffer);
+
 			
 			is.close();
         } catch (Exception exception) {

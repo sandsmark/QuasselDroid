@@ -1,7 +1,8 @@
 /**
- * Copyright Frederik M.J.V. 2010 - LGPL 2.1 / GPLv3
+ * Copyright Frederik M.J.V. 2010 
+ * Copyright Martin Sandsmark 2011
+ * LGPL 2.1 / GPLv3
  */
-
 package com.lekebilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QMap;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QString;
 import com.lekebilen.quasseldroid.qtcomm.serializers.UnsignedInteger;
+import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.BufferInfoSerializer;
 
 
 public class QMetaTypeRegistry {
@@ -33,17 +35,19 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(), "BufferId", new QInteger()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"NetworkId", new QInteger()));
 	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"uint", new UnsignedInteger(32)));
-	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.UserType.getValue(),"Identity", new QMap<String, QVariant<?>>(QMetaType.Type.QString.getValue(), QMetaType.Type.QVariant.getValue())));
+	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.UserType.getValue(), "Identity", new QMap<String, QVariant<?>>("QString", "QVariant")));
+	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"IdentityId", new QInteger()));
+	    types.add(new QMetaType<BufferInfo>(QMetaType.Type.UserType.getValue(),"BufferInfo", new BufferInfoSerializer()));
 
 	    
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qlonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.ULongLong.getValue(),"qulonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Double.getValue(),"double"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QChar.getValue(),"QChar"));
-	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.QVariantMap.getValue(),"QVariantMap", new QMap<String, QVariant<?>>(QMetaType.Type.QString.getValue(), QMetaType.Type.QVariant.getValue())));
-	    types.add(new QMetaType<List<QVariant<?>> >(QMetaType.Type.QVariantList.getValue(),"QVariantList", new QList<QVariant<?>>(QMetaType.Type.QVariant.getValue())));
+	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.QVariantMap.getValue(),"QVariantMap", new QMap<String, QVariant<?>>("QString", "QVariant")));
+	    types.add(new QMetaType<List<QVariant<?>> >(QMetaType.Type.QVariantList.getValue(),"QVariantList", new QList<QVariant<?>>("QVariant")));
 	    types.add(new QMetaType<String>(QMetaType.Type.QString.getValue(),"QString", new QString()));
-	    types.add(new QMetaType<List<String> >(QMetaType.Type.QStringList.getValue(),"QStringList", new QList<String>(QMetaType.Type.QString.getValue())));
+	    types.add(new QMetaType<List<String> >(QMetaType.Type.QStringList.getValue(),"QStringList", new QList<String>("QString")));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QStringList.getValue(),"QStringList"));
 	    types.add(new QMetaType<ByteBuffer>(QMetaType.Type.QByteArray.getValue(),"QByteArray", new QByteArray()));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QBitArray.getValue(),"QBitArray"));
@@ -129,7 +133,7 @@ public class QMetaTypeRegistry {
 		}
 		return singleton;
 	}
-	public synchronized int getTypeForName(String name){
+	public synchronized int getIdForName(String name){
 		for(QMetaType type: types){
 			if(type.name.equals(name))
 				return type.id;
@@ -138,9 +142,16 @@ public class QMetaTypeRegistry {
 	}
 	public synchronized QMetaType getTypeForId(int id){
 		for(QMetaType type: types){
-			if(type.id == id){
+			if(type.id == id) {
 				return type;
 			}
+		}
+		throw new IllegalArgumentException();
+	}
+	public synchronized QMetaType getTypeForName(String name) {
+		for (QMetaType type: types) {
+			if(type.name.equals(name))
+				return type;
 		}
 		throw new IllegalArgumentException();
 	}

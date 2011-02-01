@@ -8,6 +8,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.SocketFactory;
@@ -26,6 +28,22 @@ import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 
 public class TestClient {
+	private enum RequestType {
+	    Sync(1),
+	    RpcCall(2),
+	    InitRequest(3),
+	    InitData(4),
+	    HeartBeat(5),
+	    HeartBeatReply(6);
+	    
+        int value;
+        RequestType(int value){
+        	this.value = value;
+        }
+        public int getValue(){
+        	return value;
+        }	    
+	}
 	public static void main(String[] args) {
 		try {
 			// START CREATE SOCKETS
@@ -60,7 +78,13 @@ public class TestClient {
 			
 			// START CORE INFO
 			QDataInputStream is = new QDataInputStream(socket.getInputStream());
-			int len = is.readInt();
+			long len = is.readUInt(32);
+//			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("/home/sandsmark/projects/quasseldroid/info-core.dump"));
+//			byte [] buffer = new byte[(int)len];
+//			is.read(buffer);
+//			outstream.write(buffer);
+//			System.exit(0);
+			
 			System.out.println("We're getting this many bytesies from the core: " + len);
 				
 			Map<String, QVariant<?>> init;
@@ -122,10 +146,13 @@ public class TestClient {
 				System.out.println("\t" + key + " : " + init.get(key));
 			}
 			// END LOGIN ACK
+
 			
 			// START SESSION INIT
 			is = new QDataInputStream(sslSocket.getInputStream());
-			len = is.readInt();
+
+			len = is.readUInt(32);
+
 			System.out.println("We're getting this many bytesies from the core: " + len);
 			v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
 
@@ -136,8 +163,23 @@ public class TestClient {
 			}
 			// END SESSION INIT
 			
-			
 			// Now the fun part starts, where we play signal proxy
+			
+			// START SIGNAL PROXY INIT
+			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
+//			packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
+			
+			
+			
+			
+			while (true) {
+				len = is.readInt();
+				System.out.println("We're getting this many bytesies from the core: " + len);
+				packedFunc = (List<QVariant<?>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariantList, is);
+				System.out.println("Got answer from server: ");
+				System.out.println(packedFunc);
+			}
+			// END SIGNAL PROXY
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
