@@ -129,8 +129,8 @@ public class QVariant<T extends Object>{
 		@Override
 		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException{	    
 			
-			
 			int type = (int)src.readUInt(32);
+			System.out.println("cake" + type);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?
 				/*if (u >= MapFromThreeCount)
@@ -163,7 +163,7 @@ public class QVariant<T extends Object>{
 			}
 //			System.out.println(ret.type);
 			
-			if (ret.type==Type.Invalid || is_null) { //includes data = null; FIXME: is this correct?
+			if (ret.type==Type.Invalid){// || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
 				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
 				ret.data = null;

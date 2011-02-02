@@ -161,8 +161,8 @@ public class CoreConnection {
 //			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
 			
 			while (true) {
-//				packedFunc = readQVariantList();
-				reply = readQVariantMap();
+				packedFunc = readQVariantList();
+//				reply = readQVariantMap();
 				System.out.println("Got answer from server: ");
 				System.out.println(packedFunc);
 			}
