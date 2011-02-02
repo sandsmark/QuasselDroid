@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
+import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
 import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QByteArray;

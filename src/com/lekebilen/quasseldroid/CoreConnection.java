@@ -1,3 +1,4 @@
+package com.lekebilen.quasseldroid;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -88,8 +89,7 @@ public class CoreConnection {
 			initial.put("MsgType", new QVariant<String>("ClientInit", QVariant.Type.String));
 			initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariant.Type.Int));
 			
-			QVariant<Map<String, QVariant<?>>> bufstruct = new QVariant<Map<String, QVariant<?>>>(initial, QVariant.Type.Map);
-			sendQVariant(bufstruct);
+			sendQVariantMap(initial);
 			// END CLIENT INFO
 			
 			
@@ -128,9 +128,7 @@ public class CoreConnection {
 			login.put("MsgType", new QVariant<String>("ClientLogin", QVariant.Type.String));
 			login.put("User", new QVariant<String>("test", QVariant.Type.String));
 			login.put("Password", new QVariant<String>("test", QVariant.Type.String));
-			
-			bufstruct = new QVariant<Map<String, QVariant<?>>>(login, QVariant.Type.Map);
-			sendQVariant(bufstruct);
+			sendQVariantMap(login);
 			// FINISH LOGIN
 			
 			
@@ -154,21 +152,19 @@ public class CoreConnection {
 			// Now the fun part starts, where we play signal proxy
 			
 			// START SIGNAL PROXY INIT
-//			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
-//			packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
-//			packedFunc.add(new QVariant<String>("Network", QVariant.Type.String));
-//			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
-//			
-//			
-//			
-//			
-//			while (true) {
-//				len = is.readInt();
-//				System.out.println("We're getting this many bytesies from the core: " + len);
-//				packedFunc = (List<QVariant<?>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariantList, is);
-//				System.out.println("Got answer from server: ");
-//				System.out.println(packedFunc);
-//			}
+			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
+			packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
+			packedFunc.add(new QVariant<String>("Network", QVariant.Type.String));
+			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
+			sendQVariantList(packedFunc);
+			
+			
+			while (true) {
+//				packedFunc = readQVariantList();
+				reply = readQVariantMap();
+				System.out.println("Got answer from server: ");
+				System.out.println(packedFunc);
+			}
 			// END SIGNAL PROXY
 	}
 	
@@ -184,6 +180,16 @@ public class CoreConnection {
 		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
 	}
 	
+	private void sendQVariantMap(Map<String, QVariant<?>> data) throws IOException {
+		QVariant<Map<String, QVariant<?>>> bufstruct = new QVariant<Map<String, QVariant<?>>>(data, QVariant.Type.Map);
+		sendQVariant(bufstruct);
+	}
+	
+	private void sendQVariantList(List<QVariant<?>> data) throws IOException {
+		QVariant<List<QVariant<?>>> bufstruct = new QVariant<List<QVariant<?>>>(data, QVariant.Type.List);
+		sendQVariant(bufstruct);
+	}
+	
 	private Map<String, QVariant<?>> readQVariantMap() throws IOException {
 		long len = inStream.readUInt(32);
 		System.out.println("We're getting this many bytesies from the core: " + len);
@@ -192,7 +198,16 @@ public class CoreConnection {
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
 		
 		return ret;
+	}
+	
+	private List<QVariant<?>> readQVariantList() throws IOException {	
+		long len = inStream.readUInt(32);
+		System.out.println("We're getting this many bytesies from the core: " + len);
+		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
+		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
+		
+		return ret;
 	}
 	
 	private static class CustomTrustManager implements javax.net.ssl.X509TrustManager {

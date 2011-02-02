@@ -3,7 +3,7 @@ package com.lekebilen.quasseldroid.qtcomm.serializers.quassel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.lekebilen.quasseldroid.qtcomm.BufferInfo;
+import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;

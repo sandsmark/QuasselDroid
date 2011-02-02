@@ -1,4 +1,4 @@
-package com.lekebilen.quasseldroid.qtcomm;
+package com.lekebilen.quasseldroid;
 
 import java.nio.ByteBuffer;
 
