@@ -158,6 +158,7 @@ public class CoreConnection {
 			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
 			sendQVariantList(packedFunc);
 			
+			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
 			
 			while (true) {
 //				packedFunc = readQVariantList();
@@ -208,6 +209,15 @@ public class CoreConnection {
 		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
 		
 		return ret;
+	}
+	
+	private void dump(String file) throws IOException {
+		long len = inStream.readUInt(32);
+		QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream(file));
+		byte [] buffer = new byte[(int)len];
+		inStream.read(buffer);
+		outstream.write(buffer);
+		System.exit(0);			 	
 	}
 	
 	private static class CustomTrustManager implements javax.net.ssl.X509TrustManager {
