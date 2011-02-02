@@ -1,10 +1,15 @@
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 
 import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
@@ -37,12 +42,41 @@ class TestCore {
 				System.out.println("\t" + key + " : " + init.get(key));
 			}
 			
-            QDataInputStream file = new QDataInputStream(new FileInputStream("/home/sandsmark/quasseldroid/sessioninit-core.dump"));
+            File file = new File("/home/sandsmark/projects/quasseldroid/info-core.dump");
+            byte [] buf = new byte[(int) file.length()];
+            FileInputStream in = new FileInputStream(file);
+            in.read(buf);
 			
-			QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream("/home/sandsmark/projects/quasseldroid/syncinit-client.dump"));
-			byte [] buffer = new byte[len];
-			is.read(buffer);
-			outstream.write(buffer);
+			QDataOutputStream outstream = new QDataOutputStream(socket.getOutputStream());
+			outstream.writeInt(buf.length);
+			outstream.write(buf);
+
+//			SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+//			SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(socket, 4242);
+//			SSLSocket sslsocket = (SSLSocket) sslserversocket.accept();
+			SSLContext sslContext = SSLContext.getDefault();
+
+			SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+			
+			SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, "localhost", 4242, true);
+			//sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
+			for (String protocol: sslSocket.getEnabledProtocols()) {
+				System.out.println(protocol);
+			}
+			sslSocket.setUseClientMode(false);
+			sslSocket.startHandshake();
+
+			is = new QDataInputStream(sslSocket.getInputStream());
+            len = is.readInt();
+            System.out.println("We are getting this many bytesis: " + len);
+            
+			v = (QVariant)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, is);
+
+			init = (Map<String, QVariant<?>>)v.getData();
+			System.out.println("Got connection: ");
+			for (String key : init.keySet()) {
+				System.out.println("\t" + key + " : " + init.get(key));
+			}
 
 			
 			is.close();
