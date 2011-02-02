@@ -28,12 +28,10 @@ public class QString implements QMetaTypeSerializer<String> {
 	public String unserialize(QDataInputStream stream, DataStreamVersion version)
 			throws IOException {
 		int len = (int)stream.readUInt(32);
-		System.out.println("String length: " + len);
 		if(len == 0xFFFFFFFF)
-			return null;
+			return new String();
 		byte data[] = new byte[len];
 		stream.readFully(data);
-		System.out.println("String: '" + new String(data,"UTF-16BE") + "'");
 		return new String(data,"UTF-16BE");
 	}
 }

@@ -4,10 +4,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
@@ -17,6 +16,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.concurrent.Semaphore;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -33,8 +34,9 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 
-public class CoreConnection {
+public class CoreConnection extends Observable {
 	private enum RequestType {
+		Invalid(0),
 	    Sync(1),
 	    RpcCall(2),
 	    InitRequest(3),
@@ -48,7 +50,15 @@ public class CoreConnection {
         }
         public int getValue(){
         	return value;
-        }	    
+        }
+        
+        public static RequestType getForVal(int val) {
+        	for (RequestType type: values()) {
+        		if (type.value == val)
+        			return type;
+        	}
+        	return Invalid;
+        }
 	}
 	
 	private QDataOutputStream outStream;
@@ -58,13 +68,11 @@ public class CoreConnection {
 		try {
 			CoreConnection conn = new CoreConnection("localhost", 4242);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Unknown host!");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Security error!");
 			e.printStackTrace();
 		}
 	}
@@ -158,15 +166,75 @@ public class CoreConnection {
 			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
 			sendQVariantList(packedFunc);
 			
+			ReadThread readThread = new ReadThread(this);
+			readThread.start();
+			
 //			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
 			
-			while (true) {
-				packedFunc = readQVariantList();
-//				reply = readQVariantMap();
-				System.out.println("Got answer from server: ");
-				System.out.println(packedFunc);
-			}
+
 			// END SIGNAL PROXY
+	}
+	
+	private class WriteThread extends Thread {
+		boolean running = false;
+		QVariant<?> data = null;
+		Semaphore mutex = new Semaphore(1);
+		
+		public void run() {
+			try {
+				while (running) {
+					mutex.acquire();
+					
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		public void write(QVariant<?> data) {
+			
+		}
+	}
+	
+	private class ReadThread extends Thread {
+		boolean running = false;
+		CoreConnection parent;
+		
+		public ReadThread(CoreConnection parent) {
+			this.parent = parent;
+		}
+		
+		public void run() {
+			this.running = true;
+			
+			List<QVariant<?>> packedFunc;
+			while (running) {
+				try {
+					packedFunc = readQVariantList();
+				} catch (IOException e) {
+					running = false;//FIXME: handle this properly?
+					System.err.println("IO error!");
+					return;
+				}
+				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
+				switch (type) {
+				case HeartBeat:
+					//TODO
+					break;
+				case InitData:
+				case Sync:
+				case RpcCall:
+					parent.handleFunctionCall(type, packedFunc);
+					break;
+				}
+			}
+		}
+	}
+	
+	private void handleFunctionCall(RequestType type, List<QVariant<?>> packedFunc) {
+		String object = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
+		System.out.println(object);
 	}
 	
 	private void sendQVariant(QVariant<?> data) throws IOException {

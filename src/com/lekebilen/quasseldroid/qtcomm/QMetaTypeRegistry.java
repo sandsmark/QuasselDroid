@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.lekebilen.quasseldroid.BufferInfo;
+import com.lekebilen.quasseldroid.Message;
 import com.lekebilen.quasseldroid.NetworkServer;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
 import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
@@ -25,6 +26,7 @@ import com.lekebilen.quasseldroid.qtcomm.serializers.QString;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QTime;
 import com.lekebilen.quasseldroid.qtcomm.serializers.UnsignedInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.BufferInfoSerializer;
+import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.MessageSerializer;
 import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.NetworkServerSerializer;
 
 
@@ -44,6 +46,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"IdentityId", new QInteger()));
 	    types.add(new QMetaType<BufferInfo>(QMetaType.Type.UserType.getValue(),"BufferInfo", new BufferInfoSerializer()));
 	    types.add(new QMetaType<NetworkServer>(QMetaType.Type.UserType.getValue(),"Network::Server", new NetworkServerSerializer()));
+	    types.add(new QMetaType<Message>(QMetaType.Type.UserType.getValue(),"Message", new MessageSerializer()));
 	    types.add(new QMetaType<Calendar>(QMetaType.Type.QTime.getValue(), "QTime", new QTime()));
 
 	    
@@ -140,7 +143,6 @@ public class QMetaTypeRegistry {
 		return singleton;
 	}
 	public synchronized int getIdForName(String name){
-		System.out.println(":::" + name);
 		for(QMetaType type: types){
 			if(type.name.equals(name))
 				return type.id;
@@ -148,20 +150,16 @@ public class QMetaTypeRegistry {
 		throw new IllegalArgumentException();
 	}
 	public synchronized QMetaType getTypeForId(int id){
-		System.out.println(id);
 		for(QMetaType type: types){
 			if(type.id == id) {
-				System.out.println("Returning type for id: " + type.name);
 				return type;
 			}
 		}
 		throw new IllegalArgumentException();
 	}
 	public synchronized QMetaType getTypeForName(String name) {
-		System.out.println(name);
 		for (QMetaType type: types) {
 			if(type.name.equals(name)) {
-				System.out.println("Returning type: " + type.name);
 				return type;
 			}
 		}

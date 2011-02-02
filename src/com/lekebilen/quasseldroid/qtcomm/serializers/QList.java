@@ -32,7 +32,6 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 			throws IOException {
 		List<T> list = makeList();
 		int len = (int)stream.readUInt(32);
-		System.out.println(len);
 		for(int i=0;i<len;i++){
 			list.add((T)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer().unserialize(stream, version));
 		}

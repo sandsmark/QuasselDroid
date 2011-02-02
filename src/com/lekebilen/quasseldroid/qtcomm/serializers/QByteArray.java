@@ -9,14 +9,15 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeSerializer;
 
 
-public class QByteArray implements QMetaTypeSerializer<ByteBuffer>{
+public class QByteArray implements QMetaTypeSerializer<ByteBuffer> {
 
 	@Override
 	public ByteBuffer unserialize(QDataInputStream stream, DataStreamVersion version)
 	throws IOException {
 		int len = (int)stream.readUInt(32);
-		if(len == 0xFFFFFFFF)
-			return null;
+		if(len == 0xFFFFFFFF) {
+			return ByteBuffer.allocate(0);
+		}
 		byte data[] = new byte[len];
 		stream.readFully(data);
 		return ByteBuffer.wrap(data);

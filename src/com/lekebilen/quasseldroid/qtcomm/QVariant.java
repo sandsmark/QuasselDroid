@@ -7,9 +7,10 @@
 package com.lekebilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 
 public class QVariant<T extends Object>{
@@ -130,7 +131,6 @@ public class QVariant<T extends Object>{
 		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException{	    
 			
 			int type = (int)src.readUInt(32);
-			System.out.println("cake" + type);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?
 				/*if (u >= MapFromThreeCount)
@@ -161,7 +161,6 @@ public class QVariant<T extends Object>{
 					break;
 				}
 			}
-//			System.out.println(ret.type);
 			
 			if (ret.type==Type.Invalid){// || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
@@ -228,8 +227,15 @@ public class QVariant<T extends Object>{
 			return r;
 		case UserType:
 			return userTypeName + data;
+		case ByteArray:
+			try {
+				return new String(((ByteBuffer)data).array(), "UTF-16BE");
+			} catch (UnsupportedEncodingException e) {
+				return "INVALID ByteBuffer";
+			}
+
 		default:
-			return "/" + type.toString() + "/";
+			return "/" + type.toString() + " [ " + data.toString()  + " ]/";
 		}
 	}
 }
