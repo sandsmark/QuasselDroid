@@ -83,6 +83,7 @@ public class QVariant<T extends Object>{
 		CString(12),
 		PointArray(71),
 		//#endif
+		UShort(133),
 		LastType(0xffffffff);
 		int value;
 		Type(int value){

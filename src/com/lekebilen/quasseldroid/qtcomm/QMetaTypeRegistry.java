@@ -36,6 +36,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(), "BufferId", new QInteger()));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"NetworkId", new QInteger()));
 	    types.add(new QMetaType<Long>(QMetaType.Type.UInt.getValue(),"uint", new UnsignedInteger(32)));
+	    types.add(new QMetaType<Long>(QMetaType.Type.UShort.getValue(),"ushort", new UnsignedInteger(16)));
 	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.UserType.getValue(), "Identity", new QMap<String, QVariant<?>>("QString", "QVariant")));
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"IdentityId", new QInteger()));
 	    types.add(new QMetaType<BufferInfo>(QMetaType.Type.UserType.getValue(),"BufferInfo", new BufferInfoSerializer()));
@@ -101,7 +102,6 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Object>(QMetaType.Type.Short.getValue(),"short"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Char.getValue(),"char"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.ULong.getValue(),"ulong"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.UShort.getValue(),"ushort"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.UChar.getValue(),"uchar"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Float.getValue(),"float"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QObjectStar.getValue(),"QObject*"));
@@ -144,6 +144,7 @@ public class QMetaTypeRegistry {
 	public synchronized QMetaType getTypeForId(int id){
 		for(QMetaType type: types){
 			if(type.id == id) {
+				System.out.println("Returning type: " + type.name);
 				return type;
 			}
 		}
@@ -151,8 +152,10 @@ public class QMetaTypeRegistry {
 	}
 	public synchronized QMetaType getTypeForName(String name) {
 		for (QMetaType type: types) {
-			if(type.name.equals(name))
+			if(type.name.equals(name)) {
+				System.out.println("Returning type: " + type.name);
 				return type;
+			}
 		}
 		throw new IllegalArgumentException();
 	}

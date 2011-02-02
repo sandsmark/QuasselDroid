@@ -33,6 +33,7 @@ public class QString implements QMetaTypeSerializer<String> {
 			return null;
 		byte data[] = new byte[len];
 		stream.readFully(data);
+		System.out.println(new String(data,"UTF-16BE"));
 		return new String(data,"UTF-16BE");
 	}
 }

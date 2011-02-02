@@ -41,7 +41,6 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
 		long julianDay = stream.readUInt(32);
 		long secondsSinceMidnight = stream.readUInt(32);
 		long isUTC = stream.readUInt(8);
-		System.out.println("JD:" + julianDay + ", MS:" + secondsSinceMidnight + ", UTC:" + isUTC);
 		
 		double J = (double)(julianDay) + 0.5f;
 		long j = (int) (J + 32044);

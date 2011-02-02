@@ -158,7 +158,7 @@ public class CoreConnection {
 			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
 			sendQVariantList(packedFunc);
 			
-			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
+//			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
 			
 			while (true) {
 //				packedFunc = readQVariantList();
