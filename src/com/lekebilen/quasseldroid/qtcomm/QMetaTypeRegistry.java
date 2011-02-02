@@ -22,6 +22,7 @@ import com.lekebilen.quasseldroid.qtcomm.serializers.QInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QMap;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QString;
+import com.lekebilen.quasseldroid.qtcomm.serializers.QTime;
 import com.lekebilen.quasseldroid.qtcomm.serializers.UnsignedInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.BufferInfoSerializer;
 import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.NetworkServerSerializer;
@@ -43,6 +44,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"IdentityId", new QInteger()));
 	    types.add(new QMetaType<BufferInfo>(QMetaType.Type.UserType.getValue(),"BufferInfo", new BufferInfoSerializer()));
 	    types.add(new QMetaType<NetworkServer>(QMetaType.Type.UserType.getValue(),"Network::Server", new NetworkServerSerializer()));
+	    types.add(new QMetaType<Calendar>(QMetaType.Type.QTime.getValue(), "QTime", new QTime()));
 
 	    
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qlonglong"));
