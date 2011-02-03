@@ -2,7 +2,7 @@ package com.lekebilen.quasseldroid;
 
 import java.util.Date;
 
-public class Message {
+public class Message implements Comparable<Message>{
 	public enum Type {
 		Plain     (0x00001),
 		Notice    (0x00002),
@@ -60,4 +60,9 @@ public class Message {
 	public String sender;
 	public Type type;
 	public byte flags;
+
+	
+	public int compareTo(Message other) {
+		return this.timestamp.compareTo(other.timestamp);
+	}
 }

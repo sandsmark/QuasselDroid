@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.concurrent.Semaphore;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -64,7 +63,7 @@ public class CoreConnection extends Observable {
 	private QDataOutputStream outStream;
 	private QDataInputStream inStream;
 	
-	private List<BufferInfo> buffers;
+	private Map<Integer, Buffer> buffers;
 	
 	public static void main(String[] args) {
 		try {
@@ -157,8 +156,14 @@ public class CoreConnection extends Observable {
 			for (String key : reply.keySet()) {
 				System.out.println("\t" + key + " : " + reply.get(key));
 			}
+			
 			Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
-			buffers = (List<BufferInfo>) sessionState.get("BufferInfos").getData();
+			List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
+			buffers = new HashMap<Integer, Buffer>();
+			for (QVariant<?> bufferInfoQV: bufferInfos) {
+				BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
+				buffers.put(bufferInfo.id, new Buffer(bufferInfo));
+			}
 			// END SESSION INIT
 			
 			// Now the fun part starts, where we play signal proxy
@@ -170,8 +175,33 @@ public class CoreConnection extends Observable {
 			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
 			sendQVariantList(packedFunc);
 			
+
+			packedFunc = new LinkedList<QVariant<?>>();
+			packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
+			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
+			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
+			sendQVariantList(packedFunc);
+			
+			packedFunc = new LinkedList<QVariant<?>>();
+			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
+			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
+			packedFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
+			packedFunc.add(new QVariant<Integer>(-1, "BufferId"));
+			packedFunc.add(new QVariant<Integer>(-1, "MsgId"));
+			sendQVariantList(packedFunc);
+			
+			
+			
 			ReadThread readThread = new ReadThread(this);
 			readThread.start();
+			
+			
+			// Apparently the client doesn't send heartbeats?
+			/*TimerTask sendPingAction = new TimerTask() {
+				public void run() {
+					
+				}
+			};*/
 			
 //			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
 			
@@ -179,8 +209,8 @@ public class CoreConnection extends Observable {
 			// END SIGNAL PROXY
 	}
 	
-	public List<BufferInfo> getBuffers() {
-		return buffers;
+	public Buffer [] getBuffers() {
+		return (Buffer[]) buffers.values().toArray();
 	}
 	
 	private class ReadThread extends Thread {
@@ -201,19 +231,48 @@ public class CoreConnection extends Observable {
 				} catch (IOException e) {
 					running = false;//FIXME: handle this properly?
 					System.err.println("IO error!");
+					e.printStackTrace();
 					return;
 				}
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
+				String name;
 				switch (type) {
 				case HeartBeat:
 					System.out.println("Got heartbeat");
 					break;
 				case InitData:
+					System.out.println("Init data:");
+					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
+					if (name.equals("Network")) {
+						// Do nothing, for now
+					} else if (name.equals("BufferSyncer")) {
+						packedFunc.remove(0); // Object name, not used
+						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
+						for (int i=0; i<lastSeen.size()/2; i++) {
+							int bufferId = (Integer)lastSeen.remove(0).getData();
+							int msgId = (Integer)lastSeen.remove(0).getData();
+							buffers.get(bufferId).setLastSeenMessage(msgId);
+						}
+						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
+						for (int i=0; i<lastSeen.size()/2; i++) {
+							int bufferId = (Integer)lastSeen.remove(0).getData();
+							int msgId = (Integer)lastSeen.remove(0).getData();
+							buffers.get(bufferId).setMarkerLineMessage(msgId);
+						}
+						
+						System.out.println(packedFunc);
+					}
+					break;
 				case Sync:
-				case RpcCall:
-					String object = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
-					System.out.println(object);
+					System.out.println("Sync request:");
+//					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
 					
+//					System.out.println(name);
+					break;
+				case RpcCall:
+					System.out.println("RPC call:");
+					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
+					System.out.println(name);
 					break;
 				}
 			}
