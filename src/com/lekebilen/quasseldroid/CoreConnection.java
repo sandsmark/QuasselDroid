@@ -64,6 +64,8 @@ public class CoreConnection extends Observable {
 	private QDataOutputStream outStream;
 	private QDataInputStream inStream;
 	
+	private List<BufferInfo> buffers;
+	
 	public static void main(String[] args) {
 		try {
 			CoreConnection conn = new CoreConnection("localhost", 4242);
@@ -151,10 +153,12 @@ public class CoreConnection extends Observable {
 			
 			// START SESSION INIT
 			reply = readQVariantMap();
-			System.out.println("Got answer from server: ");
+			System.out.println("Got session init from core: ");
 			for (String key : reply.keySet()) {
 				System.out.println("\t" + key + " : " + reply.get(key));
 			}
+			Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
+			buffers = (List<BufferInfo>) sessionState.get("BufferInfos").getData();
 			// END SESSION INIT
 			
 			// Now the fun part starts, where we play signal proxy
@@ -175,26 +179,8 @@ public class CoreConnection extends Observable {
 			// END SIGNAL PROXY
 	}
 	
-	private class WriteThread extends Thread {
-		boolean running = false;
-		QVariant<?> data = null;
-		Semaphore mutex = new Semaphore(1);
-		
-		public void run() {
-			try {
-				while (running) {
-					mutex.acquire();
-					
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		public void write(QVariant<?> data) {
-			
-		}
+	public List<BufferInfo> getBuffers() {
+		return buffers;
 	}
 	
 	private class ReadThread extends Thread {
@@ -220,22 +206,20 @@ public class CoreConnection extends Observable {
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
 				switch (type) {
 				case HeartBeat:
-					//TODO
+					System.out.println("Got heartbeat");
 					break;
 				case InitData:
 				case Sync:
 				case RpcCall:
-					parent.handleFunctionCall(type, packedFunc);
+					String object = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
+					System.out.println(object);
+					
 					break;
 				}
 			}
 		}
 	}
-	
-	private void handleFunctionCall(RequestType type, List<QVariant<?>> packedFunc) {
-		String object = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
-		System.out.println(object);
-	}
+
 	
 	private void sendQVariant(QVariant<?> data) throws IOException {
 		// See how much data we're going to send
