@@ -155,7 +155,7 @@ public class QVariant<T extends Object>{
 				try{
 					type = QMetaTypeRegistry.instance().getIdForName(name);
 				} catch (IllegalArgumentException e){
-					throw new IOException("Corrupt data, unable to unserialize this: " + name, e);
+					throw new IOException("Corrupt data, unable to unserialize this: " + name);
 				}
 			}
 
