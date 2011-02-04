@@ -6,9 +6,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,13 +16,10 @@ import java.util.Map;
 import java.util.Observable;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
@@ -171,27 +165,18 @@ public class CoreConnection extends Observable {
 			// Now the fun part starts, where we play signal proxy
 			
 			// START SIGNAL PROXY INIT
+			sendInitRequest("BacklogManager", "");
+			sendInitRequest("Network", "1");
+			sendInitRequest("BufferSyncer", "");
+			
 			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
-			packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
-			packedFunc.add(new QVariant<String>("Network", QVariant.Type.String));
-			packedFunc.add(new QVariant<String>("1", QVariant.Type.String));
-			sendQVariantList(packedFunc);
-			
-
-			packedFunc = new LinkedList<QVariant<?>>();
-			packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
-			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
-			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
-			sendQVariantList(packedFunc);
-			
-			packedFunc = new LinkedList<QVariant<?>>();
 			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
 			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
+			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
 			packedFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
 			packedFunc.add(new QVariant<Integer>(-1, "BufferId"));
 			packedFunc.add(new QVariant<Integer>(-1, "MsgId"));
 			sendQVariantList(packedFunc);
-			
 			
 			
 			ReadThread readThread = new ReadThread(this);
@@ -261,8 +246,9 @@ public class CoreConnection extends Observable {
 							int msgId = (Integer)lastSeen.remove(0).getData();
 							buffers.get(bufferId).setMarkerLineMessage(msgId);
 						}
-						
-						System.out.println(packedFunc);
+						for (int buffer: buffers.keySet()) {
+							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
+						}
 					}
 					break;
 				case Sync:
@@ -333,78 +319,34 @@ public class CoreConnection extends Observable {
 		System.exit(0);			 	
 	}
 	
-	private static class CustomTrustManager implements javax.net.ssl.X509TrustManager {
-	     /*
-	      * The default X509TrustManager returned by SunX509.  We'll delegate
-	      * decisions to it, and fall back to the logic in this class if the
-	      * default X509TrustManager doesn't trust it.
-	      */
-	     X509TrustManager sunJSSEX509TrustManager;
-	 
-	     CustomTrustManager() throws GeneralSecurityException {
-	         // create a "default" JSSE X509TrustManager.
-	 
-	         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-	         //ks.load(new FileInputStream("trustedCerts"),
-	         //    "passphrase".toCharArray());
-	 
-	         TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-	         tmf.init(ks);
-	 
-	         TrustManager tms [] = tmf.getTrustManagers();
-	 
-	         /*
-	          * Iterate over the returned trustmanagers, look
-	          * for an instance of X509TrustManager.  If found,
-	          * use that as our "default" trust manager.
-	          */
-	         for (int i = 0; i < tms.length; i++) {
-	             if (tms[i] instanceof X509TrustManager) {
-	                 sunJSSEX509TrustManager = (X509TrustManager) tms[i];
-	                 return;
-	             }
-	         }
-	 
-	         /*
-	          * Find some other way to initialize, or else we have to fail the
-	          * constructor.
-	          */
-	         throw new GeneralSecurityException("Couldn't initialize");
-	     }
-	 
-	     /*
-	      * Delegate to the default trust manager.
-	      */
-	     public void checkClientTrusted(X509Certificate[] chain, String authType)
-	                 throws CertificateException {
-	         try {
-	             sunJSSEX509TrustManager.checkClientTrusted(chain, authType);
-	         } catch (CertificateException excep) {
-
-	         }
-	     }
-	 
-	     /*
-	      * Delegate to the default trust manager.
-	      */
-	     public void checkServerTrusted(X509Certificate[] chain, String authType)
-	                 throws CertificateException {
-	         try {
-	             sunJSSEX509TrustManager.checkServerTrusted(chain, authType);
-	         } catch (CertificateException excep) {
-	             for (X509Certificate cert : chain) {
-	            	 System.out.println(cert.getEncoded());
-	             }
-	         }
-	     }
-	 
-	     /*
-	      * Merely pass this through.
-	      */
-	     public X509Certificate[] getAcceptedIssuers() {
-	         return sunJSSEX509TrustManager.getAcceptedIssuers();
-	     }
-		
+	private void sendInitRequest(String className, String objectName) throws IOException {
+		List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
+		packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
+		packedFunc.add(new QVariant<String>(className, QVariant.Type.String));
+		packedFunc.add(new QVariant<String>(objectName, QVariant.Type.String));
+		sendQVariantList(packedFunc);
 	}
-
+	
+	private void requestBacklog(int buffer, int first) {
+		requestBacklog(buffer, first, -1);
+	}
+	
+	private void requestBacklog(int buffer, int firstMsg, int lastMsg) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
+		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
+		retFunc.add(new QVariant<String>("", QVariant.Type.String));
+		retFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
+		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
+		retFunc.add(new QVariant<Integer>(firstMsg, "MsgId"));
+		retFunc.add(new QVariant<Integer>(lastMsg, "MsgId"));
+		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
+		retFunc.add(new QVariant<Integer>(Config.backlogAdditional, QVariant.Type.Int));
+		
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
