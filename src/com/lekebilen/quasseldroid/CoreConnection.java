@@ -1,4 +1,5 @@
 package com.lekebilen.quasseldroid;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
@@ -173,9 +175,10 @@ public class CoreConnection extends Observable {
 			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
 			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
 			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
-			packedFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
-			packedFunc.add(new QVariant<Integer>(-1, "BufferId"));
-			packedFunc.add(new QVariant<Integer>(-1, "MsgId"));
+//			packedFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariant.Type.String));
+			packedFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestSetLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
+			packedFunc.add(new QVariant<Integer>(1, "BufferId"));
+			packedFunc.add(new QVariant<Integer>(1, "MsgId"));
 			sendQVariantList(packedFunc);
 			
 			
@@ -247,8 +250,10 @@ public class CoreConnection extends Observable {
 							buffers.get(bufferId).setMarkerLineMessage(msgId);
 						}
 						for (int buffer: buffers.keySet()) {
-							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
+//							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 						}
+					} else {
+						System.out.println(name);
 					}
 					break;
 				case Sync:
@@ -270,12 +275,16 @@ public class CoreConnection extends Observable {
 	
 	private void sendQVariant(QVariant<?> data) throws IOException {
 		// See how much data we're going to send
-		QDataOutputStream bos = new QDataOutputStream(new ByteArrayOutputStream());
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		QDataOutputStream bos = new QDataOutputStream(baos);
 		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, bos, data);
 		
 		// Tell the other end how much data to expect
 		outStream.writeUInt(bos.size(), 32);
 		
+		QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		
+		System.out.println(QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2));
 		// Send data 
 		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
 	}
@@ -336,9 +345,13 @@ public class CoreConnection extends Observable {
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
 		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
 		retFunc.add(new QVariant<String>("", QVariant.Type.String));
-		retFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
+		retFunc.add(new QVariant<String>("requestBacklog", QVariant.Type.String));
+//		retFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestBacklog".getBytes())), QVariant.Type.ByteArray));
+		System.out.println(buffer);
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
+		System.out.println(firstMsg);
 		retFunc.add(new QVariant<Integer>(firstMsg, "MsgId"));
+		System.out.println(lastMsg);
 		retFunc.add(new QVariant<Integer>(lastMsg, "MsgId"));
 		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
 		retFunc.add(new QVariant<Integer>(Config.backlogAdditional, QVariant.Type.Int));

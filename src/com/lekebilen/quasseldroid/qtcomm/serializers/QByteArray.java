@@ -20,6 +20,7 @@ public class QByteArray implements QMetaTypeSerializer<ByteBuffer> {
 		}
 		byte data[] = new byte[len];
 		stream.readFully(data);
+
 		return ByteBuffer.wrap(data);
 	}
 

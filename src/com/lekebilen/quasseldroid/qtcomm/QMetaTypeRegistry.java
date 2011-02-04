@@ -32,8 +32,9 @@ import com.lekebilen.quasseldroid.qtcomm.serializers.quassel.NetworkServerSerial
 
 public class QMetaTypeRegistry {
 	static QMetaTypeRegistry singleton = null;
-	List<QMetaType<?>> types = new ArrayList<QMetaType<?>>();  
+	List<QMetaType<?>> types = null;  
 	private QMetaTypeRegistry(){
+		types = new ArrayList<QMetaType<?>>();
 		//:%s/QT_ADD_STATIC_METATYPE(\(\"[^\"]\+\"\)\, QMetaType::\([^)]\+\)),/types.add(new QMetaType(QMetaType.Type.\2.getValue(),\1));/g
 	    types.add(new QMetaType<java.lang.Void>(QMetaType.Type.Void.getValue(), "void", new com.lekebilen.quasseldroid.qtcomm.serializers.Void()));
 	    types.add(new QMetaType<Boolean>(QMetaType.Type.Bool.getValue(),"bool", new Bool()));
@@ -160,7 +161,7 @@ public class QMetaTypeRegistry {
 	}
 	public synchronized QMetaType getTypeForName(String name) {
 		for (QMetaType type: types) {
-			if(type.name.equals(name)) {
+			if (type.name.equals(name)) {
 				return type;
 			}
 		}

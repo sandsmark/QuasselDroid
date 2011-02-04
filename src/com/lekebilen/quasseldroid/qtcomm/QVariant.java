@@ -8,6 +8,7 @@ package com.lekebilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -150,12 +151,31 @@ public class QVariant<T extends Object>{
 			QVariant<U> ret = new QVariant<U>();
 			if (type == QVariant.Type.UserType.value) {
 				String name = new String(((ByteBuffer)QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version)).array());
+
+				System.out.println();
+				for(byte b: name.getBytes()) {
+					System.out.print(" " + b);
+				}
+				System.out.println();
+				
+				System.out.println();
+				for(byte b: "BufferId".getBytes()) {
+					System.out.print(" " + b);
+				}
+				System.out.println();
 				name = name.trim();
 				ret.userTypeName = name;
+//				System.out.println("in: " + name.toCharArray());
+//				System.out.println("LOEL:" + String.format("%x", new BigInteger(name.getBytes())));
+//				System.out.println("LOEL:" + (new BigInteger(name.getBytes())).toString(16));
+//				System.out.println("our: " + "BufferId".toCharArray());
+//				System.out.println("CAEK:" + String.format("%x", new BigInteger("BufferId".getBytes())));
+//				System.out.println("LOEL:" + (new BigInteger("BufferId".getBytes())).toString(16));
+
 				try{
 					type = QMetaTypeRegistry.instance().getIdForName(name);
 				} catch (IllegalArgumentException e){
-					throw new IOException("Corrupt data, unable to unserialize this: " + name);
+					throw new IOException("Corrupt data, unable to unserialize this: '" + name + "'");
 				}
 			}
 
@@ -166,7 +186,7 @@ public class QVariant<T extends Object>{
 					break;
 				}
 			}
-			
+			System.out.println(ret.type);
 			if (ret.type==Type.Invalid){// || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
 				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
