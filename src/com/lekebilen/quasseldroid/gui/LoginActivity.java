@@ -207,15 +207,15 @@ public class LoginActivity extends Activity{
         	dbHelper.close();
         	
         	try {
-				CoreConnection conn = new CoreConnection(res.getString("address"), 4242);
+				CoreConnection conn = new CoreConnection(res.getString("address"), 4242, username.getText().toString(), password.getText().toString());
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+				// Show the user a message about host not found
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Network trouble?
 				e.printStackTrace();
 			} catch (GeneralSecurityException e) {
-				// TODO Auto-generated catch block
+				// SSL not enabled?
 				e.printStackTrace();
 			}
         	

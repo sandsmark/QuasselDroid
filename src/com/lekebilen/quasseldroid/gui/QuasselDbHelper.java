@@ -59,11 +59,16 @@ public class QuasselDbHelper {
 	}
 
 	public void addCore(String name, String address, int port) {
-		ContentValues initialValues = new ContentValues();
-		initialValues.put(KEY_NAME, name);
-		initialValues.put(KEY_ADDRESS, address);
-		initialValues.put(KEY_PORT, port);
-		db.insert(DATABASE_TABLE, null, initialValues);
+		try {
+			open();
+			ContentValues initialValues = new ContentValues();
+			initialValues.put(KEY_NAME, name);
+			initialValues.put(KEY_ADDRESS, address);
+			initialValues.put(KEY_PORT, port);
+			db.insert(DATABASE_TABLE, null, initialValues);
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void deleteCore(long rowId) {

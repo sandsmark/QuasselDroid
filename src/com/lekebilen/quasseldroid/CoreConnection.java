@@ -68,7 +68,7 @@ public class CoreConnection extends Observable {
 	
 	public static void main(String[] args) {
 		try {
-			CoreConnection conn = new CoreConnection("localhost", 4242);
+			CoreConnection conn = new CoreConnection("localhost", 4242, "test", "test");
 		} catch (UnknownHostException e) {
 			System.err.println("Unknown host!");
 		} catch (IOException e) {
@@ -79,7 +79,8 @@ public class CoreConnection extends Observable {
 		}
 	}
 	
-	public CoreConnection(String host, int port) throws UnknownHostException, IOException, GeneralSecurityException {
+	public CoreConnection(String host, int port, String username, String password)
+	throws UnknownHostException, IOException, GeneralSecurityException {
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 			Socket socket = (Socket)factory.createSocket(host, port);
@@ -136,8 +137,8 @@ public class CoreConnection extends Observable {
 			// START LOGIN
 			Map<String, QVariant<?>> login = new HashMap<String, QVariant<?>>();
 			login.put("MsgType", new QVariant<String>("ClientLogin", QVariant.Type.String));
-			login.put("User", new QVariant<String>("test", QVariant.Type.String));
-			login.put("Password", new QVariant<String>("test", QVariant.Type.String));
+			login.put("User", new QVariant<String>(username, QVariant.Type.String));
+			login.put("Password", new QVariant<String>(password, QVariant.Type.String));
 			sendQVariantMap(login);
 			// FINISH LOGIN
 			
