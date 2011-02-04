@@ -231,7 +231,7 @@ public class LoginActivity extends Activity{
 				e.printStackTrace();
 			}
 			
-        	LoginActivity.this.startActivity(new Intent(LoginActivity.this, ChatActivity.class));
+        	LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
 			
 		}
 	};
