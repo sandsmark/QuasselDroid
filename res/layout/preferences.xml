@@ -11,4 +11,10 @@
   	android:key="@string/backlogAdditional"
   	android:defaultValue="5"
   />
+  <CheckBoxPreference 
+  	android:title="SSL"
+  	android:defaultValue="true"
+  	android:summary="Use SSL"
+  	android:key="@string/useSSL"
+  />
 </PreferenceScreen>

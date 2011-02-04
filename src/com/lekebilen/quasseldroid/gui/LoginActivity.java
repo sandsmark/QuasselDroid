@@ -195,6 +195,7 @@ public class LoginActivity extends Activity{
         		
         	}
         	settingsedit.commit();
+        	dbHelper.open();
         	Bundle res = dbHelper.getCore(core.getSelectedItemId());
 			HashMap<String,String> paramMap=new HashMap<String, String>();
         	paramMap.put("username",(username.getText().toString()));
@@ -212,7 +213,7 @@ public class LoginActivity extends Activity{
         	dbHelper.close();
         	
         	try {
-				CoreConnection conn = new CoreConnection(res.getString("address"), 4242, username.getText().toString(), password.getText().toString(), LoginActivity.this);
+				CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this);
 			} catch (UnknownHostException e) {
 				// Show the user a message about host not found
 				e.printStackTrace();
