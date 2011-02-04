@@ -209,11 +209,12 @@ public class QVariant<T extends Object>{
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?
 			}
-			if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue())
+//			if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue())
 				stream.writeByte(data==null?1:0);
 			
 			if (data.type == QVariant.Type.UserType) {
-				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
+//				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
+				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().serialize(stream, ByteBuffer.wrap(data.getUserTypeName().getBytes()), version);
 				QMetaTypeRegistry.instance().getTypeForName(data.getUserTypeName()).getSerializer().serialize(stream, data.data, version);
 			} else {
 				QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(stream, data.data, version);

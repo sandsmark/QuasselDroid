@@ -182,8 +182,8 @@ public class CoreConnection extends Observable {
 			sendQVariantList(packedFunc);
 			
 			
-			ReadThread readThread = new ReadThread(this);
-			readThread.start();
+//			ReadThread readThread = new ReadThread(this);
+//			readThread.start();
 			
 			
 			// Apparently the client doesn't send heartbeats?
