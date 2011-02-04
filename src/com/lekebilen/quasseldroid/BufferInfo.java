@@ -31,6 +31,6 @@ public class BufferInfo {
 	public ByteBuffer name;
 	
 	public String toString() {
-		return new String(name.array()) + "[" + type.name() + "]";
+		return new String(name.array()) + id + "[" + type.name() + "]";
 	}
 }

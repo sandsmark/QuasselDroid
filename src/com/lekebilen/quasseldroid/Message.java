@@ -65,4 +65,8 @@ public class Message implements Comparable<Message>{
 	public int compareTo(Message other) {
 		return this.timestamp.compareTo(other.timestamp);
 	}
+	
+	public String toString() {
+		return sender +": " + content;
+	}
 }

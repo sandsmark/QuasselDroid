@@ -18,6 +18,7 @@ import com.lekebilen.quasseldroid.NetworkServer;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
 import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QByteArray;
+import com.lekebilen.quasseldroid.qtcomm.serializers.QChar;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QDateTime;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QInteger;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QList;
@@ -55,7 +56,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Object>(QMetaType.Type.LongLong.getValue(),"qlonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.ULongLong.getValue(),"qulonglong"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.Double.getValue(),"double"));
-	    types.add(new QMetaType<Object>(QMetaType.Type.QChar.getValue(),"QChar"));
+	    types.add(new QMetaType<Character>(QMetaType.Type.QChar.getValue(),"QChar", new QChar()));
 	    types.add(new QMetaType<Map<String, QVariant<?>>>(QMetaType.Type.QVariantMap.getValue(),"QVariantMap", new QMap<String, QVariant<?>>("QString", "QVariant")));
 	    types.add(new QMetaType<List<QVariant<?>> >(QMetaType.Type.QVariantList.getValue(),"QVariantList", new QList<QVariant<?>>("QVariant")));
 	    types.add(new QMetaType<String>(QMetaType.Type.QString.getValue(),"QString", new QString()));

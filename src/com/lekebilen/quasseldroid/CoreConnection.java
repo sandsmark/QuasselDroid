@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -29,7 +28,7 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 
-public class CoreConnection extends Observable {
+public class CoreConnection {
 	private enum RequestType {
 		Invalid(0),
 	    Sync(1),
@@ -75,7 +74,7 @@ public class CoreConnection extends Observable {
 	}
 	
 	public CoreConnection(String host, int port, String username, String password)
-	throws UnknownHostException, IOException, GeneralSecurityException {
+		throws UnknownHostException, IOException, GeneralSecurityException {
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 			Socket socket = (Socket)factory.createSocket(host, port);
@@ -102,7 +101,7 @@ public class CoreConnection extends Observable {
 			// START CORE INFO
 			inStream = new QDataInputStream(socket.getInputStream());
 			Map<String, QVariant<?>> reply = readQVariantMap();
-			System.out.println("Got answer from server: ");
+			System.out.println("CORE INFO: ");
 			for (String key : reply.keySet()) {
 				System.out.println("\t" + key + " : " + reply.get(key));
 			}
@@ -137,16 +136,14 @@ public class CoreConnection extends Observable {
 			
 			// START LOGIN ACK 
 			reply = readQVariantMap();
-			System.out.println("Got answer from server: ");
-			for (String key : reply.keySet()) {
-				System.out.println("\t" + key + " : " + reply.get(key));
-			}
+			if (!reply.get("MsgType").toString().equals("ClientLoginAck"))
+				throw new GeneralSecurityException("Invalid password?");
 			// END LOGIN ACK
 
 			
 			// START SESSION INIT
 			reply = readQVariantMap();
-			System.out.println("Got session init from core: ");
+			System.out.println("SESSION INIT: ");
 			for (String key : reply.keySet()) {
 				System.out.println("\t" + key + " : " + reply.get(key));
 			}
@@ -191,6 +188,10 @@ public class CoreConnection extends Observable {
 			// END SIGNAL PROXY
 	}
 	
+	/**
+	 * Returns list of buffers in use. 
+	 * @return
+	 */
 	public Buffer [] getBuffers() {
 		return (Buffer[]) buffers.values().toArray();
 	}
@@ -223,7 +224,6 @@ public class CoreConnection extends Observable {
 					System.out.println("Got heartbeat");
 					break;
 				case InitData:
-					System.out.println("Init data:");
 					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
 					if (name.equals("Network")) {
 						// Do nothing, for now
@@ -233,24 +233,24 @@ public class CoreConnection extends Observable {
 						for (int i=0; i<lastSeen.size()/2; i++) {
 							int bufferId = (Integer)lastSeen.remove(0).getData();
 							int msgId = (Integer)lastSeen.remove(0).getData();
-							buffers.get(bufferId).setLastSeenMessage(msgId);
+							if (buffers.containsKey(bufferId)) // We only care for buffers we have open
+								buffers.get(bufferId).setLastSeenMessage(msgId);
 						}
 						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
 						for (int i=0; i<lastSeen.size()/2; i++) {
 							int bufferId = (Integer)lastSeen.remove(0).getData();
 							int msgId = (Integer)lastSeen.remove(0).getData();
-							buffers.get(bufferId).setMarkerLineMessage(msgId);
+							if (buffers.containsKey(bufferId))
+								buffers.get(bufferId).setMarkerLineMessage(msgId);
 						}
-						System.out.println("Received data for " + buffers.size() + " buffers.");
 						for (int buffer: buffers.keySet()) {
 							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 						}
 					} else {
-						System.out.println(name);
+						System.out.println("InitData: " + name);
 					}
 					break;
 				case Sync:
-					System.out.println("Sync request:");
 					String className = packedFunc.remove(0).toString();
 					packedFunc.remove(0); // object name, we don't really care
 					String function = packedFunc.remove(0).toString();
@@ -264,14 +264,24 @@ public class CoreConnection extends Observable {
 						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
 							buffers.get(buffer).addBacklog((Message) message.getData());
 						}
+					} else {
+						System.out.println("Sync request: " + className + "::" + function);
 					}
 
 					break;
 				case RpcCall:
-					System.out.println("RPC call:");
-					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
-					System.out.println(name);
+					String functionName = packedFunc.remove(0).toString();
+//					int buffer = functionName.charAt(0);
+//					functionName = functionName.substring(1);
+					if (functionName.equals("2displayMsg(Message)")) {
+						Message message = (Message) packedFunc.remove(0).getData();
+						buffers.get(message.bufferInfo.id).addBacklog(message);
+					} else {
+						System.out.println("RpcCall: " + functionName + " (" + packedFunc + ").");
+					}
 					break;
+				default:
+					System.out.println(type);
 				}
 			}
 		}
@@ -352,5 +362,15 @@ public class CoreConnection extends Observable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * This should display the certificate to the user and ask if it is trusted,
+	 * If the user has already seen it, it should just return true.
+	 * @param encoded The certificate on byte-encoded form.
+	 * @return true if the certificate is trusted.
+	 */
+	public static boolean trustCertificate(byte[] encoded) {
+		return true;
 	}
 }
