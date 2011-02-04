@@ -33,6 +33,7 @@ public final class R {
         public static final int logo_img=0x7f07000a;
         public static final int logo_layout=0x7f070009;
         public static final int menu_add_core=0x7f070016;
+        public static final int menu_preferences=0x7f070017;
         public static final int passwordField=0x7f07000f;
         public static final int passwordText=0x7f070013;
         public static final int remember_me_checkbox=0x7f070014;
@@ -45,13 +46,19 @@ public final class R {
         public static final int dialog_add_core=0x7f030000;
         public static final int login=0x7f030001;
         public static final int main=0x7f030002;
+        public static final int preferences=0x7f030003;
     }
     public static final class menu {
         public static final int login_menu=0x7f060000;
     }
     public static final class string {
         public static final int app_name=0x7f050002;
+        public static final int backlogAdditional=0x7f050005;
+        public static final int backlogLimit=0x7f050004;
         public static final int hello=0x7f050001;
         public static final int menu_add_core=0x7f050000;
+        public static final int notANumber=0x7f050006;
+        public static final int preferences=0x7f050007;
+        public static final int useSSL=0x7f050003;
     }
 }

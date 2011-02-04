@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
@@ -26,7 +28,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import com.lekebilen.quasseldroid.gui.LoginActivity;
+import android.content.SharedPreferences;
+
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
@@ -79,10 +82,13 @@ public class CoreConnection {
 			e.printStackTrace();
 		}
 	}
-	private LoginActivity parent;
-	public CoreConnection(String host, int port, String username, String password, LoginActivity parent)
+	private SharedPreferences settings;
+
+	
+	public CoreConnection(String host, int port, String username, String password, SharedPreferences settings)
 		throws UnknownHostException, IOException, GeneralSecurityException {
-			this.parent = parent;
+			this.settings = settings;
+			
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 			Socket socket = (Socket)factory.createSocket(host, port);
@@ -96,7 +102,7 @@ public class CoreConnection {
 			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
 			Date date = new Date();
 			initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariant.Type.String));
-			initial.put("UseSsl", new QVariant<Boolean>(true, QVariant.Type.Bool));
+			initial.put("UseSsl", new QVariant<Boolean>(settings.getBoolean("useSSL", true), QVariant.Type.Bool));
 			initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariant.Type.String));
 			initial.put("UseCompression", new QVariant<Boolean>(false, QVariant.Type.Bool));
 			initial.put("MsgType", new QVariant<String>("ClientInit", QVariant.Type.String));
@@ -118,18 +124,20 @@ public class CoreConnection {
 
 			
 			// START SSL CONNECTION
-			SSLContext sslContext = SSLContext.getInstance("TLS");
-			TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager() };
-			sslContext.init(null, trustManagers, null);
-			SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-			SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, host, port, true);
-			sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
-
-
-			sslSocket.setUseClientMode(true);
-			sslSocket.startHandshake();
-			inStream = new QDataInputStream(sslSocket.getInputStream());
-			outStream = new QDataOutputStream(sslSocket.getOutputStream());
+			if (settings.getBoolean("useSSL", true)) {
+				SSLContext sslContext = SSLContext.getInstance("TLS");
+				TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager() };
+				sslContext.init(null, trustManagers, null);
+				SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+				SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, host, port, true);
+				sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
+	
+	
+				sslSocket.setUseClientMode(true);
+				sslSocket.startHandshake();
+				inStream = new QDataInputStream(sslSocket.getInputStream());
+				outStream = new QDataOutputStream(sslSocket.getOutputStream());
+			}
 			// FINISHED SSL CONNECTION
 			
 			
@@ -432,11 +440,33 @@ public class CoreConnection {
 	         try {
 	             defaultTrustManager.checkServerTrusted(chain, authType);
 	         } catch (CertificateException excep) {
-	        	 if (!parent.trustCertificate(chain[0].getEncoded())) {
-	        		 throw new CertificateException();
+	        	 String hashedCert = hash(chain[0].getEncoded());
+	        	 if (CoreConnection.this.settings.contains("certificate")) {
+	        		 if (!CoreConnection.this.settings.getString("certificate", "lol").equals(hashedCert)) {
+	        			 throw new CertificateException();
+	        		 }
+	        	 } else {
+	        		 System.out.println("Storing new certificate: " + hashedCert);
+	        		 CoreConnection.this.settings.edit().putString("certificate", hashedCert).commit();
 	        	 }
 	         }
 	     }
+	     
+	     private String hash(byte[] s) {
+	    	    try {
+	    	        MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
+	    	        digest.update(s);
+	    	        byte messageDigest[] = digest.digest();
+	    	        StringBuffer hexString = new StringBuffer();
+	    	        for (int i=0; i<messageDigest.length; i++)
+	    	            hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+	    	        return hexString.toString();	    	        
+	    	    } catch (NoSuchAlgorithmException e) {
+	    	        e.printStackTrace();
+	    	    }
+	    	    return "";
+	    	}
+
 
 	     /*
 	      * Merely pass this through.
