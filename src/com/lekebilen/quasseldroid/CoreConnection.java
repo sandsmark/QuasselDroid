@@ -117,11 +117,8 @@ public class CoreConnection extends Observable {
 			sslContext.init(null, trustManagers, null);
 			SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 			SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, host, port, true);
-			
 			sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
-			for (String protocol: sslSocket.getEnabledProtocols()) {
-				System.out.println(protocol);
-			}
+
 
 			sslSocket.setUseClientMode(true);
 			sslSocket.startHandshake();
@@ -175,15 +172,14 @@ public class CoreConnection extends Observable {
 			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
 			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
 			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
-//			packedFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariant.Type.String));
-			packedFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestSetLastSeenMsg".getBytes())), QVariant.Type.ByteArray));
+			packedFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariant.Type.String));
 			packedFunc.add(new QVariant<Integer>(1, "BufferId"));
 			packedFunc.add(new QVariant<Integer>(1, "MsgId"));
 			sendQVariantList(packedFunc);
 			
 			
-//			ReadThread readThread = new ReadThread(this);
-//			readThread.start();
+			ReadThread readThread = new ReadThread(this);
+			readThread.start();
 			
 			
 			// Apparently the client doesn't send heartbeats?
@@ -193,9 +189,6 @@ public class CoreConnection extends Observable {
 				}
 			};*/
 			
-//			dump("/home/sandsmark/projects/quasseldroid/corelol.dump");
-			
-
 			// END SIGNAL PROXY
 	}
 	
@@ -249,8 +242,9 @@ public class CoreConnection extends Observable {
 							int msgId = (Integer)lastSeen.remove(0).getData();
 							buffers.get(bufferId).setMarkerLineMessage(msgId);
 						}
+						System.out.println("Received data for " + buffers.size() + " buffers.");
 						for (int buffer: buffers.keySet()) {
-//							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
+							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 						}
 					} else {
 						System.out.println(name);
@@ -258,9 +252,8 @@ public class CoreConnection extends Observable {
 					break;
 				case Sync:
 					System.out.println("Sync request:");
-//					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
 					
-//					System.out.println(name);
+					System.out.println(packedFunc.remove(0));
 					break;
 				case RpcCall:
 					System.out.println("RPC call:");
@@ -282,9 +275,10 @@ public class CoreConnection extends Observable {
 		// Tell the other end how much data to expect
 		outStream.writeUInt(bos.size(), 32);
 		
+		// Sanity check, check that we can decode our own stuff before sending it off
 		QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
 		
-		System.out.println(QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2));
 		// Send data 
 		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
 	}
@@ -301,7 +295,6 @@ public class CoreConnection extends Observable {
 	
 	private Map<String, QVariant<?>> readQVariantMap() throws IOException {
 		long len = inStream.readUInt(32);
-		System.out.println("We're getting this many bytesies from the core: " + len);
 		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
@@ -311,21 +304,11 @@ public class CoreConnection extends Observable {
 	
 	private List<QVariant<?>> readQVariantList() throws IOException {	
 		long len = inStream.readUInt(32);
-		System.out.println("We're getting this many bytesies from the core: " + len);
 		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
 		
 		return ret;
-	}
-	
-	private void dump(String file) throws IOException {
-		long len = inStream.readUInt(32);
-		QDataOutputStream outstream = new QDataOutputStream(new FileOutputStream(file));
-		byte [] buffer = new byte[(int)len];
-		inStream.read(buffer);
-		outstream.write(buffer);
-		System.exit(0);			 	
 	}
 	
 	private void sendInitRequest(String className, String objectName) throws IOException {
@@ -346,12 +329,8 @@ public class CoreConnection extends Observable {
 		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
 		retFunc.add(new QVariant<String>("", QVariant.Type.String));
 		retFunc.add(new QVariant<String>("requestBacklog", QVariant.Type.String));
-//		retFunc.add(new QVariant<ByteBuffer>((ByteBuffer.wrap("requestBacklog".getBytes())), QVariant.Type.ByteArray));
-		System.out.println(buffer);
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
-		System.out.println(firstMsg);
 		retFunc.add(new QVariant<Integer>(firstMsg, "MsgId"));
-		System.out.println(lastMsg);
 		retFunc.add(new QVariant<Integer>(lastMsg, "MsgId"));
 		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
 		retFunc.add(new QVariant<Integer>(Config.backlogAdditional, QVariant.Type.Int));

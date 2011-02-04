@@ -18,6 +18,7 @@ public class Buffer {
 		if (backlog == null)
 			backlog = new PriorityQueue<Message>();
 		
+		System.out.println("Buffer " + new String(info.name.array()) + " got message: " + message.content);
 		backlog.add(message); // TODO: sort
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
