@@ -1,9 +1,13 @@
 package com.lekebilen.quasseldroid.gui;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
 
+import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
 
 import android.R.integer;
@@ -14,7 +18,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.Bundle;	
 import android.test.PerformanceTestCase;
 import android.util.Log;
 import android.view.Menu;
@@ -199,23 +203,22 @@ public class LoginActivity extends Activity{
         	dataUri.authority("");
         	dataUri.fragment("");
         	dataUri.query(encodeMap(paramMap));
-        	
-        	
-        	
-        	//This was used when ChatActivity started login
-        	//setResult(Activity.RESULT_OK,new Intent("", dataUri.build()));
-        	
-        	/*
-        	Intent intent = new Intent("", dataUri.build(), LoginActivity.this, ChatActivity.class);
-        	//intent.
-        	startActivity(intent);
+      	
         	dbHelper.close();
-        	finish();
-        	//Intent startChat=new Intent(thisActivity,ChatActivity.class);
-	    	//ChatActivity.setLoginInfo(setup);
-        	//ChatActivity.loginRecieved();
-        	 * 
-        	 */
+        	
+        	try {
+				CoreConnection conn = new CoreConnection(res.getString("address"), 4242);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
 			
 		}
 	};

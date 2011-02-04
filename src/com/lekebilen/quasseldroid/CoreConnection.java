@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Observable;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -114,7 +115,7 @@ public class CoreConnection extends Observable {
 
 			
 			// START SSL CONNECTION
-			SSLContext sslContext = SSLContext.getInstance("SSL");
+			SSLContext sslContext = SSLContext.getInstance("TLS");
 			TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager() };
 			sslContext.init(null, trustManagers, null);
 			SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
@@ -342,11 +343,11 @@ public class CoreConnection extends Observable {
 	     CustomTrustManager() throws GeneralSecurityException {
 	         // create a "default" JSSE X509TrustManager.
 	 
-	         KeyStore ks = KeyStore.getInstance("JKS");
+	         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 	         //ks.load(new FileInputStream("trustedCerts"),
 	         //    "passphrase".toCharArray());
 	 
-	         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509", "SunJSSE");
+	         TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 	         tmf.init(ks);
 	 
 	         TrustManager tms [] = tmf.getTrustManagers();
