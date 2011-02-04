@@ -1,16 +1,10 @@
 package com.lekebilen.quasseldroid.gui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.lekebilen.quasseldroid.Buffer;
-import com.lekebilen.quasseldroid.BufferInfo;
-import com.lekebilen.quasseldroid.R;
-import com.lekebilen.quasseldroid.gui.ChatActivity.BacklogEntry;
-import com.lekebilen.quasseldroid.gui.ChatActivity.ViewHolder;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +12,16 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class BufferActivity extends ListActivity{
+import com.lekebilen.quasseldroid.Buffer;
+import com.lekebilen.quasseldroid.BufferInfo;
+import com.lekebilen.quasseldroid.R;
+
+public class BufferActivity extends ListActivity {
+	
+	public static final String BUFFER_ID_EXTRA = "bufferid";
+	
 	ArrayList<Buffer> bufferList;
 
 	@Override
@@ -45,8 +44,6 @@ public class BufferActivity extends ListActivity{
 		test.getInfo().name = "#testlolol4";
 		bufferList.add(test);
 
-		
-
 		ListAdapter adapter = new BufferListAdapter(this, bufferList);
 
 		setListAdapter(adapter);
@@ -58,10 +55,10 @@ public class BufferActivity extends ListActivity{
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		
-		Toast.makeText(this, bufferList.get(position).getInfo().name, Toast.LENGTH_SHORT).show();
+		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
+		i.putExtra(BUFFER_ID_EXTRA, bufferList.get(position).getInfo().id);
 		
-		
-		
+		startActivity(i);
 	}
 	
 
