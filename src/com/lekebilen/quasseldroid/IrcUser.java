@@ -9,4 +9,5 @@ public class IrcUser {
 	public String awayMessage;
 	public String ircOperator;
 	public String nick;
+	public List<String> channels;
 }
