@@ -76,14 +76,6 @@ public class LoginActivity extends Activity{
 		username = (EditText)findViewById(R.id.usernameField);
 		password = (EditText)findViewById(R.id.passwordField);
 		rememberMe = (CheckBox)findViewById(R.id.remember_me_checkbox);
-
-		core.setSelection(settings.getInt(PREFS_CORE, 0));
-		username.setText(settings.getString(PREFS_USERNAME,""));
-		password.setText(settings.getString(PREFS_PASSWORD,""));
-		rememberMe.setChecked(settings.getBoolean(PREFS_REMEMBERME, false));
-
-		connect = (Button)findViewById(R.id.connect_button);
-		connect.setOnClickListener(onConnect);
 		
 		//setup the core spinner
 		//dbHelper.addCore("testcore", "test.core.com", 8848);
@@ -96,6 +88,17 @@ public class LoginActivity extends Activity{
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		//TODO: Ken:Implement view reuse
 		core.setAdapter(adapter);
+
+		//Use saved settings
+		core.setSelection(settings.getInt(PREFS_CORE, 0));
+		username.setText(settings.getString(PREFS_USERNAME,""));
+		password.setText(settings.getString(PREFS_PASSWORD,""));
+		rememberMe.setChecked(settings.getBoolean(PREFS_REMEMBERME, false));
+
+		connect = (Button)findViewById(R.id.connect_button);
+		connect.setOnClickListener(onConnect);
+		
+		
 			
 		//Not sure if this is good design so commented out for now
 		/*if(rememberMe.isChecked()){
@@ -175,7 +178,7 @@ public class LoginActivity extends Activity{
 			dialog = null;
 			break;
 		}
-		return dialog;
+		return dialog;  
 	}
 	
 	private OnClickListener onConnect = new OnClickListener() {
@@ -183,6 +186,7 @@ public class LoginActivity extends Activity{
         	SharedPreferences.Editor settingsedit = settings.edit();
         	if(rememberMe.isChecked()){//save info
         		settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
+        		Log.i("SAVVED", Integer.toString(core.getSelectedItemPosition()));
 	        	settingsedit.putString(PREFS_USERNAME,username.getText().toString());
 	        	settingsedit.putString(PREFS_PASSWORD, password.getText().toString());
 	            settingsedit.putBoolean(PREFS_REMEMBERME, true);
@@ -215,6 +219,7 @@ public class LoginActivity extends Activity{
         	//TODO: Following is just debug, change later
         	try {
 				CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
+				conn.getBuffers();
 			} catch (UnknownHostException e) {
 				// Show the user a message about host not found
 				e.printStackTrace();
@@ -225,6 +230,7 @@ public class LoginActivity extends Activity{
 				// SSL not enabled?
 				e.printStackTrace();
 			}
+			
         	LoginActivity.this.startActivity(new Intent(LoginActivity.this, ChatActivity.class));
 			
 		}
