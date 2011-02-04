@@ -5,6 +5,6 @@
 		android:layout_width="fill_parent" android:id="@+id/chatNameView"
 		android:layout_alignParentTop="true" android:gravity="center"></TextView>
 	<ListView android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:id="@+id/chatBacklogView"></ListView>
+		android:layout_height="wrap_content" android:id="@+id/chatBacklogList" android:layout_below="@+id/chatNameView"></ListView>
 	<EditText android:layout_width="fill_parent" android:id="@+id/ChatInputView" android:layout_alignParentBottom="true" android:layout_height="wrap_content" android:inputType="textMultiLine"></EditText>
 		</RelativeLayout>
