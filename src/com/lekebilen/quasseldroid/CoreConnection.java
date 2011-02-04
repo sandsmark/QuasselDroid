@@ -262,6 +262,12 @@ public class CoreConnection {
 						for (int buffer: buffers.keySet()) {
 							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 						}
+					} else if (name.equals("IrcUser")) {
+						IrcUser user = new IrcUser();
+						user.name = (String) packedFunc.remove(0).getData();
+						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+						
+						
 					} else {
 						System.out.println("InitData: " + name);
 					}
