@@ -380,6 +380,19 @@ public class CoreConnection {
 		}
 	}
 	
+	private void sendMessage(int buffer, String message) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariant.Type.Int));
+		retFunc.add(new QVariant<String>("2sendInput(BufferInfo,QString)", QVariant.Type.String));
+		retFunc.add(new QVariant<BufferInfo>(buffers.get(buffer).getInfo(), "BufferInfo"));
+		retFunc.add(new QVariant<String>("/SAY " + message, QVariant.Type.String));	
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	private class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	     /*
