@@ -393,7 +393,6 @@ public class CoreConnection {
 		}
 	}
 	
-
 	private class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	     /*
 	      * The default X509TrustManager returned by SunX509.  We'll delegate

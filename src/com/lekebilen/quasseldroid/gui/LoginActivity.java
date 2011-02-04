@@ -35,7 +35,7 @@ import com.lekebilen.quasseldroid.R;
 
 public class LoginActivity extends Activity{
 
-	public static final String TAG = "QuasselLogin";
+	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
 	public static final String PREFS_CORE = "coreSelection";
 	public static final String PREFS_USERNAME = "username";
@@ -210,8 +210,9 @@ public class LoginActivity extends Activity{
         	dataUri.fragment("");
         	dataUri.query(encodeMap(paramMap));
       	
-        	dbHelper.close();
+        	//dbHelper.close();
         	
+        	//TODO: Following is just debug, change later
         	try {
 				CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
 			} catch (UnknownHostException e) {
@@ -224,6 +225,8 @@ public class LoginActivity extends Activity{
 				// SSL not enabled?
 				e.printStackTrace();
 			}
+        	LoginActivity.this.startActivity(new Intent(LoginActivity.this, ChatActivity.class));
+			
 		}
 	};
 	

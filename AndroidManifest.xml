@@ -16,6 +16,7 @@
       			  android:screenOrientation="sensor"
         		  android:label="@string/app_name">
 		</activity>
+<activity android:name=".gui.ChatActivity"></activity>
 </application>
 
 
