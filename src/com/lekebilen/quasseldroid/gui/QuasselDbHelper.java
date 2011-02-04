@@ -14,7 +14,7 @@ public class QuasselDbHelper {
 	public static final String KEY_NAME = "name";
 	public static final String KEY_ADDRESS = "server";
 	public static final String KEY_PORT = "port";
-	public static final String KEY_CERTIFICATE = "certificate";
+	public static final String KEY_CERTIFICATE = "certificates";
 
 	private DatabaseHelper dbHelper;
 	private SQLiteDatabase db;
@@ -23,7 +23,7 @@ public class QuasselDbHelper {
 	private static final String CORE_TABLE = "cores";
 	private static final String CERTIFICATE_TABLE = "certificates";
 	private static final String DATABASE_CREATE = 
-		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null);" +
+		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null);\n" +
 		"create table certificates (content text);";
 	private static final int DATABASE_VERSION = 1;
 

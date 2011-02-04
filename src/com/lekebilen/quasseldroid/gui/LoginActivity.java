@@ -11,6 +11,7 @@ import java.util.Map;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -199,7 +200,7 @@ public class LoginActivity extends Activity{
         	dbHelper.close();
         	
         	try {
-				CoreConnection conn = new CoreConnection(res.getString("address"), 4242, username.getText().toString(), password.getText().toString());
+				CoreConnection conn = new CoreConnection(res.getString("address"), 4242, username.getText().toString(), password.getText().toString(), LoginActivity.this);
 			} catch (UnknownHostException e) {
 				// Show the user a message about host not found
 				e.printStackTrace();
@@ -231,14 +232,33 @@ public class LoginActivity extends Activity{
 	public void updateCoreSpinner() {
 		((SimpleCursorAdapter)core.getAdapter()).getCursor().requery();
 	}
-	
+
+	private boolean trust;
 	public boolean trustCertificate(byte [] certificate) {
 		if (dbHelper.hasCertificate(certificate))
 			return true;
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Do you want to trust this certificate?:\n" + md5(certificate)
-			   .
+		builder.setMessage("Do you want to trust this certificate?:\n" + md5(certificate))
+			       .setCancelable(false)
+			       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                System.out.println("cake");
+			                LoginActivity.this.trust = true;
+			           }
+			       })
+			       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                LoginActivity.this.trust = false;
+			                dialog.cancel();
+			           }
+			       });
+		if (trust) {
+			dbHelper.storeCertificate(certificate);
+			return true;
+		} else {
+			return false;
+		}
 		
 	}
 	
