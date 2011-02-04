@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  <EditTextPreference android:title="Backlog Limit"
+  	android:summary="How many lines to fetch on connect"
+  	android:key="@string/backlogLimit"
+  	android:defaultValue="50"
+  />
+  <EditTextPreference android:title="Additional backlog"
+  	android:summary="How many lines to fetch on scroll"
+  	android:key="@string/backlogAdditional"
+  	android:defaultValue="5"
+  />
+</PreferenceScreen>

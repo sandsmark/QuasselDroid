@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="menu_add_core">
-		Add core
-	</string>
-	<string name="hello">
-		Hello World, Quasseldroid!
-	</string>
-	<string name="app_name">
-		Quasseldroid
-	</string>
+	<string name="menu_add_core">Add core</string>
+	<string name="hello">Hello World, Quasseldroid!</string>
+	<string name="app_name">Quasseldroid</string>
+	<string name="backlogLimit">backlogLimit</string>
+	<string name="backlogAdditional">backlogAdditional</string>
+	<string name="notANumber">is not a number</string>
+	<string name="preferences">Preferences</string>
+	
 </resources>

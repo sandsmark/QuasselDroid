@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -49,6 +50,13 @@ public class LoginActivity extends Activity{
 	EditText password;
 	CheckBox rememberMe;
 	Button connect;
+	
+	
+	/* EXample of how to get a preference
+	 * SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean update = prefs.getBoolean("updatePref", false);
+	 * 
+	 */
 
 	/** Called when the activity is first created. */
 	@Override
@@ -106,9 +114,13 @@ public class LoginActivity extends Activity{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_add_core:
-			showDialog(DIALOG_ADD_CORE);
-			break;
+			case R.id.menu_add_core:
+				showDialog(DIALOG_ADD_CORE);
+				break;
+			case R.id.menu_preferences:
+				Intent i = new Intent(LoginActivity.this, PreferenceView.class);
+				startActivity(i);
+				break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -211,10 +223,9 @@ public class LoginActivity extends Activity{
 				// SSL not enabled?
 				e.printStackTrace();
 			}
-        	
-			
 		}
 	};
+	
 	public static String encodeMap(Map<String,String> map){
 		StringBuilder ret=new StringBuilder();
 		for(String key:map.keySet()){
@@ -280,5 +291,4 @@ public class LoginActivity extends Activity{
 	    }
 	    return "";
 	}
-
 }
