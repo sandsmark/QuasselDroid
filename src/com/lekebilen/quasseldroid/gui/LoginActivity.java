@@ -41,7 +41,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 public class LoginActivity extends Activity{
 
-	public static final String TAG = "QuasselLogin";
+	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
 	public static final String PREFS_CORE = "coreSelection";
 	public static final String PREFS_USERNAME = "username";
@@ -204,8 +204,9 @@ public class LoginActivity extends Activity{
         	dataUri.fragment("");
         	dataUri.query(encodeMap(paramMap));
       	
-        	dbHelper.close();
+        	//dbHelper.close();
         	
+        	//TODO: Following is just debug, change later
         	try {
 				CoreConnection conn = new CoreConnection(res.getString("address"), 4242);
 			} catch (UnknownHostException e) {
@@ -218,7 +219,7 @@ public class LoginActivity extends Activity{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        	
+        	LoginActivity.this.startActivity(new Intent(LoginActivity.this, ChatActivity.class));
 			
 		}
 	};
