@@ -35,9 +35,9 @@ public class MessageSerializer implements QMetaTypeSerializer<Message> {
 		ret.flags = stream.readByte();
 		ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().unserialize(stream, version);
 		ByteBuffer b = (ByteBuffer) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 
-		ret.sender = new String(b.array(), "UTF-16BE");
+		ret.sender = new String(b.array(), "UTF-8");
 		b = (ByteBuffer) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 
-		ret.content = new String(b.array(), "UTF-16BE");
+		ret.content = new String(b.array(), "UTF-8");
 		
 		return ret;
 	}

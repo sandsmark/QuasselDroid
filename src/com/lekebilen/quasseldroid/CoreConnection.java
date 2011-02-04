@@ -1,7 +1,6 @@
 package com.lekebilen.quasseldroid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -252,8 +251,21 @@ public class CoreConnection extends Observable {
 					break;
 				case Sync:
 					System.out.println("Sync request:");
+					String className = packedFunc.remove(0).toString();
+					packedFunc.remove(0); // object name, we don't really care
+					String function = packedFunc.remove(0).toString();
 					
-					System.out.println(packedFunc.remove(0));
+					if (className.equals("BacklogManager") && function.equals("receiveBacklog")) {
+						int buffer = (Integer) packedFunc.remove(0).getData();
+						packedFunc.remove(0); // first
+						packedFunc.remove(0); // last
+						packedFunc.remove(0); // limit
+						packedFunc.remove(0); // additional
+						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
+							buffers.get(buffer).addBacklog((Message) message.getData());
+						}
+					}
+
 					break;
 				case RpcCall:
 					System.out.println("RPC call:");
