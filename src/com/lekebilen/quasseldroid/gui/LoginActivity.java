@@ -195,6 +195,7 @@ public class LoginActivity extends Activity{
         		
         	}
         	settingsedit.commit();
+        	dbHelper.open();
         	Bundle res = dbHelper.getCore(core.getSelectedItemId());
 			HashMap<String,String> paramMap=new HashMap<String, String>();
         	paramMap.put("username",(username.getText().toString()));
