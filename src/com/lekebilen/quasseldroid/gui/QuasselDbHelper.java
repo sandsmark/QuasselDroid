@@ -14,13 +14,17 @@ public class QuasselDbHelper {
 	public static final String KEY_NAME = "name";
 	public static final String KEY_ADDRESS = "server";
 	public static final String KEY_PORT = "port";
+	public static final String KEY_CERTIFICATE = "certificate";
 
 	private DatabaseHelper dbHelper;
 	private SQLiteDatabase db;
 
 	private static final String DATABASE_NAME = "data";
-	private static final String DATABASE_TABLE = "cores";
-	private static final String DATABASE_CREATE = "create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null);";
+	private static final String CORE_TABLE = "cores";
+	private static final String CERTIFICATE_TABLE = "certificates";
+	private static final String DATABASE_CREATE = 
+		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null);" +
+		"create table certificates (content text);";
 	private static final int DATABASE_VERSION = 1;
 
 	private static final String TAG = "DbHelper";
@@ -65,22 +69,52 @@ public class QuasselDbHelper {
 			initialValues.put(KEY_NAME, name);
 			initialValues.put(KEY_ADDRESS, address);
 			initialValues.put(KEY_PORT, port);
-			db.insert(DATABASE_TABLE, null, initialValues);
+			db.insert(CORE_TABLE, null, initialValues);
 		} catch(SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
+	}
+	
+	public void storeCertificate(byte[] certificate) {
+		try {
+			open();
+			ContentValues value = new ContentValues();
+			value.put(KEY_CERTIFICATE, certificate);
+			db.insert(CERTIFICATE_TABLE, null, value);
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+	}
+	
+	public boolean hasCertificate(byte[] certificate) {
+		try {
+			open();
+			Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
+			if (c != null) { // This is retarded, fuck Android.
+				if (c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)).equals(certificate)) {
+					return true;
+				}
+			}
+		} finally {
+			close();
+		}
+		return false;
 	}
 
 	public void deleteCore(long rowId) {
-		db.delete(DATABASE_TABLE, KEY_ID + "=" + rowId, null);
+		db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
 	}
 
 	public Cursor getAllCores() {
-		return db.query(DATABASE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
+		return db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
 	}
 
 	public Bundle getCore(long rowId) throws SQLException {
-		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT}, KEY_ID + "=" + rowId, null, null, null, null, null);
+		Cursor cursor = db.query(true, CORE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT}, KEY_ID + "=" + rowId, null, null, null, null, null);
 		Bundle b = new Bundle();
 		if (cursor != null) {
 			cursor.moveToFirst();

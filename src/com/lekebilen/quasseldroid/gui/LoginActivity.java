@@ -3,41 +3,33 @@ package com.lekebilen.quasseldroid.gui;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-
-import com.lekebilen.quasseldroid.CoreConnection;
-import com.lekebilen.quasseldroid.R;
-
-import android.R.integer;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;	
-import android.test.PerformanceTestCase;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
+
+import com.lekebilen.quasseldroid.CoreConnection;
+import com.lekebilen.quasseldroid.R;
 
 public class LoginActivity extends Activity{
 
@@ -238,6 +230,35 @@ public class LoginActivity extends Activity{
 	
 	public void updateCoreSpinner() {
 		((SimpleCursorAdapter)core.getAdapter()).getCursor().requery();
+	}
+	
+	public boolean trustCertificate(byte [] certificate) {
+		if (dbHelper.hasCertificate(certificate))
+			return true;
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Do you want to trust this certificate?:\n" + md5(certificate)
+			   .
 		
 	}
+	
+	public String md5(byte [] s) {
+	    try {
+	        // Create MD5 Hash
+	        MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
+	        digest.update(s);
+	        byte messageDigest[] = digest.digest();
+	        
+	        // Create Hex String
+	        StringBuffer hexString = new StringBuffer();
+	        for (int i=0; i<messageDigest.length; i++)
+	            hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+	        return hexString.toString();
+	        
+	    } catch (NoSuchAlgorithmException e) {
+	        e.printStackTrace();
+	    }
+	    return "";
+	}
+
 }
