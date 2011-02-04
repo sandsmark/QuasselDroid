@@ -106,6 +106,9 @@ public class BufferActivity extends ListActivity{
 			}
 			Buffer entry = list.get(position);
 			holder.bufferView.setText(entry.getInfo().name);
+			
+			//Check here if there are any unread messages in the buffer, and then set this color if there is
+			holder.bufferView.setTextColor(getResources().getColor(R.color.unread_buffer_color));
 			return convertView;
 		}
 	}

@@ -2,4 +2,5 @@
 <resources>
 	<color name="logo_text_color">
 		#0686fd</color>
+	<color name="unread_buffer_color">#00FF00</color>
 </resources>
