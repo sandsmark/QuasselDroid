@@ -3,7 +3,9 @@ package com.lekebilen.quasseldroid;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class Buffer {
+import java.util.Observable;
+
+public class Buffer extends Observable {
 	private BufferInfo info;
 	private PriorityQueue<Message> backlog = null;
 	private int lastSeenMessage;
@@ -12,14 +14,12 @@ public class Buffer {
 
 	public Buffer(BufferInfo info) {
 		this.info = info;
+		backlog = new PriorityQueue<Message>();
 	}
 	
 	public void addBacklog(Message message) {
-		if (backlog == null)
-			backlog = new PriorityQueue<Message>();
-		
-//		System.out.println("Buffer " + new String(info.name.array()) + " got message: " + message);
-		backlog.add(message); // TODO: sort
+		backlog.add(message);
+		notifyObservers(message);
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
 		this.lastSeenMessage = lastSeenMessage;
