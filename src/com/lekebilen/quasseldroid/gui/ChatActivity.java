@@ -1,6 +1,7 @@
 package com.lekebilen.quasseldroid.gui;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -16,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -52,6 +54,36 @@ public class ChatActivity extends Activity{
 		adapter.addItem(new BacklogEntry("9", "nr9", "MER SPAM"));
 		((ListView)findViewById(R.id.chatBacklogList)).setAdapter(adapter);
 			
+	}
+	
+	//Nick autocomplete when pressing the search-button
+	@Override
+	public boolean onSearchRequested() {
+		ArrayList<String> nicks = new ArrayList<String>();
+		nicks.add("hei");
+		nicks.add("Hadet");
+		nicks.add("hvordan");
+		nicks.add("går");
+		nicks.add("det");
+		
+		EditText inputfield = (EditText)findViewById(R.id.ChatInputView); 
+		String inputNick = inputfield.getText().toString();
+		
+		if ( "".equals(inputNick) ) {
+			if ( nicks.size() > 0 ) {
+				inputfield.setText(nicks.get(0)+ ": ");
+				inputfield.setSelection(nicks.get(0).length() + 2);
+			}
+		} else {
+			for (String nick : nicks) {
+				if ( nick.matches("(?i)"+inputNick+".*")  ) {
+					inputfield.setText(nick+ ": ");
+					inputfield.setSelection(nick.length() + 2);
+					break;
+				}
+			}
+		}
+		return false;  // don't go ahead and show the search box
 	}
 	
 	
