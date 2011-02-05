@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -93,7 +94,7 @@ public class ChatActivity extends Activity{
 			}
 		} else {
 			for (String nick : nicks) {
-				if ( nick.matches("(?i)"+inputNick+".*")  ) {
+				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
 					inputfield.setText(nick+ ": ");
 					inputfield.setSelection(nick.length() + 2);
 					break;
@@ -157,6 +158,9 @@ public class ChatActivity extends Activity{
 			BacklogEntry entry = backlog.get(position);
 			holder.timeView.setText(entry.time);
 			holder.nickView.setText(entry.nick);
+			int hashcode = entry.nick.hashCode() & 0x00FFFFFF;
+			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
+			
 			holder.msgView.setText(entry.msg);
 			return convertView;
 		}
