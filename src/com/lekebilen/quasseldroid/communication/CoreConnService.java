@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -49,9 +50,21 @@ public class CoreConnService extends Service{
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		
+		handleIntent(intent);
 		return START_STICKY;
 
+	}
+	
+	private void handleIntent(Intent intent) {
+		Bundle connectData = intent.getExtras();
+		String address = connectData.getString("address");
+		String port = connectData.getString("port");
+		String username = connectData.getString("username");
+		String password = connectData.getString("password");
+		
+		coreConn = new CoreConnection(address, port, username, password, settings);
+		
+		
 	}
 
 }

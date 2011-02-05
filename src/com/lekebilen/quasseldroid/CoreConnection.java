@@ -38,6 +38,7 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
+//TODO: sandsmark, make the constructor not start a connection and put that into its own method connect or something, also need a method to check if we are connected to a core and to disconnect.
 
 public class CoreConnection {
 	private enum RequestType {
