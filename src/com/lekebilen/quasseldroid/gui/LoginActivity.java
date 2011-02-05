@@ -3,8 +3,6 @@ package com.lekebilen.quasseldroid.gui;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -184,6 +182,22 @@ public class LoginActivity extends Activity{
 	
 	private OnClickListener onConnect = new OnClickListener() {
 		public void onClick(View v) {
+			if(username.getText().length()==0 ||
+			   password.getText().length()==0 ||
+			   core.getCount() == 0){
+				
+				AlertDialog.Builder diag=new AlertDialog.Builder(LoginActivity.this);
+				diag.setMessage("Error, connection information not filled out properly");
+				diag.setCancelable(false);
+				
+				AlertDialog dg = diag.create();
+				dg.setOwnerActivity(LoginActivity.this);
+				dg.setButton("Ok",  new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {}});
+				dg.show();							
+				return;
+			}
+				
         	SharedPreferences.Editor settingsedit = settings.edit();
         	if(rememberMe.isChecked()){//save info
         		settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
