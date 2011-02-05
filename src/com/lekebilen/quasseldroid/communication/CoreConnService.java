@@ -4,8 +4,12 @@ import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.gui.LoginActivity;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 /**
  * This Service holdes the connection to the core from the phone, it handles all the communication with the core. It talks to CoreConnection
@@ -17,11 +21,24 @@ public class CoreConnService extends Service{
 	private static final String TAG = CoreConnService.class.getSimpleName();
 	
 	private CoreConnection coreConn;
+	private final IBinder binder = new LocalBinder();
+
+	
+	/**
+     * Class for clients to access.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with
+     * IPC.
+     */
+	public class LocalBinder extends Binder {
+		public CoreConnService getService() {
+            return CoreConnService.this;
+        }
+    }
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		// TODO Auto-generated method stub
-		return null;
+		return binder;
 	}
 
 	@Override
@@ -32,8 +49,9 @@ public class CoreConnService extends Service{
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO Auto-generated method stub
-		return super.onStartCommand(intent, flags, startId);
+		
+		return START_STICKY;
+
 	}
 
 }

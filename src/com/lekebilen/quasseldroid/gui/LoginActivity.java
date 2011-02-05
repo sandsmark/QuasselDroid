@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.communication.CoreConnService;
 
 public class LoginActivity extends Activity{
 
@@ -95,6 +96,8 @@ public class LoginActivity extends Activity{
 		
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
+		
+		this.startService(new Intent(this, CoreConnService.class));
 		
 		
 			
