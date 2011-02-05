@@ -66,12 +66,11 @@ public class LoginActivity extends Activity{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
 		
-
 		settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);
 		dbHelper = new QuasselDbHelper(this);
 		dbHelper.open();
 		
-
+		
 		core = (Spinner)findViewById(R.id.serverSpinner);
 		username = (EditText)findViewById(R.id.usernameField);
 		password = (EditText)findViewById(R.id.passwordField);
@@ -88,13 +87,14 @@ public class LoginActivity extends Activity{
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		//TODO: Ken:Implement view reuse
 		core.setAdapter(adapter);
-
+		
 		//Use saved settings
-		core.setSelection(settings.getInt(PREFS_CORE, 0));
+		if(core.getCount()>settings.getInt(PREFS_CORE, 0))
+			core.setSelection(settings.getInt(PREFS_CORE, 0));
 		username.setText(settings.getString(PREFS_USERNAME,""));
 		password.setText(settings.getString(PREFS_PASSWORD,""));
 		rememberMe.setChecked(settings.getBoolean(PREFS_REMEMBERME, false));
-
+		
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
 		
@@ -108,6 +108,7 @@ public class LoginActivity extends Activity{
 		
 		//Start connection service
 		//startService(new Intent(LoginActivity.this, ServerService.class));
+		//}
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
