@@ -229,7 +229,7 @@ public class CoreConnection {
 					packedFunc = readQVariantList();
 				} catch (IOException e) {
 					running = false;//FIXME: handle this properly?
-					System.err.println("IO error!");
+					System.err.println("IO error!");	
 					e.printStackTrace();
 					return;
 				}
