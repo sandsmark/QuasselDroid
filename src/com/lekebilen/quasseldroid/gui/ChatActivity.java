@@ -1,54 +1,28 @@
 package com.lekebilen.quasseldroid.gui;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-
-import com.lekebilen.quasseldroid.CoreConnection;
-import com.lekebilen.quasseldroid.R;
-
-import android.R.integer;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;	
-import android.test.PerformanceTestCase;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CursorAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
+
+import com.lekebilen.quasseldroid.R;
 
 public class ChatActivity extends Activity{
-
+	
+	
+	public static final int MESSAGE_RECEIVED = 0;
+	
+	private BacklogAdapter adapter;
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
 	/** Called when the activity is first created. */
@@ -61,7 +35,7 @@ public class ChatActivity extends Activity{
 		//Populate with test data
 		((TextView)findViewById(R.id.chatNameView)).setText("#mtdt12");
 
-		BacklogAdapter adapter = new BacklogAdapter(this, null);
+		adapter = new BacklogAdapter(this, null);
 		adapter.addItem(new BacklogEntry("1", "nr1", "Woo"));
 		adapter.addItem(new BacklogEntry("2", "n2", "Weee"));
 		adapter.addItem(new BacklogEntry("3", "nr3", "Djiz"));
@@ -135,6 +109,22 @@ public class ChatActivity extends Activity{
 
 		
 	}
+	
+	
+	// The Handler that gets information back from the CoreConnService
+    private final Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+	            case MESSAGE_RECEIVED:
+	            	com.lekebilen.quasseldroid.Message message = (com.lekebilen.quasseldroid.Message) msg.obj;
+	            	adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
+	                break;
+            }
+        }
+    };
+	
+	
 	public static class ViewHolder {
         public TextView timeView;
         public TextView nickView;
