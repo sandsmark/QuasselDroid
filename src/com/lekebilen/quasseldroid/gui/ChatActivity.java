@@ -9,9 +9,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -33,7 +36,6 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat_layout);
 		
-		
 		//Populate with test data
 		((TextView)findViewById(R.id.chatNameView)).setText("#mtdt12");
 
@@ -49,7 +51,27 @@ public class ChatActivity extends Activity{
 		adapter.addItem(new BacklogEntry("9", "nr9", "MER SPAM"));
 		((ListView)findViewById(R.id.chatBacklogList)).setAdapter(adapter);
 		
+		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
+		
 	}
+	
+	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
+
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction()==0 ) { //On key down as well
+                EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+                String inputText = inputfield.getText().toString();
+                
+                if ( ! "".equals(inputText) ) {
+                	//coreconnection.sendmessage(inputText);
+                	inputfield.setText("");
+                }
+                
+                return true;
+            }
+            return false;
+        }
+    };
 	
 	//Nick autocomplete when pressing the search-button
 	@Override
