@@ -5,22 +5,23 @@
 	<application android:icon="@drawable/icon" android:label="@string/app_name">
 
 
-    
-<activity android:name=".gui.LoginActivity" android:label="@string/app_name"><intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-</activity>
 
-<activity android:name=".gui.PreferenceView"
-      			  android:screenOrientation="sensor"
-        		  android:label="@string/app_name">
+		<activity android:name=".gui.LoginActivity" android:label="@string/app_name">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
 		</activity>
-<activity android:name=".gui.ChatActivity"></activity>
-<activity android:name=".gui.BufferActivity"></activity>
-</application>
+
+		<activity android:name=".gui.PreferenceView"
+			android:screenOrientation="sensor" android:label="@string/app_name">
+		</activity>
+		<activity android:name=".gui.ChatActivity"></activity>
+		<activity android:name=".gui.BufferActivity"></activity>
+		<service android:name=".communication.CoreConnService"></service>
+	</application>
 
 
-<supports-screens></supports-screens>
-<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<supports-screens></supports-screens>
+	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest> 

@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.communication.CoreConnService;
 
 public class LoginActivity extends Activity{
 
@@ -95,18 +96,12 @@ public class LoginActivity extends Activity{
 		
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
-		
-		
-			
+	
 		//Not sure if this is good design so commented out for now
 		/*if(rememberMe.isChecked()){
         	ScrollView sw=((ScrollView)findViewById(R.id.accountScroll));//scroll to bottom (connect button)
         	sw.scrollTo(0, sw.getHeight());
         }*/
-		
-		//Start connection service
-		//startService(new Intent(LoginActivity.this, ServerService.class));
-		//}
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -216,54 +211,40 @@ public class LoginActivity extends Activity{
         	settingsedit.commit();
         	dbHelper.open();
         	Bundle res = dbHelper.getCore(core.getSelectedItemId());
-			HashMap<String,String> paramMap=new HashMap<String, String>();
-        	paramMap.put("username",(username.getText().toString()));
-        	paramMap.put("password",password.getText().toString());
-        	paramMap.put("serverHost",res.getString("address"));
-        	paramMap.put("serverPort", String.valueOf(res.getInt("port")));
-
-        	Uri.Builder dataUri=new Uri.Builder();
-        	dataUri.scheme("data");
-        	dataUri.path("");
-        	dataUri.authority("");
-        	dataUri.fragment("");
-        	dataUri.query(encodeMap(paramMap));
       	
         	//dbHelper.close();
         	
         	//TODO: Following is just debug, change later
-        	try {
-				CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
-				conn.getBuffers();
-			} catch (UnknownHostException e) {
+        	//try {
+			//	CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
+			//	conn.getBuffers();
+			//} catch (UnknownHostException e) {
 				// Show the user a message about host not found
-				e.printStackTrace();
-			} catch (IOException e) {
+			//	e.printStackTrace();
+			//} catch (IOException e) {
 				// Network trouble?
-				e.printStackTrace();
-			} catch (GeneralSecurityException e) {
+			//	e.printStackTrace();
+			//} catch (GeneralSecurityException e) {
 				// SSL not enabled?
-				e.printStackTrace();
-			}
+			//	e.printStackTrace();
+			//}
+			
+			
+			//Make intent to send to the CoreConnect service, with connection data
+			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
+			connectIntent.putExtra("address", res.getString("address"));
+			connectIntent.putExtra("port", res.getInt("port"));
+			connectIntent.putExtra("username", username.getText().toString());
+			connectIntent.putExtra("password", password.getText().toString());
+			connectIntent.putExtra("ssl", settings.getBoolean("useSSL", false)); //default should be to not use ssl 
+			
+			//Start CoreConnectService with connect data
+			startService(connectIntent);
 			
         	LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
 			
 		}
 	};
-	
-	public static String encodeMap(Map<String,String> map){
-		StringBuilder ret=new StringBuilder();
-		for(String key:map.keySet()){
-			ret.append(Uri.encode(key));
-			ret.append("=");
-			ret.append(Uri.encode(map.get(key)));
-			ret.append("&");
-		}
-		if(ret.length()>0)
-			return ret.substring(0, ret.length()-1);
-		else
-			return "";
-	}
 	
 	public void updateCoreSpinner() {
 		((SimpleCursorAdapter)core.getAdapter()).getCursor().requery();

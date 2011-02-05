@@ -1,13 +1,16 @@
 package com.lekebilen.quasseldroid.gui;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -15,13 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.communication.CoreConnService;
 
 public class ChatActivity extends Activity{
 	
@@ -51,9 +54,9 @@ public class ChatActivity extends Activity{
 		adapter.addItem(new BacklogEntry("8", "nr8", "asdasa sdasd asd asds a"));
 		adapter.addItem(new BacklogEntry("9", "nr9", "MER SPAM"));
 		((ListView)findViewById(R.id.chatBacklogList)).setAdapter(adapter);
-		
+
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-		
+
 	}
 	
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
@@ -104,6 +107,22 @@ public class ChatActivity extends Activity{
 		return false;  // don't go ahead and show the search box
 	}
 	
+	
+	
+	@Override
+	protected void onStart() {
+		doBindService();
+		super.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		doUnbindService();
+		super.onStop();
+	}
+
+
+
 	private class BacklogAdapter extends BaseAdapter {
 		
 		private ArrayList<BacklogEntry> backlog;
@@ -200,5 +219,69 @@ public class ChatActivity extends Activity{
 			this.msg = msg;
 		}
 	}
+	
+	/**
+	 * Code for service binding:
+	 */
+	
+	/**
+	 * CoreConnService object to call methods on the Service when it is bound to this activity
+	 */
+	private CoreConnService boundConnService;
+	/**
+	 * State of service connection
+	 */
+	private Boolean isBound;
+	
+	/**
+	 * Service connections is the handler for event concerning the connecting and disconnecting from the Service.
+	 */
+	private ServiceConnection connection = new ServiceConnection() {
+	    public void onServiceConnected(ComponentName className, IBinder service) {
+	        // This is called when the connection with the service has been
+	        // established, giving us the service object we can use to
+	        // interact with the service.  Because we have bound to a explicit
+	        // service that we know is running in our own process, we can
+	        // cast its IBinder to a concrete class and directly access it.
+	    	Log.i(TAG, "CoreConnService bound");
+	        boundConnService = ((CoreConnService.LocalBinder)service).getService();
+
+	    }
+
+	    public void onServiceDisconnected(ComponentName className) {
+	        // This is called when the connection with the service has been
+	        // unexpectedly disconnected -- that is, its process crashed.
+	        // Because it is running in our same process, we should never
+	        // see this happen.
+	    	Log.i(TAG, "CoreConnService unbound");
+	    	boundConnService = null;
+	        
+	    }
+	};
+
+	/**
+	 * Call to bind the CoreConnect service to this activity
+	 */
+	void doBindService() {
+	    // Establish a connection with the service.  We use an explicit
+	    // class name because we want a specific service implementation that
+	    // we know will be running in our own process (and thus won't be
+	    // supporting component replacement by other applications).
+	    bindService(new Intent(ChatActivity.this, CoreConnService.class), connection, Context.BIND_AUTO_CREATE);
+	    isBound = true;
+	}
+
+	/**
+	 * Call to unbind the activity from the CoreConnect Service
+	 */
+	void doUnbindService() {
+	    if (isBound) {
+	        // Detach our existing connection.
+	        unbindService(connection);
+	        isBound = false;
+	    }
+	}
+
+
 
 }
