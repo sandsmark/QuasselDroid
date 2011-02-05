@@ -13,6 +13,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -69,7 +70,12 @@ public class CoreConnection {
 	private QDataInputStream inStream;
 	
 	private Map<Integer, Buffer> buffers;
+	private Map<String, IrcUser> users;
 	
+	public Map<String, IrcUser> getUsers() {
+		return users;
+	}
+
 	public static void main(String[] args) {
 		try {
 			CoreConnection conn = new CoreConnection("localhost", 4242, "test", "test", null);
@@ -88,6 +94,7 @@ public class CoreConnection {
 	public CoreConnection(String host, int port, String username, String password, SharedPreferences settings)
 		throws UnknownHostException, IOException, GeneralSecurityException {
 			this.settings = settings;
+			users = new HashMap<String, IrcUser>();
 			
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
@@ -208,8 +215,8 @@ public class CoreConnection {
 	 * Returns list of buffers in use. 
 	 * @return
 	 */
-	public Buffer [] getBuffers() {
-		return (Buffer[]) buffers.values().toArray();
+	public Collection<Buffer> getBuffers() {
+		return buffers.values();
 	}
 	
 	private class ReadThread extends Thread {
@@ -262,6 +269,16 @@ public class CoreConnection {
 						for (int buffer: buffers.keySet()) {
 							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 						}
+					} else if (name.equals("IrcUser")) {
+						IrcUser user = new IrcUser();
+						user.name = (String) packedFunc.remove(0).getData();
+						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+						user.away = (Boolean) map.get("away").getData();
+						user.awayMessage = (String) map.get("awayMessage").getData();
+						user.ircOperator = (String) map.get("ircOperator").getData();
+						user.nick = (String) map.get("nick").getData();
+						user.channels = (List<String>) map.get("channels").getData();
+						users.put(user.nick, user);
 					} else {
 						System.out.println("InitData: " + name);
 					}
@@ -279,6 +296,14 @@ public class CoreConnection {
 						packedFunc.remove(0); // additional
 						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
 							buffers.get(buffer).addBacklog((Message) message.getData());
+						}
+					} else if (className.equals("Network") && function.equals("addIrcUser")) {
+						String nick = (String) packedFunc.remove(0).getData();
+						try {
+							sendInitRequest("IrcUser", "1/" + nick);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					} else {
 						System.out.println("Sync request: " + className + "::" + function);

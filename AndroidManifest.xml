@@ -17,6 +17,7 @@
         		  android:label="@string/app_name">
 		</activity>
 <activity android:name=".gui.ChatActivity"></activity>
+<activity android:name=".gui.BufferActivity"></activity>
 </application>
 
 

@@ -28,9 +28,9 @@ public class BufferInfo {
 	public int id, networkId;
 	public Type type;
 	public long groupId;
-	public ByteBuffer name;
+	public String name;
 	
 	public String toString() {
-		return new String(name.array()) + id + "[" + type.name() + "]";
+		return name + id + "[" + type.name() + "]";
 	}
 }
