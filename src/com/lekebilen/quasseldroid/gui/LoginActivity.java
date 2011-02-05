@@ -236,7 +236,7 @@ public class LoginActivity extends Activity{
 			connectIntent.putExtra("port", res.getInt("port"));
 			connectIntent.putExtra("username", username.getText().toString());
 			connectIntent.putExtra("password", password.getText().toString());
-			connectIntent.putExtra("ssl", LoginActivity.this.settings);
+			connectIntent.putExtra("ssl", settings.getBoolean("useSSL", false)); //default should be to not use ssl 
 			
 			//Start CoreConnectService with connect data
 			startService(connectIntent);

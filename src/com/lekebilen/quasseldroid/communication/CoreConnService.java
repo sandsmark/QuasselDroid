@@ -1,5 +1,9 @@
 package com.lekebilen.quasseldroid.communication;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
+
 import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.gui.LoginActivity;
 
@@ -58,11 +62,22 @@ public class CoreConnService extends Service{
 	private void handleIntent(Intent intent) {
 		Bundle connectData = intent.getExtras();
 		String address = connectData.getString("address");
-		String port = connectData.getString("port");
+		int port = connectData.getInt("port");
 		String username = connectData.getString("username");
 		String password = connectData.getString("password");
-		
-		coreConn = new CoreConnection(address, port, username, password, settings);
+		Boolean ssl = connectData.getBoolean("ssl");
+		try {
+			coreConn = new CoreConnection(address, port, username, password, ssl);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 	}

@@ -51,13 +51,25 @@ public class ChatActivity extends Activity{
 		adapter.addItem(new BacklogEntry("8", "nr8", "asdasa sdasd asd asds a"));
 		adapter.addItem(new BacklogEntry("9", "nr9", "MER SPAM"));
 		((ListView)findViewById(R.id.chatBacklogList)).setAdapter(adapter);
-		
-		//Service testing
-		this.doBindService();
-		
-		
+			
 	}
 	
+	
+	
+	@Override
+	protected void onStart() {
+		doBindService();
+		super.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		doUnbindService();
+		super.onStop();
+	}
+
+
+
 	private class BacklogAdapter extends BaseAdapter {
 		
 		private ArrayList<BacklogEntry> backlog;
