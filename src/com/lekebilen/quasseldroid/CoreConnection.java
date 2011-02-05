@@ -37,6 +37,7 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
+import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
 
 //TODO: sandsmark, make the constructor not start a connection and put that into its own method connect or something, also need a method to check if we are connected to a core and to disconnect.
 
@@ -89,12 +90,9 @@ public class CoreConnection {
 			e.printStackTrace();
 		}
 	}
-	private SharedPreferences settings;
 
-	
-	public CoreConnection(String host, int port, String username, String password, SharedPreferences settings)
+	public CoreConnection(String host, int port, String username, String password, Boolean ssl)
 		throws UnknownHostException, IOException, GeneralSecurityException {
-			this.settings = settings;
 			users = new HashMap<String, IrcUser>();
 			
 			// START CREATE SOCKETS
@@ -110,7 +108,7 @@ public class CoreConnection {
 			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
 			Date date = new Date();
 			initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariant.Type.String));
-			initial.put("UseSsl", new QVariant<Boolean>(settings.getBoolean("useSSL", true), QVariant.Type.Bool));
+			initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariant.Type.Bool));
 			initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariant.Type.String));
 			initial.put("UseCompression", new QVariant<Boolean>(false, QVariant.Type.Bool));
 			initial.put("MsgType", new QVariant<String>("ClientInit", QVariant.Type.String));
@@ -132,7 +130,7 @@ public class CoreConnection {
 
 			
 			// START SSL CONNECTION
-			if (settings.getBoolean("useSSL", true)) {
+			if (ssl) {
 				SSLContext sslContext = SSLContext.getInstance("TLS");
 				TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager() };
 				sslContext.init(null, trustManagers, null);
@@ -479,14 +477,15 @@ public class CoreConnection {
 	             defaultTrustManager.checkServerTrusted(chain, authType);
 	         } catch (CertificateException excep) {
 	        	 String hashedCert = hash(chain[0].getEncoded());
-	        	 if (CoreConnection.this.settings.contains("certificate")) {
-	        		 if (!CoreConnection.this.settings.getString("certificate", "lol").equals(hashedCert)) {
-	        			 throw new CertificateException();
-	        		 }
-	        	 } else {
-	        		 System.out.println("Storing new certificate: " + hashedCert);
-	        		 CoreConnection.this.settings.edit().putString("certificate", hashedCert).commit();
-	        	 }
+	        	 //TODO: Had to comment out this because we no longer have a shared preferences here, fix somehow?
+//	        	 if (CoreConnection.this.settings.contains("certificate")) {
+//	        		 if (!CoreConnection.this.settings.getString("certificate", "lol").equals(hashedCert)) {
+//	        			 throw new CertificateException();
+//	        		 }
+//	        	 } else {
+//	        		 System.out.println("Storing new certificate: " + hashedCert);
+//	        		 CoreConnection.this.settings.edit().putString("certificate", hashedCert).commit();
+//	        	 }
 	         }
 	     }
 	     
