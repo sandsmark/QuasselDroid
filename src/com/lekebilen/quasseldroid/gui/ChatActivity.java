@@ -199,17 +199,27 @@ public class ChatActivity extends Activity{
 	/**
 	 * Code for service binding:
 	 */
+	
+	/**
+	 * CoreConnService object to call methods on the Service when it is bound to this activity
+	 */
 	private CoreConnService boundConnService;
+	/**
+	 * State of service connection
+	 */
 	private Boolean isBound;
 	
-	private ServiceConnection mConnection = new ServiceConnection() {
+	/**
+	 * Service connections is the handler for event concerning the connecting and disconnecting from the Service.
+	 */
+	private ServiceConnection connection = new ServiceConnection() {
 	    public void onServiceConnected(ComponentName className, IBinder service) {
 	        // This is called when the connection with the service has been
 	        // established, giving us the service object we can use to
 	        // interact with the service.  Because we have bound to a explicit
 	        // service that we know is running in our own process, we can
 	        // cast its IBinder to a concrete class and directly access it.
-	    	Log.i(TAG, "BINDING ON SERVICE DONE");
+	    	Log.i(TAG, "CoreConnService bound");
 	        boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 	    }
@@ -219,24 +229,31 @@ public class ChatActivity extends Activity{
 	        // unexpectedly disconnected -- that is, its process crashed.
 	        // Because it is running in our same process, we should never
 	        // see this happen.
+	    	Log.i(TAG, "CoreConnService unbound");
 	    	boundConnService = null;
 	        
 	    }
 	};
 
+	/**
+	 * Call to bind the CoreConnect service to this activity
+	 */
 	void doBindService() {
 	    // Establish a connection with the service.  We use an explicit
 	    // class name because we want a specific service implementation that
 	    // we know will be running in our own process (and thus won't be
 	    // supporting component replacement by other applications).
-	    bindService(new Intent(ChatActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
+	    bindService(new Intent(ChatActivity.this, CoreConnService.class), connection, Context.BIND_AUTO_CREATE);
 	    isBound = true;
 	}
 
+	/**
+	 * Call to unbind the activity from the CoreConnect Service
+	 */
 	void doUnbindService() {
 	    if (isBound) {
 	        // Detach our existing connection.
-	        unbindService(mConnection);
+	        unbindService(connection);
 	        isBound = false;
 	    }
 	}

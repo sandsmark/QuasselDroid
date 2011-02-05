@@ -59,6 +59,10 @@ public class CoreConnService extends Service{
 
 	}
 	
+	/**
+	 * Handle the data in the intent, and use it to connect with CoreConnect
+	 * @param intent
+	 */
 	private void handleIntent(Intent intent) {
 		Bundle connectData = intent.getExtras();
 		String address = connectData.getString("address");
