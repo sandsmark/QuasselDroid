@@ -31,6 +31,8 @@ public class ChatActivity extends Activity{
 	
 	public static final int MESSAGE_RECEIVED = 0;
 	
+	private int separatorLineNum = 3;
+	private int curLineNum = 0;
 	private BacklogAdapter adapter;
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -53,7 +55,10 @@ public class ChatActivity extends Activity{
 		adapter.addItem(new BacklogEntry("7", "nr7", "Hax"));
 		adapter.addItem(new BacklogEntry("8", "nr8", "asdasa sdasd asd asds a"));
 		adapter.addItem(new BacklogEntry("9", "nr9", "MER SPAM"));
-		((ListView)findViewById(R.id.chatBacklogList)).setAdapter(adapter);
+		
+		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
+		backlogList.setAdapter(adapter);
+		backlogList.setDividerHeight(0);
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
 
@@ -164,6 +169,12 @@ public class ChatActivity extends Activity{
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder = null;
+			if (separatorLineNum == curLineNum ) { //Set separator line here
+				convertView = inflater.inflate(R.layout.listseparator, null);
+				curLineNum++;
+				return convertView;
+			}
+			
 			if (convertView==null) {
 				convertView = inflater.inflate(R.layout.backlog_item, null);
 				holder = new ViewHolder();
@@ -171,6 +182,7 @@ public class ChatActivity extends Activity{
 				holder.nickView = (TextView)convertView.findViewById(R.id.backlog_nick_view);
 				holder.msgView = (TextView)convertView.findViewById(R.id.backlog_msg_view);
 				convertView.setTag(holder);
+				curLineNum++;
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}

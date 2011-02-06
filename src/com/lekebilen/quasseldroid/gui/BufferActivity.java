@@ -45,7 +45,7 @@ public class BufferActivity extends ListActivity {
 		bufferList.add(test);
 
 		ListAdapter adapter = new BufferListAdapter(this, bufferList);
-
+		getListView().setDividerHeight(0);
 		setListAdapter(adapter);
 	}
 	
