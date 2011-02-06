@@ -89,35 +89,10 @@ public class CoreConnection extends Service{
 	private String password;
 	private boolean ssl;
 
-    /**
-     * For testing purposes
-     */
-	public static void main(String[] args) {
-		try {
-			CoreConnection conn = new CoreConnection();
-			conn.address = "localhost";
-			conn.port =  4242;
-			conn.username= "test";
-			conn.password = "test";
-			conn.ssl = true;
-			conn.connect();
-		} catch (UnknownHostException e) {
-			System.err.println("Unknown host!");
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (GeneralSecurityException e) {
-			System.err.println("Security error!");
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Initiates a connection.
 	 */
-	private void connect()
-		throws UnknownHostException, IOException, GeneralSecurityException {
-
-			
+	private void connect() throws UnknownHostException, IOException, GeneralSecurityException {	
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 			Socket socket = (Socket)factory.createSocket(address, port);

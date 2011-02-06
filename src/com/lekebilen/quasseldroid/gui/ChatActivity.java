@@ -48,6 +48,7 @@ public class ChatActivity extends Activity{
 		
 		//Populate with test data
 		((TextView)findViewById(R.id.chatNameView)).setText("#mtdt12");
+		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
 
 		adapter = new BacklogAdapter(this, null);
 		adapter.addItem(new BacklogEntry("1", "nr1", "Woo"));
