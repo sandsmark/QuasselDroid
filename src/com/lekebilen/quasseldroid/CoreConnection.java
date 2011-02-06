@@ -262,9 +262,11 @@ public class CoreConnection extends Service{
 							if (buffers.containsKey(bufferId))
 								buffers.get(bufferId).setMarkerLineMessage(msgId);
 						}
-						for (int buffer: buffers.keySet()) {
-							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
-						}
+						// We don't fetch backlog automatically
+//						for (int buffer: buffers.keySet()) {
+//							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
+//						}
+						sendMessage(MSG_NEW_BUFFER, buffers.get(buffers)); // We have now received everything we need to know about this buffer
 					} else if (name.equals("IrcUser")) {
 						IrcUser user = new IrcUser();
 						user.name = (String) packedFunc.remove(0).getData();
@@ -292,8 +294,8 @@ public class CoreConnection extends Service{
 						packedFunc.remove(0); // additional
 						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
 							buffers.get(buffer).addBacklog((IrcMessage) message.getData());
-						}
-						sendMessage(MSG_NEW_BUFFER, buffers.get(buffers)); // We have now received everything we need to know about this buffer
+							sendMessage(MSG_NEW_MESSAGE, message.getData());
+						}						
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
 						try {
@@ -562,7 +564,14 @@ public class CoreConnection extends Service{
      * New irc message available.
      */
     public static final int MSG_NEW_MESSAGE = 8;
-    
+
+    /**
+     * Request backlog for a given buffer-
+     * @param arg1 (optional, -1 = not set) first message id
+     * @param arg2 (optional, -1 = not set) last message id
+     * @param obj Buffer to fetch backlog for
+     */
+    public static final int MSG_REQUEST_BACKLOG = 9;
 
     private void sendMessage(int what, Object data) {
         for (int i=mClients.size()-1; i>=0; i--) {
@@ -614,6 +623,13 @@ public class CoreConnection extends Service{
                         }
                     }
                     break;
+                case MSG_REQUEST_BACKLOG:
+                	int buffer = (Integer) msg.obj;
+                	int first = msg.arg1;
+                	int last = msg.arg2;
+                	if (first == -1)
+                		first = buffers.get(buffer).getLastSeenMessage();
+                	requestBacklog(buffer, first, last);
                 default:
                     super.handleMessage(msg);
             }

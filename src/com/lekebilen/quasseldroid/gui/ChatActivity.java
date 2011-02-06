@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.CoreConnection;
+import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.Network;
 import com.lekebilen.quasseldroid.R;
@@ -42,6 +43,8 @@ public class ChatActivity extends Activity{
 	
 	private BacklogAdapter adapter;
 	private static final String TAG = ChatActivity.class.getSimpleName();
+	private int bufferId;
+	private String bufferName;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -49,30 +52,24 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat_layout);
 		
-		//Populate with test data
-		((TextView)findViewById(R.id.chatNameView)).setText("#mtdt12");
+		nicks = new ArrayList<String>();
+		
+		bufferId = savedInstanceState.getInt(BufferActivity.BUFFER_ID_EXTRA);
+
+		bufferName = savedInstanceState.getString(BufferActivity.BUFFER_NAME_EXTRA);
+		
+		((TextView)findViewById(R.id.chatNameView)).setText(bufferName);
 		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
 
 		adapter = new BacklogAdapter(this, null);
-		adapter.addItem(new BacklogEntry("1", "nr1", "Woo"));
-		adapter.addItem(new BacklogEntry("2", "n2", "Weee"));
-		adapter.addItem(new BacklogEntry("3", "nr3", "Djiz"));
-		adapter.addItem(new BacklogEntry("4", "nr4", "Pfft"));
-		adapter.addItem(new BacklogEntry("5", "nr5", "Meh"));
-		adapter.addItem(new BacklogEntry("6", "nr6", ":D"));
-		adapter.addItem(new BacklogEntry("7", "nr7", "Hax"));
-		adapter.addItem(new BacklogEntry("8", "nr8", "asdasa sdasd asd asds a"));
-		adapter.addItem(new BacklogEntry("9", "nr9", "MER SPAM"));
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
 		backlogList.setAdapter(adapter);
 		backlogList.setDividerHeight(0);
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-
 	}
 	
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
-
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction()==0 ) { //On key down as well
                 EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
@@ -88,17 +85,12 @@ public class ChatActivity extends Activity{
             return false;
         }
     };
+
+	private ArrayList<String> nicks;
 	
 	//Nick autocomplete when pressing the search-button
 	@Override
 	public boolean onSearchRequested() {
-		ArrayList<String> nicks = new ArrayList<String>();
-		nicks.add("hei");
-		nicks.add("Hadet");
-		nicks.add("hvordan");
-		nicks.add("g�r");
-		nicks.add("det");
-		
 		EditText inputfield = (EditText)findViewById(R.id.ChatInputView); 
 		String inputNick = inputfield.getText().toString();
 		
@@ -202,22 +194,7 @@ public class ChatActivity extends Activity{
 		}
 
 		
-	}
-	
-	
-	// The Handler that gets information back from the CoreConnService
-    private final Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-	            case MESSAGE_RECEIVED:
-	            	com.lekebilen.quasseldroid.IrcMessage message = (com.lekebilen.quasseldroid.IrcMessage) msg.obj;
-	            	adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
-	                break;
-            }
-        }
-    };
-	
+	}	
 	
 	public static class ViewHolder {
         public TextView timeView;
@@ -254,27 +231,30 @@ public class ChatActivity extends Activity{
 	    @Override
 	    public void handleMessage(Message msg) {
 	        switch (msg.what) {
-	            case CoreConnection.MSG_CONNECT:
-	                mCallbackText.setText("We have connection!");
-	                break;
-	            case CoreConnection.MSG_CONNECT_FAILED:
-	            	mCallbackText.setText("Connection failed!");
-	            	break;
-	            case CoreConnection.MSG_NEW_BUFFER:
-	            	mCallbackText.setText("Got new buffer!");
-	            	Buffer buffer = (Buffer) msg.obj;
-	            	break;
+//	            case CoreConnection.MSG_CONNECT:
+//	                mCallbackText.setText("We have connection!");
+//	                break;
+//	            case CoreConnection.MSG_CONNECT_FAILED:
+//	            	mCallbackText.setText("Connection failed!");
+//	            	break;
+//	            case CoreConnection.MSG_NEW_BUFFER:
+//	            	mCallbackText.setText("Got new buffer!");
+//	            	Buffer buffer = (Buffer) msg.obj;
+//	            	break;
 	            case CoreConnection.MSG_NEW_MESSAGE:
-	            	mCallbackText.setText("Got new message!");
-	            	Message message = (Message) msg.obj;
+	            	IrcMessage message = (IrcMessage) msg.obj;
+	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
+	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
 	            	break;
-	            case CoreConnection.MSG_NEW_NETWORK:
-	            	mCallbackText.setText("Got new network!");
-	            	Network network = (Network) msg.obj;
-	            	break;
+//	            case CoreConnection.MSG_NEW_NETWORK:
+//	            	mCallbackText.setText("Got new network!");
+//	            	Network network = (Network) msg.obj;
+//	            	break;
 	            case CoreConnection.MSG_NEW_USER:
-	            	mCallbackText.setText("Got new user!");
+	            	mCallbackText.setText("Got new user!");//TODO: handle me
 	            	IrcUser user = (IrcUser) msg.obj; 
+	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
+	            		nicks.add(user.nick);
 	            	break;
 	            default:
 	                super.handleMessage(msg);
@@ -291,7 +271,7 @@ public class ChatActivity extends Activity{
 	 * Class for interacting with the main interface of the service.
 	 */
 	private ServiceConnection mConnection = new ServiceConnection() {
-	    public void onServiceConnected(ComponentName className,
+		public void onServiceConnected(ComponentName className,
 	            IBinder service) {
 	        // This is called when the connection with the service has been
 	        // established, giving us the service object we can use to
@@ -309,9 +289,8 @@ public class ChatActivity extends Activity{
 	            msg.replyTo = mMessenger;
 	            mService.send(msg);
 
-	            // Give it some value as an example.
-	            msg = Message.obtain(null,
-	                    CoreConnection.MSG_CONNECT, this.hashCode(), 0);
+	            // Get some sweet, sweet backlog
+	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BACKLOG, -1, -1, bufferId);
 	            mService.send(msg);
 	        } catch (RemoteException e) {
 	            // In this case the service has crashed before we could even
