@@ -5,17 +5,17 @@ import java.nio.ByteBuffer;
 import java.util.Date;
 
 import com.lekebilen.quasseldroid.BufferInfo;
-import com.lekebilen.quasseldroid.Message;
+import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeSerializer;
 
-public class MessageSerializer implements QMetaTypeSerializer<Message> {
+public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 
 	@Override
-	public void serialize(QDataOutputStream stream, Message data,
+	public void serialize(QDataOutputStream stream, IrcMessage data,
 			DataStreamVersion version) throws IOException {
 		stream.writeInt(data.messageId);
 		stream.writeUInt(data.timestamp.getTime() / 1000, 32);
@@ -26,12 +26,12 @@ public class MessageSerializer implements QMetaTypeSerializer<Message> {
 	}
 
 	@Override
-	public Message unserialize(QDataInputStream stream,
+	public IrcMessage unserialize(QDataInputStream stream,
 			DataStreamVersion version) throws IOException {
-		Message ret = new Message();
+		IrcMessage ret = new IrcMessage();
 		ret.messageId = stream.readInt();
 		ret.timestamp = new Date(stream.readUInt(32) * 1000);
-		ret.type = Message.Type.getForValue((int) stream.readUInt(32));
+		ret.type = IrcMessage.Type.getForValue((int) stream.readUInt(32));
 		ret.flags = stream.readByte();
 		ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().unserialize(stream, version);
 		ByteBuffer b = (ByteBuffer) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 

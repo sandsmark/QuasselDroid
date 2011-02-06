@@ -13,6 +13,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,19 +30,28 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import android.content.SharedPreferences;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
+import android.widget.Toast;
 
+import com.lekebilen.quasseldroid.gui.BufferActivity;
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
-import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
 
-//TODO: sandsmark, make the constructor not start a connection and put that into its own method connect or something, also need a method to check if we are connected to a core and to disconnect.
-
-public class CoreConnection {
+public class CoreConnection extends Service{
 	private enum RequestType {
 		Invalid(0),
 	    Sync(1),
@@ -72,15 +82,25 @@ public class CoreConnection {
 	private QDataInputStream inStream;
 	
 	private Map<Integer, Buffer> buffers;
-	private Map<String, IrcUser> users;
 	
-	public Map<String, IrcUser> getUsers() {
-		return users;
-	}
+	private String address;
+	private int port;
+	private String username;
+	private String password;
+	private boolean ssl;
 
+    /**
+     * For testing purposes
+     */
 	public static void main(String[] args) {
 		try {
-			CoreConnection conn = new CoreConnection("localhost", 4242, "test", "test", null);
+			CoreConnection conn = new CoreConnection();
+			conn.address = "localhost";
+			conn.port =  4242;
+			conn.username= "test";
+			conn.password = "test";
+			conn.ssl = true;
+			conn.connect();
 		} catch (UnknownHostException e) {
 			System.err.println("Unknown host!");
 		} catch (IOException e) {
@@ -90,14 +110,17 @@ public class CoreConnection {
 			e.printStackTrace();
 		}
 	}
-
-	public CoreConnection(String host, int port, String username, String password, Boolean ssl)
+	
+	/**
+	 * Initiates a connection.
+	 */
+	private void connect()
 		throws UnknownHostException, IOException, GeneralSecurityException {
-			users = new HashMap<String, IrcUser>();
+
 			
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
-			Socket socket = (Socket)factory.createSocket(host, port);
+			Socket socket = (Socket)factory.createSocket(address, port);
 			outStream = new QDataOutputStream(socket.getOutputStream());
 			// END CREATE SOCKETS 
 
@@ -135,9 +158,8 @@ public class CoreConnection {
 				TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager() };
 				sslContext.init(null, trustManagers, null);
 				SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-				SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, host, port, true);
+				SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, address, port, true);
 				sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
-	
 	
 				sslSocket.setUseClientMode(true);
 				sslSocket.startHandshake();
@@ -277,7 +299,7 @@ public class CoreConnection {
 						user.ircOperator = (String) map.get("ircOperator").getData();
 						user.nick = (String) map.get("nick").getData();
 						user.channels = (List<String>) map.get("channels").getData();
-						users.put(user.nick, user);
+						sendMessage(MSG_NEW_USER, user);
 					} else {
 						System.out.println("InitData: " + name);
 					}
@@ -294,8 +316,9 @@ public class CoreConnection {
 						packedFunc.remove(0); // limit
 						packedFunc.remove(0); // additional
 						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
-							buffers.get(buffer).addBacklog((Message) message.getData());
+							buffers.get(buffer).addBacklog((IrcMessage) message.getData());
 						}
+						sendMessage(MSG_NEW_BUFFER, buffers.get(buffers)); // We have now received everything we need to know about this buffer
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
 						try {
@@ -314,8 +337,9 @@ public class CoreConnection {
 //					int buffer = functionName.charAt(0);
 //					functionName = functionName.substring(1);
 					if (functionName.equals("2displayMsg(Message)")) {
-						Message message = (Message) packedFunc.remove(0).getData();
+						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
 						buffers.get(message.bufferInfo.id).addBacklog(message);
+						sendMessage(MSG_NEW_MESSAGE, message);
 					} else {
 						System.out.println("RpcCall: " + functionName + " (" + packedFunc + ").");
 					}
@@ -512,4 +536,175 @@ public class CoreConnection {
 	         return defaultTrustManager.getAcceptedIssuers();
 	     }
 	}
+
+    /** For showing and hiding our notification. */
+    NotificationManager mNM;
+    /** Keeps track of all current registered clients. */
+    ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+	
+    /**
+     * Command to the service to register a client, receiving callbacks
+     * from the service.  The Message's replyTo field must be a Messenger of
+     * the client where callbacks should be sent.
+     */
+    public static final int MSG_REGISTER_CLIENT = 1;
+
+    /**
+     * Command to the service to unregister a client, ot stop receiving callbacks
+     * from the service.  The Message's replyTo field must be a Messenger of
+     * the client as previously given with MSG_REGISTER_CLIENT.
+     */
+    public static final int MSG_UNREGISTER_CLIENT = 2;
+
+    /**
+     * Command to service to set a new value.  This can be sent to the
+     * service to supply a new value, and will be sent by the service to
+     * any registered clients with the new value.
+     */
+    public static final int MSG_CONNECT = 3;
+    
+    /**
+     * Connection failed.
+     */
+    public static final int MSG_CONNECT_FAILED = 4;
+    
+    /**
+     * New network available.
+     */
+    public static final int MSG_NEW_NETWORK = 5;
+
+    /**
+     * New buffer available.
+     */
+    public static final int MSG_NEW_BUFFER = 6;
+    
+    /**
+     * New user available.
+     */
+    public static final int MSG_NEW_USER = 7;
+    
+    /**
+     * New irc message available.
+     */
+    public static final int MSG_NEW_MESSAGE = 8;
+    
+
+    private void sendMessage(int what, Object data) {
+        for (int i=mClients.size()-1; i>=0; i--) {
+            try {
+                mClients.get(i).send(Message.obtain(null, what, 0, 0, data));
+            } catch (RemoteException e) {
+                // The client is dead.  Remove it from the list;
+                // we are going through the list from back to front
+                // so this is safe to do inside the loop.
+                mClients.remove(i);
+            }
+        }
+    }
+    
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_REGISTER_CLIENT:
+                    mClients.add(msg.replyTo);
+                    break;
+                case MSG_UNREGISTER_CLIENT:
+                    mClients.remove(msg.replyTo);
+                    break;
+                case MSG_CONNECT:
+                	int result = MSG_CONNECT;
+                	try {
+                		connect();
+                	} catch (Exception e) {
+                		e.printStackTrace();
+                		result = MSG_CONNECT_FAILED;
+                	}
+//				} catch (UnknownHostException e1) { // TODO: send separate messages for all these
+//					e1.printStackTrace();
+//				} catch (IOException e1) {
+//					e1.printStackTrace();
+//				} catch (GeneralSecurityException e1) {
+//					e1.printStackTrace();
+//				}
+                    for (int i=mClients.size()-1; i>=0; i--) {
+                        try {
+                            mClients.get(i).send(Message.obtain(null,
+                                    result, 0, 0));
+                        } catch (RemoteException e) {
+                            mClients.remove(i);
+                        }
+                    }
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    @Override
+    public void onCreate() {
+        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+        // Display a notification about us starting.
+        showNotification();
+    }
+
+    @Override
+    public void onDestroy() {
+        // Cancel the persistent notification.
+        mNM.cancel(R.string.remote_service_started);
+
+        // Tell the user we stopped.
+        Toast.makeText(this, R.string.remote_service_stopped, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    @Override
+    public IBinder onBind(Intent intent) {
+    	Bundle connectData = intent.getExtras();
+    	address = connectData.getString("address");
+    	port = connectData.getInt("port");
+    	username = connectData.getString("username");
+    	password = connectData.getString("password");
+    	ssl = connectData.getBoolean("ssl");
+
+        return mMessenger.getBinder();
+    }
+
+    /**
+     * Show a notification while this service is running.
+     */
+    private void showNotification() {
+        // In this sample, we'll use the same text for the ticker and the expanded notification
+        CharSequence text = getText(R.string.remote_service_started);
+
+        // Set the icon, scrolling text and timestamp
+        Notification notification = new Notification(R.drawable.icon, text,
+                System.currentTimeMillis());
+
+        // The PendingIntent to launch our activity if the user selects this notification
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, BufferActivity.class), 0);
+
+        // Set the info for the views that show in the notification panel.
+        notification.setLatestEventInfo(this, getText(R.string.remote_service_label),
+                       text, contentIntent);
+
+        // Send the notification.
+        // We use a string id because it is a unique number.  We use it later to cancel.
+        mNM.notify(R.string.remote_service_started, notification);
+    }
 }
+

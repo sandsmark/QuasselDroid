@@ -1,11 +1,5 @@
 package com.lekebilen.quasseldroid.gui;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -30,7 +23,6 @@ import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
-import com.lekebilen.quasseldroid.communication.CoreConnService;
 
 public class LoginActivity extends Activity{
 
@@ -231,7 +223,7 @@ public class LoginActivity extends Activity{
 			
 			
 			//Make intent to send to the CoreConnect service, with connection data
-			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
+			Intent connectIntent = new Intent(LoginActivity.this, CoreConnection.class);
 			connectIntent.putExtra("address", res.getString("address"));
 			connectIntent.putExtra("port", res.getInt("port"));
 			connectIntent.putExtra("username", username.getText().toString());

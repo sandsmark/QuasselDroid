@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,9 +24,13 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.lekebilen.quasseldroid.Buffer;
+import com.lekebilen.quasseldroid.CoreConnection;
+import com.lekebilen.quasseldroid.IrcUser;
+import com.lekebilen.quasseldroid.Network;
 import com.lekebilen.quasseldroid.R;
-import com.lekebilen.quasseldroid.communication.CoreConnService;
 
 public class ChatActivity extends Activity{
 	
@@ -84,7 +90,7 @@ public class ChatActivity extends Activity{
 		nicks.add("hei");
 		nicks.add("Hadet");
 		nicks.add("hvordan");
-		nicks.add("går");
+		nicks.add("gï¿½r");
 		nicks.add("det");
 		
 		EditText inputfield = (EditText)findViewById(R.id.ChatInputView); 
@@ -194,7 +200,7 @@ public class ChatActivity extends Activity{
         public void handleMessage(Message msg) {
             switch (msg.what) {
 	            case MESSAGE_RECEIVED:
-	            	com.lekebilen.quasseldroid.Message message = (com.lekebilen.quasseldroid.Message) msg.obj;
+	            	com.lekebilen.quasseldroid.IrcMessage message = (com.lekebilen.quasseldroid.IrcMessage) msg.obj;
 	            	adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
 	                break;
             }
@@ -223,65 +229,134 @@ public class ChatActivity extends Activity{
 	/**
 	 * Code for service binding:
 	 */
-	
+	/** Messenger for communicating with service. */
+	Messenger mService = null;
+	/** Flag indicating whether we have called bind on the service. */
+	boolean mIsBound;
+	/** Some text view we are using to show state information. */
+	TextView mCallbackText;
+
 	/**
-	 * CoreConnService object to call methods on the Service when it is bound to this activity
+	 * Handler of incoming messages from service.
 	 */
-	private CoreConnService boundConnService;
+	class IncomingHandler extends Handler {
+	    @Override
+	    public void handleMessage(Message msg) {
+	        switch (msg.what) {
+	            case CoreConnection.MSG_CONNECT:
+	                mCallbackText.setText("We have connection!");
+	                break;
+	            case CoreConnection.MSG_CONNECT_FAILED:
+	            	mCallbackText.setText("Connection failed!");
+	            	break;
+	            case CoreConnection.MSG_NEW_BUFFER:
+	            	mCallbackText.setText("Got new buffer!");
+	            	Buffer buffer = (Buffer) msg.obj;
+	            	break;
+	            case CoreConnection.MSG_NEW_MESSAGE:
+	            	mCallbackText.setText("Got new message!");
+	            	Message message = (Message) msg.obj;
+	            	break;
+	            case CoreConnection.MSG_NEW_NETWORK:
+	            	mCallbackText.setText("Got new network!");
+	            	Network network = (Network) msg.obj;
+	            	break;
+	            case CoreConnection.MSG_NEW_USER:
+	            	mCallbackText.setText("Got new user!");
+	            	IrcUser user = (IrcUser) msg.obj; 
+	            	break;
+	            default:
+	                super.handleMessage(msg);
+	        }
+	    }
+	}
+
 	/**
-	 * State of service connection
+	 * Target we publish for clients to send messages to IncomingHandler.
 	 */
-	private Boolean isBound;
-	
+	final Messenger mMessenger = new Messenger(new IncomingHandler());
+
 	/**
-	 * Service connections is the handler for event concerning the connecting and disconnecting from the Service.
+	 * Class for interacting with the main interface of the service.
 	 */
-	private ServiceConnection connection = new ServiceConnection() {
-	    public void onServiceConnected(ComponentName className, IBinder service) {
+	private ServiceConnection mConnection = new ServiceConnection() {
+	    public void onServiceConnected(ComponentName className,
+	            IBinder service) {
 	        // This is called when the connection with the service has been
 	        // established, giving us the service object we can use to
-	        // interact with the service.  Because we have bound to a explicit
-	        // service that we know is running in our own process, we can
-	        // cast its IBinder to a concrete class and directly access it.
-	    	Log.i(TAG, "CoreConnService bound");
-	        boundConnService = ((CoreConnService.LocalBinder)service).getService();
+	        // interact with the service.  We are communicating with our
+	        // service through an IDL interface, so get a client-side
+	        // representation of that from the raw service object.
+	        mService = new Messenger(service);
+	        mCallbackText.setText("Attached.");
 
+	        // We want to monitor the service for as long as we are
+	        // connected to it.
+	        try {
+	            Message msg = Message.obtain(null,
+	                    CoreConnection.MSG_REGISTER_CLIENT);
+	            msg.replyTo = mMessenger;
+	            mService.send(msg);
+
+	            // Give it some value as an example.
+	            msg = Message.obtain(null,
+	                    CoreConnection.MSG_CONNECT, this.hashCode(), 0);
+	            mService.send(msg);
+	        } catch (RemoteException e) {
+	            // In this case the service has crashed before we could even
+	            // do anything with it; we can count on soon being
+	            // disconnected (and then reconnected if it can be restarted)
+	            // so there is no need to do anything here.
+	        }
+
+	        // As part of the sample, tell the user what happened.
+	        Toast.makeText(ChatActivity.this, R.string.remote_service_connected,
+	                Toast.LENGTH_SHORT).show();
 	    }
 
 	    public void onServiceDisconnected(ComponentName className) {
 	        // This is called when the connection with the service has been
 	        // unexpectedly disconnected -- that is, its process crashed.
-	        // Because it is running in our same process, we should never
-	        // see this happen.
-	    	Log.i(TAG, "CoreConnService unbound");
-	    	boundConnService = null;
-	        
+	        mService = null;
+	        mCallbackText.setText("Disconnected.");
+
+	        // As part of the sample, tell the user what happened.
+	        Toast.makeText(ChatActivity.this, R.string.remote_service_disconnected,
+	                Toast.LENGTH_SHORT).show();
 	    }
 	};
 
-	/**
-	 * Call to bind the CoreConnect service to this activity
-	 */
 	void doBindService() {
 	    // Establish a connection with the service.  We use an explicit
-	    // class name because we want a specific service implementation that
-	    // we know will be running in our own process (and thus won't be
-	    // supporting component replacement by other applications).
-	    bindService(new Intent(ChatActivity.this, CoreConnService.class), connection, Context.BIND_AUTO_CREATE);
-	    isBound = true;
+	    // class name because there is no reason to be able to let other
+	    // applications replace our component.
+	    bindService(new Intent(ChatActivity.this, 
+	            CoreConnection.class), mConnection, Context.BIND_AUTO_CREATE);
+	    mIsBound = true;
+	    mCallbackText.setText("Binding.");
 	}
 
-	/**
-	 * Call to unbind the activity from the CoreConnect Service
-	 */
 	void doUnbindService() {
-	    if (isBound) {
+	    if (mIsBound) {
+	        // If we have received the service, and hence registered with
+	        // it, then now is the time to unregister.
+	        if (mService != null) {
+	            try {
+	                Message msg = Message.obtain(null,
+	                        CoreConnection.MSG_UNREGISTER_CLIENT);
+	                msg.replyTo = mMessenger;
+	                mService.send(msg);
+	            } catch (RemoteException e) {
+	                // There is nothing special we need to do if the service
+	                // has crashed.
+	            }
+	        }
+
 	        // Detach our existing connection.
-	        unbindService(connection);
-	        isBound = false;
+	        unbindService(mConnection);
+	        mIsBound = false;
+	        mCallbackText.setText("Unbinding.");
 	    }
 	}
-
-
 
 }
