@@ -369,6 +369,4 @@ public class ChatActivity extends Activity{
 	        mCallbackText.setText("Unbinding.");
 	    }
 	}
-
->>>>>>> 9bb917fee1b9a36030146bcab78bd3596832bc4b
 }
