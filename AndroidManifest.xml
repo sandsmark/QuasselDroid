@@ -18,7 +18,7 @@
 		</activity>
 		<activity android:name=".gui.ChatActivity"></activity>
 		<activity android:name=".gui.BufferActivity"></activity>
-		<service android:name=".communication.CoreConnService"></service>
+		<service android:name=".CoreConnection"></service>
 	</application>
 
 
