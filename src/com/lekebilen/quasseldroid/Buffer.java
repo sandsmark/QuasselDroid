@@ -7,17 +7,17 @@ import java.util.Observable;
 
 public class Buffer extends Observable {
 	private BufferInfo info;
-	private PriorityQueue<Message> backlog = null;
+	private PriorityQueue<IrcMessage> backlog = null;
 	private int lastSeenMessage;
 	private int markerLineMessage;
 	
 
 	public Buffer(BufferInfo info) {
 		this.info = info;
-		backlog = new PriorityQueue<Message>();
+		backlog = new PriorityQueue<IrcMessage>();
 	}
 	
-	public void addBacklog(Message message) {
+	public void addBacklog(IrcMessage message) {
 		backlog.add(message);
 		notifyObservers(message);
 	}
@@ -30,7 +30,7 @@ public class Buffer extends Observable {
 	public BufferInfo getInfo() {
 		return info;
 	}
-	public PriorityQueue<Message> getBacklog() {
+	public PriorityQueue<IrcMessage> getBacklog() {
 		return backlog;
 	}
 	public int getLastSeenMessage() {

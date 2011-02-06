@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.lekebilen.quasseldroid.BufferInfo;
-import com.lekebilen.quasseldroid.Message;
+import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.NetworkServer;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType.Type;
 import com.lekebilen.quasseldroid.qtcomm.serializers.Bool;
@@ -49,7 +49,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<Integer>(QMetaType.Type.UserType.getValue(),"MsgId", new QInteger()));
 	    types.add(new QMetaType<BufferInfo>(QMetaType.Type.UserType.getValue(),"BufferInfo", new BufferInfoSerializer()));
 	    types.add(new QMetaType<NetworkServer>(QMetaType.Type.UserType.getValue(),"Network::Server", new NetworkServerSerializer()));
-	    types.add(new QMetaType<Message>(QMetaType.Type.UserType.getValue(),"Message", new MessageSerializer()));
+	    types.add(new QMetaType<IrcMessage>(QMetaType.Type.UserType.getValue(),"Message", new MessageSerializer()));
 	    types.add(new QMetaType<Calendar>(QMetaType.Type.QTime.getValue(), "QTime", new QTime()));
 
 	    
