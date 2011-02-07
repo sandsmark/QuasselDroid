@@ -180,7 +180,6 @@ public class CoreConnection extends Service{
 			
 			// START SIGNAL PROXY INIT
 			sendInitRequest("BacklogManager", "");
-			sendInitRequest("Network", "1");
 			sendInitRequest("BufferSyncer", "");
 			
 			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
@@ -572,6 +571,12 @@ public class CoreConnection extends Service{
      * @param obj Buffer to fetch backlog for
      */
     public static final int MSG_REQUEST_BACKLOG = 9;
+    
+    /**
+     * Request buffers for a given network
+     * @param arg1 Network to get info for
+     */
+    public static final int MSG_REQUEST_BUFFERS = 10;
 
     private void sendMessage(int what, Object data) {
         for (int i=mClients.size()-1; i>=0; i--) {
@@ -630,6 +635,13 @@ public class CoreConnection extends Service{
                 	if (first == -1)
                 		first = buffers.get(buffer).getLastSeenMessage();
                 	requestBacklog(buffer, first, last);
+                case MSG_REQUEST_BUFFERS:
+                	try {
+                		sendInitRequest("Network", Integer.toString(msg.arg1));
+                	} catch (IOException e) {
+                		// TODO Auto-generated catch block
+                		e.printStackTrace();
+                	}
                 default:
                     super.handleMessage(msg);
             }

@@ -39,22 +39,10 @@ public class BufferActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 
 		setContentView(R.layout.buffer_list);
 		bufferList = new ArrayList<Buffer>();
-		
-		Buffer test = new Buffer(new BufferInfo());
-		test.getInfo().name = "#testlolol1";
-		bufferList.add(test);
-		test = new Buffer(new BufferInfo());
-		test.getInfo().name = "#testlolol2";
-		bufferList.add(test);
-		test = new Buffer(new BufferInfo());
-		test.getInfo().name = "#testlolol3";
-		bufferList.add(test);
-		test = new Buffer(new BufferInfo());
-		test.getInfo().name = "#testlolol4";
-		bufferList.add(test);
 
 		ListAdapter adapter = new BufferListAdapter(this, bufferList);
 		getListView().setDividerHeight(0);
@@ -194,7 +182,7 @@ public class BufferActivity extends ListActivity {
 
 	            // Get some sweet, sweet backlog 
 	            //TODO: request buffer list
-//	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BACKLOG, -1, -1, bufferId);
+	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BUFFERS, 1, 0, null);
 	            mService.send(msg);
 	        } catch (RemoteException e) {
 	            // In this case the service has crashed before we could even
