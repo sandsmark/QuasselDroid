@@ -328,12 +328,14 @@ public class CoreConnection {
 							if (buffers.containsKey(bufferId))
 								buffers.get(bufferId).setMarkerLineMessage(msgId);
 							
-							service.newBuffer(buffers.get(bufferId));// We have now received everything we need to know about this buffer
+							
 						}
 						// We don't fetch backlog automatically
-//						for (int buffer: buffers.keySet()) {
+						for (int buffer: buffers.keySet()) {
+							System.out.println("Bufferlol: " + buffer);
+							service.newBuffer(buffers.get(buffer));// We have now received everything we need to know about this buffer
 //							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
-//						}
+						}
 //						sendMessage(MSG_NEW_BUFFER, buffers.get(buffers)); 
 						
 					} else if (name.equals("IrcUser")) {
