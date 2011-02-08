@@ -8,26 +8,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
-import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.CoreConnService;
-import com.lekebilen.quasseldroid.CoreConnection;
-import com.lekebilen.quasseldroid.Network;
 import com.lekebilen.quasseldroid.R;
 
 public class BufferActivity extends ListActivity {

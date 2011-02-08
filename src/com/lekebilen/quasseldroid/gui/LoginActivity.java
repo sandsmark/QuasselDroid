@@ -1,6 +1,8 @@
 package com.lekebilen.quasseldroid.gui;
 
-import org.apache.http.params.CoreConnectionPNames;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.CoreConnService;
+import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
 
 public class LoginActivity extends Activity{
@@ -209,19 +212,20 @@ public class LoginActivity extends Activity{
         	//dbHelper.close();
         	
         	//TODO: Following is just debug, change later
-        	//try {
-			//	CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
-			//	conn.getBuffers();
-			//} catch (UnknownHostException e) {
-				// Show the user a message about host not found
-			//	e.printStackTrace();
-			//} catch (IOException e) {
-				// Network trouble?
-			//	e.printStackTrace();
-			//} catch (GeneralSecurityException e) {
-				// SSL not enabled?
-			//	e.printStackTrace();
-			//}
+//        	try {
+//				CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
+//				conn.connect();
+////				conn.getBuffers();
+//			} catch (UnknownHostException e) {
+////				 Show the user a message about host not found
+//				e.printStackTrace();
+//			} catch (IOException e) {
+////				 Network trouble?
+//				e.printStackTrace();
+//			} catch (GeneralSecurityException e) {
+////				 SSL not enabled?
+//				e.printStackTrace();
+//			}
 			
 			
 			//Make intent to send to the CoreConnect service, with connection data

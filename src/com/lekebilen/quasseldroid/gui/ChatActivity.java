@@ -27,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
-import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.Network;
@@ -320,8 +319,8 @@ public class ChatActivity extends Activity{
 	    // Establish a connection with the service.  We use an explicit
 	    // class name because there is no reason to be able to let other
 	    // applications replace our component.
-	    bindService(new Intent(ChatActivity.this, 
-	            CoreConnection.class), mConnection, Context.BIND_AUTO_CREATE);
+//	    bindService(new Intent(ChatActivity.this, 
+//	            CoreConnection.class), mConnection, Context.BIND_AUTO_CREATE);
 	    mIsBound = true;
 	    mCallbackText.setText("Binding.");
 	}
