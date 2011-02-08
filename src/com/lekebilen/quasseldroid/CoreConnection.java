@@ -18,6 +18,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -49,6 +50,21 @@ public class CoreConnection {
 		this.password = password;
 		this.ssl = ssl;
 		this.service = parent;
+	}
+	
+	/**
+	 * Requests all buffers.
+	 */
+	public void requestBuffers() {
+		try {
+			for(int network: networks) {
+
+				sendInitRequest("Network", Integer.toString(network));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -184,10 +200,15 @@ public class CoreConnection {
 			
 			Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
 			List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
-			buffers = new HashMap<Integer, Buffer>();
+			buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
 			for (QVariant<?> bufferInfoQV: bufferInfos) {
 				BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
 				buffers.put(bufferInfo.id, new Buffer(bufferInfo));
+			}
+			List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
+			networks = new ArrayList<Integer>(networkIds.size());
+			for (QVariant<?> networkId: networkIds) {
+				networks.add((Integer) networkId.getData());
 			}
 			// END SESSION INIT
 			
@@ -257,6 +278,7 @@ public class CoreConnection {
 	private QDataInputStream inStream;
 	
 	private Map<Integer, Buffer> buffers;
+	private List<Integer> networks;
 	
 	private String address;
 	private int port;
