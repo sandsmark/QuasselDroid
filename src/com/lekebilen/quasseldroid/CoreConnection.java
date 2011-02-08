@@ -51,7 +51,7 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
-public class CoreConnection extends Service{
+public class CoreConnection {
 	private enum RequestType {
 		Invalid(0),
 	    Sync(1),
@@ -88,6 +88,17 @@ public class CoreConnection extends Service{
 	private String username;
 	private String password;
 	private boolean ssl;
+	CoreConnService service;
+
+	public CoreConnection(String address, int port, String username,
+			String password, Boolean ssl, CoreConnService parent) {
+		this.address = address;
+		this.port = port;
+		this.username = username;
+		this.password = password;
+		this.ssl = ssl;
+		this.service = parent;
+	}
 
 	/**
 	 * Initiates a connection.
@@ -260,12 +271,15 @@ public class CoreConnection extends Service{
 							int msgId = (Integer)lastSeen.remove(0).getData();
 							if (buffers.containsKey(bufferId))
 								buffers.get(bufferId).setMarkerLineMessage(msgId);
+							
+							service.newBuffer(buffers.get(bufferId));// We have now received everything we need to know about this buffer
 						}
 						// We don't fetch backlog automatically
 //						for (int buffer: buffers.keySet()) {
 //							requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 //						}
-						sendMessage(MSG_NEW_BUFFER, buffers.get(buffers)); // We have now received everything we need to know about this buffer
+//						sendMessage(MSG_NEW_BUFFER, buffers.get(buffers)); 
+						
 					} else if (name.equals("IrcUser")) {
 						IrcUser user = new IrcUser();
 						user.name = (String) packedFunc.remove(0).getData();
@@ -275,7 +289,7 @@ public class CoreConnection extends Service{
 						user.ircOperator = (String) map.get("ircOperator").getData();
 						user.nick = (String) map.get("nick").getData();
 						user.channels = (List<String>) map.get("channels").getData();
-						sendMessage(MSG_NEW_USER, user);
+						service.newUser(user);
 					} else {
 						System.out.println("InitData: " + name);
 					}
@@ -293,7 +307,7 @@ public class CoreConnection extends Service{
 						packedFunc.remove(0); // additional
 						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
 							buffers.get(buffer).addBacklog((IrcMessage) message.getData());
-							sendMessage(MSG_NEW_MESSAGE, message.getData());
+							service.newMessage((IrcMessage) message.getData());
 						}						
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
@@ -315,7 +329,7 @@ public class CoreConnection extends Service{
 					if (functionName.equals("2displayMsg(Message)")) {
 						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
 						buffers.get(message.bufferInfo.id).addBacklog(message);
-						sendMessage(MSG_NEW_MESSAGE, message);
+						service.newMessage(message);
 					} else {
 						System.out.println("RpcCall: " + functionName + " (" + packedFunc + ").");
 					}
@@ -512,202 +526,5 @@ public class CoreConnection extends Service{
 	         return defaultTrustManager.getAcceptedIssuers();
 	     }
 	}
-
-    /** For showing and hiding our notification. */
-    NotificationManager mNM;
-    /** Keeps track of all current registered clients. */
-    ArrayList<Messenger> mClients = new ArrayList<Messenger>();
-	
-    /**
-     * Command to the service to register a client, receiving callbacks
-     * from the service.  The Message's replyTo field must be a Messenger of
-     * the client where callbacks should be sent.
-     */
-    public static final int MSG_REGISTER_CLIENT = 1;
-
-    /**
-     * Command to the service to unregister a client, ot stop receiving callbacks
-     * from the service.  The Message's replyTo field must be a Messenger of
-     * the client as previously given with MSG_REGISTER_CLIENT.
-     */
-    public static final int MSG_UNREGISTER_CLIENT = 2;
-
-    /**
-     * Command to service to set a new value.  This can be sent to the
-     * service to supply a new value, and will be sent by the service to
-     * any registered clients with the new value.
-     */
-    public static final int MSG_CONNECT = 3;
-    
-    /**
-     * Connection failed.
-     */
-    public static final int MSG_CONNECT_FAILED = 4;
-    
-    /**
-     * New network available.
-     */
-    public static final int MSG_NEW_NETWORK = 5;
-
-    /**
-     * New buffer available.
-     */
-    public static final int MSG_NEW_BUFFER = 6;
-    
-    /**
-     * New user available.
-     */
-    public static final int MSG_NEW_USER = 7;
-    
-    /**
-     * New irc message available.
-     */
-    public static final int MSG_NEW_MESSAGE = 8;
-
-    /**
-     * Request backlog for a given buffer-
-     * @param arg1 (optional, -1 = not set) first message id
-     * @param arg2 (optional, -1 = not set) last message id
-     * @param obj Buffer to fetch backlog for
-     */
-    public static final int MSG_REQUEST_BACKLOG = 9;
-    
-    /**
-     * Request buffers for a given network
-     * @param arg1 Network to get info for
-     */
-    public static final int MSG_REQUEST_BUFFERS = 10;
-
-    private void sendMessage(int what, Object data) {
-        for (int i=mClients.size()-1; i>=0; i--) {
-            try {
-                mClients.get(i).send(Message.obtain(null, what, 0, 0, data));
-            } catch (RemoteException e) {
-                // The client is dead.  Remove it from the list;
-                // we are going through the list from back to front
-                // so this is safe to do inside the loop.
-                mClients.remove(i);
-            }
-        }
-    }
-    
-    /**
-     * Handler of incoming messages from clients.
-     */
-    class IncomingHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REGISTER_CLIENT:
-                    mClients.add(msg.replyTo);
-                    break;
-                case MSG_UNREGISTER_CLIENT:
-                    mClients.remove(msg.replyTo);
-                    break;
-                case MSG_CONNECT:
-                	int result = MSG_CONNECT;
-                	try {
-                		connect();
-                	} catch (Exception e) {
-                		e.printStackTrace();
-                		result = MSG_CONNECT_FAILED;
-                	}
-//				} catch (UnknownHostException e1) { // TODO: send separate messages for all these
-//					e1.printStackTrace();
-//				} catch (IOException e1) {
-//					e1.printStackTrace();
-//				} catch (GeneralSecurityException e1) {
-//					e1.printStackTrace();
-//				}
-                    for (int i=mClients.size()-1; i>=0; i--) {
-                        try {
-                            mClients.get(i).send(Message.obtain(null,
-                                    result, 0, 0));
-                        } catch (RemoteException e) {
-                            mClients.remove(i);
-                        }
-                    }
-                    break;
-                case MSG_REQUEST_BACKLOG:
-                	int buffer = (Integer) msg.obj;
-                	int first = msg.arg1;
-                	int last = msg.arg2;
-                	if (first == -1)
-                		first = buffers.get(buffer).getLastSeenMessage();
-                	requestBacklog(buffer, first, last);
-                case MSG_REQUEST_BUFFERS:
-                	try {
-                		sendInitRequest("Network", Integer.toString(msg.arg1));
-                	} catch (IOException e) {
-                		// TODO Auto-generated catch block
-                		e.printStackTrace();
-                	}
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-
-    /**
-     * Target we publish for clients to send messages to IncomingHandler.
-     */
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
-
-    @Override
-    public void onCreate() {
-        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-
-        // Display a notification about us starting.
-        showNotification();
-    }
-
-    @Override
-    public void onDestroy() {
-        // Cancel the persistent notification.
-        mNM.cancel(R.string.remote_service_started);
-
-        // Tell the user we stopped.
-        Toast.makeText(this, R.string.remote_service_stopped, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * When binding to the service, we return an interface to our messenger
-     * for sending messages to the service.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-    	Bundle connectData = intent.getExtras();
-    	address = connectData.getString("address");
-    	port = connectData.getInt("port");
-    	username = connectData.getString("username");
-    	password = connectData.getString("password");
-    	ssl = connectData.getBoolean("ssl");
-
-        return mMessenger.getBinder();
-    }
-
-    /**
-     * Show a notification while this service is running.
-     */
-    private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.remote_service_started);
-
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.icon, text,
-                System.currentTimeMillis());
-
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, BufferActivity.class), 0);
-
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.remote_service_label),
-                       text, contentIntent);
-
-        // Send the notification.
-        // We use a string id because it is a unique number.  We use it later to cancel.
-        mNM.notify(R.string.remote_service_started, notification);
-    }
 }
 

@@ -138,17 +138,17 @@ public class BufferActivity extends ListActivity {
 //	            case CoreConnection.MSG_CONNECT_FAILED:
 //	            	mCallbackText.setText("Connection failed!");
 //	            	break;
-	            case CoreConnection.MSG_NEW_BUFFER:
-	            	mCallbackText.setText("Got new buffer!");
-	            	Buffer buffer = (Buffer) msg.obj;
-	            	bufferList.add(buffer);
-	            	break;
-	            case CoreConnection.MSG_NEW_NETWORK: //TODO: handle me
-	            	mCallbackText.setText("Got new network!");
-	            	Network network = (Network) msg.obj;
-	            	break;
-	            default:
-	                super.handleMessage(msg);
+//	            case CoreConnection.MSG_NEW_BUFFER:
+//	            	mCallbackText.setText("Got new buffer!");
+//	            	Buffer buffer = (Buffer) msg.obj;
+//	            	bufferList.add(buffer);
+//	            	break;
+//	            case CoreConnection.MSG_NEW_NETWORK: //TODO: handle me
+//	            	mCallbackText.setText("Got new network!");
+//	            	Network network = (Network) msg.obj;
+//	            	break;
+//	            default:
+//	                super.handleMessage(msg);
 	        }
 	    }
 	}
@@ -174,22 +174,22 @@ public class BufferActivity extends ListActivity {
 
 	        // We want to monitor the service for as long as we are
 	        // connected to it.
-	        try {
-	            Message msg = Message.obtain(null,
-	                    CoreConnection.MSG_REGISTER_CLIENT);
-	            msg.replyTo = mMessenger;
-	            mService.send(msg);
-
-	            // Get some sweet, sweet backlog 
-	            //TODO: request buffer list
-	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BUFFERS, 1, 0, null);
-	            mService.send(msg);
-	        } catch (RemoteException e) {
-	            // In this case the service has crashed before we could even
-	            // do anything with it; we can count on soon being
-	            // disconnected (and then reconnected if it can be restarted)
-	            // so there is no need to do anything here.
-	        }
+//	        try {
+//	            Message msg = Message.obtain(null,
+//	                    CoreConnection.MSG_REGISTER_CLIENT);
+//	            msg.replyTo = mMessenger;
+//	            mService.send(msg);
+//
+//	            // Get some sweet, sweet backlog 
+//	            //TODO: request buffer list
+//	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BUFFERS, 1, 0, null);
+//	            mService.send(msg);
+//	        } catch (RemoteException e) {
+//	            // In this case the service has crashed before we could even
+//	            // do anything with it; we can count on soon being
+//	            // disconnected (and then reconnected if it can be restarted)
+//	            // so there is no need to do anything here.
+//	        }
 
 	        // As part of the sample, tell the user what happened.
 	        Toast.makeText(BufferActivity.this, R.string.remote_service_connected,
@@ -222,17 +222,17 @@ public class BufferActivity extends ListActivity {
 	    if (mIsBound) {
 	        // If we have received the service, and hence registered with
 	        // it, then now is the time to unregister.
-	        if (mService != null) {
-	            try {
-	                Message msg = Message.obtain(null,
-	                        CoreConnection.MSG_UNREGISTER_CLIENT);
-	                msg.replyTo = mMessenger;
-	                mService.send(msg);
-	            } catch (RemoteException e) {
-	                // There is nothing special we need to do if the service
-	                // has crashed.
-	            }
-	        }
+//	        if (mService != null) {
+//	            try {
+//	                Message msg = Message.obtain(null,
+//	                        CoreConnection.MSG_UNREGISTER_CLIENT);
+//	                msg.replyTo = mMessenger;
+//	                mService.send(msg);
+//	            } catch (RemoteException e) {
+//	                // There is nothing special we need to do if the service
+//	                // has crashed.
+//	            }
+//	        }
 
 	        // Detach our existing connection.
 	        unbindService(mConnection);

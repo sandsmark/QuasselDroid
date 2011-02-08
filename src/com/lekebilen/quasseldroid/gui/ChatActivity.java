@@ -240,24 +240,24 @@ public class ChatActivity extends Activity{
 //	            case CoreConnection.MSG_NEW_BUFFER:
 //	            	mCallbackText.setText("Got new buffer!");
 //	            	Buffer buffer = (Buffer) msg.obj;
+////	            	break;
+//	            case CoreConnection.MSG_NEW_MESSAGE:
+//	            	IrcMessage message = (IrcMessage) msg.obj;
+//	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
+//	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
 //	            	break;
-	            case CoreConnection.MSG_NEW_MESSAGE:
-	            	IrcMessage message = (IrcMessage) msg.obj;
-	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
-	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
-	            	break;
-//	            case CoreConnection.MSG_NEW_NETWORK:
-//	            	mCallbackText.setText("Got new network!");
-//	            	Network network = (Network) msg.obj;
+////	            case CoreConnection.MSG_NEW_NETWORK:
+////	            	mCallbackText.setText("Got new network!");
+////	            	Network network = (Network) msg.obj;
+////	            	break;
+//	            case CoreConnection.MSG_NEW_USER:
+//	            	mCallbackText.setText("Got new user!");//TODO: handle me
+//	            	IrcUser user = (IrcUser) msg.obj; 
+//	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
+//	            		nicks.add(user.nick);
 //	            	break;
-	            case CoreConnection.MSG_NEW_USER:
-	            	mCallbackText.setText("Got new user!");//TODO: handle me
-	            	IrcUser user = (IrcUser) msg.obj; 
-	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
-	            		nicks.add(user.nick);
-	            	break;
-	            default:
-	                super.handleMessage(msg);
+//	            default:
+//	                super.handleMessage(msg);
 	        }
 	    }
 	}
@@ -282,22 +282,22 @@ public class ChatActivity extends Activity{
 	        mCallbackText.setText("Attached.");
 
 	        // We want to monitor the service for as long as we are
-	        // connected to it.
-	        try {
-	            Message msg = Message.obtain(null,
-	                    CoreConnection.MSG_REGISTER_CLIENT);
-	            msg.replyTo = mMessenger;
-	            mService.send(msg);
-
-	            // Get some sweet, sweet backlog
-	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BACKLOG, -1, -1, bufferId);
-	            mService.send(msg);
-	        } catch (RemoteException e) {
-	            // In this case the service has crashed before we could even
-	            // do anything with it; we can count on soon being
-	            // disconnected (and then reconnected if it can be restarted)
-	            // so there is no need to do anything here.
-	        }
+//	        // connected to it.
+//	        try {
+//	            Message msg = Message.obtain(null,
+//	                    CoreConnection.MSG_REGISTER_CLIENT);
+//	            msg.replyTo = mMessenger;
+//	            mService.send(msg);
+//
+//	            // Get some sweet, sweet backlog
+//	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BACKLOG, -1, -1, bufferId);
+//	            mService.send(msg);
+//	        } catch (RemoteException e) {
+//	            // In this case the service has crashed before we could even
+//	            // do anything with it; we can count on soon being
+//	            // disconnected (and then reconnected if it can be restarted)
+//	            // so there is no need to do anything here.
+//	        }
 
 	        // As part of the sample, tell the user what happened.
 	        Toast.makeText(ChatActivity.this, R.string.remote_service_connected,
@@ -327,25 +327,25 @@ public class ChatActivity extends Activity{
 	}
 
 	void doUnbindService() {
-	    if (mIsBound) {
-	        // If we have received the service, and hence registered with
-	        // it, then now is the time to unregister.
-	        if (mService != null) {
-	            try {
-	                Message msg = Message.obtain(null,
-	                        CoreConnection.MSG_UNREGISTER_CLIENT);
-	                msg.replyTo = mMessenger;
-	                mService.send(msg);
-	            } catch (RemoteException e) {
-	                // There is nothing special we need to do if the service
-	                // has crashed.
-	            }
-	        }
-
-	        // Detach our existing connection.
-	        unbindService(mConnection);
-	        mIsBound = false;
-	        mCallbackText.setText("Unbinding.");
-	    }
+//	    if (mIsBound) {
+//	        // If we have received the service, and hence registered with
+//	        // it, then now is the time to unregister.
+//	        if (mService != null) {
+//	            try {
+//	                Message msg = Message.obtain(null,
+//	                        CoreConnection.MSG_UNREGISTER_CLIENT);
+//	                msg.replyTo = mMessenger;
+//	                mService.send(msg);
+//	            } catch (RemoteException e) {
+//	                // There is nothing special we need to do if the service
+//	                // has crashed.
+//	            }
+//	        }
+//
+//	        // Detach our existing connection.
+//	        unbindService(mConnection);
+//	        mIsBound = false;
+//	        mCallbackText.setText("Unbinding.");
+//	    }
 	}
 }
