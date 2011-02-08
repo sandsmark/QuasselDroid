@@ -27,10 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
+import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.Network;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.gui.BufferActivity.IncomingHandler;
 
 public class ChatActivity extends Activity{
 
@@ -41,6 +43,7 @@ public class ChatActivity extends Activity{
 	private int curLineNum = 0;
 
 	private BacklogAdapter adapter;
+	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
 	private int bufferId;
 	private String bufferName;
@@ -61,8 +64,10 @@ public class ChatActivity extends Activity{
 		}
 
 		((TextView)findViewById(R.id.chatNameView)).setText(bufferName);
-		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
+//		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
 
+		handler = new IncomingHandler();
+		
 		adapter = new BacklogAdapter(this, null);
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
 		backlogList.setAdapter(adapter);
@@ -129,15 +134,15 @@ public class ChatActivity extends Activity{
 
 
 
-	private class BacklogAdapter extends BaseAdapter {
+	public class BacklogAdapter extends BaseAdapter {
 
-		private ArrayList<BacklogEntry> backlog;
+		private ArrayList<IrcMessage> backlog;
 		private LayoutInflater inflater;
 
 
-		public BacklogAdapter(Context context, ArrayList<BacklogEntry> backlog) {
+		public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
 			if (backlog==null) {
-				this.backlog = new ArrayList<BacklogEntry>();
+				this.backlog = new ArrayList<IrcMessage>();
 			}else {
 				this.backlog = backlog;				
 			}
@@ -145,8 +150,8 @@ public class ChatActivity extends Activity{
 
 		}
 
-		public void addItem(BacklogEntry item) {
-			Log.i(TAG, item.time);
+		public void addItem(IrcMessage item) {
+			Log.i(TAG, item.timestamp.toString());
 			this.backlog.add(item);
 			notifyDataSetChanged();
 		}
@@ -158,7 +163,7 @@ public class ChatActivity extends Activity{
 		}
 
 		@Override
-		public BacklogEntry getItem(int position) {
+		public IrcMessage getItem(int position) {
 			return backlog.get(position);
 		}
 
@@ -185,13 +190,15 @@ public class ChatActivity extends Activity{
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}
-			BacklogEntry entry = backlog.get(position);
-			holder.timeView.setText(entry.time);
-			holder.nickView.setText(entry.nick);
-			int hashcode = entry.nick.hashCode() & 0x00FFFFFF;
+			IrcMessage entry = backlog.get(position);
+			holder.timeView.setText(entry.getTime());
+			holder.nickView.setText(entry.getNick());
+			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
+			
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 
-			holder.msgView.setText(entry.msg);
+			holder.msgView.setText(entry.content);
+			Log.i(TAG, "CONTENT:" + entry.content);
 			return convertView;
 		}
 
@@ -204,27 +211,8 @@ public class ChatActivity extends Activity{
 		public TextView msgView;
 	}
 
-	public class BacklogEntry {
-		public String time;
-		public String nick;
-		public String msg;
 
-		public BacklogEntry(String time, String nick, String msg) {
-			this.time = time;
-			this.nick = nick;
-			this.msg = msg;
-		}
-	}
 
-	/**
-	 * Code for service binding:
-	 */
-	/** Messenger for communicating with service. */
-	Messenger mService = null;
-	/** Flag indicating whether we have called bind on the service. */
-	boolean mIsBound;
-	/** Some text view we are using to show state information. */
-	TextView mCallbackText;
 
 	/**
 	 * Handler of incoming messages from service.
@@ -233,6 +221,9 @@ public class ChatActivity extends Activity{
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
+				case R.id.CHAT_MESSAGES_UPDATED:
+					ChatActivity.this.adapter.addItem((IrcMessage)msg.obj);
+					break;
 			//	            case CoreConnection.MSG_CONNECT:
 			//	                mCallbackText.setText("We have connection!");
 			//	                break;
@@ -264,90 +255,57 @@ public class ChatActivity extends Activity{
 		}
 	}
 
+	
+	
+	
+	
 	/**
-	 * Target we publish for clients to send messages to IncomingHandler.
+	 * Code for service binding:
 	 */
-	final Messenger mMessenger = new Messenger(new IncomingHandler());
+	private CoreConnService boundConnService;
+	private Boolean isBound;
 
-	/**
-	 * Class for interacting with the main interface of the service.
-	 */
 	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className,
-				IBinder service) {
+		public void onServiceConnected(ComponentName className, IBinder service) {
 			// This is called when the connection with the service has been
 			// established, giving us the service object we can use to
-			// interact with the service.  We are communicating with our
-			// service through an IDL interface, so get a client-side
-			// representation of that from the raw service object.
-			mService = new Messenger(service);
-			mCallbackText.setText("Attached.");
+			// interact with the service. Because we have bound to a explicit
+			// service that we know is running in our own process, we can
+			// cast its IBinder to a concrete class and directly access it.
+			Log.i(TAG, "BINDING ON SERVICE DONE");
+			boundConnService = ((CoreConnService.LocalBinder)service).getService();
+			
+			Intent intent = getIntent();
+			//Testing to see if i can add item to adapter in service
+			boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), handler);
 
-			// We want to monitor the service for as long as we are
-			//	        // connected to it.
-			//	        try {
-			//	            Message msg = Message.obtain(null,
-			//	                    CoreConnection.MSG_REGISTER_CLIENT);
-			//	            msg.replyTo = mMessenger;
-			//	            mService.send(msg);
-			//
-			//	            // Get some sweet, sweet backlog
-			//	            msg = Message.obtain(null, CoreConnection.MSG_REQUEST_BACKLOG, -1, -1, bufferId);
-			//	            mService.send(msg);
-			//	        } catch (RemoteException e) {
-			//	            // In this case the service has crashed before we could even
-			//	            // do anything with it; we can count on soon being
-			//	            // disconnected (and then reconnected if it can be restarted)
-			//	            // so there is no need to do anything here.
-			//	        }
-
-			// As part of the sample, tell the user what happened.
-			Toast.makeText(ChatActivity.this, R.string.remote_service_connected,
-					Toast.LENGTH_SHORT).show();
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
 			// This is called when the connection with the service has been
 			// unexpectedly disconnected -- that is, its process crashed.
-			mService = null;
-			mCallbackText.setText("Disconnected.");
+			// Because it is running in our same process, we should never
+			// see this happen.
+			boundConnService = null;
 
-			// As part of the sample, tell the user what happened.
-			Toast.makeText(ChatActivity.this, R.string.remote_service_disconnected,
-					Toast.LENGTH_SHORT).show();
 		}
 	};
 
 	void doBindService() {
-		// Establish a connection with the service.  We use an explicit
-		// class name because there is no reason to be able to let other
-		// applications replace our component.
-		//	    bindService(new Intent(ChatActivity.this, 
-		//	            CoreConnection.class), mConnection, Context.BIND_AUTO_CREATE);
-		mIsBound = true;
-		mCallbackText.setText("Binding.");
+		// Establish a connection with the service. We use an explicit
+		// class name because we want a specific service implementation that
+		// we know will be running in our own process (and thus won't be
+		// supporting component replacement by other applications).
+		bindService(new Intent(ChatActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
+		isBound = true;
+		Log.i(TAG, "BINDING");
 	}
 
 	void doUnbindService() {
-		//	    if (mIsBound) {
-		//	        // If we have received the service, and hence registered with
-		//	        // it, then now is the time to unregister.
-		//	        if (mService != null) {
-		//	            try {
-		//	                Message msg = Message.obtain(null,
-		//	                        CoreConnection.MSG_UNREGISTER_CLIENT);
-		//	                msg.replyTo = mMessenger;
-		//	                mService.send(msg);
-		//	            } catch (RemoteException e) {
-		//	                // There is nothing special we need to do if the service
-		//	                // has crashed.
-		//	            }
-		//	        }
-		//
-		//	        // Detach our existing connection.
-		//	        unbindService(mConnection);
-		//	        mIsBound = false;
-		//	        mCallbackText.setText("Unbinding.");
-		//	    }
+		if (isBound) {
+			// Detach our existing connection.
+			unbindService(mConnection);
+			isBound = false;
+		}
 	}
 }

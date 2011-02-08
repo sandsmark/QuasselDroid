@@ -1,5 +1,7 @@
 package com.lekebilen.quasseldroid;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class IrcMessage implements Comparable<IrcMessage>{
@@ -68,5 +70,16 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	
 	public String toString() {
 		return sender +": " + content;
+	}
+	
+
+	public String getTime(){
+		Date time = new Date();
+		
+		return time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
+	}
+	
+	public String getNick(){
+		return sender.split("!")[0];
 	}
 }

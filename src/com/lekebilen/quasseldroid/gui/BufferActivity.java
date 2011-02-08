@@ -92,6 +92,7 @@ public class BufferActivity extends ListActivity {
 
 		public void addBuffer(Buffer buffer){
 			this.list.add(buffer);
+			notifyDataSetChanged();
 		}
 
 		@Override
@@ -151,7 +152,7 @@ public class BufferActivity extends ListActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case R.id.BUFFER_LIST_UPDATED:
-				BufferActivity.this.listAdapter.notifyDataSetChanged();
+				BufferActivity.this.listAdapter.addBuffer((Buffer) msg.obj);
 				break;
 				////	            case CoreConnection.MSG_CONNECT_FAILED:
 				////	            	mCallbackText.setText("Connection failed!");
@@ -276,7 +277,7 @@ public class BufferActivity extends ListActivity {
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 			//Testing to see if i can add item to adapter in service
-			boundConnService.getBufferList(listAdapter, handler);
+			boundConnService.getBufferList(handler);
 
 		}
 

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Adapter;
 
 import com.lekebilen.quasseldroid.gui.BufferActivity;
+import com.lekebilen.quasseldroid.gui.ChatActivity;
 
 /**
  * This Service holdes the connection to the core from the phone, it handles all the communication with the core. It talks to CoreConnection
@@ -90,13 +91,18 @@ public class CoreConnService extends Service{
 	}
 	
 	public void newMessage(IrcMessage message) {
-		//TODO
+		Log.i(TAG, "MESSAGE: " + message.content.toString() );
+		Message msg = notifyHandler.obtainMessage(R.id.CHAT_MESSAGES_UPDATED);
+		msg.obj = message;
+		msg.sendToTarget();
+		
+		
 	}
 	
 	public void newBuffer(Buffer buffer) {
 		Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
-		adapter.addBuffer(buffer);
 		Message msg = notifyHandler.obtainMessage(R.id.BUFFER_LIST_UPDATED);
+		msg.obj = buffer;
 		msg.sendToTarget();
 		//adapter.notifyDataSetChanged();
 		
@@ -110,8 +116,12 @@ public class CoreConnService extends Service{
 		//TODO
 	}
 	
-	public void getBufferList(BufferActivity.BufferListAdapter adapter, Handler notifyHandler) {
-		this.adapter = adapter;
+	public void getBuffer(int bufferId, Handler notifyHandler){
+		this.notifyHandler = notifyHandler;
+		coreConn.requestBacklog(bufferId);
+	}
+	
+	public void getBufferList(Handler notifyHandler) {
 		this.notifyHandler = notifyHandler;
 		//Buffer buffer = new Buffer(new BufferInfo());
 		//buffer.getInfo().name = "#MTDT12";
