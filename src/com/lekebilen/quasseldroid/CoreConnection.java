@@ -19,12 +19,15 @@ import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
@@ -43,6 +46,7 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
+import com.lekebilen.quasseldroid.qtcomm.serializers.QTime;
 
 public class CoreConnection {
 	public CoreConnection(String address, int port, String username,
@@ -234,12 +238,21 @@ public class CoreConnection {
 			readThread.start();
 			
 			
-			// Apparently the client doesn't send heartbeats?
-			/*TimerTask sendPingAction = new TimerTask() {
+			TimerTask sendPingAction = new TimerTask() {
 				public void run() {
-					
+					List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
+					packedFunc.add(new QVariant<Integer>(RequestType.HeartBeat.getValue(), QVariant.Type.Int));
+					packedFunc.add(new QVariant<Calendar>(Calendar.getInstance(), QVariant.Type.Time));
+					try {
+						sendQVariantList(packedFunc);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-			};*/
+			};
+			Timer timer = new Timer();
+			timer.schedule(sendPingAction, 0, 30); // Send heartbeats every 30 seconds
 			
 			// END SIGNAL PROXY
 	}
