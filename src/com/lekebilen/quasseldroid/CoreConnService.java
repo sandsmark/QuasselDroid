@@ -3,6 +3,8 @@ package com.lekebilen.quasseldroid;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Observer;
 
 import android.app.Service;
 import android.content.Intent;
@@ -31,7 +33,9 @@ public class CoreConnService extends Service{
 	
 	BufferActivity.BufferListAdapter adapter;
 	Handler notifyHandler;
-
+	Handler incomingHandler;
+	
+	HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
 	
 	/**
      * Class for clients to access.  Because we know this service always
@@ -54,11 +58,19 @@ public class CoreConnService extends Service{
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
+		
+		incomingHandler = new IncomingHandler();
+	}
+
+	public Handler getHandler() {
+		return incomingHandler;
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		handleIntent(intent);
+		if (intent!=null) {
+			handleIntent(intent);
+		}
 		return START_STICKY;
 
 	}
@@ -92,9 +104,12 @@ public class CoreConnService extends Service{
 	
 	public void newMessage(IrcMessage message) {
 		Log.i(TAG, "MESSAGE: " + message.content.toString() );
-		Message msg = notifyHandler.obtainMessage(R.id.CHAT_MESSAGES_UPDATED);
-		msg.obj = message;
-		msg.sendToTarget();
+		
+		Buffer buffer = buffers.get(message.bufferInfo.id);
+		buffer.addBacklog(message);
+		//Message msg = notifyHandler.obtainMessage(R.id.CHAT_MESSAGES_UPDATED);
+		//msg.obj = message;
+		//msg.sendToTarget();
 		
 		
 	}
@@ -102,6 +117,12 @@ public class CoreConnService extends Service{
 	public void newBuffer(Buffer buffer) {
 		Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
 		Message msg = notifyHandler.obtainMessage(R.id.BUFFER_LIST_UPDATED);
+		if (buffers.get(buffer.getInfo().id) == null ) {
+			buffers.put(buffer.getInfo().id, buffer);
+		} else {
+			Log.e(TAG, "Getting already gotten buffer");
+		}
+		
 		msg.obj = buffer;
 		msg.sendToTarget();
 		//adapter.notifyDataSetChanged();
@@ -116,9 +137,11 @@ public class CoreConnService extends Service{
 		//TODO
 	}
 	
-	public void getBuffer(int bufferId, Handler notifyHandler){
-		this.notifyHandler = notifyHandler;
+	public Buffer getBuffer(int bufferId, Observer obs){
+		//this.notifyHandler = notifyHandler;
+		buffers.get(bufferId).addObserver(obs);
 		coreConn.requestBacklog(bufferId);
+		return buffers.get(bufferId);
 	}
 	
 	public void getBufferList(Handler notifyHandler) {
@@ -128,6 +151,21 @@ public class CoreConnService extends Service{
 		//adapter.addBuffer(buffer);
 		//adapter.notifyDataSetChanged();
 		coreConn.requestBuffers();
+	}
+	
+	/**
+	 * Handler of incoming messages from CoreConnection, since it's in another read thread.
+	 */
+	class IncomingHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
+					newMessage((IrcMessage)msg.obj);
+					break;
+			
+			}
+		}
 	}
 
 }

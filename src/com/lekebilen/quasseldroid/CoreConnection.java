@@ -35,6 +35,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import android.os.Message;
+
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
@@ -367,8 +369,11 @@ public class CoreConnection {
 						List<QVariant<?>> data = (List<QVariant<?>>)(packedFunc.remove(0).getData());
 						Collections.reverse(data);
 						for (QVariant<?> message: data) {
-							buffers.get(buffer).addBacklog((IrcMessage) message.getData());
-							service.newMessage((IrcMessage) message.getData());
+							//buffers.get(buffer).addBacklog((IrcMessage) message.getData());
+							//service.newMessage((IrcMessage) message.getData());
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE);
+							msg.obj = (IrcMessage) message.getData();
+							msg.sendToTarget();
 						}						
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
@@ -389,8 +394,11 @@ public class CoreConnection {
 //					functionName = functionName.substring(1);
 					if (functionName.equals("2displayMsg(Message)")) {
 						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
-						buffers.get(message.bufferInfo.id).addBacklog(message);
-						service.newMessage(message);
+//						buffers.get(message.bufferInfo.id).addBacklog(message);
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE);
+						msg.obj = message;
+						msg.sendToTarget();
+						
 					} else {
 						System.out.println("RpcCall: " + functionName + " (" + packedFunc + ").");
 					}

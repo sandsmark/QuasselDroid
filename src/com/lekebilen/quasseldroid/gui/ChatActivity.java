@@ -1,6 +1,8 @@
 package com.lekebilen.quasseldroid.gui;
 
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -27,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
+import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
@@ -66,7 +69,7 @@ public class ChatActivity extends Activity{
 		((TextView)findViewById(R.id.chatNameView)).setText(bufferName);
 //		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
 
-		handler = new IncomingHandler();
+		//handler = new IncomingHandler();
 		
 		adapter = new BacklogAdapter(this, null);
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
@@ -134,37 +137,45 @@ public class ChatActivity extends Activity{
 
 
 
-	public class BacklogAdapter extends BaseAdapter {
+	public class BacklogAdapter extends BaseAdapter implements Observer {
 
-		private ArrayList<IrcMessage> backlog;
+		//private ArrayList<IrcMessage> backlog;
 		private LayoutInflater inflater;
+		private Buffer buffer;
 
 
 		public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
-			if (backlog==null) {
-				this.backlog = new ArrayList<IrcMessage>();
-			}else {
-				this.backlog = backlog;				
-			}
+//			if (backlog==null) {
+//				this.backlog = new ArrayList<IrcMessage>();
+//			}else {
+//				this.backlog = backlog;				
+//			}
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		}
 
-		public void addItem(IrcMessage item) {
-			Log.i(TAG, item.timestamp.toString());
-			this.backlog.add(item);
+//		public void addItem(IrcMessage item) {
+//			Log.i(TAG, item.timestamp.toString());
+//			//this.backlog.add(item);
+//			notifyDataSetChanged();
+//		}
+		
+		public void setBuffer(Buffer buffer) {
+			this.buffer = buffer;
 			notifyDataSetChanged();
 		}
 
 
 		@Override
 		public int getCount() {
-			return backlog.size();
+			if (this.buffer==null) return 0;
+			return buffer.getBacklog().size();
 		}
 
 		@Override
 		public IrcMessage getItem(int position) {
-			return backlog.get(position);
+			//TODO: QriorityQueue is fucked, we dont want to convert to array here, so change later
+			return (IrcMessage) buffer.getBacklog().toArray()[position];
 		}
 
 		@Override
@@ -190,7 +201,7 @@ public class ChatActivity extends Activity{
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}
-			IrcMessage entry = backlog.get(position);
+			IrcMessage entry = this.getItem(position);
 			holder.timeView.setText(entry.getTime());
 			holder.nickView.setText(entry.getNick());
 			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
@@ -200,6 +211,13 @@ public class ChatActivity extends Activity{
 			holder.msgView.setText(entry.content);
 			Log.i(TAG, "CONTENT:" + entry.content);
 			return convertView;
+		}
+
+		@Override
+		public void update(Observable observable, Object data) {
+			Log.i(TAG, "BACKLOG CHANGED");
+			notifyDataSetChanged();
+			
 		}
 
 
@@ -217,43 +235,43 @@ public class ChatActivity extends Activity{
 	/**
 	 * Handler of incoming messages from service.
 	 */
-	class IncomingHandler extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-				case R.id.CHAT_MESSAGES_UPDATED:
-					ChatActivity.this.adapter.addItem((IrcMessage)msg.obj);
-					break;
-			//	            case CoreConnection.MSG_CONNECT:
-			//	                mCallbackText.setText("We have connection!");
-			//	                break;
-			//	            case CoreConnection.MSG_CONNECT_FAILED:
-			//	            	mCallbackText.setText("Connection failed!");
-			//	            	break;
-			//	            case CoreConnection.MSG_NEW_BUFFER:
-			//	            	mCallbackText.setText("Got new buffer!");
-			//	            	Buffer buffer = (Buffer) msg.obj;
-			////	            	break;
-			//	            case CoreConnection.MSG_NEW_MESSAGE:
-			//	            	IrcMessage message = (IrcMessage) msg.obj;
-			//	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
-			//	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
-			//	            	break;
-			////	            case CoreConnection.MSG_NEW_NETWORK:
-			////	            	mCallbackText.setText("Got new network!");
-			////	            	Network network = (Network) msg.obj;
-			////	            	break;
-			//	            case CoreConnection.MSG_NEW_USER:
-			//	            	mCallbackText.setText("Got new user!");//TODO: handle me
-			//	            	IrcUser user = (IrcUser) msg.obj; 
-			//	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
-			//	            		nicks.add(user.nick);
-			//	            	break;
-			//	            default:
-			//	                super.handleMessage(msg);
-			}
-		}
-	}
+//	class IncomingHandler extends Handler {
+//		@Override
+//		public void handleMessage(Message msg) {
+//			switch (msg.what) {
+//				case R.id.CHAT_MESSAGES_UPDATED:
+//					ChatActivity.this.adapter.addItem((IrcMessage)msg.obj);
+//					break;
+//			//	            case CoreConnection.MSG_CONNECT:
+//			//	                mCallbackText.setText("We have connection!");
+//			//	                break;
+//			//	            case CoreConnection.MSG_CONNECT_FAILED:
+//			//	            	mCallbackText.setText("Connection failed!");
+//			//	            	break;
+//			//	            case CoreConnection.MSG_NEW_BUFFER:
+//			//	            	mCallbackText.setText("Got new buffer!");
+//			//	            	Buffer buffer = (Buffer) msg.obj;
+//			////	            	break;
+//			//	            case CoreConnection.MSG_NEW_MESSAGE:
+//			//	            	IrcMessage message = (IrcMessage) msg.obj;
+//			//	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
+//			//	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
+//			//	            	break;
+//			////	            case CoreConnection.MSG_NEW_NETWORK:
+//			////	            	mCallbackText.setText("Got new network!");
+//			////	            	Network network = (Network) msg.obj;
+//			////	            	break;
+//			//	            case CoreConnection.MSG_NEW_USER:
+//			//	            	mCallbackText.setText("Got new user!");//TODO: handle me
+//			//	            	IrcUser user = (IrcUser) msg.obj; 
+//			//	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
+//			//	            		nicks.add(user.nick);
+//			//	            	break;
+//			//	            default:
+//			//	                super.handleMessage(msg);
+//			}
+//		}
+//	}
 
 	
 	
@@ -277,7 +295,7 @@ public class ChatActivity extends Activity{
 			
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
-			boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), handler);
+			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));
 
 		}
 
