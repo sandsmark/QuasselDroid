@@ -1,3 +1,8 @@
+/**
+ * Copyright Martin Sandsmark 2011 
+ * LGPL 2.1 / GPLv3
+ */
+
 package com.lekebilen.quasseldroid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,8 +18,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,20 +33,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
-import android.widget.Toast;
-
-import com.lekebilen.quasseldroid.gui.BufferActivity;
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
@@ -143,7 +132,6 @@ public class CoreConnection {
 			sendQVariantMap(initial);
 			// END CLIENT INFO
 			
-			
 			// START CORE INFO
 			inStream = new QDataInputStream(socket.getInputStream());
 			Map<String, QVariant<?>> reply = readQVariantMap();
@@ -154,7 +142,6 @@ public class CoreConnection {
 			// TODO: We should check that the core is new and dandy here. 
 			// END CORE INFO
 
-			
 			// START SSL CONNECTION
 			if (ssl) {
 				SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -220,7 +207,7 @@ public class CoreConnection {
 			sendQVariantList(packedFunc);
 			
 			
-			ReadThread readThread = new ReadThread(this);
+			ReadThread readThread = new ReadThread();
 			readThread.start();
 			
 			
@@ -280,12 +267,7 @@ public class CoreConnection {
 
 	private class ReadThread extends Thread {
 		boolean running = false;
-		CoreConnection parent;
-		
-		public ReadThread(CoreConnection parent) {
-			this.parent = parent;
-		}
-		
+
 		public void run() {
 			this.running = true;
 			
@@ -458,12 +440,7 @@ public class CoreConnection {
 	     X509TrustManager defaultTrustManager;
 
 	     CustomTrustManager() throws GeneralSecurityException {
-	         // create a "default" JSSE X509TrustManager.
-
 	         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-	         //ks.load(new FileInputStream("trustedCerts"),
-	         //    "passphrase".toCharArray());
-
 	         TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 	         tmf.init(ks);
 
@@ -481,11 +458,7 @@ public class CoreConnection {
 	             }
 	         }
 
-	         /*
-	          * Find some other way to initialize, or else we have to fail the
-	          * constructor.
-	          */
-	         throw new GeneralSecurityException("Couldn't initialize");
+	         throw new GeneralSecurityException("Couldn't initialize certificate management");
 	     }
 
 	     /*
