@@ -128,6 +128,10 @@ public class BufferActivity extends ListActivity {
 			holder.bufferView.setTextColor(getResources().getColor(R.color.unread_buffer_color));
 			return convertView;
 		}
+
+		public void clear() {
+			list.clear();
+		}
 	}
 
 	public static class ViewHolder {
@@ -277,7 +281,9 @@ public class BufferActivity extends ListActivity {
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 			//Testing to see if i can add item to adapter in service
+			listAdapter.clear();
 			boundConnService.getBufferList(handler);
+
 
 		}
 
