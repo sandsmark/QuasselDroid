@@ -5,6 +5,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Adapter;
+
+import com.lekebilen.quasseldroid.gui.BufferActivity;
 
 /**
  * This Service holdes the connection to the core from the phone, it handles all the communication with the core. It talks to CoreConnection
@@ -60,6 +64,7 @@ public class CoreConnService extends Service{
 		String username = connectData.getString("username");
 		String password = connectData.getString("password");
 		Boolean ssl = connectData.getBoolean("ssl");
+		Log.i(TAG, "Connecting to core: "+address+":"+port+" with username " +username);
 		coreConn = new CoreConnection(address, port, username, password, ssl, this);
 	}
 	
@@ -68,7 +73,7 @@ public class CoreConnService extends Service{
 	}
 	
 	public void newBuffer(Buffer buffer) {
-		//TODO
+		Log.i(TAG, "GETTING BUFFER");
 	}
 	
 	public void newUser(IrcUser user) {
@@ -77,6 +82,14 @@ public class CoreConnService extends Service{
 	
 	public void sendMessage(Buffer buffer, String message){
 		//TODO
+	}
+	
+	public void getBufferList(BufferActivity.BufferListAdapter adapter) {
+		Buffer buffer = new Buffer(new BufferInfo());
+		buffer.getInfo().name = "#MTDT12";
+		adapter.addBuffer(buffer);
+		adapter.notifyDataSetChanged();
+		coreConn.requestBuffers();
 	}
 
 }

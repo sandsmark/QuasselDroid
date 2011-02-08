@@ -1,5 +1,7 @@
 package com.lekebilen.quasseldroid.gui;
 
+import org.apache.http.params.CoreConnectionPNames;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,7 +23,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.lekebilen.quasseldroid.CoreConnection;
+import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.R;
 
 public class LoginActivity extends Activity{
@@ -223,7 +225,7 @@ public class LoginActivity extends Activity{
 			
 			
 			//Make intent to send to the CoreConnect service, with connection data
-			Intent connectIntent = new Intent(LoginActivity.this, CoreConnection.class);
+			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
 			connectIntent.putExtra("address", res.getString("address"));
 			connectIntent.putExtra("port", res.getInt("port"));
 			connectIntent.putExtra("username", username.getText().toString());
