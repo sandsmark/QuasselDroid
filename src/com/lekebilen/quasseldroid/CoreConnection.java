@@ -57,8 +57,8 @@ public class CoreConnection {
 	 */
 	public void requestBuffers() {
 		try {
+			sendInitRequest("BufferSyncer", "");
 			for(int network: networks) {
-
 				sendInitRequest("Network", Integer.toString(network));
 			}
 		} catch (IOException e) {
@@ -216,7 +216,6 @@ public class CoreConnection {
 			
 			// START SIGNAL PROXY INIT
 			sendInitRequest("BacklogManager", "");
-			sendInitRequest("BufferSyncer", "");
 			
 			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
 			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));

@@ -94,7 +94,7 @@ public class CoreConnService extends Service{
 	}
 	
 	public void newBuffer(Buffer buffer) {
-		Log.i(TAG, "GETTING BUFFER");
+		Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
 		adapter.addBuffer(buffer);
 		Message msg = notifyHandler.obtainMessage(R.id.BUFFER_LIST_UPDATED);
 		msg.sendToTarget();
