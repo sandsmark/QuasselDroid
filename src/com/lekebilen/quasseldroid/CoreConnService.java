@@ -74,5 +74,9 @@ public class CoreConnService extends Service{
 	public void newUser(IrcUser user) {
 		
 	}
+	
+	public void sendMessage(Buffer buffer, String message){
+		//TODO
+	}
 
 }
