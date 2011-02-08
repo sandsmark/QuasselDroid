@@ -12,6 +12,7 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaTypeSerializer;
 
 public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void serialize(QDataOutputStream stream, BufferInfo data,
 			DataStreamVersion version) throws IOException {
@@ -19,7 +20,7 @@ public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
 		stream.writeInt(data.networkId);
 		stream.writeShort(data.type.getValue());
 		stream.writeUInt(data.groupId, 32);
-		QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().serialize(stream, data.name.getBytes(), version);
+		QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().serialize(stream, ByteBuffer.wrap(data.name.getBytes()), version);
 	}
 
 	@Override

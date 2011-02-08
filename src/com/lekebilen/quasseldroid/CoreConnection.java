@@ -251,8 +251,8 @@ public class CoreConnection {
 					}
 				}
 			};
-			Timer timer = new Timer();
-			timer.schedule(sendPingAction, 0, 30); // Send heartbeats every 30 seconds
+//			Timer timer = new Timer();
+//			timer.schedule(sendPingAction, 0, 30); // Send heartbeats every 30 seconds
 			
 			// END SIGNAL PROXY
 	}
