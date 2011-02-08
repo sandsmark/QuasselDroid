@@ -52,44 +52,6 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 public class CoreConnection {
-	private enum RequestType {
-		Invalid(0),
-	    Sync(1),
-	    RpcCall(2),
-	    InitRequest(3),
-	    InitData(4),
-	    HeartBeat(5),
-	    HeartBeatReply(6);
-	    
-        int value;
-        RequestType(int value){
-        	this.value = value;
-        }
-        public int getValue(){
-        	return value;
-        }
-        
-        public static RequestType getForVal(int val) {
-        	for (RequestType type: values()) {
-        		if (type.value == val)
-        			return type;
-        	}
-        	return Invalid;
-        }
-	}
-	
-	private QDataOutputStream outStream;
-	private QDataInputStream inStream;
-	
-	private Map<Integer, Buffer> buffers;
-	
-	private String address;
-	private int port;
-	private String username;
-	private String password;
-	private boolean ssl;
-	CoreConnService service;
-
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
 		this.address = address;
@@ -99,11 +61,66 @@ public class CoreConnection {
 		this.ssl = ssl;
 		this.service = parent;
 	}
+	
+	/**
+	 * Requests the unread backlog for a given buffer.
+	 */
+	public void requestBacklog(int buffer) {
+		requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
+	}
+	
+	/**
+	 * Requests all backlog from a given message ID until the current. 
+	 */
+	public void requestBacklog(int buffer, int firstMsgId) {
+		requestBacklog(buffer, firstMsgId, -1);
+	}
+	
+	/**
+	 * Requests backlog between two given message IDs.
+	 */
+	public void requestBacklog(int buffer, int firstMsgId, int lastMsgId) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
+		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
+		retFunc.add(new QVariant<String>("", QVariant.Type.String));
+		retFunc.add(new QVariant<String>("requestBacklog", QVariant.Type.String));
+		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
+		retFunc.add(new QVariant<Integer>(firstMsgId, "MsgId"));
+		retFunc.add(new QVariant<Integer>(lastMsgId, "MsgId"));
+		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
+		retFunc.add(new QVariant<Integer>(Config.backlogAdditional, QVariant.Type.Int));
+		
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Sends an IRC message to a given buffer
+	 * @param buffer buffer to send to
+	 * @param message content of message
+	 */
+	public void sendMessage(int buffer, String message) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariant.Type.Int));
+		retFunc.add(new QVariant<String>("2sendInput(BufferInfo,QString)", QVariant.Type.String));
+		retFunc.add(new QVariant<BufferInfo>(buffers.get(buffer).getInfo(), "BufferInfo"));
+		retFunc.add(new QVariant<String>("/SAY " + message, QVariant.Type.String));	
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	/**
 	 * Initiates a connection.
 	 */
-	private void connect() throws UnknownHostException, IOException, GeneralSecurityException {	
+	public void connect() throws UnknownHostException, IOException, GeneralSecurityException {	
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 			Socket socket = (Socket)factory.createSocket(address, port);
@@ -216,15 +233,51 @@ public class CoreConnection {
 			
 			// END SIGNAL PROXY
 	}
-	
-	/**
-	 * Returns list of buffers in use. 
-	 * @return
+
+	/****************************
+	 * Private internal communication stuff.
+	 * Please don't look below this line.
+	 * @author sandsmark
 	 */
-	public Collection<Buffer> getBuffers() {
-		return buffers.values();
+
+	private enum RequestType {
+		Invalid(0),
+	    Sync(1),
+	    RpcCall(2),
+	    InitRequest(3),
+	    InitData(4),
+	    HeartBeat(5),
+	    HeartBeatReply(6);
+	    
+        int value;
+        RequestType(int value){
+        	this.value = value;
+        }
+        public int getValue(){
+        	return value;
+        }
+        
+        public static RequestType getForVal(int val) {
+        	for (RequestType type: values()) {
+        		if (type.value == val)
+        			return type;
+        	}
+        	return Invalid;
+        }
 	}
 	
+	private QDataOutputStream outStream;
+	private QDataInputStream inStream;
+	
+	private Map<Integer, Buffer> buffers;
+	
+	private String address;
+	private int port;
+	private String username;
+	private String password;
+	private boolean ssl;
+	private CoreConnService service;
+
 	private class ReadThread extends Thread {
 		boolean running = false;
 		CoreConnection parent;
@@ -395,41 +448,6 @@ public class CoreConnection {
 		sendQVariantList(packedFunc);
 	}
 	
-	private void requestBacklog(int buffer, int first) {
-		requestBacklog(buffer, first, -1);
-	}
-	
-	private void requestBacklog(int buffer, int firstMsg, int lastMsg) {
-		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
-		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
-		retFunc.add(new QVariant<String>("", QVariant.Type.String));
-		retFunc.add(new QVariant<String>("requestBacklog", QVariant.Type.String));
-		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
-		retFunc.add(new QVariant<Integer>(firstMsg, "MsgId"));
-		retFunc.add(new QVariant<Integer>(lastMsg, "MsgId"));
-		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
-		retFunc.add(new QVariant<Integer>(Config.backlogAdditional, QVariant.Type.Int));
-		
-		try {
-			sendQVariantList(retFunc);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void sendMessage(int buffer, String message) {
-		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-		retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariant.Type.Int));
-		retFunc.add(new QVariant<String>("2sendInput(BufferInfo,QString)", QVariant.Type.String));
-		retFunc.add(new QVariant<BufferInfo>(buffers.get(buffer).getInfo(), "BufferInfo"));
-		retFunc.add(new QVariant<String>("/SAY " + message, QVariant.Type.String));	
-		try {
-			sendQVariantList(retFunc);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 	
 	private class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	     /*
