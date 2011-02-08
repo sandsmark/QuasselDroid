@@ -11,11 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,14 +22,10 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
-import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.IrcMessage;
-import com.lekebilen.quasseldroid.IrcUser;
-import com.lekebilen.quasseldroid.Network;
 import com.lekebilen.quasseldroid.R;
 import com.lekebilen.quasseldroid.gui.BufferActivity.IncomingHandler;
 
@@ -86,7 +78,7 @@ public class ChatActivity extends Activity{
 				String inputText = inputfield.getText().toString();
 
 				if ( ! "".equals(inputText) ) {
-					//coreconnection.sendmessage(inputText);
+					boundConnService.sendMessage(adapter.buffer.getInfo().id, inputText);
 					inputfield.setText("");
 				}
 

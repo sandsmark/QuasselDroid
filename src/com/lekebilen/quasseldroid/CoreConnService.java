@@ -133,8 +133,8 @@ public class CoreConnService extends Service{
 		
 	}
 	
-	public void sendMessage(Buffer buffer, String message){
-		//TODO
+	public void sendMessage(int bufferId, String message){
+		coreConn.sendMessage(bufferId, message);
 	}
 	
 	public Buffer getBuffer(int bufferId, Observer obs){
@@ -143,6 +143,7 @@ public class CoreConnService extends Service{
 		coreConn.requestBacklog(bufferId);
 		return buffers.get(bufferId);
 	}
+	
 	
 	public void getBufferList(Handler notifyHandler) {
 		this.notifyHandler = notifyHandler;
