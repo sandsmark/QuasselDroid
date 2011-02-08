@@ -1,10 +1,16 @@
 package com.lekebilen.quasseldroid;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Adapter;
 
@@ -21,6 +27,9 @@ public class CoreConnService extends Service{
 	
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
+	
+	BufferActivity.BufferListAdapter adapter;
+	Handler notifyHandler;
 
 	
 	/**
@@ -66,6 +75,18 @@ public class CoreConnService extends Service{
 		Boolean ssl = connectData.getBoolean("ssl");
 		Log.i(TAG, "Connecting to core: "+address+":"+port+" with username " +username);
 		coreConn = new CoreConnection(address, port, username, password, ssl, this);
+		try {
+			coreConn.connect();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void newMessage(IrcMessage message) {
@@ -74,6 +95,11 @@ public class CoreConnService extends Service{
 	
 	public void newBuffer(Buffer buffer) {
 		Log.i(TAG, "GETTING BUFFER");
+		adapter.addBuffer(buffer);
+		Message msg = notifyHandler.obtainMessage(R.id.BUFFER_LIST_UPDATED);
+		msg.sendToTarget();
+		//adapter.notifyDataSetChanged();
+		
 	}
 	
 	public void newUser(IrcUser user) {
@@ -84,11 +110,13 @@ public class CoreConnService extends Service{
 		//TODO
 	}
 	
-	public void getBufferList(BufferActivity.BufferListAdapter adapter) {
-		Buffer buffer = new Buffer(new BufferInfo());
-		buffer.getInfo().name = "#MTDT12";
-		adapter.addBuffer(buffer);
-		adapter.notifyDataSetChanged();
+	public void getBufferList(BufferActivity.BufferListAdapter adapter, Handler notifyHandler) {
+		this.adapter = adapter;
+		this.notifyHandler = notifyHandler;
+		//Buffer buffer = new Buffer(new BufferInfo());
+		//buffer.getInfo().name = "#MTDT12";
+		//adapter.addBuffer(buffer);
+		//adapter.notifyDataSetChanged();
 		coreConn.requestBuffers();
 	}
 

@@ -8,7 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,14 +26,14 @@ import com.lekebilen.quasseldroid.R;
 public class BufferActivity extends ListActivity {
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
-	
+
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 
 
 	ArrayList<Buffer> bufferList;
 	BufferListAdapter listAdapter;
-
+	IncomingHandler handler;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,8 +45,11 @@ public class BufferActivity extends ListActivity {
 		listAdapter = new BufferListAdapter(this, bufferList);
 		getListView().setDividerHeight(0);
 		setListAdapter(listAdapter);
+		
+		handler = new IncomingHandler();
+
 	}
-	
+
 	@Override
 	protected void onStart() {
 		doBindService();
@@ -82,7 +87,7 @@ public class BufferActivity extends ListActivity {
 				this.list = list;				
 			}
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			
+
 		}
 
 		public void addBuffer(Buffer buffer){
@@ -141,31 +146,31 @@ public class BufferActivity extends ListActivity {
 	//	/**
 	//	 * Handler of incoming messages from service.
 	//	 */
-	//	class IncomingHandler extends Handler {
-	//	    @Override
-	//	    public void handleMessage(Message msg) {
-	//	        switch (msg.what) {
-	////	            case CoreConnection.MSG_CONNECT:
-	////	                mCallbackText.setText("We have connection!");
-	////	                break;
-	////	            case CoreConnection.MSG_CONNECT_FAILED:
-	////	            	mCallbackText.setText("Connection failed!");
-	////	            	break;
-	////	            case CoreConnection.MSG_NEW_BUFFER:
-	////	            	mCallbackText.setText("Got new buffer!");
-	////	            	Buffer buffer = (Buffer) msg.obj;
-	////	            	bufferList.add(buffer);
-	////	            	break;
-	////	            case CoreConnection.MSG_NEW_NETWORK: //TODO: handle me
-	////	            	mCallbackText.setText("Got new network!");
-	////	            	Network network = (Network) msg.obj;
-	////	            	break;
-	////	            default:
-	////	                super.handleMessage(msg);
-	//	        }
-	//	    }
-	//	}
-	//
+	class IncomingHandler extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case R.id.BUFFER_LIST_UPDATED:
+				BufferActivity.this.listAdapter.notifyDataSetChanged();
+				break;
+				////	            case CoreConnection.MSG_CONNECT_FAILED:
+				////	            	mCallbackText.setText("Connection failed!");
+				////	            	break;
+				////	            case CoreConnection.MSG_NEW_BUFFER:
+				////	            	mCallbackText.setText("Got new buffer!");
+				////	            	Buffer buffer = (Buffer) msg.obj;
+				////	            	bufferList.add(buffer);
+				////	            	break;
+				////	            case CoreConnection.MSG_NEW_NETWORK: //TODO: handle me
+				////	            	mCallbackText.setText("Got new network!");
+				////	            	Network network = (Network) msg.obj;
+				////	            	break;
+				////	            default:
+				////	                super.handleMessage(msg);
+				//	        }
+			}
+		}
+	}
 	//	/**
 	//	 * Target we publish for clients to send messages to IncomingHandler.
 	//	 */
@@ -269,9 +274,9 @@ public class BufferActivity extends ListActivity {
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-			
+
 			//Testing to see if i can add item to adapter in service
-			boundConnService.getBufferList(listAdapter);
+			boundConnService.getBufferList(listAdapter, handler);
 
 		}
 
