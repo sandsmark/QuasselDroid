@@ -19,6 +19,7 @@ import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -363,7 +364,9 @@ public class CoreConnection {
 						packedFunc.remove(0); // last
 						packedFunc.remove(0); // limit
 						packedFunc.remove(0); // additional
-						for (QVariant<?> message: (List<QVariant<?>>)(packedFunc.remove(0).getData())) {
+						List<QVariant<?>> data = (List<QVariant<?>>)(packedFunc.remove(0).getData());
+						Collections.reverse(data);
+						for (QVariant<?> message: data) {
 							buffers.get(buffer).addBacklog((IrcMessage) message.getData());
 							service.newMessage((IrcMessage) message.getData());
 						}						
