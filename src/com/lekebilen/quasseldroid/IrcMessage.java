@@ -74,9 +74,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	
 
 	public String getTime(){
-		Date time = new Date();
-		
-		return time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();
+		return timestamp.getHours() + ":" + timestamp.getMinutes() + ":" + timestamp.getSeconds();
 	}
 	
 	public String getNick(){
