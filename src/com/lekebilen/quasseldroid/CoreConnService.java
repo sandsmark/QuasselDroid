@@ -25,28 +25,28 @@ import com.lekebilen.quasseldroid.gui.ChatActivity;
  */
 
 public class CoreConnService extends Service{
-	
+
 	private static final String TAG = CoreConnService.class.getSimpleName();
-	
+
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
-	
+
 	BufferActivity.BufferListAdapter adapter;
 	Handler notifyHandler;
 	Handler incomingHandler;
-	
-	HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
-	
+
+	BufferCollection bufferCollection;
+
 	/**
-     * Class for clients to access.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with
-     * IPC.
-     */
+	 * Class for clients to access.  Because we know this service always
+	 * runs in the same process as its clients, we don't need to deal with
+	 * IPC.
+	 */
 	public class LocalBinder extends Binder {
 		public CoreConnService getService() {
-            return CoreConnService.this;
-        }
-    }
+			return CoreConnService.this;
+		}
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -58,8 +58,9 @@ public class CoreConnService extends Service{
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
-		
+
 		incomingHandler = new IncomingHandler();
+		bufferCollection = new BufferCollection();
 	}
 
 	public Handler getHandler() {
@@ -74,7 +75,7 @@ public class CoreConnService extends Service{
 		return START_STICKY;
 
 	}
-	
+
 	/**
 	 * Handle the data in the intent, and use it to connect with CoreConnect
 	 * @param intent
@@ -101,70 +102,59 @@ public class CoreConnService extends Service{
 			e.printStackTrace();
 		}
 	}
-	
-	public void newMessage(IrcMessage message) {
-		Log.i(TAG, "MESSAGE: " + message.content.toString() );
-		
-		Buffer buffer = buffers.get(message.bufferInfo.id);
-		buffer.addBacklog(message);
-		//Message msg = notifyHandler.obtainMessage(R.id.CHAT_MESSAGES_UPDATED);
-		//msg.obj = message;
-		//msg.sendToTarget();
-		
-		
-	}
-	
-	public void newBuffer(Buffer buffer) {
-		Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
-		Message msg = notifyHandler.obtainMessage(R.id.BUFFER_LIST_UPDATED);
-		if (buffers.get(buffer.getInfo().id) == null ) {
-			buffers.put(buffer.getInfo().id, buffer);
-		} else {
-			Log.e(TAG, "Getting already gotten buffer");
-		}
-		
-		msg.obj = buffer;
-		msg.sendToTarget();
-		//adapter.notifyDataSetChanged();
-		
-	}
-	
+
 	public void newUser(IrcUser user) {
-		
+
 	}
-	
+
 	public void sendMessage(int bufferId, String message){
 		coreConn.sendMessage(bufferId, message);
 	}
-	
+
 	public Buffer getBuffer(int bufferId, Observer obs){
-		//this.notifyHandler = notifyHandler;
-		buffers.get(bufferId).addObserver(obs);
+		bufferCollection.getBuffer(bufferId).addObserver(obs);
 		coreConn.requestBacklog(bufferId);
-		return buffers.get(bufferId);
+		return bufferCollection.getBuffer(bufferId);
 	}
-	
-	
-	public void getBufferList(Handler notifyHandler) {
-		this.notifyHandler = notifyHandler;
-		//Buffer buffer = new Buffer(new BufferInfo());
-		//buffer.getInfo().name = "#MTDT12";
-		//adapter.addBuffer(buffer);
-		//adapter.notifyDataSetChanged();
+
+
+	public BufferCollection getBufferList(Observer obs) {
+		bufferCollection.addObserver(obs);
 		coreConn.requestBuffers();
+		return bufferCollection;
 	}
-	
+
 	/**
 	 * Handler of incoming messages from CoreConnection, since it's in another read thread.
 	 */
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
+			Buffer buffer;
 			switch (msg.what) {
-				case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
-					newMessage((IrcMessage)msg.obj);
-					break;
-			
+			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
+				/**
+				 * New message on one buffer so update that buffer with the new message
+				 */
+				IrcMessage message = (IrcMessage)msg.obj;
+				Log.i(TAG, "MESSAGE: " + message.content.toString() );
+
+				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
+				buffer.addBacklog(message);
+				break;
+
+			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
+				/**
+				 * New buffer recived, so update out channel holder with the new buffer
+				 */
+				buffer = (Buffer)msg.obj;
+				Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
+				if (!bufferCollection.hasBuffer(buffer.getInfo().id)) {
+					bufferCollection.addBuffer(buffer);
+				} else {
+					Log.e(TAG, "Getting already gotten buffer");
+				}
+				break;
 			}
 		}
 	}
