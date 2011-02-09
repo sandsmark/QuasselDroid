@@ -138,9 +138,14 @@ public class CoreConnService extends Service{
 				 */
 				IrcMessage message = (IrcMessage)msg.obj;
 				Log.i(TAG, "MESSAGE: " + message.content.toString() );
-
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
-				buffer.addBacklog(message);
+				
+				if(!buffer.hasMessage(message)) {
+					buffer.addBacklog(message);					
+				}else {
+					Log.e(TAG, "Getting message buffer already have");
+				}
+
 				break;
 
 			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:

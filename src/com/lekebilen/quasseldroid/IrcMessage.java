@@ -68,7 +68,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		//return this.timestamp.compareTo(other.timestamp);
 		return ((Integer)messageId).compareTo((Integer)other.messageId);
 	}
-	
+
 	public String toString() {
 		return sender +": " + content;
 	}

@@ -160,13 +160,13 @@ public class ChatActivity extends Activity{
 		@Override
 		public int getCount() {
 			if (this.buffer==null) return 0;
-			return buffer.getBacklog().size();
+			return buffer.getSize();
 		}
 
 		@Override
 		public IrcMessage getItem(int position) {
 			//TODO: QriorityQueue is fucked, we dont want to convert to array here, so change later
-			return (IrcMessage) buffer.getBacklog().toArray()[position];
+			return (IrcMessage) buffer.getBacklogEntry(position);
 		}
 
 		@Override
@@ -200,7 +200,7 @@ public class ChatActivity extends Activity{
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 
 			holder.msgView.setText(entry.content);
-			Log.i(TAG, "CONTENT:" + entry.content);
+			//Log.i(TAG, "CONTENT:" + entry.content);
 			return convertView;
 		}
 

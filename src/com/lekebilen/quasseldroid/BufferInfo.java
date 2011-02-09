@@ -1,6 +1,7 @@
 package com.lekebilen.quasseldroid;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class BufferInfo {
 	public enum Type {
