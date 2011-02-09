@@ -25,12 +25,10 @@ public class Buffer extends Observable {
 	public void addBacklog(IrcMessage message) {
 		Log.i(TAG, "Buffer add message " + message.content);
 		backlog.add(message);
+		this.setChanged();	
 		notifyObservers();
 	}
 	
-	public boolean hasChanged() {
-		return true;
-	}
 	public void setLastSeenMessage(int lastSeenMessage) {
 		this.lastSeenMessage = lastSeenMessage;
 	}	

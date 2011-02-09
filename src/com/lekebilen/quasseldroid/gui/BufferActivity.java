@@ -1,6 +1,8 @@
 package com.lekebilen.quasseldroid.gui;
 
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 import android.app.ListActivity;
 import android.content.ComponentName;
@@ -21,32 +23,33 @@ import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.CoreConnService;
+import com.lekebilen.quasseldroid.BufferCollection;
 import com.lekebilen.quasseldroid.R;
 
 public class BufferActivity extends ListActivity {
 
-	private static final String TAG = ChatActivity.class.getSimpleName();
+	private static final String TAG = BufferActivity.class.getSimpleName();
 
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 
 
-	ArrayList<Buffer> bufferList;
+	//ArrayList<Buffer> bufferList;
 	BufferListAdapter listAdapter;
-	IncomingHandler handler;
+	//	IncomingHandler handler;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 
 		setContentView(R.layout.buffer_list);
-		bufferList = new ArrayList<Buffer>();
+		//bufferList = new ArrayList<Buffer>();
 
-		listAdapter = new BufferListAdapter(this, bufferList);
+		listAdapter = new BufferListAdapter(this);
 		getListView().setDividerHeight(0);
 		setListAdapter(listAdapter);
-		
-		handler = new IncomingHandler();
+
+		//		handler = new IncomingHandler();
 
 	}
 
@@ -69,40 +72,39 @@ public class BufferActivity extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 
 		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
-		i.putExtra(BUFFER_ID_EXTRA, bufferList.get(position).getInfo().id);
-		i.putExtra(BUFFER_NAME_EXTRA, bufferList.get(position).getInfo().name);
+		i.putExtra(BUFFER_ID_EXTRA, listAdapter.getItem(position).getInfo().id);
+		i.putExtra(BUFFER_NAME_EXTRA, listAdapter.getItem(position).getInfo().name);
 
 		startActivity(i);
 	}
 
 
-	public class BufferListAdapter extends BaseAdapter {
-		private ArrayList<Buffer> list;
+	public class BufferListAdapter extends BaseAdapter implements Observer {
+		private BufferCollection bufferCollection;
 		private LayoutInflater inflater;
 
-		public BufferListAdapter(Context context, ArrayList<Buffer> list) {
-			if (list==null) {
-				this.list = new ArrayList<Buffer>();
-			}else {
-				this.list = list;				
-			}
+		public BufferListAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		}
 
-		public void addBuffer(Buffer buffer){
-			this.list.add(buffer);
+		public void setBuffers(BufferCollection buffers){
+			this.bufferCollection = buffers;
 			notifyDataSetChanged();
 		}
 
 		@Override
 		public int getCount() {
-			return list.size();
+			if (bufferCollection==null) {
+				return 0;
+			}else {
+				return bufferCollection.getBufferCount();
+			}
 		}
 
 		@Override
 		public Buffer getItem(int position) {
-			return list.get(position);
+			return bufferCollection.getPos(position);
 		}
 
 		@Override
@@ -121,7 +123,7 @@ public class BufferActivity extends ListActivity {
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}
-			Buffer entry = list.get(position);
+			Buffer entry = this.getItem(position);
 			holder.bufferView.setText(entry.getInfo().name);
 
 			//Check here if there are any unread messages in the buffer, and then set this color if there is
@@ -129,8 +131,20 @@ public class BufferActivity extends ListActivity {
 			return convertView;
 		}
 
-		public void clear() {
-			list.clear();
+		@Override
+		public void update(Observable observable, Object data) {
+			Log.i(TAG, "BUFFERLIST CHANGED");
+			notifyDataSetChanged();
+
+		}
+
+		public void clearBuffers() {
+			bufferCollection = null;
+		}
+
+		public void stopObserving() {
+			bufferCollection.deleteObserver(this);
+			
 		}
 	}
 
@@ -151,31 +165,31 @@ public class BufferActivity extends ListActivity {
 	//	/**
 	//	 * Handler of incoming messages from service.
 	//	 */
-	class IncomingHandler extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case R.id.BUFFER_LIST_UPDATED:
-				BufferActivity.this.listAdapter.addBuffer((Buffer) msg.obj);
-				break;
-				////	            case CoreConnection.MSG_CONNECT_FAILED:
-				////	            	mCallbackText.setText("Connection failed!");
-				////	            	break;
-				////	            case CoreConnection.MSG_NEW_BUFFER:
-				////	            	mCallbackText.setText("Got new buffer!");
-				////	            	Buffer buffer = (Buffer) msg.obj;
-				////	            	bufferList.add(buffer);
-				////	            	break;
-				////	            case CoreConnection.MSG_NEW_NETWORK: //TODO: handle me
-				////	            	mCallbackText.setText("Got new network!");
-				////	            	Network network = (Network) msg.obj;
-				////	            	break;
-				////	            default:
-				////	                super.handleMessage(msg);
-				//	        }
-			}
-		}
-	}
+	//	class IncomingHandler extends Handler {
+	//		@Override
+	//		public void handleMessage(Message msg) {
+	//			switch (msg.what) {
+	//			case R.id.BUFFER_LIST_UPDATED:
+	//				BufferActivity.this.listAdapter.addBuffer((Buffer) msg.obj);
+	//				break;
+	//				////	            case CoreConnection.MSG_CONNECT_FAILED:
+	//				////	            	mCallbackText.setText("Connection failed!");
+	//				////	            	break;
+	//				////	            case CoreConnection.MSG_NEW_BUFFER:
+	//				////	            	mCallbackText.setText("Got new buffer!");
+	//				////	            	Buffer buffer = (Buffer) msg.obj;
+	//				////	            	bufferList.add(buffer);
+	//				////	            	break;
+	//				////	            case CoreConnection.MSG_NEW_NETWORK: //TODO: handle me
+	//				////	            	mCallbackText.setText("Got new network!");
+	//				////	            	Network network = (Network) msg.obj;
+	//				////	            	break;
+	//				////	            default:
+	//				////	                super.handleMessage(msg);
+	//				//	        }
+	//			}
+	//		}
+	//	}
 	//	/**
 	//	 * Target we publish for clients to send messages to IncomingHandler.
 	//	 */
@@ -281,8 +295,7 @@ public class BufferActivity extends ListActivity {
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 			//Testing to see if i can add item to adapter in service
-			listAdapter.clear();
-			boundConnService.getBufferList(handler);
+			listAdapter.setBuffers(boundConnService.getBufferList(listAdapter));
 
 
 		}
@@ -309,9 +322,12 @@ public class BufferActivity extends ListActivity {
 
 	void doUnbindService() {
 		if (isBound) {
+			Log.i(TAG, "Unbinding service");
+			listAdapter.stopObserving();
 			// Detach our existing connection.
 			unbindService(mConnection);
 			isBound = false;
+			listAdapter.clearBuffers();
 		}
 	}
 

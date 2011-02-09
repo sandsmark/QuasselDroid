@@ -5,4 +5,5 @@
 <item type="id" name="BUFFER_LIST_UPDATED"></item>
 <item type="id" name="CHAT_MESSAGES_UPDATED"></item>
 <item type="id" name="CORECONNECTION_NEW_MESSAGE_TO_SERVICE"></item>
+<item type="id" name="CORECONNECTION_NEW_BUFFER_TO_SERVICE"></item>
 </resources>

@@ -74,6 +74,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	
 
 	public String getTime(){
+		//TODO: Krashk, think this fails or something when you go over 00.00, getting strange times 
 		Date time = new Date();
 		
 		return time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds();

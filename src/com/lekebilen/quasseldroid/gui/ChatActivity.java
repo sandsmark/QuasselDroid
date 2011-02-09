@@ -27,7 +27,6 @@ import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.R;
-import com.lekebilen.quasseldroid.gui.BufferActivity.IncomingHandler;
 
 public class ChatActivity extends Activity{
 
@@ -38,7 +37,7 @@ public class ChatActivity extends Activity{
 	private int curLineNum = 0;
 
 	private BacklogAdapter adapter;
-	IncomingHandler handler;
+//	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
 	private int bufferId;
 	private String bufferName;
@@ -212,6 +211,16 @@ public class ChatActivity extends Activity{
 			
 		}
 
+		public void stopObserving() {
+			buffer.deleteObserver(this);
+			
+		}
+
+		public void clearBuffer() {
+			buffer = null;
+			
+		}
+
 
 	}	
 
@@ -313,9 +322,12 @@ public class ChatActivity extends Activity{
 
 	void doUnbindService() {
 		if (isBound) {
+			Log.i(TAG, "Unbinding service");
 			// Detach our existing connection.
+			adapter.stopObserving();
 			unbindService(mConnection);
 			isBound = false;
+			adapter.clearBuffer();
 		}
 	}
 }
