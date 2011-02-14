@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<string name="menu_manage_cores">Manage cores</string>
 	<string name="menu_add_core">Add core</string>
+	<string name="menu_edit_core">Edit core</string>
+	<string name="menu_delete_core">Delete core</string>
 	<string name="menu_disconnect">Disconnect</string>
 	
 	

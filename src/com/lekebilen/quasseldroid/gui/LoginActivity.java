@@ -37,7 +37,6 @@ public class LoginActivity extends Activity{
 	public static final String PREFS_USERNAME = "username";
 	public static final String PREFS_PASSWORD = "password";
 	public static final String PREFS_REMEMBERME = "rememberMe";
-	private final int DIALOG_ADD_CORE = 0;
 	SharedPreferences settings;
 	QuasselDbHelper dbHelper;
 	
@@ -106,11 +105,23 @@ public class LoginActivity extends Activity{
 		getMenuInflater().inflate(R.menu.login_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
+	
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		
+		return super.onPrepareOptionsMenu(menu);
+	}
+	
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.menu_add_core:
-				showDialog(DIALOG_ADD_CORE);
+				showDialog(R.id.DIALOG_ADD_CORE);
+				break;
+			case R.id.menu_edit_core:
+				showDialog(R.id.DIALOG_EDIT_CORE);
 				break;
 			case R.id.menu_preferences:
 				Intent i = new Intent(LoginActivity.this, PreferenceView.class);
@@ -121,10 +132,33 @@ public class LoginActivity extends Activity{
 	}
 	
 	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		switch(id) {
+		case R.id.DIALOG_ADD_CORE:
+			dialog.setTitle("Add new core");
+			break;
+		case R.id.DIALOG_EDIT_CORE:
+			dialog.setTitle("Edit core");
+			EditText nameField = (EditText)dialog.findViewById(R.id.dialog_name_field);
+			EditText addressField = (EditText)dialog.findViewById(R.id.dialog_address_field);
+			EditText portField = (EditText)dialog.findViewById(R.id.dialog_port_field);
+
+		}
+		
+		super.onPrepareDialog(id, dialog);
+	}
+	
+	@Override
 	protected Dialog onCreateDialog(int id) {
 		final Dialog dialog;
+		
+		if ( id == R.id.DIALOG_ADD_CORE || id == R.id.DIALOG_EDIT_CORE ){
+			
+		}
 		switch (id) {
-		case DIALOG_ADD_CORE:
+		
+		case R.id.DIALOG_EDIT_CORE: //fallthrough
+		case R.id.DIALOG_ADD_CORE:
 			Log.i("Ken", "Creating dialog");
 			//TODO:Ken:Add dialog
 			dialog = new Dialog(this);

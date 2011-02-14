@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_add_core" android:title="@string/menu_add_core"
-		android:icon="@android:drawable/ic_menu_add" />
+
+	<item android:id="@+id/menu_manage_cores" android:title="@string/menu_manage_cores"
+		android:icon="@android:drawable/ic_menu_preferences" >
+		
+		
+		<menu xmlns:android="http://schemas.android.com/apk/res/android">
+			<item android:id="@+id/menu_add_core" android:title="@string/menu_add_core"
+				android:icon="@android:drawable/ic_menu_add" />
+				
+			<item android:id="@+id/menu_edit_core" android:title="@string/menu_edit_core"
+				android:icon="@android:drawable/ic_menu_preferences" />
+			<item android:id="@+id/menu_delete_core" android:title="@string/menu_delete_core"
+				android:icon="@android:drawable/ic_menu_preferences"  />
+		</menu>
+	</item>
 	<item android:id="@+id/menu_preferences" android:title="@string/preferences"
 		android:icon="@android:drawable/ic_menu_preferences" />
+		
+		
 </menu>

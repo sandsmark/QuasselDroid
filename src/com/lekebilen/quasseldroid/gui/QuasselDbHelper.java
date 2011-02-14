@@ -63,6 +63,8 @@ public class QuasselDbHelper {
 	}
 
 	public void addCore(String name, String address, int port) {
+		
+		//TODO: If name exists, edit instead of add
 		try {
 			open();
 			ContentValues initialValues = new ContentValues();

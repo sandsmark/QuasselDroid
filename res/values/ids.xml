@@ -2,6 +2,10 @@
 <resources>
 
 
+<item type="id" name="DIALOG_ADD_CORE"></item>
+<item type="id" name="DIALOG_EDIT_CORE"></item>
+<item type="id" name="DIALOG_DELETE_CORE"></item>
+
 <item type="id" name="BUFFER_LIST_UPDATED"></item>
 <item type="id" name="CHAT_MESSAGES_UPDATED"></item>
 <item type="id" name="CORECONNECTION_NEW_MESSAGE_TO_SERVICE"></item>
