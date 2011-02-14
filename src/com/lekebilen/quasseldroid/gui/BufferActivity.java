@@ -15,6 +15,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -65,6 +67,26 @@ public class BufferActivity extends ListActivity {
 	protected void onStop() {
 		doUnbindService();
 		super.onStop();
+	}
+	
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.standard_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_preferences:
+			Intent i = new Intent(BufferActivity.this, PreferenceView.class);
+			startActivity(i);
+			break;
+		case R.id.menu_disconnect:
+			//disconnect()
+			break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 
