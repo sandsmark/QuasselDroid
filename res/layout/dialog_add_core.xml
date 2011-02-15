@@ -29,7 +29,7 @@
 			<EditText android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:layout_weight="0"
 				android:inputType="number" android:id="@+id/dialog_port_field"
-				android:singleLine="true" android:hint="4242" />
+				android:singleLine="true" android:hint="4242" android:maxLength="5"/>
 		</TableRow>
 	</TableLayout>
 	<LinearLayout android:id="@+id/LinearLayout01"
