@@ -63,7 +63,7 @@ public class QuasselDbHelper {
 	}
 
 	public void addCore(String name, String address, int port) {
-		
+
 		//TODO: If name exists, edit instead of add
 		try {
 			open();
@@ -78,7 +78,38 @@ public class QuasselDbHelper {
 			close();
 		}
 	}
+
 	
+	public void deleteCore(long rowId) {
+		db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
+	}
+
+	public Cursor getAllCores() {
+		return db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
+	}
+
+	public Bundle getCore(long rowId) throws SQLException {
+		Cursor cursor = db.query(true, CORE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT, KEY_NAME}, KEY_ID + "=" + rowId, null, null, null, null, null);
+		Bundle b = new Bundle();
+		if (cursor != null) {
+			cursor.moveToFirst();
+			b.putString("name", cursor.getString(cursor.getColumnIndex(KEY_NAME)));
+			b.putInt("port", cursor.getInt(cursor.getColumnIndex(KEY_PORT)));
+			b.putString("address", cursor.getString(cursor.getColumnIndex(KEY_ADDRESS)));
+			cursor.close(); 
+		}
+		return b;
+	}
+
+	public void updateCore(long rowId, String name, String address, int port) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_NAME, name);
+		args.put(KEY_ADDRESS, address);
+		args.put(KEY_PORT, port);
+		
+		db.update(CORE_TABLE, args, KEY_ID + "=" + rowId, null);
+		//TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we  get problems if names are the same
+	}
 	public void storeCertificate(byte[] certificate) {
 		try {
 			open();
@@ -91,7 +122,7 @@ public class QuasselDbHelper {
 			close();
 		}
 	}
-	
+
 	public boolean hasCertificate(byte[] certificate) {
 		try {
 			open();
@@ -106,33 +137,5 @@ public class QuasselDbHelper {
 		}
 		return false;
 	}
-
-	public void deleteCore(long rowId) {
-		db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
-	}
-
-	public Cursor getAllCores() {
-		return db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
-	}
-
-	public Bundle getCore(long rowId) throws SQLException {
-		Cursor cursor = db.query(true, CORE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT}, KEY_ID + "=" + rowId, null, null, null, null, null);
-		Bundle b = new Bundle();
-		if (cursor != null) {
-			cursor.moveToFirst();
-			 b.putInt("port", cursor.getInt(cursor.getColumnIndex(KEY_PORT)));
-			 b.putString("address", cursor.getString(cursor.getColumnIndex(KEY_ADDRESS)));
-			cursor.close(); 
-		}
-		return b;
-	}
-
-	//public boolean updateNote(long rowId, String name, String question) {
-	//	ContentValues args = new ContentValues();
-	//	args.put(KEY_NAME, name);
-	//	args.put(KEY_QUESTION, question);
-	//
-	//	return db.update(DATABASE_TABLE, args, KEY_ID + "=" + rowId, null) > 0;
-	//}
 }
 
