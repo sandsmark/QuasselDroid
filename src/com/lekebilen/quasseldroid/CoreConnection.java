@@ -234,7 +234,7 @@ public class CoreConnection {
 			sendQVariantList(packedFunc);
 			
 			
-			ReadThread readThread = new ReadThread();
+			readThread = new ReadThread();
 			readThread.start();
 			
 			
@@ -251,10 +251,30 @@ public class CoreConnection {
 					}
 				}
 			};
-			Timer timer = new Timer();
-			timer.schedule(sendPingAction, 0, 30000); // Send heartbeats every 30 seconds
+			heartbeatTimer = new Timer();
+			heartbeatTimer.schedule(sendPingAction, 0, 30000); // Send heartbeats every 30 seconds
 			
 			// END SIGNAL PROXY
+	}
+	
+	/**
+	 * Attempts to disconnect from the core, as best as we can.
+	 * Java sucks.
+	 */
+	public void disconnect() {
+		heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+		try {
+			outStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		readThread.running = false;
+		try {
+			readThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	/****************************
@@ -301,6 +321,8 @@ public class CoreConnection {
 	private String password;
 	private boolean ssl;
 	private CoreConnService service;
+	private Timer heartbeatTimer;
+	private ReadThread readThread;
 
 	private class ReadThread extends Thread {
 		boolean running = false;
@@ -421,6 +443,12 @@ public class CoreConnection {
 				default:
 					System.out.println(type);
 				}
+			}
+			try {
+				inStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
