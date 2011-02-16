@@ -18,7 +18,7 @@ public class Buffer extends Observable {
 	private ArrayList<IrcMessage> backlog = null;
 	private int lastSeenMessage;
 	private int markerLineMessage;
-
+	private boolean unread;
 	private static final String TAG = Buffer.class.getSimpleName();
 
 	public Buffer(BufferInfo info) {
@@ -45,6 +45,7 @@ public class Buffer extends Observable {
 		}
 
 		notifyObservers();
+		unread = true;
 	}
 
 	public void setLastSeenMessage(int lastSeenMessage) {
@@ -72,5 +73,12 @@ public class Buffer extends Observable {
 	
 	public int getSize() {
 		return backlog.size();
+
+	public void setRead() {
+		this.unread = false;
+	}
+
+	public boolean hasUnread() {
+		return unread;
 	}
 }

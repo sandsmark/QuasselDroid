@@ -59,6 +59,21 @@ public class CoreConnection {
 		this.service = parent;
 	}
 	
+	public void requestMarkBufferAsRead(int buffer) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
+		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
+		retFunc.add(new QVariant<String>("", QVariant.Type.String));
+		retFunc.add(new QVariant<String>("requestMarkBufferAsRead", QVariant.Type.String));
+		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
+		
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Requests all buffers.
 	 */
@@ -420,6 +435,9 @@ public class CoreConnection {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+					} else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
+						int buffer = (Integer) packedFunc.remove(0).getData();
+						buffers.get(buffer).setRead();
 					} else {
 						System.out.println("Sync request: " + className + "::" + function);
 					}
