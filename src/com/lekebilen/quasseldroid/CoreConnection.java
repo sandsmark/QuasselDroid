@@ -376,9 +376,9 @@ public class CoreConnection {
 						packedFunc.remove(0); // Object name, not used
 						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
-						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) initMap.get("channels").getData();
+						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
 						for (QVariant<?> channel:  channels.values()) {
-							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel;
+							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
 							String chanName = (String)chan.get("name").getData();
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
 							List<String> users = new ArrayList<String>(userModes.keySet());
