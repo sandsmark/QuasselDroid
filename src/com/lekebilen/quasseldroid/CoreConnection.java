@@ -498,8 +498,6 @@ public class CoreConnection {
 
 	
 	private void sendQVariant(QVariant<?> data) throws IOException {
-		if (!isConnected()) return; //FIXME
-		
 		// See how much data we're going to send
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		QDataOutputStream bos = new QDataOutputStream(baos);
