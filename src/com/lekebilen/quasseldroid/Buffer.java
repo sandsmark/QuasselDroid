@@ -20,6 +20,7 @@ public class Buffer extends Observable {
 	private int markerLineMessage;
 	private boolean unread;
 	private static final String TAG = Buffer.class.getSimpleName();
+	private List<String> nicks;
 
 	public Buffer(BufferInfo info) {
 		this.info = info;
@@ -39,9 +40,6 @@ public class Buffer extends Observable {
 			}else {
 				Log.e(TAG, "Getting message buffer already has");
 			}
-				
-			
-			
 		}
 
 		notifyObservers();
@@ -73,7 +71,8 @@ public class Buffer extends Observable {
 	
 	public int getSize() {
 		return backlog.size();
-
+	}
+	
 	public void setRead() {
 		this.unread = false;
 	}
@@ -81,4 +80,21 @@ public class Buffer extends Observable {
 	public boolean hasUnread() {
 		return unread;
 	}
+
+	public void setNicks(List<String> nicks) {
+		this.nicks = nicks;
+	}
+
+	public List<String> nicks() {
+		return nicks;
+	}
+	
+	public void removeNick(String nick) {
+		nicks.remove(nick);
+	}
+	
+	public void addNick(String nick) {
+		nicks.add(nick);
+	}
+	
 }

@@ -97,6 +97,14 @@ public class CoreConnection {
 	}
 	
 	/**
+	 * Requests moar backlog for a give buffer
+	 * @param buffer Buffer id to request moar for
+	 */
+	public void requestMoreBacklog(int buffer) {
+		requestBacklog(buffer, buffers.get(buffer).getBacklogEntry(buffers.get(buffer).getSize()).messageId);
+	}
+	
+	/**
 	 * Requests all backlog from a given message ID until the current. 
 	 */
 	public void requestBacklog(int buffer, int firstMsgId) {
@@ -338,6 +346,7 @@ public class CoreConnection {
 	private CoreConnService service;
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
+	private int backlogFetchAmount = 50;
 
 	private class ReadThread extends Thread {
 		boolean running = false;
@@ -364,7 +373,21 @@ public class CoreConnection {
 				case InitData:
 					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
 					if (name.equals("Network")) {
-						// Do nothing, for now
+						packedFunc.remove(0); // Object name, not used
+						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
+						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) initMap.get("channels").getData();
+						for (QVariant<?> channel:  channels.values()) {
+							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel;
+							String chanName = (String)chan.get("name").getData();
+							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
+							List<String> users = new ArrayList<String>(userModes.keySet());
+							for (Buffer buffer: buffers.values()) {
+								if (buffer.getInfo().name.equals(chanName)) {
+									buffer.setNicks(users);
+								}
+							}
+						}
 					} else if (name.equals("BufferSyncer")) {
 						packedFunc.remove(0); // Object name, not used
 						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
