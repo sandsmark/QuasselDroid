@@ -36,9 +36,6 @@ public class ChatActivity extends Activity{
 
 	public static final int MESSAGE_RECEIVED = 0;
 
-	private int separatorLineNum = 3;
-	private int curLineNum = 0;
-
 	private BacklogAdapter adapter;
 //	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
@@ -52,7 +49,6 @@ public class ChatActivity extends Activity{
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.chat_layout);
 
-		nicks = new ArrayList<String>();
 
 		if (savedInstanceState!=null) {
 			bufferId = savedInstanceState.getInt(BufferActivity.BUFFER_ID_EXTRA);
@@ -91,7 +87,6 @@ public class ChatActivity extends Activity{
 		}
 	};
 
-	private ArrayList<String> nicks;
 
 	//Nick autocomplete when pressing the search-button
 	@Override
@@ -100,12 +95,12 @@ public class ChatActivity extends Activity{
 		String inputNick = inputfield.getText().toString();
 
 		if ( "".equals(inputNick) ) {
-			if ( nicks.size() > 0 ) {
-				inputfield.setText(nicks.get(0)+ ": ");
-				inputfield.setSelection(nicks.get(0).length() + 2);
+			if ( adapter.buffer.nicks().size() > 0 ) {
+				inputfield.setText(adapter.buffer.nicks().get(0)+ ": ");
+				inputfield.setSelection(adapter.buffer.nicks().get(0).length() + 2);
 			}
 		} else {
-			for (String nick : nicks) {
+			for (String nick : adapter.buffer.nicks()) {
 				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
 					inputfield.setText(nick+ ": ");
 					inputfield.setSelection(nick.length() + 2);
@@ -200,21 +195,28 @@ public class ChatActivity extends Activity{
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder = null;
-			if (separatorLineNum == curLineNum ) { //Set separator line here
-				convertView = inflater.inflate(R.layout.listseparator, null);
-				curLineNum++;
-				return convertView;
-			}
+			
 			if (convertView==null) {
 				convertView = inflater.inflate(R.layout.backlog_item, null);
 				holder = new ViewHolder();
 				holder.timeView = (TextView)convertView.findViewById(R.id.backlog_time_view);
 				holder.nickView = (TextView)convertView.findViewById(R.id.backlog_nick_view);
 				holder.msgView = (TextView)convertView.findViewById(R.id.backlog_msg_view);
+				holder.separatorView = (TextView)convertView.findViewById(R.id.backlog_list_separator);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}
+			
+			Log.i(TAG, position + "   "+ getCount());
+			
+			if (buffer.getLastSeenMessage() == getItem(position).messageId) { //Set separator line here
+				holder.separatorView.getLayoutParams().height = 1;
+			} else {
+				holder.separatorView.getLayoutParams().height = 0;
+			}
+			
+			
 			IrcMessage entry = this.getItem(position);
 			holder.timeView.setText(entry.getTime());
 			holder.nickView.setText(entry.getNick());
@@ -251,6 +253,7 @@ public class ChatActivity extends Activity{
 		public TextView timeView;
 		public TextView nickView;
 		public TextView msgView;
+		public TextView separatorView;
 	}
 
 
