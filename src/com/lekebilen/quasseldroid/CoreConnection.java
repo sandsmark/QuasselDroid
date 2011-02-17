@@ -158,7 +158,7 @@ public class CoreConnection {
 	public void connect() throws UnknownHostException, IOException, GeneralSecurityException {	
 			// START CREATE SOCKETS
 			SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
-			Socket socket = (Socket)factory.createSocket(address, port);
+			socket = (Socket)factory.createSocket(address, port);
 			outStream = new QDataOutputStream(socket.getOutputStream());
 			// END CREATE SOCKETS 
 
@@ -201,6 +201,7 @@ public class CoreConnection {
 				sslSocket.startHandshake();
 				inStream = new QDataInputStream(sslSocket.getInputStream());
 				outStream = new QDataOutputStream(sslSocket.getOutputStream());
+				socket = sslSocket;
 			}
 			// FINISHED SSL CONNECTION
 			
@@ -347,6 +348,7 @@ public class CoreConnection {
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
 	private int backlogFetchAmount = 50;
+	private Socket socket;
 
 	private class ReadThread extends Thread {
 		boolean running = false;
@@ -496,6 +498,8 @@ public class CoreConnection {
 
 	
 	private void sendQVariant(QVariant<?> data) throws IOException {
+		if (!isConnected()) return; //FIXME
+		
 		// See how much data we're going to send
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		QDataOutputStream bos = new QDataOutputStream(baos);
@@ -548,6 +552,9 @@ public class CoreConnection {
 		sendQVariantList(packedFunc);
 	}
 	
+	public boolean isConnected() {
+		return (socket != null && socket.isConnected() && readThread != null && readThread.isAlive());
+	}
 	
 	private class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	     /*
