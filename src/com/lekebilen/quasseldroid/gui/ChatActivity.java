@@ -171,6 +171,7 @@ public class ChatActivity extends Activity{
 		
 		public void setBuffer(Buffer buffer) {
 			this.buffer = buffer;
+			((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
 			notifyDataSetChanged();
 		}
 
