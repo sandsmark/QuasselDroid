@@ -373,7 +373,7 @@ public class CoreConnection {
 				case InitData:
 					name = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
 					if (name.equals("Network")) {
-						packedFunc.remove(0); // Object name, not used
+						int networkId = Integer.parseInt((String) packedFunc.remove(0).getData()); // Object name, not used
 						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
 						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
@@ -383,7 +383,7 @@ public class CoreConnection {
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
 							List<String> users = new ArrayList<String>(userModes.keySet());
 							for (Buffer buffer: buffers.values()) {
-								if (buffer.getInfo().name.equals(chanName)) {
+								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
 									buffer.setNicks(users);
 								}
 							}
