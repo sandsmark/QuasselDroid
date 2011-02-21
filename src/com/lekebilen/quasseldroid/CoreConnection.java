@@ -52,6 +52,7 @@ import com.lekebilen.quasseldroid.qtcomm.serializers.QTime;
 public class CoreConnection {
 	
 	private static final String TAG = CoreConnection.class.getSimpleName();
+
 	
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
@@ -62,6 +63,11 @@ public class CoreConnection {
 		this.password = password;
 		this.ssl = ssl;
 		this.service = parent;
+		this.nicks = new HashMap<Integer, String>();
+	}
+	
+	public String getNick(int network) {
+		return nicks.get(networks);
 	}
 	
 	public void requestMarkBufferAsRead(int buffer) {
@@ -342,6 +348,7 @@ public class CoreConnection {
 	private QDataInputStream inStream;
 	
 	private Map<Integer, Buffer> buffers;
+	private Map<Integer, String> nicks;
 	private List<Integer> networks;
 	
 	private String address;
@@ -394,6 +401,7 @@ public class CoreConnection {
 									buffer.setNicks(users);
 								}
 							}
+							nicks.put(networkId, (String) initMap.get("myNick").getData());
 						}
 					} else if (name.equals("BufferSyncer")) {
 						packedFunc.remove(0); // Object name, not used
