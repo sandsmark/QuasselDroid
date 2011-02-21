@@ -40,21 +40,21 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		}
 	}
 	public enum Flag {
-		    None (0x00),
-		    Self (0x01),
-		    Highlight (0x02),
-		    Redirected (0x04),
-		    ServerMsg (0x08),
-		    Backlog (0x80);
-			int value;
-			Flag (int value){
-				this.value = value;
-			}
-			public int getValue(){
-				return value;
-			}		    
-		  };
-	
+		None (0x00),
+		Self (0x01),
+		Highlight (0x02),
+		Redirected (0x04),
+		ServerMsg (0x08),
+		Backlog (0x80);
+		int value;
+		Flag (int value){
+			this.value = value;
+		}
+		public int getValue(){
+			return value;
+		}		    
+	};
+
 	public Date timestamp; //TODO: timezones, Java bleh as usual
 	public int messageId;
 	public BufferInfo bufferInfo;
@@ -63,7 +63,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public Type type;
 	public byte flags;
 
-	
+
 	public int compareTo(IrcMessage other) {
 		//return this.timestamp.compareTo(other.timestamp);
 		return ((Integer)messageId).compareTo((Integer)other.messageId);
@@ -72,12 +72,12 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public String toString() {
 		return sender +": " + content;
 	}
-	
+
 
 	public String getTime(){
 		return String.format("%02d:%02d:%02d", timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
 	}
-	
+
 	public String getNick(){
 		return sender.split("!")[0];
 	}
