@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.R.color;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,7 +39,7 @@ public class ChatActivity extends Activity{
 	public static final int MESSAGE_RECEIVED = 0;
 
 	private BacklogAdapter adapter;
-//	IncomingHandler handler;
+	//	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
 	private int bufferId;
 	private String bufferName;
@@ -58,10 +60,10 @@ public class ChatActivity extends Activity{
 		}
 
 		((TextView)findViewById(R.id.chatNameView)).setText(bufferName);
-//		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
+		//		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
 
 		//handler = new IncomingHandler();
-		
+
 		adapter = new BacklogAdapter(this, null);
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
 		backlogList.setAdapter(adapter);
@@ -129,8 +131,8 @@ public class ChatActivity extends Activity{
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	
+
+
 
 	@Override
 	protected void onStart() {
@@ -154,21 +156,21 @@ public class ChatActivity extends Activity{
 
 
 		public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
-//			if (backlog==null) {
-//				this.backlog = new ArrayList<IrcMessage>();
-//			}else {
-//				this.backlog = backlog;				
-//			}
+			//			if (backlog==null) {
+			//				this.backlog = new ArrayList<IrcMessage>();
+			//			}else {
+			//				this.backlog = backlog;				
+			//			}
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		}
 
-//		public void addItem(IrcMessage item) {
-//			Log.i(TAG, item.timestamp.toString());
-//			//this.backlog.add(item);
-//			notifyDataSetChanged();
-//		}
-		
+		//		public void addItem(IrcMessage item) {
+		//			Log.i(TAG, item.timestamp.toString());
+		//			//this.backlog.add(item);
+		//			notifyDataSetChanged();
+		//		}
+
 		public void setBuffer(Buffer buffer) {
 			this.buffer = buffer;
 			((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
@@ -196,7 +198,7 @@ public class ChatActivity extends Activity{
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder holder = null;
-			
+
 			if (convertView==null) {
 				convertView = inflater.inflate(R.layout.backlog_item, null);
 				holder = new ViewHolder();
@@ -204,28 +206,34 @@ public class ChatActivity extends Activity{
 				holder.nickView = (TextView)convertView.findViewById(R.id.backlog_nick_view);
 				holder.msgView = (TextView)convertView.findViewById(R.id.backlog_msg_view);
 				holder.separatorView = (TextView)convertView.findViewById(R.id.backlog_list_separator);
+				holder.item_layout = (LinearLayout)convertView.findViewById(R.id.backlog_item_linearlayout);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}
-			
-			Log.i(TAG, position + "   "+ getCount());
-			
+
+			//Log.i(TAG, position + "   "+ getCount());
+
 			if (buffer.getLastSeenMessage() == getItem(position).messageId) { //Set separator line here
 				holder.separatorView.getLayoutParams().height = 1;
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
 			}
-			
-			
+
+
 			IrcMessage entry = this.getItem(position);
 			holder.timeView.setText(entry.getTime());
 			holder.nickView.setText(entry.getNick());
 			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
-			
+
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 
 			holder.msgView.setText(entry.content);
+			if (entry.isHighlighted()) {
+				holder.item_layout.setBackgroundResource(R.color.ircmessage_highlight_color);
+			}else {
+				holder.item_layout.setBackgroundResource(R.color.ircmessage_normal_color);
+			}
 			//Log.i(TAG, "CONTENT:" + entry.content);
 			return convertView;
 		}
@@ -234,17 +242,17 @@ public class ChatActivity extends Activity{
 		public void update(Observable observable, Object data) {
 			Log.i(TAG, "BACKLOG CHANGED");
 			notifyDataSetChanged();
-			
+
 		}
 
 		public void stopObserving() {
 			buffer.deleteObserver(this);
-			
+
 		}
 
 		public void clearBuffer() {
 			buffer = null;
-			
+
 		}
 
 
@@ -255,6 +263,7 @@ public class ChatActivity extends Activity{
 		public TextView nickView;
 		public TextView msgView;
 		public TextView separatorView;
+		public LinearLayout item_layout;
 	}
 
 
@@ -263,48 +272,48 @@ public class ChatActivity extends Activity{
 	/**
 	 * Handler of incoming messages from service.
 	 */
-//	class IncomingHandler extends Handler {
-//		@Override
-//		public void handleMessage(Message msg) {
-//			switch (msg.what) {
-//				case R.id.CHAT_MESSAGES_UPDATED:
-//					ChatActivity.this.adapter.addItem((IrcMessage)msg.obj);
-//					break;
-//			//	            case CoreConnection.MSG_CONNECT:
-//			//	                mCallbackText.setText("We have connection!");
-//			//	                break;
-//			//	            case CoreConnection.MSG_CONNECT_FAILED:
-//			//	            	mCallbackText.setText("Connection failed!");
-//			//	            	break;
-//			//	            case CoreConnection.MSG_NEW_BUFFER:
-//			//	            	mCallbackText.setText("Got new buffer!");
-//			//	            	Buffer buffer = (Buffer) msg.obj;
-//			////	            	break;
-//			//	            case CoreConnection.MSG_NEW_MESSAGE:
-//			//	            	IrcMessage message = (IrcMessage) msg.obj;
-//			//	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
-//			//	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
-//			//	            	break;
-//			////	            case CoreConnection.MSG_NEW_NETWORK:
-//			////	            	mCallbackText.setText("Got new network!");
-//			////	            	Network network = (Network) msg.obj;
-//			////	            	break;
-//			//	            case CoreConnection.MSG_NEW_USER:
-//			//	            	mCallbackText.setText("Got new user!");//TODO: handle me
-//			//	            	IrcUser user = (IrcUser) msg.obj; 
-//			//	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
-//			//	            		nicks.add(user.nick);
-//			//	            	break;
-//			//	            default:
-//			//	                super.handleMessage(msg);
-//			}
-//		}
-//	}
+	//	class IncomingHandler extends Handler {
+	//		@Override
+	//		public void handleMessage(Message msg) {
+	//			switch (msg.what) {
+	//				case R.id.CHAT_MESSAGES_UPDATED:
+	//					ChatActivity.this.adapter.addItem((IrcMessage)msg.obj);
+	//					break;
+	//			//	            case CoreConnection.MSG_CONNECT:
+	//			//	                mCallbackText.setText("We have connection!");
+	//			//	                break;
+	//			//	            case CoreConnection.MSG_CONNECT_FAILED:
+	//			//	            	mCallbackText.setText("Connection failed!");
+	//			//	            	break;
+	//			//	            case CoreConnection.MSG_NEW_BUFFER:
+	//			//	            	mCallbackText.setText("Got new buffer!");
+	//			//	            	Buffer buffer = (Buffer) msg.obj;
+	//			////	            	break;
+	//			//	            case CoreConnection.MSG_NEW_MESSAGE:
+	//			//	            	IrcMessage message = (IrcMessage) msg.obj;
+	//			//	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
+	//			//	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
+	//			//	            	break;
+	//			////	            case CoreConnection.MSG_NEW_NETWORK:
+	//			////	            	mCallbackText.setText("Got new network!");
+	//			////	            	Network network = (Network) msg.obj;
+	//			////	            	break;
+	//			//	            case CoreConnection.MSG_NEW_USER:
+	//			//	            	mCallbackText.setText("Got new user!");//TODO: handle me
+	//			//	            	IrcUser user = (IrcUser) msg.obj; 
+	//			//	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
+	//			//	            		nicks.add(user.nick);
+	//			//	            	break;
+	//			//	            default:
+	//			//	                super.handleMessage(msg);
+	//			}
+	//		}
+	//	}
 
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Code for service binding:
 	 */
@@ -320,7 +329,7 @@ public class ChatActivity extends Activity{
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-			
+
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
 			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));

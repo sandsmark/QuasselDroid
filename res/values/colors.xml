@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="logo_text_color">
-		#0686fd</color>
+	<color name="logo_text_color">#0686fd</color>
 	<color name="unread_buffer_color">#00FF00</color>
+<color name="ircmessage_highlight_color">#ff8c00</color>
+<color name="ircmessage_normal_color">#000000</color>
 </resources>

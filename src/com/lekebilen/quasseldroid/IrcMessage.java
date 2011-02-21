@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.util.Log;
+
 public class IrcMessage implements Comparable<IrcMessage>{
 	public enum Type {
 		Plain     (0x00001),
@@ -80,5 +82,16 @@ public class IrcMessage implements Comparable<IrcMessage>{
 
 	public String getNick(){
 		return sender.split("!")[0];
+	}
+	
+	public void setFlag(Flag flag) {
+		this.flags |= flag.value;
+	}
+	
+	public boolean isHighlighted() {
+		if ((flags & Flag.Highlight.value) != 0) {
+			return true;
+		}
+		return false;
 	}
 }

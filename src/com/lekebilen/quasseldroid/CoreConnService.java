@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Observer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Service;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PatternMatcher;
 import android.util.Log;
 import android.widget.Adapter;
 
@@ -34,6 +37,8 @@ public class CoreConnService extends Service{
 	BufferActivity.BufferListAdapter adapter;
 	Handler notifyHandler;
 	Handler incomingHandler;
+	
+	Pattern regexHighlight;
 
 	BufferCollection bufferCollection;
 
@@ -61,6 +66,7 @@ public class CoreConnService extends Service{
 
 		incomingHandler = new IncomingHandler();
 		bufferCollection = new BufferCollection();
+		regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+"Kenji"+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 	}
 
 	public Handler getHandler() {
@@ -141,6 +147,14 @@ public class CoreConnService extends Service{
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 				
 				if(!buffer.hasMessage(message)) {
+					/**
+					 * Check if we are highlighted in the message, 
+					 * TODO: Add support for custom highlight masks
+					 */
+					Matcher matcher = regexHighlight.matcher(message.content);
+					if (matcher.find()) {
+						message.setFlag(IrcMessage.Flag.Highlight);
+					}
 					buffer.addBacklog(message);					
 				}else {
 					Log.e(TAG, "Getting message buffer already have");
