@@ -164,4 +164,9 @@ public class CoreConnService extends Service{
 		}
 	}
 
+	public void disconnectFromCore() {
+		coreConn.disconnect();
+		
+	}
+
 }

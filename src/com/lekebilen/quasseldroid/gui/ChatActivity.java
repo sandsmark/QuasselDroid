@@ -124,7 +124,7 @@ public class ChatActivity extends Activity{
 			startActivity(i);
 			break;
 		case R.id.menu_disconnect:
-			//disconnect()
+			this.boundConnService.disconnectFromCore();
 			break;
 		}
 		return super.onOptionsItemSelected(item);

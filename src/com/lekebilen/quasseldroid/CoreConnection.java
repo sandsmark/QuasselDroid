@@ -39,6 +39,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import android.os.Message;
+import android.util.Log;
 
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
@@ -49,8 +50,12 @@ import com.lekebilen.quasseldroid.qtcomm.QVariant;
 import com.lekebilen.quasseldroid.qtcomm.serializers.QTime;
 
 public class CoreConnection {
+	
+	private static final String TAG = CoreConnection.class.getSimpleName();
+	
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
+		
 		this.address = address;
 		this.port = port;
 		this.username = username;
@@ -293,11 +298,11 @@ public class CoreConnection {
 			e.printStackTrace();
 		}
 		readThread.running = false;
-		try {
-			readThread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		//try {
+			//readThread.join(); //CAnt joine a thread when its run from the UI thread, makes everything hang
+		//} catch (InterruptedException e) {
+		//	e.printStackTrace();
+		//}
 		
 	}
 
