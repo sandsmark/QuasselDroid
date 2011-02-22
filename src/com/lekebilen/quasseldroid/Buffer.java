@@ -18,6 +18,7 @@ public class Buffer extends Observable {
 	private ArrayList<IrcMessage> backlog = null;
 	private int lastSeenMessage;
 	private int markerLineMessage;
+	private int highlightMessageId;
 	private boolean unread;
 	private static final String TAG = Buffer.class.getSimpleName();
 	private List<String> nicks;
@@ -29,6 +30,11 @@ public class Buffer extends Observable {
 
 	public void addBacklog(IrcMessage message) {
 		//Log.i(TAG, "Buffer add message " + message.content);
+		
+		if (message.isHighlighted() && message.messageId > highlightMessageId){
+			highlightMessageId = message.messageId;
+		}
+		
 		if (backlog.isEmpty()) {
 			backlog.add(message);
 			this.setChanged();	
@@ -45,7 +51,20 @@ public class Buffer extends Observable {
 		notifyObservers();
 		unread = true;
 	}
-
+	
+	public boolean hasUnseenHighlight(){
+		if (highlightMessageId > lastSeenMessage){
+			return true;
+		}
+		return false;
+	}
+	public boolean hasUnreadMessage(){
+		//Last message in the backlog has a bigger messageId than the last seen message
+		if (backlog.size() != 0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
+			return true;
+		}
+		return false;
+	}
 	public void setLastSeenMessage(int lastSeenMessage) {
 		this.lastSeenMessage = lastSeenMessage;
 	}	
