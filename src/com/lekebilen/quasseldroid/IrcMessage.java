@@ -89,7 +89,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	}
 	
 	public boolean isHighlighted() {
-		if ((flags & Flag.Highlight.value) != 0) {
+		if (((flags & Flag.Highlight.value) != 0) && ((flags & Flag.Self.value) == 0)) {
 			return true;
 		}
 		return false;

@@ -66,8 +66,8 @@ public class CoreConnection {
 		this.nicks = new HashMap<Integer, String>();
 	}
 	
-	public String getNick(int network) {
-		return nicks.get(networks);
+	public String getNick(int networkId) {
+		return nicks.get(networkId);
 	}
 	
 	public void requestMarkBufferAsRead(int buffer) {

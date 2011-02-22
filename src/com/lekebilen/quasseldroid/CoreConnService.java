@@ -37,8 +37,6 @@ public class CoreConnService extends Service{
 	BufferActivity.BufferListAdapter adapter;
 	Handler notifyHandler;
 	Handler incomingHandler;
-	
-	Pattern regexHighlight;
 
 	BufferCollection bufferCollection;
 
@@ -66,7 +64,6 @@ public class CoreConnService extends Service{
 
 		incomingHandler = new IncomingHandler();
 		bufferCollection = new BufferCollection();
-		regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+"Kenji"+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 	}
 
 	public Handler getHandler() {
@@ -151,6 +148,7 @@ public class CoreConnService extends Service{
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks
 					 */
+					Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+coreConn.getNick(buffer.getInfo().networkId)+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 					Matcher matcher = regexHighlight.matcher(message.content);
 					if (matcher.find()) {
 						message.setFlag(IrcMessage.Flag.Highlight);
