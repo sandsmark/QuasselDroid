@@ -34,7 +34,6 @@ public class CoreConnService extends Service{
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
 
-	BufferActivity.BufferListAdapter adapter;
 	Handler notifyHandler;
 	Handler incomingHandler;
 
@@ -162,7 +161,7 @@ public class CoreConnService extends Service{
 
 			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
 				/**
-				 * New buffer recived, so update out channel holder with the new buffer
+				 * New buffer received, so update out channel holder with the new buffer
 				 */
 				buffer = (Buffer)msg.obj;
 				Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
@@ -171,6 +170,22 @@ public class CoreConnService extends Service{
 				} else {
 					Log.e(TAG, "Getting already gotten buffer");
 				}
+				break;
+			case R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE:
+				/**
+				 * Setting last seen message id in a buffer
+				 */
+				Log.d(TAG, "service lastseenset buffer");
+				Buffer buf = (Buffer) msg.obj;
+				buf.setLastSeenMessage(msg.arg1);
+				break;
+			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
+				/**
+				 * Setting marker line message id in a buffer
+				 */
+				Log.d(TAG, "service markerlineset buffer");
+				Buffer buf2 = (Buffer) msg.obj;
+				buf2.setMarkerLineMessage(msg.arg1);
 				break;
 			}
 		}

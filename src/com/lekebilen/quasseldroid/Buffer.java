@@ -67,11 +67,13 @@ public class Buffer extends Observable {
 		return false;
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
+		Log.d(TAG, "LASTSEEN SET");
 		this.lastSeenMessage = lastSeenMessage;
 		this.setChanged();
 		notifyObservers();
 	}	
 	public void setMarkerLineMessage(int markerLineMessage) {
+		Log.d(TAG, "MARKELINE SET");
 		this.markerLineMessage = markerLineMessage;
 		this.setChanged();
 		notifyObservers();
