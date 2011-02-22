@@ -39,7 +39,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import android.os.Message;
-import android.util.Log;
 
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
@@ -47,16 +46,11 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
-import com.lekebilen.quasseldroid.qtcomm.serializers.QTime;
 
 public class CoreConnection {
-	
 	private static final String TAG = CoreConnection.class.getSimpleName();
-
-	
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
-		
 		this.address = address;
 		this.port = port;
 		this.username = username;
@@ -65,11 +59,19 @@ public class CoreConnection {
 		this.service = parent;
 		this.nicks = new HashMap<Integer, String>();
 	}
-	
+	/**
+	 * Gets the users own nick on a given network.
+	 * @param networkId the network to get the nick for
+	 * @return the nick of the user
+	 */
 	public String getNick(int networkId) {
 		return nicks.get(networkId);
 	}
 	
+	/**
+	 * requests the core to set a given buffer as read
+	 * @param buffer the buffer id to set as read
+	 */
 	public void requestMarkBufferAsRead(int buffer) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
