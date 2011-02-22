@@ -18,7 +18,7 @@ public class Buffer extends Observable {
 	private ArrayList<IrcMessage> backlog = null;
 	private int lastSeenMessage;
 	private int markerLineMessage;
-	private int highlightMessageId;
+	private int lastHighlightMessageId;
 	private boolean unread;
 	private static final String TAG = Buffer.class.getSimpleName();
 	private List<String> nicks;
@@ -31,8 +31,9 @@ public class Buffer extends Observable {
 	public void addBacklog(IrcMessage message) {
 		//Log.i(TAG, "Buffer add message " + message.content);
 		
-		if (message.isHighlighted() && message.messageId > highlightMessageId){
-			highlightMessageId = message.messageId;
+		if (message.isHighlighted() && message.messageId > lastHighlightMessageId){
+			lastHighlightMessageId = message.messageId;
+			this.setChanged();
 		}
 		
 		if (backlog.isEmpty()) {
@@ -53,7 +54,7 @@ public class Buffer extends Observable {
 	}
 	
 	public boolean hasUnseenHighlight(){
-		if (highlightMessageId > lastSeenMessage){
+		if (lastHighlightMessageId > lastSeenMessage){
 			return true;
 		}
 		return false;
@@ -67,9 +68,13 @@ public class Buffer extends Observable {
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
 		this.lastSeenMessage = lastSeenMessage;
+		this.setChanged();
+		notifyObservers();
 	}	
 	public void setMarkerLineMessage(int markerLineMessage) {
 		this.markerLineMessage = markerLineMessage;
+		this.setChanged();
+		notifyObservers();
 	}
 	public BufferInfo getInfo() {
 		return info;
@@ -85,6 +90,7 @@ public class Buffer extends Observable {
 	}
 
 	public boolean hasMessage(IrcMessage message) {
+		Log.d("HVA ER HVA", "last: " +lastSeenMessage+" marker: "+markerLineMessage);
 		return Collections.binarySearch(backlog, message)>=0;
 	}
 	

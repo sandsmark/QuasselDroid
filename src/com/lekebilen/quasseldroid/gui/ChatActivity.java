@@ -360,6 +360,7 @@ public class ChatActivity extends Activity{
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
 			// Detach our existing connection.
+			adapter.buffer.setLastSeenMessage(adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
 			adapter.stopObserving();
 			unbindService(mConnection);
 			isBound = false;
