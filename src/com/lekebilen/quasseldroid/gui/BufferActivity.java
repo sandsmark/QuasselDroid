@@ -148,10 +148,20 @@ public class BufferActivity extends ListActivity {
 				holder = (ViewHolder)convertView.getTag();
 			}
 			Buffer entry = this.getItem(position);
-			holder.bufferView.setText(entry.getInfo().name);
+			if ("".equals(entry.getInfo().name)){
+				holder.bufferView.setText("EFNet");//entry.getInfo().networkId);
+			}else{
+				holder.bufferView.setText(entry.getInfo().name);
+			}
 
 			//Check here if there are any unread messages in the buffer, and then set this color if there is
-			holder.bufferView.setTextColor(getResources().getColor(R.color.unread_buffer_color));
+			if (entry.hasUnseenHighlight()){
+				holder.bufferView.setTextColor(getResources().getColor(R.color.highlight_buffer_color));
+			} else if (entry.hasUnreadMessage()){
+				holder.bufferView.setTextColor(getResources().getColor(R.color.unread_buffer_color));
+			} else {
+				holder.bufferView.setTextColor(getResources().getColor(R.color.read_buffer_color));
+			}
 			return convertView;
 		}
 

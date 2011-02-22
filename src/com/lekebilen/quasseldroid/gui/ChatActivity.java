@@ -214,7 +214,7 @@ public class ChatActivity extends Activity{
 
 			//Log.i(TAG, position + "   "+ getCount());
 
-			if (buffer.getLastSeenMessage() == getItem(position).messageId) { //Set separator line here
+			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { //Set separator line here
 				holder.separatorView.getLayoutParams().height = 1;
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
