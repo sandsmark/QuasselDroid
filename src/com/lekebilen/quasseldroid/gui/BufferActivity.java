@@ -83,7 +83,7 @@ public class BufferActivity extends ListActivity {
 			startActivity(i);
 			break;
 		case R.id.menu_disconnect:
-			//disconnect()
+			this.boundConnService.disconnectFromCore();
 			break;
 		}
 		return super.onOptionsItemSelected(item);
