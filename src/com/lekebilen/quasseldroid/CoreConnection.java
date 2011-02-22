@@ -434,7 +434,7 @@ public class CoreConnection {
 						}
 						// We don't fetch backlog automatically
 						for (int buffer: buffers.keySet()) {
-							System.out.println("Bufferlol: " + buffer);
+							//System.out.println("Bufferlol: " + buffer);
 							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE);
 							msg.obj = buffers.get(buffer);// We have now received everything we need to know about this buffer
 							msg.sendToTarget();
