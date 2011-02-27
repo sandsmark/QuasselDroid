@@ -7,10 +7,12 @@ import java.security.GeneralSecurityException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -288,10 +290,21 @@ public class LoginActivity extends Activity{
 			connectIntent.putExtra("password", password.getText().toString());
 			connectIntent.putExtra("ssl", settings.getBoolean("useSSL", false)); //default should be to not use ssl 
 
+			
+			
 			//Start CoreConnectService with connect data
-			startService(connectIntent);
+			
+			//TODO: quick fix for checking if we have internett before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
+			//Check that the phone has either mobile or wifi connection to querry teh bus oracle
+			ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			//0 is mobile, 1 is wifi
+			if (!(conn.getNetworkInfo(0).isConnected() || conn.getNetworkInfo(1).isConnected())) {
+				Toast.makeText(LoginActivity.this, "This application requires a internett connection", Toast.LENGTH_LONG).show();
+			}else {
+				startService(connectIntent);
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+			}
 
-			LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
 
 		}
 	};

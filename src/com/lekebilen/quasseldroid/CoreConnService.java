@@ -75,7 +75,6 @@ public class CoreConnService extends Service{
 	@Override
 	public void onDestroy() {
 		this.disconnectFromCore();
-		notifyManager.cancel(R.id.NOTIFICATION);
 		
 	}
 
@@ -92,14 +91,15 @@ public class CoreConnService extends Service{
 
 	}
 	
-	/*
-    * Show a notification while this service is running.
-    */
+	/**
+	 * Show a notification while this service is running.
+	 * @param connected are we connected to a core or not 
+	 */
    private void showNotification(boolean connected) {
 	   //TODO: Remove when "leaving" the application
        CharSequence text =  "";
        if (connected){
-       	text = getText(R.string.notification_connected) + " NAME OF CORE HERE";
+       	text = getText(R.string.notification_connected);
        } else {
        	text = getText(R.string.notification_disconnected);
        }
@@ -237,13 +237,15 @@ public class CoreConnService extends Service{
 				Buffer buf2 = (Buffer) msg.obj;
 				buf2.setMarkerLineMessage(msg.arg1);
 				break;
+			case R.id.CORECONNECTION_LOST_CONNECTION:
+				showNotification(false);
 			}
 		}
 	}
 
 	public void disconnectFromCore() {
-		coreConn.disconnect();
 		notifyManager.cancel(R.id.NOTIFICATION);
+		coreConn.disconnect();
 	}
 
 }

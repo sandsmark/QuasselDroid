@@ -307,7 +307,7 @@ public class CoreConnection {
 		}
 		readThread.running = false;
 		//try {
-			//readThread.join(); //CAnt joine a thread when its run from the UI thread, makes everything hang
+			//readThread.join(); //Cant joine a thread when its run from the UI thread, makes everything hang
 		//} catch (InterruptedException e) {
 		//	e.printStackTrace();
 		//}
@@ -375,7 +375,11 @@ public class CoreConnection {
 				try {
 					packedFunc = readQVariantList();
 				} catch (IOException e) {
-					running = false;//FIXME: handle this properly?
+					//TODO: not sure if this is really the best way to check if we are connected, by just waiting untill it fails, but will have to do for now
+					CoreConnection.this.disconnect(); 
+					Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+					msg.sendToTarget();
+					
 					System.err.println("IO error!");	
 					e.printStackTrace();
 					return;

@@ -16,4 +16,5 @@
 <item type="id" name="CORECONNECTION_SET_LAST_SEEN_TO_SERVICE"></item>
 <item type="id" name="CORECONNECTION_SET_MARKERLINE_TO_SERVICE"></item>
 
+<item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>
 </resources>
