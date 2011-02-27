@@ -65,6 +65,12 @@ public class CoreConnService extends Service{
 		bufferCollection = new BufferCollection();
 	}
 
+	@Override
+	public void onDestroy() {
+		this.disconnectFromCore();
+		
+	}
+
 	public Handler getHandler() {
 		return incomingHandler;
 	}
