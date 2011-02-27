@@ -238,7 +238,11 @@ public class CoreConnService extends Service{
 				buf2.setMarkerLineMessage(msg.arg1);
 				break;
 			case R.id.CORECONNECTION_LOST_CONNECTION:
+				/**
+				 * Lost connection with core, update notification
+				 */
 				showNotification(false);
+				break;
 			}
 		}
 	}
