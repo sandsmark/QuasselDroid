@@ -27,8 +27,9 @@ import com.lekebilen.quasseldroid.gui.ChatActivity;
 import com.lekebilen.quasseldroid.gui.LoginActivity;
 
 /**
- * This Service holdes the connection to the core from the phone, it handles all the communication with the core. It talks to CoreConnection
- * 
+ * This Service holds the connection to the core from the phone, 
+ * it handles all the communication with the core. 
+ * It talks to CoreConnection
  */
 
 public class CoreConnService extends Service{
@@ -110,8 +111,7 @@ public class CoreConnService extends Service{
        //TODO: Fix so that if a chat is currently on top, launch that one, instead of the BufferActivity
        if (connected){ //Launch the Buffer Activity.
        	Intent launch = new Intent(this, BufferActivity.class);
-       	launch.setAction(Intent.ACTION_MAIN);
-       	launch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+       	launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
        	contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
        } else {
        	Intent launch = new Intent(this, LoginActivity.class);
@@ -143,13 +143,10 @@ public class CoreConnService extends Service{
 			coreConn.connect();
 			showNotification(true);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -246,8 +243,7 @@ public class CoreConnService extends Service{
 
 	public void disconnectFromCore() {
 		coreConn.disconnect();
-		showNotification(false);
-		
+		notifyManager.cancel(R.id.NOTIFICATION);
 	}
 
 }

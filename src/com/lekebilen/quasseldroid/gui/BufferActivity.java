@@ -1,6 +1,5 @@
 package com.lekebilen.quasseldroid.gui;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -10,9 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,8 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.Buffer;
-import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.BufferCollection;
+import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.R;
 
 public class BufferActivity extends ListActivity {
@@ -52,8 +49,6 @@ public class BufferActivity extends ListActivity {
 		bufferListAdapter = new BufferListAdapter(this);
 		getListView().setDividerHeight(0);
 		setListAdapter(bufferListAdapter);
-
-		//		handler = new IncomingHandler();
 
 	}
 
