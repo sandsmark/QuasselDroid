@@ -41,8 +41,6 @@ public class ChatActivity extends Activity{
 	private BacklogAdapter adapter;
 	//	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
-	private int bufferId;
-	private String bufferName;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -50,19 +48,6 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.chat_layout);
-
-
-		if (savedInstanceState!=null) {
-			bufferId = savedInstanceState.getInt(BufferActivity.BUFFER_ID_EXTRA);
-			bufferName = savedInstanceState.getString(BufferActivity.BUFFER_NAME_EXTRA);
-		}else{
-			//TODO: do something?
-		}
-
-		((TextView)findViewById(R.id.chatNameView)).setText(bufferName);
-		//		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
-
-		//handler = new IncomingHandler();
 
 		adapter = new BacklogAdapter(this, null);
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
@@ -142,7 +127,7 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected void onStop() {
-		boundConnService.markBufferAsRead(bufferId);
+		boundConnService.markBufferAsRead(adapter.getBufferId());
 		doUnbindService();
 		super.onStop();
 	}
@@ -254,6 +239,10 @@ public class ChatActivity extends Activity{
 		public void clearBuffer() {
 			buffer = null;
 
+		}
+		
+		public int getBufferId() {
+			return buffer.getInfo().id;
 		}
 
 
