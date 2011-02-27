@@ -112,6 +112,10 @@ public class CoreConnService extends Service{
 	public void sendMessage(int bufferId, String message){
 		coreConn.sendMessage(bufferId, message);
 	}
+	
+	public void markBufferAsRead(int bufferId){
+		coreConn.requestMarkBufferAsRead(bufferId);
+	}
 
 	public Buffer getBuffer(int bufferId, Observer obs){
 		bufferCollection.getBuffer(bufferId).addObserver(obs);

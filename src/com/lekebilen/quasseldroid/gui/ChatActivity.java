@@ -142,10 +142,11 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected void onStop() {
+		boundConnService.markBufferAsRead(bufferId);
 		doUnbindService();
 		super.onStop();
 	}
-
+	
 
 
 	public class BacklogAdapter extends BaseAdapter implements Observer {
