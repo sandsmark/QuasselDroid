@@ -11,6 +11,8 @@
 	<string name="hello">Hello World, Quasseldroid!</string>
 	<string name="app_name">Quasseldroid</string>
 	
+	<string name="notification_connected">You are connected to core</string>
+	<string name="notification_disconnected">You are not connected to a core</string>
 	
 	<string name="useSSL">usessl</string>
 	<string name="backlogLimit">backlogLimit</string>
