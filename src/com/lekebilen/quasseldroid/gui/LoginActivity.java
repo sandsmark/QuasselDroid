@@ -305,12 +305,6 @@ public class LoginActivity extends Activity implements Observer {
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			// This is called when the connection with the service has been
-			// unexpectedly disconnected -- that is, its process crashed.
-			// Because it is running in our same process, we should never
-			// see this happen.
-			boundConnService = null;
-
 		}
 	};
 
