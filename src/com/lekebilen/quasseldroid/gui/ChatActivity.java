@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -230,10 +231,12 @@ public class ChatActivity extends Activity{
 
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 			holder.msgView.setTextColor(0xff000000);
+			holder.msgView.setTypeface(Typeface.DEFAULT);
 			
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("*");
+				holder.msgView.setTypeface(Typeface.DEFAULT_BOLD);
 				holder.msgView.setText(entry.getNick() + " " + entry.content);
 				break;
 			case Join:
