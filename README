@@ -1,0 +1,28 @@
+QuasselDroid
+============
+
+Quassel is a distributed, decentralized IRC client, written using C++ and Qt.
+QuasselDroid is a pure-java client for the Quassel core, allowing you to
+connect to your Quassel core using your Android (TM) phone.
+
+No requirements apart from a recently modern Android SDK (2.1 should be
+sufficient, no guarantees in either directions, though).
+
+We do support encryption, but no compression support for now (qCompress should,
+in theory, be compatible with Deflater if you do some pre-parsing massaging on
+it, but I haven't gotten it to work just yet).
+
+
+Authors (in chronological order of appearance):
+Frederik M. J. Vestre (freqmod)
+    (Initial qdatastream deserialization attempts)
+Martin "Java Sucks" Sandsmark (sandsmark)
+    (Protocol implementation, (de)serializers, project (de)moralizer)
+Magnus Fjell (Krashk)
+    (GUI, Android stuff)
+Ken Børge Viktil (Kenji)
+    (GUI, Android stuff)
+
+
+Homepage: http://github.com/sandsmark/QuasselDroid
+
