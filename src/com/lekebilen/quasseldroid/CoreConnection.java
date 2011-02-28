@@ -38,6 +38,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Message;
 
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
@@ -48,6 +50,7 @@ import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 public class CoreConnection {
+	@SuppressWarnings("unused")
 	private static final String TAG = CoreConnection.class.getSimpleName();
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
@@ -114,7 +117,7 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer) {
-		requestBacklog(buffer, buffers.get(buffer).getBacklogEntry(buffers.get(buffer).getSize()).messageId);
+		requestBacklog(buffer, buffers.get(buffer).getBacklogEntry(buffers.get(buffer).getSize()).messageId + backlogFetchAmount);
 	}
 	
 	/**
@@ -540,7 +543,7 @@ public class CoreConnection {
 	}
 	
 	private Map<String, QVariant<?>> readQVariantMap() throws IOException {
-		long len = inStream.readUInt(32);
+		/*long len = */inStream.readUInt(32);
 		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
@@ -549,7 +552,7 @@ public class CoreConnection {
 	}
 	
 	private List<QVariant<?>> readQVariantList() throws IOException {	
-		long len = inStream.readUInt(32);
+		/*long len = */inStream.readUInt(32);
 		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
@@ -620,15 +623,16 @@ public class CoreConnection {
 	             defaultTrustManager.checkServerTrusted(chain, authType);
 	         } catch (CertificateException excep) {
 	        	 String hashedCert = hash(chain[0].getEncoded());
-	        	 //TODO: Had to comment out this because we no longer have a shared preferences here, fix somehow?
-//	        	 if (CoreConnection.this.settings.contains("certificate")) {
-//	        		 if (!CoreConnection.this.settings.getString("certificate", "lol").equals(hashedCert)) {
-//	        			 throw new CertificateException();
-//	        		 }
-//	        	 } else {
-//	        		 System.out.println("Storing new certificate: " + hashedCert);
-//	        		 CoreConnection.this.settings.edit().putString("certificate", hashedCert).commit();
-//	        	 }
+	        	 SharedPreferences preferences = CoreConnection.this.service.getSharedPreferences("CertificateStorage", Context.MODE_PRIVATE);
+	        	 if (preferences.contains("certificate")) {
+	        		 
+	        		 if (!preferences.getString("certificate", "lol").equals(hashedCert)) {
+	        			 throw new CertificateException();
+	        		 }
+	        	 } else {
+	        		 System.out.println("Storing new certificate: " + hashedCert);
+	        		 preferences.edit().putString("certificate", hashedCert).commit();
+	        	 }
 	         }
 	     }
 	     
