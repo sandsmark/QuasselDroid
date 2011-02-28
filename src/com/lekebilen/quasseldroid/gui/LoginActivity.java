@@ -276,7 +276,12 @@ public class LoginActivity extends Activity implements Observer {
 			connectIntent.putExtra("ssl", settings.getBoolean("useSSL", false)); //default should be to not use ssl 
 
 			//Start CoreConnectService with connect data
-			startService(connectIntent);
+			if (boundConnService == null)
+				startService(connectIntent);
+			else if (boundConnService.isConnected())
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));				
+
+				
 			bindService(new Intent(LoginActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
 		}
 	};
@@ -289,7 +294,7 @@ public class LoginActivity extends Activity implements Observer {
 		// TODO Auto-generated method stub
 		
 	}
-	
+	private CoreConnService boundConnService = null;
 	private ServiceConnection mConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			// This is called when the connection with the service has been
@@ -298,13 +303,14 @@ public class LoginActivity extends Activity implements Observer {
 			// service that we know is running in our own process, we can
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
-			CoreConnService boundConnService = ((CoreConnService.LocalBinder)service).getService();
+			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 			if (boundConnService.isConnected()) {
 				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));				
 			}
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
+			boundConnService = null;
 		}
 	};
 

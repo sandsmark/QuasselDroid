@@ -149,11 +149,20 @@ public class BufferActivity extends ListActivity {
 				holder = (ViewHolder)convertView.getTag();
 			}
 			Buffer entry = this.getItem(position);
-			if (entry.getInfo().name.equals("")){
-				holder.bufferView.setText("EFNet");//entry.getInfo().networkId);
-			}else{
+			switch (entry.getInfo().type) {
+			case StatusBuffer:
 				holder.bufferView.setText(entry.getInfo().name);
+				break;
+			case ChannelBuffer:
+			case QueryBuffer:
+				holder.bufferView.setText("\t" + entry.getInfo().name);
+				break;
+			case GroupBuffer:
+			case InvalidBuffer:
+				holder.bufferView.setText("XXXX " + entry.getInfo().name);
 			}
+
+				
 
 			//Check here if there are any unread messages in the buffer, and then set this color if there is
 			if (entry.hasUnseenHighlight()){

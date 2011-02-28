@@ -4,11 +4,11 @@
 	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/chatNameView"
-		android:layout_alignParentTop="true" android:gravity="center"/>
+		android:layout_alignParentTop="true" android:gravity="center"
+		/>
 	<ListView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/chatBacklogList"
 		android:layout_below="@+id/chatNameView" android:layout_above="@+id/ChatInputView"
-		android:background="#FF0000"
 		android:transcriptMode="alwaysScroll"/>
 	<EditText android:layout_width="fill_parent" android:id="@+id/ChatInputView"
 		android:layout_alignParentBottom="true" android:layout_height="wrap_content"

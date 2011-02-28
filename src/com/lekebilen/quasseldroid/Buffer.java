@@ -11,6 +11,7 @@ import java.util.Observable;
 
 import android.util.Log;
 
+import com.lekebilen.quasseldroid.BufferInfo.Type;
 import com.lekebilen.quasseldroid.gui.ChatActivity;
 
 public class Buffer extends Observable {
@@ -22,6 +23,7 @@ public class Buffer extends Observable {
 	private boolean unread;
 	private static final String TAG = Buffer.class.getSimpleName();
 	private List<String> nicks;
+	private String topic;
 
 	public Buffer(BufferInfo info) {
 		this.info = info;
@@ -121,5 +123,12 @@ public class Buffer extends Observable {
 	public void addNick(String nick) {
 		nicks.add(nick);
 	}
-	
+
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
+
+	public String topic() {
+		return topic;
+	}
 }

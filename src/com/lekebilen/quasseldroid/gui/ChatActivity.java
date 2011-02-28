@@ -71,6 +71,8 @@ public class ChatActivity extends Activity{
 		backlogList.setDividerHeight(0);
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
+		
+		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
 	}
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
@@ -174,7 +176,7 @@ public class ChatActivity extends Activity{
 
 		public void setBuffer(Buffer buffer) {
 			this.buffer = buffer;
-			((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
+			((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
 			notifyDataSetChanged();
 		}
 
@@ -224,12 +226,34 @@ public class ChatActivity extends Activity{
 
 			IrcMessage entry = this.getItem(position);
 			holder.timeView.setText(entry.getTime());
-			holder.nickView.setText(entry.getNick());
-			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
+			int hashcode = entry.getNick().hashCode() & 0x55FFFFFF;
 
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 
-			holder.msgView.setText(entry.content);
+			switch (entry.type) {
+			case Action:
+				holder.nickView.setText("*");
+				holder.msgView.setText(entry.getNick() + " " + entry.content);
+				break;
+			case Join:
+				holder.nickView.setText("→");
+				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
+				break;
+			case Part:
+				holder.nickView.setText("←");
+				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
+				break;
+			case Quit:				
+				holder.nickView.setText("←");
+				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
+				break;
+			//TODO: implement the rest
+			case Plain:
+			default:
+				holder.nickView.setText(entry.getNick());
+				holder.msgView.setText(entry.content);
+				break;
+			}
 			if (entry.isHighlighted()) {
 				holder.item_layout.setBackgroundResource(R.color.ircmessage_highlight_color);
 			}else {

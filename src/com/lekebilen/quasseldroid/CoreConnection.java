@@ -62,7 +62,6 @@ public class CoreConnection {
 		this.service = parent;
 		
 		this.nicks = new HashMap<Integer, String>();
-		this.networkNames = new HashMap<Integer, String>();
 		
 		this.connected = false;
 	}
@@ -83,15 +82,6 @@ public class CoreConnection {
 	 */
 	public String getNick(int networkId) {
 		return nicks.get(networkId);
-	}
-	
-	/**
-	 * Gets the name associated with a given network ID.
-	 * @param networkId the network to get the name for
-	 * @return the name of the network
-	 */
-	public String getNetworkName(int networkId) {
-		return networkNames.get(networkId);
 	}
 	
 	/**
@@ -120,9 +110,7 @@ public class CoreConnection {
 	public void requestBuffers() {
 		try {
 			sendInitRequest("BufferSyncer", "");
-			for(int network: networks) {
-				sendInitRequest("Network", Integer.toString(network));
-			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			connected = false;
@@ -299,6 +287,10 @@ public class CoreConnection {
 			packedFunc.add(new QVariant<Integer>(1, "MsgId"));
 			sendQVariantList(packedFunc);
 			
+			// We must do this here, to get network names early enough
+			for(int network: networks) {
+				sendInitRequest("Network", Integer.toString(network));
+			}			
 			
 			readThread = new ReadThread();
 			readThread.start();
@@ -382,7 +374,6 @@ public class CoreConnection {
 	private Map<Integer, Buffer> buffers;
 	private Map<Integer, String> nicks;
 	private List<Integer> networks;
-	private Map<Integer, String> networkNames;
 	
 	private String address;
 	private int port;
@@ -451,21 +442,29 @@ public class CoreConnection {
 						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						// Store the network name and associated nick for "our" user
 						nicks.put(networkId, (String) initMap.get("myNick").getData());
-						networkNames.put(networkId, (String) initMap.get("networkName").getData());
+						
+						for (Buffer buffer: buffers.values()) {
+							if (buffer.getInfo().networkId == networkId && buffer.getInfo().name.equals("")) {
+								buffer.getInfo().name = (String) initMap.get("networkName").getData();
+								break;
+							}
+						}
 						
 						// Horribly nested maps
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
 						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
 						
-						// Parse out the list of nicks in all channels
+						// Parse out the list of nicks in all channels, and topics
 						for (QVariant<?> channel:  channels.values()) {
 							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
 							String chanName = (String)chan.get("name").getData();
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
 							List<String> users = new ArrayList<String>(userModes.keySet());
+							String topic = (String)chan.get("topic").getData();
 							// Horribly inefficient search for the right buffer, Java sucks.
 							for (Buffer buffer: buffers.values()) {
 								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
+									buffer.setTopic(topic);
 									buffer.setNicks(users);
 									break;
 								}
@@ -534,8 +533,7 @@ public class CoreConnection {
 					/* See above; parse out information about object, 
 					 * and additionally a sync function name.
 					 */
-					//System.out.println("FUCKSHIT:" + packedFunc.remove(0).getData());
-					className = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
+					className = packedFunc.remove(0).getData().toString(); // This is either a byte buffer or a string
 					objectName = (String) packedFunc.remove(0).getData();
 					String function = packedFunc.remove(0).toString();
 
