@@ -3,15 +3,21 @@ package com.lekebilen.quasseldroid.gui;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.util.Observable;
+import java.util.Observer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +36,7 @@ import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
 
-public class LoginActivity extends Activity{
+public class LoginActivity extends Activity implements Observer {
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -261,25 +267,6 @@ public class LoginActivity extends Activity{
 			dbHelper.open();
 			Bundle res = dbHelper.getCore(core.getSelectedItemId());
 
-			//dbHelper.close();
-
-			//TODO: Following is just debug, change later
-			//        	try {
-			//				CoreConnection conn = new CoreConnection(res.getString("address"), res.getInt("port"), username.getText().toString(), password.getText().toString(), LoginActivity.this.settings);
-			//				conn.connect();
-			////				conn.getBuffers();
-			//			} catch (UnknownHostException e) {
-			////				 Show the user a message about host not found
-			//				e.printStackTrace();
-			//			} catch (IOException e) {
-			////				 Network trouble?
-			//				e.printStackTrace();
-			//			} catch (GeneralSecurityException e) {
-			////				 SSL not enabled?
-			//				e.printStackTrace();
-			//			}
-
-
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
 			connectIntent.putExtra("address", res.getString("address"));
@@ -290,13 +277,41 @@ public class LoginActivity extends Activity{
 
 			//Start CoreConnectService with connect data
 			startService(connectIntent);
-
-			LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
-
+			bindService(new Intent(LoginActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
 		}
 	};
 
 	public void updateCoreSpinner() {
 		((SimpleCursorAdapter)core.getAdapter()).getCursor().requery();
 	}
+
+	public void update(Observable observable, Object data) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private ServiceConnection mConnection = new ServiceConnection() {
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			// This is called when the connection with the service has been
+			// established, giving us the service object we can use to
+			// interact with the service. Because we have bound to a explicit
+			// service that we know is running in our own process, we can
+			// cast its IBinder to a concrete class and directly access it.
+			Log.i(TAG, "BINDING ON SERVICE DONE");
+			CoreConnService boundConnService = ((CoreConnService.LocalBinder)service).getService();
+			if (boundConnService.isConnected()) {
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));				
+			}
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			// This is called when the connection with the service has been
+			// unexpectedly disconnected -- that is, its process crashed.
+			// Because it is running in our same process, we should never
+			// see this happen.
+			boundConnService = null;
+
+		}
+	};
+
 }

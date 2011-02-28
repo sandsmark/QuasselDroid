@@ -94,6 +94,7 @@ public class CoreConnService extends Service{
 		coreConn = new CoreConnection(address, port, username, password, ssl, this);
 		try {
 			coreConn.connect();
+			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -178,7 +179,10 @@ public class CoreConnService extends Service{
 
 	public void disconnectFromCore() {
 		coreConn.disconnect();
-		
+	}
+	
+	public boolean isConnected() {
+		return coreConn.isConnected();
 	}
 
 }

@@ -65,7 +65,8 @@ public class ChatActivity extends Activity{
 		//handler = new IncomingHandler();
 
 		adapter = new BacklogAdapter(this, null);
-		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList)); 
+		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList));
+		backlogList.setCacheColorHint(0xffffff);
 		backlogList.setAdapter(adapter);
 		backlogList.setDividerHeight(0);
 

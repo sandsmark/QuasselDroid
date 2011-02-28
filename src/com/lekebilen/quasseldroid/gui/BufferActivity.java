@@ -51,6 +51,7 @@ public class BufferActivity extends ListActivity {
 
 		listAdapter = new BufferListAdapter(this);
 		getListView().setDividerHeight(0);
+		getListView().setCacheColorHint(0xffffff);
 		setListAdapter(listAdapter);
 
 		//		handler = new IncomingHandler();
@@ -148,7 +149,7 @@ public class BufferActivity extends ListActivity {
 				holder = (ViewHolder)convertView.getTag();
 			}
 			Buffer entry = this.getItem(position);
-			if ("".equals(entry.getInfo().name)){
+			if (entry.getInfo().name.equals("")){
 				holder.bufferView.setText("EFNet");//entry.getInfo().networkId);
 			}else{
 				holder.bufferView.setText(entry.getInfo().name);

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="wrap_content" android:background="#ff000000">
+	android:layout_height="wrap_content" android:background="#ffffffff">
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/backlog_item_linearlayout">
+		android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/backlog_item_linearlayout"
+		android:background="#ffffffff">
 		<TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:id="@+id/backlog_time_view" />
 		<TextView android:layout_width="wrap_content"
@@ -11,7 +12,6 @@
 			android:paddingLeft="10dip" android:paddingRight="10dip" />
 		<TextView android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:id="@+id/backlog_msg_view" />
-
 	</LinearLayout>
 	<TextView android:layout_width="fill_parent"
 		android:layout_height="0sp" android:id="@+id/backlog_list_separator"
