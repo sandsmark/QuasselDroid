@@ -6,5 +6,5 @@
 	<color name="highlight_buffer_color">#FF8Cff</color>
 	<color name="read_buffer_color">#000000</color>
 	<color name="ircmessage_highlight_color">#FF8C00</color>
-	<color name="ircmessage_normal_color">#000000</color>
+	<color name="ircmessage_normal_color">#ffffff</color>
 </resources>

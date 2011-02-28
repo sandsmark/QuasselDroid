@@ -226,10 +226,11 @@ public class ChatActivity extends Activity{
 
 			IrcMessage entry = this.getItem(position);
 			holder.timeView.setText(entry.getTime());
-			int hashcode = entry.getNick().hashCode() & 0x55FFFFFF;
+			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
 
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
-
+			holder.msgView.setTextColor(0xff000000);
+			
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("*");
