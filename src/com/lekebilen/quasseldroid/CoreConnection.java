@@ -429,7 +429,9 @@ public class CoreConnection {
 				case HeartBeat:
 					System.out.println("Got heartbeat");
 					break;
-					
+				case HeartBeatReply:
+					System.out.println("Got heartbeat reply");
+					break;
 				/*
 				 * This is when the core send us a new object to create.
 				 * Since we don't actually create objects, we parse out the fields
@@ -490,7 +492,6 @@ public class CoreConnection {
 							int msgId = (Integer)lastSeen.remove(0).getData();
 							if (buffers.containsKey(bufferId))
 								buffers.get(bufferId).setMarkerLineMessage(msgId);
-							
 						}
 						/* 
 						 * We have now received everything we need to know about our buffers,
@@ -501,7 +502,7 @@ public class CoreConnection {
 							msg.obj = buffers.get(buffer);
 							msg.sendToTarget();
 							
-							// Here we might want to fetch backlog for all buffers, but we don't want to:
+							// Here we might fetch backlog for all buffers, but we don't want to:
 							//requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 						}
 

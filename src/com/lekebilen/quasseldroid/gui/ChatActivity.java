@@ -243,7 +243,6 @@ public class ChatActivity extends Activity{
 		public void update(Observable observable, Object data) {
 			Log.i(TAG, "BACKLOG CHANGED");
 			notifyDataSetChanged();
-
 		}
 
 		public void stopObserving() {
