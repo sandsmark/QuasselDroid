@@ -20,10 +20,14 @@ public class BacklogView extends ListView {
 		// TODO Auto-generated constructor stub
 	}
 	
+	 
 	@Override
-	/*void onOverScrolled (int scrollX, int scrollY, boolean clampedX, boolean clampedY)
+	protected void onScrollChanged (int l, int t, int oldl, int oldt)
 	{
-		if (clampedY) fetch moar;
-	}*/
+		System.out.println(t);
+		if (t == 0) {
+			System.out.println("fuck");
+		}
+	}
 	
 }

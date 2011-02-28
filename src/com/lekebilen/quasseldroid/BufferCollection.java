@@ -3,6 +3,7 @@ package com.lekebilen.quasseldroid;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observer;
 import java.util.PriorityQueue;
 
 import java.util.Observable;
@@ -11,7 +12,7 @@ import android.util.Log;
 
 import com.lekebilen.quasseldroid.gui.ChatActivity;
 
-public class BufferCollection extends Observable {
+public class BufferCollection extends Observable implements Observer {
 	
 	private HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
 	
@@ -25,6 +26,7 @@ public class BufferCollection extends Observable {
 		Log.i(TAG, "Channel add message " + buffer.getInfo().name);
 		buffers.put(buffer.getInfo().id, buffer);
 		this.setChanged();
+		buffer.addObserver(this);
 		notifyObservers();
 	}
 	
@@ -44,5 +46,13 @@ public class BufferCollection extends Observable {
 
 	public boolean hasBuffer(int id) {
 		return buffers.containsKey(id);
+	}
+
+	@Override
+	public void update(Observable arg0, Object arg1) {
+		Log.d(TAG, "NOTIFY IN BUFFERCOLLECITON");
+		this.setChanged();
+		notifyObservers();
+		
 	}
 }

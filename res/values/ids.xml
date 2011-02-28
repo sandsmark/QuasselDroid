@@ -8,6 +8,13 @@
 
 <item type="id" name="BUFFER_LIST_UPDATED"></item>
 <item type="id" name="CHAT_MESSAGES_UPDATED"></item>
+
+<item type="id" name="NOTIFICATION"></item>
+
 <item type="id" name="CORECONNECTION_NEW_MESSAGE_TO_SERVICE"></item>
 <item type="id" name="CORECONNECTION_NEW_BUFFER_TO_SERVICE"></item>
+<item type="id" name="CORECONNECTION_SET_LAST_SEEN_TO_SERVICE"></item>
+<item type="id" name="CORECONNECTION_SET_MARKERLINE_TO_SERVICE"></item>
+
+<item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>
 </resources>

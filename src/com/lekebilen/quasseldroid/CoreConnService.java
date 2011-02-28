@@ -8,6 +8,9 @@ import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -21,10 +24,12 @@ import android.widget.Adapter;
 
 import com.lekebilen.quasseldroid.gui.BufferActivity;
 import com.lekebilen.quasseldroid.gui.ChatActivity;
+import com.lekebilen.quasseldroid.gui.LoginActivity;
 
 /**
- * This Service holdes the connection to the core from the phone, it handles all the communication with the core. It talks to CoreConnection
- * 
+ * This Service holds the connection to the core from the phone, 
+ * it handles all the communication with the core. 
+ * It talks to CoreConnection
  */
 
 public class CoreConnService extends Service{
@@ -34,9 +39,9 @@ public class CoreConnService extends Service{
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
 
-	BufferActivity.BufferListAdapter adapter;
 	Handler notifyHandler;
 	Handler incomingHandler;
+	NotificationManager notifyManager;
 
 	BufferCollection bufferCollection;
 
@@ -64,6 +69,13 @@ public class CoreConnService extends Service{
 
 		incomingHandler = new IncomingHandler();
 		bufferCollection = new BufferCollection();
+		notifyManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+	}
+
+	@Override
+	public void onDestroy() {
+		this.disconnectFromCore();
+		
 	}
 
 	public Handler getHandler() {
@@ -78,6 +90,41 @@ public class CoreConnService extends Service{
 		return START_STICKY;
 
 	}
+	
+	/**
+	 * Show a notification while this service is running.
+	 * @param connected are we connected to a core or not 
+	 */
+   private void showNotification(boolean connected) {
+	   //TODO: Remove when "leaving" the application
+       CharSequence text =  "";
+       if (connected){
+       	text = getText(R.string.notification_connected);
+       } else {
+       	text = getText(R.string.notification_disconnected);
+       }
+       // Set the icon, scrolling text and timestamp
+       Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
+       // The PendingIntent to launch our activity if the user selects this notification
+       PendingIntent contentIntent;
+       
+       //TODO: Fix so that if a chat is currently on top, launch that one, instead of the BufferActivity
+       if (connected){ //Launch the Buffer Activity.
+       	Intent launch = new Intent(this, BufferActivity.class);
+       	launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+       	contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
+       } else {
+       	Intent launch = new Intent(this, LoginActivity.class);
+       	contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
+       }
+       // Set the info for the views that show in the notification panel.
+       notification.setLatestEventInfo(this, getText(R.string.app_name),
+                      text, contentIntent);
+       // Send the notification.
+       notifyManager.notify(R.id.NOTIFICATION, notification);
+   }
+	
+	
 
 	/**
 	 * Handle the data in the intent, and use it to connect with CoreConnect
@@ -95,14 +142,12 @@ public class CoreConnService extends Service{
 		try {
 			coreConn.connect();
 			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
+			showNotification(true);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -113,6 +158,10 @@ public class CoreConnService extends Service{
 
 	public void sendMessage(int bufferId, String message){
 		coreConn.sendMessage(bufferId, message);
+	}
+	
+	public void markBufferAsRead(int bufferId){
+		coreConn.requestMarkBufferAsRead(bufferId);
 	}
 
 	public Buffer getBuffer(int bufferId, Observer obs){
@@ -163,7 +212,7 @@ public class CoreConnService extends Service{
 
 			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
 				/**
-				 * New buffer recived, so update out channel holder with the new buffer
+				 * New buffer received, so update out channel holder with the new buffer
 				 */
 				buffer = (Buffer)msg.obj;
 				Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
@@ -173,11 +222,34 @@ public class CoreConnService extends Service{
 					Log.e(TAG, "Getting already gotten buffer");
 				}
 				break;
+			case R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE:
+				/**
+				 * Setting last seen message id in a buffer
+				 */
+				Log.d(TAG, "service lastseenset buffer");
+				Buffer buf = (Buffer) msg.obj;
+				buf.setLastSeenMessage(msg.arg1);
+				break;
+			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
+				/**
+				 * Setting marker line message id in a buffer
+				 */
+				Log.d(TAG, "service markerlineset buffer");
+				Buffer buf2 = (Buffer) msg.obj;
+				buf2.setMarkerLineMessage(msg.arg1);
+				break;
+			case R.id.CORECONNECTION_LOST_CONNECTION:
+				/**
+				 * Lost connection with core, update notification
+				 */
+				showNotification(false);
+				break;
 			}
 		}
 	}
 
 	public void disconnectFromCore() {
+		notifyManager.cancel(R.id.NOTIFICATION);
 		coreConn.disconnect();
 	}
 	

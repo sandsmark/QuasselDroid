@@ -16,8 +16,9 @@
 			android:screenOrientation="sensor" android:label="@string/app_name">
 		</activity>
 		<activity android:name=".gui.ChatActivity"></activity>
-		<activity android:name=".gui.BufferActivity"></activity>
+		<activity android:name=".gui.BufferActivity" android:launchMode="singleTop"></activity>
 		<service android:name=".CoreConnService"></service>
 	</application>
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
 </manifest> 

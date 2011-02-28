@@ -1,6 +1,5 @@
 package com.lekebilen.quasseldroid.gui;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -10,9 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,8 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.Buffer;
-import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.BufferCollection;
+import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.R;
 
 public class BufferActivity extends ListActivity {
@@ -38,7 +35,7 @@ public class BufferActivity extends ListActivity {
 
 
 	//ArrayList<Buffer> bufferList;
-	BufferListAdapter listAdapter;
+	BufferListAdapter bufferListAdapter;
 	//	IncomingHandler handler;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +46,13 @@ public class BufferActivity extends ListActivity {
 		setContentView(R.layout.buffer_list);
 		//bufferList = new ArrayList<Buffer>();
 
-		listAdapter = new BufferListAdapter(this);
+		bufferListAdapter = new BufferListAdapter(this);
 		getListView().setDividerHeight(0);
 		getListView().setCacheColorHint(0xffffff);
 		setListAdapter(listAdapter);
 
 		//		handler = new IncomingHandler();
+		setListAdapter(bufferListAdapter);
 
 	}
 
@@ -97,8 +95,8 @@ public class BufferActivity extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 
 		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
-		i.putExtra(BUFFER_ID_EXTRA, listAdapter.getItem(position).getInfo().id);
-		i.putExtra(BUFFER_NAME_EXTRA, listAdapter.getItem(position).getInfo().name);
+		i.putExtra(BUFFER_ID_EXTRA, bufferListAdapter.getItem(position).getInfo().id);
+		i.putExtra(BUFFER_NAME_EXTRA, bufferListAdapter.getItem(position).getInfo().name);
 
 		startActivity(i);
 	}
@@ -115,6 +113,7 @@ public class BufferActivity extends ListActivity {
 
 		public void setBuffers(BufferCollection buffers){
 			this.bufferCollection = buffers;
+			bufferCollection.addObserver(this);
 			notifyDataSetChanged();
 		}
 
@@ -339,7 +338,7 @@ public class BufferActivity extends ListActivity {
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 			//Testing to see if i can add item to adapter in service
-			listAdapter.setBuffers(boundConnService.getBufferList(listAdapter));
+			bufferListAdapter.setBuffers(boundConnService.getBufferList(bufferListAdapter));
 
 
 		}
@@ -367,11 +366,11 @@ public class BufferActivity extends ListActivity {
 	void doUnbindService() {
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
-			listAdapter.stopObserving();
+			bufferListAdapter.stopObserving();
 			// Detach our existing connection.
 			unbindService(mConnection);
 			isBound = false;
-			listAdapter.clearBuffers();
+			bufferListAdapter.clearBuffers();
 		}
 	}
 

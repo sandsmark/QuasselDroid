@@ -42,8 +42,6 @@ public class ChatActivity extends Activity{
 	private BacklogAdapter adapter;
 	//	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
-	private int bufferId;
-	private String bufferName;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -51,19 +49,6 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.chat_layout);
-
-
-		if (savedInstanceState!=null) {
-			bufferId = savedInstanceState.getInt(BufferActivity.BUFFER_ID_EXTRA);
-			bufferName = savedInstanceState.getString(BufferActivity.BUFFER_NAME_EXTRA);
-		}else{
-			//TODO: do something?
-		}
-
-		((TextView)findViewById(R.id.chatNameView)).setText(bufferName);
-		//		mCallbackText = ((TextView)findViewById(R.id.chatNameView));
-
-		//handler = new IncomingHandler();
 
 		adapter = new BacklogAdapter(this, null);
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList));
@@ -148,10 +133,11 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected void onStop() {
+		boundConnService.markBufferAsRead(adapter.getBufferId());
 		doUnbindService();
 		super.onStop();
 	}
-
+	
 
 
 	public class BacklogAdapter extends BaseAdapter implements Observer {
@@ -284,6 +270,10 @@ public class ChatActivity extends Activity{
 			buffer = null;
 
 		}
+		
+		public int getBufferId() {
+			return buffer.getInfo().id;
+		}
 
 
 	}	
@@ -390,7 +380,9 @@ public class ChatActivity extends Activity{
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
 			// Detach our existing connection.
-			adapter.buffer.setLastSeenMessage(adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
+			if (adapter.buffer.getSize()!= 0){
+				adapter.buffer.setLastSeenMessage(adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
+			}
 			adapter.stopObserving();
 			unbindService(mConnection);
 			isBound = false;

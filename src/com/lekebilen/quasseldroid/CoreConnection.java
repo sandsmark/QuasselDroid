@@ -400,7 +400,11 @@ public class CoreConnection {
 				try {
 					packedFunc = readQVariantList();
 				} catch (IOException e) {
-					running = false;//FIXME: handle this properly?
+					//TODO: not sure if this is really the best way to check if we are connected, by just waiting untill it fails, but will have to do for now
+					CoreConnection.this.disconnect(); 
+					Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+					msg.sendToTarget();
+					
 					System.err.println("IO error!");	
 					e.printStackTrace();
 					return;
@@ -481,16 +485,27 @@ public class CoreConnection {
 						for (int i=0; i<lastSeen.size()/2; i++) {
 							int bufferId = (Integer)lastSeen.remove(0).getData();
 							int msgId = (Integer)lastSeen.remove(0).getData();
-							if (buffers.containsKey(bufferId)) // We only care for buffers we have open
-								buffers.get(bufferId).setLastSeenMessage(msgId);
+							if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
+								
+								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
+								msg.obj = buffers.get(bufferId);
+								msg.arg1 = msgId;
+								msg.sendToTarget();
+							}
 						}
 						// Parse out the marker lines for buffers
 						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
-						for (int i=0; i<lastSeen.size()/2; i++) {
-							int bufferId = (Integer)lastSeen.remove(0).getData();
-							int msgId = (Integer)lastSeen.remove(0).getData();
-							if (buffers.containsKey(bufferId))
-								buffers.get(bufferId).setMarkerLineMessage(msgId);
+						for (int i=0; i<markerLines.size()/2; i++) {
+							int bufferId = (Integer)markerLines.remove(0).getData();
+							int msgId = (Integer)markerLines.remove(0).getData();
+							if (buffers.containsKey(bufferId)){
+								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
+								msg.obj = buffers.get(bufferId);
+								msg.arg1 = msgId;
+								msg.sendToTarget();
+							}
+							
+							
 						}
 						/* 
 						 * We have now received everything we need to know about our buffers,
