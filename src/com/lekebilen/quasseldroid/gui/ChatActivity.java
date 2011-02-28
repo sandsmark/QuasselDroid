@@ -88,6 +88,8 @@ public class ChatActivity extends Activity{
 				}
 
 				return true;
+			} else if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == 0) {
+				onSearchRequested(); // lawl
 			}
 			return false;
 		}

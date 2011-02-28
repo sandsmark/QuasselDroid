@@ -125,6 +125,7 @@ public class Buffer extends Observable {
 	}
 
 	public void setTopic(String topic) {
+		//TODO: notify observers
 		this.topic = topic;
 	}
 
