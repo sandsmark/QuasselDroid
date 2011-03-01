@@ -48,7 +48,7 @@ public class BufferActivity extends ListActivity {
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getListView().setDividerHeight(0);
-		getListView().setCacheColorHint(0xffffff);
+		getListView().setCacheColorHint(0xffffffff);
 		setListAdapter(bufferListAdapter);
 
 		//		handler = new IncomingHandler();

@@ -21,6 +21,7 @@ import android.os.Message;
 import android.os.PatternMatcher;
 import android.util.Log;
 import android.widget.Adapter;
+import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.gui.BufferActivity;
 import com.lekebilen.quasseldroid.gui.ChatActivity;
@@ -144,11 +145,12 @@ public class CoreConnService extends Service{
 			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			showNotification(true);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			Toast.makeText(getApplicationContext(), "Unknown host!", 5);
 		} catch (IOException e) {
+			Toast.makeText(getApplicationContext(), "IO error while connecting!", 5);
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
+			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", 5);
 		}
 	}
 
