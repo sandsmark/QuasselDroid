@@ -59,13 +59,11 @@ public class CoreConnService extends Service{
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
 		return binder;
 	}
 
 	@Override
 	public void onCreate() {
-		// TODO Auto-generated method stub
 		super.onCreate();
 
 		incomingHandler = new IncomingHandler();
