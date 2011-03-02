@@ -169,6 +169,10 @@ public class CoreConnService extends Service{
 		coreConn.requestBacklog(bufferId);
 		return bufferCollection.getBuffer(bufferId);
 	}
+	
+	public void getMoreBacklog(int bufferId){
+		coreConn.requestMoreBacklog(bufferId);
+	}
 
 
 	public BufferCollection getBufferList(Observer obs) {

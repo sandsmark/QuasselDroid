@@ -211,6 +211,10 @@ public class ChatActivity extends Activity{
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
 			}
+			
+			if (position <= 5 ){ //The fifth or less item in the backlog is shown, get more backlog
+				boundConnService.getMoreBacklog(buffer.getInfo().id);
+			}
 
 
 			IrcMessage entry = this.getItem(position);
