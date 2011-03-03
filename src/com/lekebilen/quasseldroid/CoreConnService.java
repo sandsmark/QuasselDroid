@@ -143,12 +143,12 @@ public class CoreConnService extends Service{
 			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			showNotification(true);
 		} catch (UnknownHostException e) {
-			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
 		} catch (IOException e) {
-			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
 		}
 	}
 
