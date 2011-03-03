@@ -200,8 +200,8 @@ public class CoreConnection {
 			Date date = new Date();
 			initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariant.Type.String));
 			initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariant.Type.Bool));
-			initial.put("ClientVersion", new QVariant<String>("QuasselDroid", QVariant.Type.String));
-			initial.put("UseCompression", new QVariant<Boolean>(false, QVariant.Type.Bool));
+			initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariant.Type.String));
+		 	initial.put("UseCompression", new QVariant<Boolean>(false, QVariant.Type.Bool));
 			initial.put("MsgType", new QVariant<String>("ClientInit", QVariant.Type.String));
 			initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariant.Type.Int));
 			

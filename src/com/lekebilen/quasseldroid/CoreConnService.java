@@ -3,7 +3,6 @@ package com.lekebilen.quasseldroid;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,13 +17,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.PatternMatcher;
 import android.util.Log;
-import android.widget.Adapter;
 import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.gui.BufferActivity;
-import com.lekebilen.quasseldroid.gui.ChatActivity;
 import com.lekebilen.quasseldroid.gui.LoginActivity;
 
 /**

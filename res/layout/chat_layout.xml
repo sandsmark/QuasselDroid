@@ -8,7 +8,7 @@
 		android:layout_width="fill_parent" android:id="@+id/chatNameView"
 		android:layout_alignParentTop="true" android:gravity="center"
 		/>
-	<com.lekebilen.quasseldroid.gui.BacklogView android:layout_width="fill_parent"
+	<ListView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/chatBacklogList"
 		android:layout_below="@+id/chatNameView" android:layout_above="@+id/ChatInputView"
 		android:transcriptMode="alwaysScroll"/>
