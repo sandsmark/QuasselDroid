@@ -197,6 +197,8 @@ public class CoreConnService extends Service{
 				Log.i(TAG, "MESSAGE: " + message.content.toString() );
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 				
+				
+				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
 				if(!buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
