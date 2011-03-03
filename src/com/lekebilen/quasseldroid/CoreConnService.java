@@ -139,12 +139,12 @@ public class CoreConnService extends Service{
 			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			showNotification(true);
 		} catch (UnknownHostException e) {
-			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
 		} catch (IOException e) {
-			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG);
+			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -193,6 +193,8 @@ public class CoreConnService extends Service{
 				Log.i(TAG, "MESSAGE: " + message.content.toString() );
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 				
+				
+				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
 				if(!buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 

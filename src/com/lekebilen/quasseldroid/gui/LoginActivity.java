@@ -319,7 +319,7 @@ public class LoginActivity extends Activity implements Observer {
 			if (boundConnService.isConnected()) {
 				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));				
 			} else {
-				Toast.makeText(getApplicationContext(), "Core not connected!", Toast.LENGTH_LONG);
+				Toast.makeText(getApplicationContext(), "Core not connected!", Toast.LENGTH_LONG).show();
 			}
 		}
 
