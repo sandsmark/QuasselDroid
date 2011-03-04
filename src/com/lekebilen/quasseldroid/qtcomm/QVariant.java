@@ -15,8 +15,7 @@ import java.util.Map;
 
 
 public class QVariant<T extends Object>{
-
-	public enum Type {
+	static public enum Type {
 		Invalid(0),
 
 		Bool(1),

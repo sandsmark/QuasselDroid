@@ -143,6 +143,10 @@ public class CoreConnection {
 	 * Requests backlog between two given message IDs.
 	 */
 	public void requestBacklog(int buffer, int firstMsgId, int lastMsgId) {
+		requestBacklog(buffer, firstMsgId, lastMsgId, Config.backlogAdditional);
+	}
+	
+	public void requestBacklog(int buffer, int firstMsgId, int lastMsgId, int maxAmount) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
 		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
@@ -152,7 +156,7 @@ public class CoreConnection {
 		retFunc.add(new QVariant<Integer>(firstMsgId, "MsgId"));
 		retFunc.add(new QVariant<Integer>(lastMsgId, "MsgId"));
 		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
-		retFunc.add(new QVariant<Integer>(Config.backlogAdditional, QVariant.Type.Int));
+		retFunc.add(new QVariant<Integer>(maxAmount, QVariant.Type.Int));
 		
 		try {
 			sendQVariantList(retFunc);
@@ -517,7 +521,7 @@ public class CoreConnection {
 							msg.sendToTarget();
 							
 							// Here we might fetch backlog for all buffers, but we don't want to:
-							//requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
+							requestBacklog(buffer, -1, -1, 10);
 						}
 
 					/*
