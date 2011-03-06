@@ -59,6 +59,7 @@ public class QuasselDbHelper {
 	}
 
 	public void close() {
+		db.close();
 		dbHelper.close();
 	}
 
@@ -66,7 +67,6 @@ public class QuasselDbHelper {
 
 		//TODO: If name exists, edit instead of add
 		try {
-			open();
 			ContentValues initialValues = new ContentValues();
 			initialValues.put(KEY_NAME, name);
 			initialValues.put(KEY_ADDRESS, address);
@@ -74,68 +74,59 @@ public class QuasselDbHelper {
 			db.insert(CORE_TABLE, null, initialValues);
 		} catch(SQLException e) {
 			e.printStackTrace();
-		} finally {
-			close();
 		}
 	}
 
-	
-	public void deleteCore(long rowId) {
-		db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
-	}
 
-	public Cursor getAllCores() {
-		return db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
-	}
-
-	public Bundle getCore(long rowId) throws SQLException {
-		Cursor cursor = db.query(true, CORE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT, KEY_NAME}, KEY_ID + "=" + rowId, null, null, null, null, null);
-		Bundle b = new Bundle();
-		if (cursor != null) {
-			cursor.moveToFirst();
-			b.putString("name", cursor.getString(cursor.getColumnIndex(KEY_NAME)));
-			b.putInt("port", cursor.getInt(cursor.getColumnIndex(KEY_PORT)));
-			b.putString("address", cursor.getString(cursor.getColumnIndex(KEY_ADDRESS)));
-			cursor.close(); 
+		public void deleteCore(long rowId) {
+			db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
 		}
-		return b;
-	}
 
-	public void updateCore(long rowId, String name, String address, int port) {
-		ContentValues args = new ContentValues();
-		args.put(KEY_NAME, name);
-		args.put(KEY_ADDRESS, address);
-		args.put(KEY_PORT, port);
-		
-		db.update(CORE_TABLE, args, KEY_ID + "=" + rowId, null);
-		//TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we  get problems if names are the same
-	}
-	public void storeCertificate(byte[] certificate) {
-		try {
-			open();
-			ContentValues value = new ContentValues();
-			value.put(KEY_CERTIFICATE, certificate);
-			db.insert(CERTIFICATE_TABLE, null, value);
-		} catch(SQLException e) {
-			e.printStackTrace();
-		} finally {
-			close();
+		public Cursor getAllCores() {
+			return db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
 		}
-	}
 
-	public boolean hasCertificate(byte[] certificate) {
-		try {
-			open();
-			Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
-			if (c != null) { // This is retarded, fuck Android.
-				if (c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)).equals(certificate)) {
-					return true;
-				}
+		public Bundle getCore(long rowId) throws SQLException {
+			Cursor cursor = db.query(true, CORE_TABLE, new String[] {KEY_ADDRESS, KEY_PORT, KEY_NAME}, KEY_ID + "=" + rowId, null, null, null, null, null);
+			Bundle b = new Bundle();
+			if (cursor != null) {
+				cursor.moveToFirst();
+				b.putString("name", cursor.getString(cursor.getColumnIndex(KEY_NAME)));
+				b.putInt("port", cursor.getInt(cursor.getColumnIndex(KEY_PORT)));
+				b.putString("address", cursor.getString(cursor.getColumnIndex(KEY_ADDRESS)));
+				cursor.close(); 
 			}
-		} finally {
-			close();
+			return b;
 		}
-		return false;
-	}
-}
+
+		public void updateCore(long rowId, String name, String address, int port) {
+			ContentValues args = new ContentValues();
+			args.put(KEY_NAME, name);
+			args.put(KEY_ADDRESS, address);
+			args.put(KEY_PORT, port);
+
+			db.update(CORE_TABLE, args, KEY_ID + "=" + rowId, null);
+			//TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we  get problems if names are the same
+		}
+		public void storeCertificate(byte[] certificate) {
+			try {
+				ContentValues value = new ContentValues();
+				value.put(KEY_CERTIFICATE, certificate);
+				db.insert(CERTIFICATE_TABLE, null, value);
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+			public boolean hasCertificate(String certificate) {
+				Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
+				if (c != null) { // This is retarded, fuck Android.
+					if (c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)).equals(certificate)) {
+						return true;
+					}
+					c.close();
+				}
+				return false;
+			}
+		}
 

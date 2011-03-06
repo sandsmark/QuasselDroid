@@ -6,6 +6,7 @@ import java.security.GeneralSecurityException;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.R.bool;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -115,6 +116,22 @@ public class LoginActivity extends Activity implements Observer {
 	}
 
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		dbHelper.open();
+	}
+	@Override
+	protected void onStop() {
+		super.onStop();
+		doUnbindService();
+		dbHelper.close();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+	}
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 
@@ -280,6 +297,7 @@ public class LoginActivity extends Activity implements Observer {
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
+			connectIntent.putExtra("name", res.getString("name"));
 			connectIntent.putExtra("address", res.getString("address"));
 			connectIntent.putExtra("port", res.getInt("port"));
 			connectIntent.putExtra("username", username.getText().toString());
@@ -289,12 +307,12 @@ public class LoginActivity extends Activity implements Observer {
 			
 			
 			//Start CoreConnectService with connect data
-			if (boundConnService == null)
-				startService(connectIntent);
-			else if (boundConnService.isConnected())
-				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+			//if (boundConnService == null)
+			startService(connectIntent);
+			//else if (boundConnService.isConnected())
+			//	LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
 				
-			bindService(new Intent(LoginActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
+			doBindService();
 		}
 	};
 
@@ -306,7 +324,10 @@ public class LoginActivity extends Activity implements Observer {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
 	private CoreConnService boundConnService = null;
+	private boolean isBound = false;
 	private ServiceConnection mConnection = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			// This is called when the connection with the service has been
@@ -327,5 +348,23 @@ public class LoginActivity extends Activity implements Observer {
 			boundConnService = null;
 		}
 	};
+	
+	void doBindService() {
+		// Establish a connection with the service. We use an explicit
+		// class name because we want a specific service implementation that
+		// we know will be running in our own process (and thus won't be
+		// supporting component replacement by other applications).
+		bindService(new Intent(LoginActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
+		isBound = true;
+		Log.i(TAG, "Binding Service");
+	}
+
+	void doUnbindService() {
+		if (isBound) {
+			Log.i(TAG, "Unbinding service");
+			unbindService(mConnection);
+			isBound = false;
+		}
+	}
 
 }

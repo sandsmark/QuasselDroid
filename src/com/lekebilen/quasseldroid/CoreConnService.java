@@ -63,7 +63,6 @@ public class CoreConnService extends Service{
 		super.onCreate();
 
 		incomingHandler = new IncomingHandler();
-		bufferCollection = new BufferCollection();
 		notifyManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 	}
 
@@ -133,6 +132,7 @@ public class CoreConnService extends Service{
 		String password = connectData.getString("password");
 		Boolean ssl = connectData.getBoolean("ssl");
 		Log.i(TAG, "Connecting to core: "+address+":"+port+" with username " +username);
+		bufferCollection = new BufferCollection();
 		coreConn = new CoreConnection(address, port, username, password, ssl, this);
 		try {
 			coreConn.connect();
