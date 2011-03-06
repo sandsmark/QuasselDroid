@@ -521,8 +521,8 @@ public class CoreConnection {
 							msg.obj = buffers.get(buffer);
 							msg.sendToTarget();
 							
-							// Here we might fetch backlog for all buffers, but we don't want to:
-							requestBacklog(buffer, -1, -1, 10);
+							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
+							//requestBacklog(buffer, -1, -1, 10);
 						}
 
 					/*
