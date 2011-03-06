@@ -510,18 +510,15 @@ public class CoreConnection {
 								msg.arg1 = msgId;
 								msg.sendToTarget();
 							}
-							
-							
 						}
 						/* 
 						 * We have now received everything we need to know about our buffers,
 						 * and will now notify our listeners about them.
 						 */
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+						msg.obj = buffers.values();
+						msg.sendToTarget();
 						for (int buffer: buffers.keySet()) {
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE);
-							msg.obj = buffers.get(buffer);
-							msg.sendToTarget();
-							
 							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
 							requestBacklog(buffer, -1, -1, 1);
 						}

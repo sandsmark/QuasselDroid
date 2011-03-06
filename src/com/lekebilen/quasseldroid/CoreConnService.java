@@ -3,6 +3,7 @@ package com.lekebilen.quasseldroid;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,7 +195,7 @@ public class CoreConnService extends Service{
 				
 				
 				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
-				if(!buffer.hasMessage(message)) {
+				if(buffer != null && !buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks
@@ -221,6 +222,12 @@ public class CoreConnService extends Service{
 				} else {
 					Log.e(TAG, "Getting already gotten buffer");
 				}
+				break;
+			case R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS:
+				/**
+				 * Complete list of buffers received
+				 */
+				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
 				break;
 			case R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE:
 				/**
