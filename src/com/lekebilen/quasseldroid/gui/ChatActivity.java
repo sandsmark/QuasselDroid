@@ -212,7 +212,7 @@ public class ChatActivity extends Activity{
 				holder.separatorView.getLayoutParams().height = 0;
 			}
 			
-			if (position <= 5 ){ //The fifth or less item in the backlog is shown, get more backlog
+			if (position <= 5 && buffer.getSize() > 0){ //The fifth or less item in the backlog is shown, get more backlog
 				boundConnService.getMoreBacklog(buffer.getInfo().id);
 			}
 
@@ -246,7 +246,7 @@ public class ChatActivity extends Activity{
 			//TODO: implement the rest
 			case Plain:
 			default:
-				holder.nickView.setText(entry.getNick());
+				holder.nickView.setText("<" + entry.getNick() + ">");
 				holder.msgView.setText(entry.content);
 				break;
 			}

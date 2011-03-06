@@ -149,7 +149,7 @@ public class QVariant<T extends Object>{
 			
 			QVariant<U> ret = new QVariant<U>();
 			if (type == QVariant.Type.UserType.value) {
-				String name = new String(((ByteBuffer)QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version)).array());
+				String name = (String)QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version);
 				name = name.trim();
 				ret.userTypeName = name;
 
@@ -194,7 +194,7 @@ public class QVariant<T extends Object>{
 			
 			if (data.type == QVariant.Type.UserType) {
 //				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
-				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().serialize(stream, ByteBuffer.wrap(data.getUserTypeName().getBytes()), version);
+				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
 				QMetaTypeRegistry.instance().getTypeForName(data.getUserTypeName()).getSerializer().serialize(stream, data.data, version);
 			} else {
 				QMetaTypeRegistry.instance().getTypeForId(data.type.getValue()).getSerializer().serialize(stream, data.data, version);
@@ -209,6 +209,7 @@ public class QVariant<T extends Object>{
 	
 	public String toString() {
 		switch (type) {
+		case ByteArray:
 		case String:
 			return (String)data;
 		case UInt:
@@ -233,13 +234,6 @@ public class QVariant<T extends Object>{
 			return r;
 		case UserType:
 			return userTypeName + data;
-		case ByteArray:
-			try {
-				return new String(((ByteBuffer)data).array(), "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				return "INVALID ByteBuffer";
-			}
-
 		default:
 			return "/" + type.toString() + " [ " + data.toString()  + " ]/";
 		}

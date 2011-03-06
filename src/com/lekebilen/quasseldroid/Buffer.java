@@ -94,7 +94,6 @@ public class Buffer extends Observable {
 	}
 
 	public boolean hasMessage(IrcMessage message) {
-		Log.d("HVA ER HVA", "last: " +lastSeenMessage+" marker: "+markerLineMessage);
 		return Collections.binarySearch(backlog, message)>=0;
 	}
 	

@@ -190,7 +190,6 @@ public class CoreConnService extends Service{
 				 * New message on one buffer so update that buffer with the new message
 				 */
 				IrcMessage message = (IrcMessage)msg.obj;
-				Log.i(TAG, "MESSAGE: " + message.content.toString() );
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 				
 				
@@ -217,7 +216,6 @@ public class CoreConnService extends Service{
 				 * New buffer received, so update out channel holder with the new buffer
 				 */
 				buffer = (Buffer)msg.obj;
-				Log.i(TAG, "GETTING BUFFER: " + buffer.getInfo().name);
 				if (!bufferCollection.hasBuffer(buffer.getInfo().id)) {
 					bufferCollection.addBuffer(buffer);
 				} else {
