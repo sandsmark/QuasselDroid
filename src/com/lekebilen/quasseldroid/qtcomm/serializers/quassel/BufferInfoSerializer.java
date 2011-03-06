@@ -20,7 +20,7 @@ public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
 		stream.writeInt(data.networkId);
 		stream.writeShort(data.type.getValue());
 		stream.writeUInt(data.groupId, 32);
-		QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().serialize(stream, ByteBuffer.wrap(data.name.getBytes()), version);
+		QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().serialize(stream, data.name, version);
 	}
 
 	@Override

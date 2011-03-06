@@ -414,8 +414,9 @@ public class CoreConnection {
 					e.printStackTrace();
 					return;
 				}
+				long start = System.currentTimeMillis();
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
-				String className, objectName;
+				String className = "", objectName;
 				
 				/*
 				 * Here we handle different calls from the core.
@@ -522,7 +523,7 @@ public class CoreConnection {
 							msg.sendToTarget();
 							
 							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
-							//requestBacklog(buffer, -1, -1, 10);
+							requestBacklog(buffer, -1, -1, 1);
 						}
 
 					/*
@@ -639,6 +640,10 @@ public class CoreConnection {
 					break;
 				default:
 					System.out.println("Unhandled request type: " + type.name());
+				}
+				long end = System.currentTimeMillis();
+				if (end-start > 500) {
+					System.err.println("Slow parsing (" + (end-start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
 				}
 			}
 			try {
