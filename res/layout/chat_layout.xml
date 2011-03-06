@@ -7,7 +7,7 @@
 	<TextView android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:id="@+id/chatNameView"
 		android:layout_alignParentTop="true" android:gravity="center"
-		/>
+		android:singleLine="true" android:ellipsize="marquee" android:focusable="true" android:focusableInTouchMode="true" android:marqueeRepeatLimit="marquee_forever"/>
 	<ListView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/chatBacklogList"
 		android:layout_below="@+id/chatNameView" android:layout_above="@+id/ChatInputView"
