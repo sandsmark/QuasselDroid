@@ -212,7 +212,7 @@ public class ChatActivity extends Activity{
 				holder.separatorView.getLayoutParams().height = 0;
 			}
 			
-			if (position <= 5 ){ //The fifth or less item in the backlog is shown, get more backlog
+			if (position <= 5 && buffer.getSize() > 0){ //The fifth or less item in the backlog is shown, get more backlog
 				boundConnService.getMoreBacklog(buffer.getInfo().id);
 			}
 

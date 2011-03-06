@@ -130,7 +130,7 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer) {
-		requestBacklog(buffer, buffers.get(buffer).getBacklogEntry(buffers.get(buffer).getSize()).messageId + backlogFetchAmount);
+		requestBacklog(buffer, buffers.get(buffer).getBacklogEntry(0).messageId + backlogFetchAmount);
 	}
 	
 	/**
