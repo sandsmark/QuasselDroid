@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-import android.R.color;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,9 +19,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -55,7 +54,8 @@ public class ChatActivity extends Activity{
 		backlogList.setCacheColorHint(0xffffff);
 		backlogList.setAdapter(adapter);
 		backlogList.setDividerHeight(0);
-
+		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+		
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
 		
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
