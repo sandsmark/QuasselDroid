@@ -414,8 +414,9 @@ public class CoreConnection {
 					e.printStackTrace();
 					return;
 				}
+				long start = System.currentTimeMillis();
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
-				String className, objectName;
+				String className = "", objectName;
 				
 				/*
 				 * Here we handle different calls from the core.
@@ -509,20 +510,17 @@ public class CoreConnection {
 								msg.arg1 = msgId;
 								msg.sendToTarget();
 							}
-							
-							
 						}
 						/* 
 						 * We have now received everything we need to know about our buffers,
 						 * and will now notify our listeners about them.
 						 */
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+						msg.obj = buffers.values();
+						msg.sendToTarget();
 						for (int buffer: buffers.keySet()) {
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE);
-							msg.obj = buffers.get(buffer);
-							msg.sendToTarget();
-							
-							// Here we might fetch backlog for all buffers, but we don't want to:
-							requestBacklog(buffer, -1, -1, 10);
+							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
+							requestBacklog(buffer, -1, -1, 1);
 						}
 
 					/*
@@ -639,6 +637,10 @@ public class CoreConnection {
 					break;
 				default:
 					System.out.println("Unhandled request type: " + type.name());
+				}
+				long end = System.currentTimeMillis();
+				if (end-start > 500) {
+					System.err.println("Slow parsing (" + (end-start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
 				}
 			}
 			try {

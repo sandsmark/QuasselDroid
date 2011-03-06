@@ -17,4 +17,5 @@
 <item type="id" name="CORECONNECTION_SET_MARKERLINE_TO_SERVICE"></item>
 
 <item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>
+<item type="id" name="CORECONNECTION_ADD_MULTIPLE_BUFFERS"></item>
 </resources>
