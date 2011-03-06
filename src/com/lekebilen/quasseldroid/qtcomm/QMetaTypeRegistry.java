@@ -62,7 +62,7 @@ public class QMetaTypeRegistry {
 	    types.add(new QMetaType<String>(QMetaType.Type.QString.getValue(),"QString", new QString()));
 	    types.add(new QMetaType<List<String> >(QMetaType.Type.QStringList.getValue(),"QStringList", new QList<String>("QString")));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QStringList.getValue(),"QStringList"));
-	    types.add(new QMetaType<ByteBuffer>(QMetaType.Type.QByteArray.getValue(),"QByteArray", new QByteArray()));
+	    types.add(new QMetaType<String>(QMetaType.Type.QByteArray.getValue(),"QByteArray", new QByteArray()));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QBitArray.getValue(),"QBitArray"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QDate.getValue(),"QDate"));
 	    types.add(new QMetaType<Object>(QMetaType.Type.QTime.getValue(),"QTime"));

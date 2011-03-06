@@ -7,6 +7,7 @@ package com.lekebilen.quasseldroid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -438,7 +439,7 @@ public class CoreConnection {
 				 */
 				case InitData:
 					// The class name and name of the object we are about to create
-					className = new String(((ByteBuffer)packedFunc.remove(0).getData()).array());
+					className = (String) packedFunc.remove(0).getData();
 					objectName = (String) packedFunc.remove(0).getData();
 					
 					/*
@@ -552,7 +553,17 @@ public class CoreConnection {
 					/* See above; parse out information about object, 
 					 * and additionally a sync function name.
 					 */
-					className = packedFunc.remove(0).getData().toString(); // This is either a byte buffer or a string
+					Object foo = packedFunc.remove(0).getData();
+					//System.out.println("FUCK" + foo.toString() + " balle " + foo.getClass().getName());
+					if (foo.getClass().getName().equals("java.nio.ReadWriteHeapByteBuffer")) {
+						try {
+							System.out.println("faen i helvete: " + new String(((ByteBuffer)foo).array(), "UTF-8"));
+						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}						
+					}
+					className = (String)foo; // This is either a byte buffer or a string
 					objectName = (String) packedFunc.remove(0).getData();
 					String function = packedFunc.remove(0).toString();
 

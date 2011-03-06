@@ -176,7 +176,6 @@ public class BufferActivity extends ListActivity {
 
 		@Override
 		public void update(Observable observable, Object data) {
-			Log.i(TAG, "BUFFERLIST CHANGED");
 			notifyDataSetChanged();
 
 		}

@@ -31,8 +31,7 @@ public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
 		ret.networkId = stream.readInt();
 		ret.type = BufferInfo.Type.getType(stream.readShort());
 		ret.groupId = stream.readUInt(32);
-		ByteBuffer buf = (ByteBuffer) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 
-		ret.name =  new String(buf.array(), "UTF-8"); 
+		ret.name =  (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 
 		return ret;
 	}
 }

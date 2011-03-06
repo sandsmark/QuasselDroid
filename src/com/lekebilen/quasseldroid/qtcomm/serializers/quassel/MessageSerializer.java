@@ -34,10 +34,8 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 		ret.type = IrcMessage.Type.getForValue((int) stream.readUInt(32));
 		ret.flags = stream.readByte();
 		ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().unserialize(stream, version);
-		ByteBuffer b = (ByteBuffer) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 
-		ret.sender = new String(b.array(), "UTF-8");
-		b = (ByteBuffer) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version); 
-		ret.content = new String(b.array(), "UTF-8");
+		ret.sender = (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
+		ret.content =  (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
 		
 		return ret;
 	}

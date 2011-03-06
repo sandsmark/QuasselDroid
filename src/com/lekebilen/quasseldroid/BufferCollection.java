@@ -23,7 +23,6 @@ public class BufferCollection extends Observable implements Observer {
 	}
 	
 	public void addBuffer(Buffer buffer) {
-		Log.i(TAG, "Channel add message " + buffer.getInfo().name);
 		buffers.put(buffer.getInfo().id, buffer);
 		this.setChanged();
 		buffer.addObserver(this);
@@ -50,7 +49,6 @@ public class BufferCollection extends Observable implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		Log.d(TAG, "NOTIFY IN BUFFERCOLLECITON");
 		this.setChanged();
 		notifyObservers();
 		

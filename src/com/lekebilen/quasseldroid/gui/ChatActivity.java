@@ -246,7 +246,7 @@ public class ChatActivity extends Activity{
 			//TODO: implement the rest
 			case Plain:
 			default:
-				holder.nickView.setText(entry.getNick());
+				holder.nickView.setText("<" + entry.getNick() + ">");
 				holder.msgView.setText(entry.content);
 				break;
 			}
