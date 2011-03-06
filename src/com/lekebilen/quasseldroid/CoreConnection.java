@@ -472,6 +472,24 @@ public class CoreConnection {
 							List<String> users = new ArrayList<String>(userModes.keySet());
 							String topic = (String)chan.get("topic").getData();
 							// Horribly inefficient search for the right buffer, Java sucks.
+							
+							Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();
+							
+							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
+							
+							for (String nick : userObjs.keySet()) {
+								IrcUser user = new IrcUser();
+								user.name = nick;
+								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) userObjs.get(nick).getData();
+								user.away = (Boolean) map.get("away").getData();
+								user.awayMessage = (String) map.get("awayMessage").getData();
+								user.ircOperator = (String) map.get("ircOperator").getData();
+								user.nick = (String) map.get("nick").getData();
+								user.channels = (List<String>) map.get("channels").getData();
+								
+								ircUsers.add(user);
+							}
+							
 							for (Buffer buffer: buffers.values()) {
 								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
 									buffer.setTopic(topic);
@@ -479,6 +497,10 @@ public class CoreConnection {
 									break;
 								}
 							}
+							
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
+							msg.obj = ircUsers;
+							msg.sendToTarget();
 						}
 						
 					/*
@@ -535,7 +557,10 @@ public class CoreConnection {
 						user.ircOperator = (String) map.get("ircOperator").getData();
 						user.nick = (String) map.get("nick").getData();
 						user.channels = (List<String>) map.get("channels").getData();
-						service.newUser(user);
+						
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USER_ADDED);
+						msg.obj = (IrcUser) user;
+						msg.sendToTarget();
 					/*
 					 * There are several objects that we don't care about (at the moment).
 					 */

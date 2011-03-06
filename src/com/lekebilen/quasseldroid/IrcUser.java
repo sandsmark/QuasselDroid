@@ -10,4 +10,9 @@ public class IrcUser {
 	public String ircOperator;
 	public String nick;
 	public List<String> channels;
+	
+	
+	public String toString(){
+		return nick + " away: " + away + " Num chans: "+ channels.size();
+	}
 }
