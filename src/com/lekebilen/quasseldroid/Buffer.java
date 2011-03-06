@@ -14,7 +14,7 @@ import android.util.Log;
 import com.lekebilen.quasseldroid.BufferInfo.Type;
 import com.lekebilen.quasseldroid.gui.ChatActivity;
 
-public class Buffer extends Observable {
+public class Buffer extends Observable implements Comparable<Buffer> {
 	private BufferInfo info;
 	private ArrayList<IrcMessage> backlog = null;
 	private int lastSeenMessage;
@@ -132,5 +132,14 @@ public class Buffer extends Observable {
 
 	public String topic() {
 		return topic;
+	}
+
+	@Override
+	public int compareTo(Buffer another) {
+		if (info.networkId != another.info.networkId)
+			return info.networkId - another.info.networkId;
+		else if (info.type != another.info.type)
+			return info.type.value - another.info.type.value;
+		else return info.name.compareTo(another.info.name);
 	}
 }
