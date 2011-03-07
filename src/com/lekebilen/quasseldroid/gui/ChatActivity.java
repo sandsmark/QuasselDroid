@@ -57,9 +57,9 @@ public class ChatActivity extends Activity{
 		backlogList.setOnScrollListener(new BacklogScrollListener(5));
 		backlogList.setDividerHeight(0);
 		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-		
+
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-		
+
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
 	}
 
@@ -139,7 +139,7 @@ public class ChatActivity extends Activity{
 		doUnbindService();
 		super.onStop();
 	}
-	
+
 
 
 	public class BacklogAdapter extends BaseAdapter implements Observer {
@@ -147,6 +147,7 @@ public class ChatActivity extends Activity{
 		//private ArrayList<IrcMessage> backlog;
 		private LayoutInflater inflater;
 		private Buffer buffer;
+		private ListView list = (ListView)findViewById(R.id.chatBacklogList);
 
 
 		public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
@@ -169,6 +170,7 @@ public class ChatActivity extends Activity{
 			this.buffer = buffer;
 			((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
 			notifyDataSetChanged();
+			list.scrollTo(list.getScrollX(), list.getScrollY());
 		}
 
 
@@ -186,7 +188,8 @@ public class ChatActivity extends Activity{
 
 		@Override
 		public long getItemId(int position) {
-			return position;
+			//return position;
+			return buffer.getBacklogEntry(position).messageId;
 		}
 
 		@Override
@@ -221,7 +224,7 @@ public class ChatActivity extends Activity{
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 			holder.msgView.setTextColor(0xff000000);
 			holder.msgView.setTypeface(Typeface.DEFAULT);
-			
+
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("*");
@@ -240,7 +243,7 @@ public class ChatActivity extends Activity{
 				holder.nickView.setText("â†�");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
 				break;
-			//TODO: implement the rest
+				//TODO: implement the rest
 			case Plain:
 			default:
 				holder.nickView.setText("<" + entry.getNick() + ">");
@@ -271,16 +274,14 @@ public class ChatActivity extends Activity{
 			buffer = null;
 
 		}
-		
+
 		public int getBufferId() {
 			return buffer.getInfo().id;
 		}
 
 		public void getMoreBacklog() {
 			boundConnService.getMoreBacklog(this.getBufferId());
-			
 		}
-
 
 	}	
 
@@ -296,38 +297,42 @@ public class ChatActivity extends Activity{
 
 
 	private class BacklogScrollListener implements OnScrollListener {
-		
+
 		private int visibleThreshold;
-	    private int previousTotal = 0;
-	    private boolean loading = true;
-	    
-	    public BacklogScrollListener(int visibleThreshold) {
-	        this.visibleThreshold = visibleThreshold;
-	    }
+		private int previousTotal = 0;
+		private boolean loading = false;
+
+		public BacklogScrollListener(int visibleThreshold) {
+			this.visibleThreshold = visibleThreshold;
+		}
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-		    if (loading) {
-	            if (totalItemCount > previousTotal) { //This isn't 100% correct, since we can get msg on the bottom of the buffer while we wait for backlog, but it's good enough for now
-	                loading = false;
-	            }
-	        }
-		    Log.d(TAG, "# totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
-	        if (!loading && (firstVisibleItem <= visibleThreshold)) {
-	        	previousTotal = totalItemCount;
-	        	loading = true;
-	            ChatActivity.this.adapter.getMoreBacklog();
-	            
-	        }	
-	        
+			if (loading) {
+				if (totalItemCount >= previousTotal+visibleThreshold) { //This isn't 100% correct, since we can get msg on the bottom of the buffer while we wait for backlog, but it's good enough for now
+					loading = false;
+				}
+			}
+			Log.d(TAG, "# totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+			if (!loading && (firstVisibleItem <= visibleThreshold)) {
+				if (adapter.buffer!=null) {
+					previousTotal = totalItemCount;
+					loading = true;
+					ChatActivity.this.adapter.getMoreBacklog();
+				}else {
+					Log.w(TAG, "Can't get backlog on null buffer");
+				}
+
+			}	
+
 		}
 
 		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			// Not interesting for us to use
-			
+
 		}
-		
+
 	}
 
 	/**
@@ -384,7 +389,7 @@ public class ChatActivity extends Activity{
 			unbindService(mConnection);
 			isBound = false;
 			adapter.clearBuffer();
-			
+
 		}
 	}
 }
