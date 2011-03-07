@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +15,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.location.Address;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +45,7 @@ public class CoreConnService extends Service{
 	NotificationManager notifyManager;
 
 	BufferCollection bufferCollection;
+	HashMap<String, IrcUser> ircUsers = new HashMap<String, IrcUser>();
 
 	/**
 	 * Class for clients to access.  Because we know this service always
@@ -150,9 +154,16 @@ public class CoreConnService extends Service{
 	}
 
 	public void newUser(IrcUser user) {
-
+		ircUsers.put(user.nick, user);
 	}
 
+	public IrcUser getUser(String nick){
+		return ircUsers.get(nick);
+	}
+	public boolean hasUser(String nick){
+		return ircUsers.containsKey(nick);
+	}
+	
 	public void sendMessage(int bufferId, String message){
 		coreConn.sendMessage(bufferId, message);
 	}
@@ -250,6 +261,24 @@ public class CoreConnService extends Service{
 				 * Lost connection with core, update notification
 				 */
 				showNotification(false);
+				break;
+				
+			case R.id.CORECONNECTION_NEW_USERLIST_ADDED:
+				/**
+				 * Initial list of users
+				 */
+				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
+				for (IrcUser user : users) {
+					newUser(user);
+				}
+				break;
+				
+			case R.id.CORECONNECTION_NEW_USER_ADDED:
+				/**
+				 * New IrcUser added
+				 */
+				IrcUser user = (IrcUser) msg.obj;
+				newUser(user);
 				break;
 			}
 		}

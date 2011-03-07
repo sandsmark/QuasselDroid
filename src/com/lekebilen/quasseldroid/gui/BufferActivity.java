@@ -153,8 +153,14 @@ public class BufferActivity extends ListActivity {
 				holder.bufferView.setText(entry.getInfo().name);
 				break;
 			case ChannelBuffer:
-			case QueryBuffer:
 				holder.bufferView.setText("\t" + entry.getInfo().name);
+				break;
+			case QueryBuffer:
+				String nick = entry.getInfo().name;
+				if (boundConnService.hasUser(nick)){
+					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+				}
+				holder.bufferView.setText("\t" + nick);
 				break;
 			case GroupBuffer:
 			case InvalidBuffer:
