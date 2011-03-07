@@ -42,6 +42,7 @@ import javax.net.ssl.X509TrustManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Message;
+import android.util.Log;
 
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
@@ -130,7 +131,7 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer) {
-		requestBacklog(buffer, buffers.get(buffer).getBacklogEntry(0).messageId + backlogFetchAmount);
+		requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, backlogFetchAmount);
 	}
 	
 	/**
@@ -156,8 +157,8 @@ public class CoreConnection {
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
 		retFunc.add(new QVariant<Integer>(firstMsgId, "MsgId"));
 		retFunc.add(new QVariant<Integer>(lastMsgId, "MsgId"));
-		retFunc.add(new QVariant<Integer>(Config.backlogLimit, QVariant.Type.Int));
 		retFunc.add(new QVariant<Integer>(maxAmount, QVariant.Type.Int));
+		retFunc.add(new QVariant<Integer>(0, QVariant.Type.Int));
 		
 		try {
 			sendQVariantList(retFunc);
@@ -390,7 +391,7 @@ public class CoreConnection {
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
 	
-	private int backlogFetchAmount = 50;
+	private int backlogFetchAmount = 5;
 	
 	private boolean connected;
 

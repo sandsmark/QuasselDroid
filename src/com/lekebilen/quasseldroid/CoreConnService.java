@@ -174,11 +174,12 @@ public class CoreConnService extends Service{
 
 	public Buffer getBuffer(int bufferId, Observer obs){
 		bufferCollection.getBuffer(bufferId).addObserver(obs);
-		coreConn.requestBacklog(bufferId);
+		//coreConn.requestBacklog(bufferId);
 		return bufferCollection.getBuffer(bufferId);
 	}
 	
 	public void getMoreBacklog(int bufferId){
+		Log.d(TAG, "GETING MORE BACKLOG");
 		coreConn.requestMoreBacklog(bufferId);
 	}
 

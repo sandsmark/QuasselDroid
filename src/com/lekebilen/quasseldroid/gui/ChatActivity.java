@@ -22,6 +22,8 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -39,7 +41,6 @@ public class ChatActivity extends Activity{
 	public static final int MESSAGE_RECEIVED = 0;
 
 	private BacklogAdapter adapter;
-	//	IncomingHandler handler;
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
 	/** Called when the activity is first created. */
@@ -53,6 +54,7 @@ public class ChatActivity extends Activity{
 		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList));
 		backlogList.setCacheColorHint(0xffffff);
 		backlogList.setAdapter(adapter);
+		backlogList.setOnScrollListener(new BacklogScrollListener(5));
 		backlogList.setDividerHeight(0);
 		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
 		
@@ -211,11 +213,6 @@ public class ChatActivity extends Activity{
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
 			}
-			
-			if (position <= 5 && buffer.getSize() > 0){ //The fifth or less item in the backlog is shown, get more backlog
-				boundConnService.getMoreBacklog(buffer.getInfo().id);
-			}
-
 
 			IrcMessage entry = this.getItem(position);
 			holder.timeView.setText(entry.getTime());
@@ -232,15 +229,15 @@ public class ChatActivity extends Activity{
 				holder.msgView.setText(entry.getNick() + " " + entry.content);
 				break;
 			case Join:
-				holder.nickView.setText("→");
+				holder.nickView.setText("â†’");
 				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
 				break;
 			case Part:
-				holder.nickView.setText("←");
+				holder.nickView.setText("â†�");
 				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
 				break;
 			case Quit:				
-				holder.nickView.setText("←");
+				holder.nickView.setText("â†�");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
 				break;
 			//TODO: implement the rest
@@ -279,6 +276,11 @@ public class ChatActivity extends Activity{
 			return buffer.getInfo().id;
 		}
 
+		public void getMoreBacklog() {
+			boundConnService.getMoreBacklog(this.getBufferId());
+			
+		}
+
 
 	}	
 
@@ -293,50 +295,40 @@ public class ChatActivity extends Activity{
 
 
 
-	/**
-	 * Handler of incoming messages from service.
-	 */
-	//	class IncomingHandler extends Handler {
-	//		@Override
-	//		public void handleMessage(Message msg) {
-	//			switch (msg.what) {
-	//				case R.id.CHAT_MESSAGES_UPDATED:
-	//					ChatActivity.this.adapter.addItem((IrcMessage)msg.obj);
-	//					break;
-	//			//	            case CoreConnection.MSG_CONNECT:
-	//			//	                mCallbackText.setText("We have connection!");
-	//			//	                break;
-	//			//	            case CoreConnection.MSG_CONNECT_FAILED:
-	//			//	            	mCallbackText.setText("Connection failed!");
-	//			//	            	break;
-	//			//	            case CoreConnection.MSG_NEW_BUFFER:
-	//			//	            	mCallbackText.setText("Got new buffer!");
-	//			//	            	Buffer buffer = (Buffer) msg.obj;
-	//			////	            	break;
-	//			//	            case CoreConnection.MSG_NEW_MESSAGE:
-	//			//	            	IrcMessage message = (IrcMessage) msg.obj;
-	//			//	            	if (message.bufferInfo.id == bufferId) // Check if the message belongs to the buffer we're displaying
-	//			//	            		adapter.addItem(new BacklogEntry(message.timestamp.toString(), message.sender, message.content));
-	//			//	            	break;
-	//			////	            case CoreConnection.MSG_NEW_NETWORK:
-	//			////	            	mCallbackText.setText("Got new network!");
-	//			////	            	Network network = (Network) msg.obj;
-	//			////	            	break;
-	//			//	            case CoreConnection.MSG_NEW_USER:
-	//			//	            	mCallbackText.setText("Got new user!");//TODO: handle me
-	//			//	            	IrcUser user = (IrcUser) msg.obj; 
-	//			//	            	if (user.channels.contains(bufferName)) // Make sure the user is in this channel
-	//			//	            		nicks.add(user.nick);
-	//			//	            	break;
-	//			//	            default:
-	//			//	                super.handleMessage(msg);
-	//			}
-	//		}
-	//	}
+	private class BacklogScrollListener implements OnScrollListener {
+		
+		private int visibleThreshold;
+	    private int previousTotal = 0;
+	    private boolean loading = true;
+	    
+	    public BacklogScrollListener(int visibleThreshold) {
+	        this.visibleThreshold = visibleThreshold;
+	    }
 
+		@Override
+		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+		    if (loading) {
+	            if (totalItemCount > previousTotal) { //This isn't 100% correct, since we can get msg on the bottom of the buffer while we wait for backlog, but it's good enough for now
+	                loading = false;
+	            }
+	        }
+		    Log.d(TAG, "# totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+	        if (!loading && (firstVisibleItem <= visibleThreshold)) {
+	        	previousTotal = totalItemCount;
+	        	loading = true;
+	            ChatActivity.this.adapter.getMoreBacklog();
+	            
+	        }	
+	        
+		}
 
-
-
+		@Override
+		public void onScrollStateChanged(AbsListView view, int scrollState) {
+			// Not interesting for us to use
+			
+		}
+		
+	}
 
 	/**
 	 * Code for service binding:
@@ -357,6 +349,7 @@ public class ChatActivity extends Activity{
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
 			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));
+			Log.d(TAG, "Buffer gotten, nr or msg on it in the start is: "+adapter.getCount());
 
 		}
 
@@ -391,6 +384,7 @@ public class ChatActivity extends Activity{
 			unbindService(mConnection);
 			isBound = false;
 			adapter.clearBuffer();
+			
 		}
 	}
 }
