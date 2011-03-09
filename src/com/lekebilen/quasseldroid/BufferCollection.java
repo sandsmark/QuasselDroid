@@ -20,6 +20,10 @@ public class BufferCollection extends Observable implements Observer {
 	}
 	
 	public void addBuffer(Buffer buffer) {
+		if (buffers.containsKey(buffer.getInfo().id)) {
+			return;
+		}
+		
 		buffers.put(buffer.getInfo().id, buffer);
 		bufferList.add(buffer);
 		Collections.sort(bufferList);
@@ -47,11 +51,17 @@ public class BufferCollection extends Observable implements Observer {
 	}
 	
 	public void addBuffers(Collection<Buffer> buffers) {
+		boolean changed = false;
 		for (Buffer buffer: buffers) {
+			if (this.buffers.containsKey(buffer.getInfo().id))
+				continue;
+			changed = true;
 			this.buffers.put(buffer.getInfo().id, buffer);
 			bufferList.add(buffer);
 			buffer.addObserver(this);
 		}
+		if (!changed) return;
+		
 		Collections.sort(bufferList);
 		this.setChanged();
 		notifyObservers();

@@ -57,6 +57,8 @@ public class ChatActivity extends Activity{
 		backlogList.setOnScrollListener(new BacklogScrollListener(5));
 		backlogList.setDividerHeight(0);
 		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+		//View v = backlogList.getChildAt(backlogList.getChildCount());
+		backlogList.setSelection(backlogList.getChildCount());
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
 

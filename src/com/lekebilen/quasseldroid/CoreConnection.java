@@ -391,7 +391,7 @@ public class CoreConnection {
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
 	
-	private int backlogFetchAmount = 5;
+	private int backlogFetchAmount = 50;
 	
 	private boolean connected;
 
