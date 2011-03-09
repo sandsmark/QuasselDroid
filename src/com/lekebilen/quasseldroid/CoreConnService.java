@@ -198,6 +198,7 @@ public class CoreConnService extends Service{
 		public void handleMessage(Message msg) {
 			Buffer buffer;
 			switch (msg.what) {
+			case R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE:
 			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
 				/**
 				 * New message on one buffer so update that buffer with the new message

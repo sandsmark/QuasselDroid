@@ -612,7 +612,7 @@ public class CoreConnection {
 						Collections.reverse(data); // Apparently, we receive them in the wrong order
 						// Send our the backlog messages to our listeners
 						for (QVariant<?> message: data) {
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE);
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE);
 							msg.obj = (IrcMessage) message.getData();
 							msg.sendToTarget();
 						}
