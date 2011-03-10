@@ -74,7 +74,7 @@ public class CoreConnService extends Service{
 	@Override
 	public void onDestroy() {
 		this.disconnectFromCore();
-		
+
 	}
 
 	public Handler getHandler() {
@@ -89,41 +89,41 @@ public class CoreConnService extends Service{
 		return START_STICKY;
 
 	}
-	
+
 	/**
 	 * Show a notification while this service is running.
 	 * @param connected are we connected to a core or not 
 	 */
-   private void showNotification(boolean connected) {
-	   //TODO: Remove when "leaving" the application
-       CharSequence text =  "";
-       if (connected){
-       	text = getText(R.string.notification_connected);
-       } else {
-       	text = getText(R.string.notification_disconnected);
-       }
-       // Set the icon, scrolling text and timestamp
-       Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
-       // The PendingIntent to launch our activity if the user selects this notification
-       PendingIntent contentIntent;
-       
-       //TODO: Fix so that if a chat is currently on top, launch that one, instead of the BufferActivity
-       if (connected){ //Launch the Buffer Activity.
-       	Intent launch = new Intent(this, BufferActivity.class);
-       	launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-       	contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-       } else {
-       	Intent launch = new Intent(this, LoginActivity.class);
-       	contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-       }
-       // Set the info for the views that show in the notification panel.
-       notification.setLatestEventInfo(this, getText(R.string.app_name),
-                      text, contentIntent);
-       // Send the notification.
-       notifyManager.notify(R.id.NOTIFICATION, notification);
-   }
-	
-	
+	private void showNotification(boolean connected) {
+		//TODO: Remove when "leaving" the application
+		CharSequence text =  "";
+		if (connected){
+			text = getText(R.string.notification_connected);
+		} else {
+			text = getText(R.string.notification_disconnected);
+		}
+		// Set the icon, scrolling text and timestamp
+		Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
+		// The PendingIntent to launch our activity if the user selects this notification
+		PendingIntent contentIntent;
+
+		//TODO: Fix so that if a chat is currently on top, launch that one, instead of the BufferActivity
+		if (connected){ //Launch the Buffer Activity.
+			Intent launch = new Intent(this, BufferActivity.class);
+			launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
+		} else {
+			Intent launch = new Intent(this, LoginActivity.class);
+			contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
+		}
+		// Set the info for the views that show in the notification panel.
+		notification.setLatestEventInfo(this, getText(R.string.app_name),
+				text, contentIntent);
+		// Send the notification.
+		notifyManager.notify(R.id.NOTIFICATION, notification);
+	}
+
+
 
 	/**
 	 * Handle the data in the intent, and use it to connect with CoreConnect
@@ -163,11 +163,11 @@ public class CoreConnService extends Service{
 	public boolean hasUser(String nick){
 		return ircUsers.containsKey(nick);
 	}
-	
+
 	public void sendMessage(int bufferId, String message){
 		coreConn.sendMessage(bufferId, message);
 	}
-	
+
 	public void markBufferAsRead(int bufferId){
 		coreConn.requestMarkBufferAsRead(bufferId);
 	}
@@ -177,10 +177,10 @@ public class CoreConnService extends Service{
 		//coreConn.requestBacklog(bufferId);
 		return bufferCollection.getBuffer(bufferId);
 	}
-	
-	public void getMoreBacklog(int bufferId){
+
+	public void getMoreBacklog(int bufferId, int amount){
 		Log.d(TAG, "GETING MORE BACKLOG");
-		coreConn.requestMoreBacklog(bufferId);
+		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
 
@@ -197,16 +197,16 @@ public class CoreConnService extends Service{
 		@Override
 		public void handleMessage(Message msg) {
 			Buffer buffer;
+			IrcMessage message;
 			switch (msg.what) {
 			case R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE:
-			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
 				/**
 				 * New message on one buffer so update that buffer with the new message
 				 */
-				IrcMessage message = (IrcMessage)msg.obj;
+				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
-				
-				
+
+
 				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
 				if(buffer != null && !buffer.hasMessage(message)) {
 					/**
@@ -218,7 +218,31 @@ public class CoreConnService extends Service{
 					if (matcher.find()) {
 						message.setFlag(IrcMessage.Flag.Highlight);
 					}
-					buffer.addBacklog(message);					
+					buffer.addBacklogMessage(message);	
+				}else {
+					Log.e(TAG, "Getting message buffer already have");
+				}
+				break;
+			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
+				/**
+				 * New message on one buffer so update that buffer with the new message
+				 */
+				message = (IrcMessage)msg.obj;
+				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
+
+
+				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
+				if(buffer != null && !buffer.hasMessage(message)) {
+					/**
+					 * Check if we are highlighted in the message, 
+					 * TODO: Add support for custom highlight masks
+					 */
+					Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+coreConn.getNick(buffer.getInfo().networkId)+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+					Matcher matcher = regexHighlight.matcher(message.content);
+					if (matcher.find()) {
+						message.setFlag(IrcMessage.Flag.Highlight);
+					}
+					buffer.addMessage(message);					
 				}else {
 					Log.e(TAG, "Getting message buffer already have");
 				}
@@ -264,7 +288,7 @@ public class CoreConnService extends Service{
 				 */
 				showNotification(false);
 				break;
-				
+
 			case R.id.CORECONNECTION_NEW_USERLIST_ADDED:
 				/**
 				 * Initial list of users
@@ -274,7 +298,7 @@ public class CoreConnService extends Service{
 					newUser(user);
 				}
 				break;
-				
+
 			case R.id.CORECONNECTION_NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
@@ -290,7 +314,7 @@ public class CoreConnService extends Service{
 		notifyManager.cancel(R.id.NOTIFICATION);
 		coreConn.disconnect();
 	}
-	
+
 	public boolean isConnected() {
 		return coreConn.isConnected();
 	}

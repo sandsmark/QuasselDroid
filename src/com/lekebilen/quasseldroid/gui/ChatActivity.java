@@ -220,6 +220,7 @@ public class ChatActivity extends Activity{
 			}
 
 			IrcMessage entry = this.getItem(position);
+			holder.messageID = entry.messageId;
 			holder.timeView.setText(entry.getTime());
 			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
 
@@ -263,8 +264,32 @@ public class ChatActivity extends Activity{
 
 		@Override
 		public void update(Observable observable, Object data) {
-			Log.i(TAG, "BACKLOG CHANGED");
-			notifyDataSetChanged();
+			if (data==null) {
+				notifyDataSetChanged();
+				return;
+			}
+			switch ((Integer)data) {
+			case R.id.BUFFERUPDATE_NEWMESSAGE:
+				notifyDataSetChanged();				
+				break;
+			case R.id.BUFFERUPDATE_BACKLOG:
+				int topPos= list.getFirstVisiblePosition();
+				int topId = ((ViewHolder)(list.getChildAt(topPos).getTag())).messageID;
+				notifyDataSetChanged();
+				Log.e(TAG, "TopPos "+topPos +" msg: "+((ViewHolder)list.getChildAt(topPos).getTag()).msgView.getText());
+				Log.i(TAG, "BACKLOG CHANGED");
+				for(int i=0;i<adapter.getCount();i++){
+					//Log.d(TAG, "FOR: "+adapter.getItemId(i) + " msg: "+adapter.getItem(i).content);
+					if (adapter.getItemId(i)==topId){
+						Log.e(TAG, "NewPos: "+i);
+						list.setSelectionFromTop(i,5);
+						//list.setSelection(i);
+						break;
+					}
+				}
+				break;
+			}
+
 		}
 
 		public void stopObserving() {
@@ -282,7 +307,8 @@ public class ChatActivity extends Activity{
 		}
 
 		public void getMoreBacklog() {
-			boundConnService.getMoreBacklog(this.getBufferId());
+			adapter.buffer.setBacklogPending(10); //TODO: get amount from settings
+			boundConnService.getMoreBacklog(adapter.getBufferId(),10);
 		}
 
 	}	
@@ -293,6 +319,8 @@ public class ChatActivity extends Activity{
 		public TextView msgView;
 		public TextView separatorView;
 		public LinearLayout item_layout;
+
+		public int messageID;
 	}
 
 
@@ -301,7 +329,6 @@ public class ChatActivity extends Activity{
 	private class BacklogScrollListener implements OnScrollListener {
 
 		private int visibleThreshold;
-		private int previousTotal = 0;
 		private boolean loading = false;
 
 		public BacklogScrollListener(int visibleThreshold) {
@@ -311,14 +338,13 @@ public class ChatActivity extends Activity{
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 			if (loading) {
-				if (totalItemCount >= previousTotal+visibleThreshold) { //This isn't 100% correct, since we can get msg on the bottom of the buffer while we wait for backlog, but it's good enough for now
+				if (!adapter.buffer.hasPendingBacklog()) {
 					loading = false;
 				}
 			}
-			Log.d(TAG, "# totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
 			if (!loading && (firstVisibleItem <= visibleThreshold)) {
 				if (adapter.buffer!=null) {
-					previousTotal = totalItemCount;
 					loading = true;
 					ChatActivity.this.adapter.getMoreBacklog();
 				}else {

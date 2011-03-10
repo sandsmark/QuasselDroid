@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 import java.util.Observable;
 
+import android.app.PendingIntent;
 import android.util.Log;
 
 import com.lekebilen.quasseldroid.BufferInfo.Type;
@@ -23,15 +24,23 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private static final String TAG = Buffer.class.getSimpleName();
 	private List<String> nicks;
 	private String topic;
+	
+	private int  backlogPending = 0;
+	private List<IrcMessage> backlogStash;
 
 	public Buffer(BufferInfo info) {
 		this.info = info;
 		backlog = new ArrayList<IrcMessage>();
+		backlogStash = new ArrayList<IrcMessage>();
 	}
 
-	public void addBacklog(IrcMessage message) {
-		//Log.i(TAG, "Buffer add message " + message.content);
-		
+	
+	public void addMessage(IrcMessage message ) {
+		newBufferEntry(message);
+		notifyObservers(R.id.BUFFERUPDATE_NEWMESSAGE);
+	}
+	
+	private void newBufferEntry(IrcMessage message) {		
 		if (message.isHighlighted() && message.messageId > lastHighlightMessageId){
 			lastHighlightMessageId = message.messageId;
 			this.setChanged();
@@ -49,10 +58,28 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 				Log.e(TAG, "Getting message buffer already has");
 			}
 		}
-
-		notifyObservers();
 	}
 	
+	public void addBacklogMessage(IrcMessage message) {
+		backlogStash.add(message);
+		
+		if (backlogPending==0 || backlogPending<=backlogStash.size()) {
+			for (IrcMessage item : backlogStash) {
+				newBufferEntry(item);
+			}
+			backlogStash.clear();
+			backlogPending=0;
+		}
+		notifyObservers(R.id.BUFFERUPDATE_BACKLOG);
+	}
+	
+	public void setBacklogPending(int amount) {
+		backlogPending = amount;
+	}
+	
+	public boolean hasPendingBacklog() {
+		return backlogPending>0;
+	}
 	public boolean hasUnseenHighlight(){
 		if (lastHighlightMessageId > lastSeenMessage){
 			return true;

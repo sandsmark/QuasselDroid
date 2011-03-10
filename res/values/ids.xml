@@ -21,4 +21,6 @@
 <item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>
 <item type="id" name="CORECONNECTION_ADD_MULTIPLE_BUFFERS"></item>
 <item name="CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE" type="id"></item>
+<item type="id" name="BUFFERUPDATE_BACKLOG"></item>
+<item type="id" name="BUFFERUPDATE_NEWMESSAGE"></item>
 </resources>
