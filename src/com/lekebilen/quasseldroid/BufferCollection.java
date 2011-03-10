@@ -55,6 +55,7 @@ public class BufferCollection extends Observable implements Observer {
 		for (Buffer buffer: buffers) {
 			if (this.buffers.containsKey(buffer.getInfo().id))
 				continue;
+			
 			changed = true;
 			this.buffers.put(buffer.getInfo().id, buffer);
 			bufferList.add(buffer);

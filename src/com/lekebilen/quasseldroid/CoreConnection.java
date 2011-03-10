@@ -110,13 +110,13 @@ public class CoreConnection {
 	 * Requests all buffers.
 	 */
 	public void requestBuffers() {
-		try {
-			sendInitRequest("BufferSyncer", "");
+		//try {
+			//sendInitRequest("BufferSyncer", "");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-			connected = false;
-		}
+		//} catch (IOException e) {
+		//	e.printStackTrace();
+		//	connected = false;
+		//}
 	}
 	
 	/**
@@ -283,8 +283,12 @@ public class CoreConnection {
 			buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
 			for (QVariant<?> bufferInfoQV: bufferInfos) {
 				BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
+				requestBacklog(bufferInfo.id, -1, -1, 1);
 				buffers.put(bufferInfo.id, new Buffer(bufferInfo));
 			}
+			Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+			msg.obj = buffers.values();
+			msg.sendToTarget();
 			List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
 			networks = new ArrayList<Integer>(networkIds.size());
 			for (QVariant<?> networkId: networkIds) {
@@ -295,22 +299,27 @@ public class CoreConnection {
 			// Now the fun part starts, where we play signal proxy
 			
 			// START SIGNAL PROXY INIT
-			sendInitRequest("BacklogManager", "");
+			//sendInitRequest("BacklogManager", "");
+			// We must do this here, to get network names early enough
+			for(int network: networks) {
+				sendInitRequest("Network", Integer.toString(network));
+			}
+			sendInitRequest("BufferSyncer", "");
+			sendInitRequest("BufferViewManager", "");
+			sendInitRequest("AliasManager", "");
+			sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
+			sendInitRequest("IgnoreListManager", "");
+			
 			
 			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
 			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
 			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
 			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
-			packedFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariant.Type.String));
-			packedFunc.add(new QVariant<Integer>(1, "BufferId"));
-			packedFunc.add(new QVariant<Integer>(1, "MsgId"));
+			packedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariant.Type.String));
 			sendQVariantList(packedFunc);
-			
-			// We must do this here, to get network names early enough
-			for(int network: networks) {
-				sendInitRequest("Network", Integer.toString(network));
-			}			
-			
+			sendInitRequest("BufferViewConfig", "0");
+
+
 			readThread = new ReadThread();
 			readThread.start();
 			
@@ -328,10 +337,10 @@ public class CoreConnection {
 				}
 			};
 			heartbeatTimer = new Timer();
-			heartbeatTimer.schedule(sendPingAction, 0, 30000); // Send heartbeats every 30 seconds
+			heartbeatTimer.schedule(sendPingAction, 30000, 30000); // Send heartbeats every 30 seconds
 			
 			// END SIGNAL PROXY
-			
+			System.out.println("Connected!");
 			connected = true;
 	}
 	
@@ -417,7 +426,9 @@ public class CoreConnection {
 			List<QVariant<?>> packedFunc;
 			while (running) {
 				try {
+					long startWait = System.currentTimeMillis();
 					packedFunc = readQVariantList();
+					System.out.println("Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 				} catch (IOException e) {
 					//TODO: not sure if this is really the best way to check if we are connected, by just waiting untill it fails, but will have to do for now
 					CoreConnection.this.disconnect(); 
@@ -426,6 +437,7 @@ public class CoreConnection {
 					
 					System.err.println("IO error!");	
 					e.printStackTrace();
+					this.running = false;
 					return;
 				}
 				long start = System.currentTimeMillis();
@@ -469,7 +481,7 @@ public class CoreConnection {
 						
 						for (Buffer buffer: buffers.values()) {
 							if (buffer.getInfo().networkId == networkId && buffer.getInfo().name.equals("")) {
-								buffer.getInfo().name = (String) initMap.get("networkName").getData();
+								buffer.setName((String) initMap.get("networkName").getData());
 								break;
 							}
 						}
@@ -551,13 +563,13 @@ public class CoreConnection {
 						 * We have now received everything we need to know about our buffers,
 						 * and will now notify our listeners about them.
 						 */
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-						msg.obj = buffers.values();
-						msg.sendToTarget();
-						for (int buffer: buffers.keySet()) {
+						//Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+						//msg.obj = buffers.values();
+						//msg.sendToTarget();
+						/*for (int buffer: buffers.keySet()) {
 							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
 							requestBacklog(buffer, -1, -1, 1);
-						}
+						}*/
 
 					/*
 					 * A class representing another user on a given IRC network.
@@ -678,9 +690,9 @@ public class CoreConnection {
 					System.out.println("Unhandled request type: " + type.name());
 				}
 				long end = System.currentTimeMillis();
-				if (end-start > 500) {
+				//if (end-start > 500) {
 					System.err.println("Slow parsing (" + (end-start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
-				}
+				//}
 			}
 			try {
 				inStream.close();
@@ -695,7 +707,7 @@ public class CoreConnection {
 	 * Convenience function to send a given QVariant.
 	 * @param data QVariant to send.
 	 */
-	private void sendQVariant(QVariant<?> data) throws IOException {
+	private synchronized void sendQVariant(QVariant<?> data) throws IOException {
 		// See how much data we're going to send
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		QDataOutputStream bos = new QDataOutputStream(baos);

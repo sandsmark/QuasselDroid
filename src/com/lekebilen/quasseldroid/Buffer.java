@@ -20,7 +20,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private int lastSeenMessage;
 	private int markerLineMessage;
 	private int lastHighlightMessageId;
-	private boolean unread;
 	private static final String TAG = Buffer.class.getSimpleName();
 	private List<String> nicks;
 	private String topic;
@@ -52,7 +51,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		}
 
 		notifyObservers();
-		unread = true;
 	}
 	
 	public boolean hasUnseenHighlight(){
@@ -102,11 +100,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	}
 	
 	public void setRead() {
-		this.unread = false;
-	}
-
-	public boolean hasUnread() {
-		return unread;
+		lastSeenMessage = backlog.get(backlog.size()-1).messageId;
 	}
 
 	public void setNicks(List<String> nicks) {
@@ -132,6 +126,11 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	public String topic() {
 		return topic;
+	}
+	
+	public void setName(String name) {
+		info.name = name;
+		notifyObservers();
 	}
 
 	@Override
