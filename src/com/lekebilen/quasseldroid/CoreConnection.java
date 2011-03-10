@@ -82,7 +82,9 @@ public class CoreConnection {
 				connect();
 				return true;
 			} catch (Exception e) {
-				service.disconnectedFromCore();
+				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
+				msg.obj = buffers.values();
+				msg.sendToTarget();
 				return false;
 			}
 		}
