@@ -127,6 +127,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	}
 	
 	public void setRead() {
+		if (backlog.isEmpty())
+			return;
+		
 		lastSeenMessage = backlog.get(backlog.size()-1).messageId;
 	}
 

@@ -286,9 +286,6 @@ public class CoreConnection {
 				requestBacklog(bufferInfo.id, -1, -1, 1);
 				buffers.put(bufferInfo.id, new Buffer(bufferInfo));
 			}
-			Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-			msg.obj = buffers.values();
-			msg.sendToTarget();
 			List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
 			networks = new ArrayList<Integer>(networkIds.size());
 			for (QVariant<?> networkId: networkIds) {
@@ -523,8 +520,12 @@ public class CoreConnection {
 									break;
 								}
 							}
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+							msg.obj = buffers.values();
+							msg.sendToTarget();
+
 							
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
+							msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
 						}
