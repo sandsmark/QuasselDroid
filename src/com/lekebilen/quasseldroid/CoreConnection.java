@@ -132,7 +132,11 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer, int amount) {
-		requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);
+		if (buffers.get(buffer).getSize()==0) {
+			requestBacklog(buffer, -1, -1, amount);			
+		}else {
+			requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);			
+		}
 	}
 	
 	/**
@@ -418,7 +422,7 @@ public class CoreConnection {
 	private class ReadThread extends Thread {
 		boolean running = false;
 		
-		CountDownTimer checkAlive = new CountDownTimer(10000, 10000) {
+		CountDownTimer checkAlive = new CountDownTimer(20000, 20000) {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				//Do nothing, no use

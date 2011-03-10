@@ -274,17 +274,20 @@ public class ChatActivity extends Activity{
 				break;
 			case R.id.BUFFERUPDATE_BACKLOG:
 				int topPos= list.getFirstVisiblePosition();
-				int topId = ((ViewHolder)(list.getChildAt(topPos).getTag())).messageID;
+				int topId;
+				if (list.getChildCount()==0) {
+					topId = 0;
+				}else {
+					topId = ((ViewHolder)(list.getChildAt(topPos).getTag())).messageID;
+				}
 				notifyDataSetChanged();
-				Log.e(TAG, "TopPos "+topPos +" msg: "+((ViewHolder)list.getChildAt(topPos).getTag()).msgView.getText());
-				Log.i(TAG, "BACKLOG CHANGED");
+				//Log.e(TAG, "TopPos "+topPos +" msg: "+((ViewHolder)list.getChildAt(topPos).getTag()).msgView.getText());
 				for(int i=0;i<adapter.getCount();i++){
 					//Log.d(TAG, "FOR: "+adapter.getItemId(i) + " msg: "+adapter.getItem(i).content);
 					if (adapter.getItemId(i)==topId){
-						Log.e(TAG, "NewPos: "+i);
 						list.setSelectionFromTop(i,5);
-						//list.setSelection(i);
 						break;
+						
 					}
 				}
 				break;
