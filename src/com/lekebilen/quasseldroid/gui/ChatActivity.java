@@ -235,15 +235,15 @@ public class ChatActivity extends Activity{
 				holder.msgView.setText(entry.getNick() + " " + entry.content);
 				break;
 			case Join:
-				holder.nickView.setText("â†’");
+				holder.nickView.setText("->’");
 				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
 				break;
 			case Part:
-				holder.nickView.setText("â†�");
+				holder.nickView.setText("<-");
 				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
 				break;
 			case Quit:				
-				holder.nickView.setText("â†�");
+				holder.nickView.setText("<-");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
 				break;
 				//TODO: implement the rest

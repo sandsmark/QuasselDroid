@@ -305,10 +305,10 @@ public class CoreConnection {
 				sendInitRequest("Network", Integer.toString(network));
 			}
 			sendInitRequest("BufferSyncer", "");
-			sendInitRequest("BufferViewManager", "");
+			/*sendInitRequest("BufferViewManager", "");
 			sendInitRequest("AliasManager", "");
 			sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
-			sendInitRequest("IgnoreListManager", "");
+			sendInitRequest("IgnoreListManager", "");*/
 			
 			
 			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
