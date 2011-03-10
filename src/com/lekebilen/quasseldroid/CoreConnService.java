@@ -123,8 +123,6 @@ public class CoreConnService extends Service{
 		notifyManager.notify(R.id.NOTIFICATION, notification);
 	}
 
-
-
 	/**
 	 * Handle the data in the intent, and use it to connect with CoreConnect
 	 * @param intent

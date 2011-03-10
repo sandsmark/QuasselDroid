@@ -41,6 +41,7 @@ import javax.net.ssl.X509TrustManager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.CountDownTimer;
 import android.os.Message;
 import android.util.Log;
 
@@ -416,6 +417,19 @@ public class CoreConnection {
 
 	private class ReadThread extends Thread {
 		boolean running = false;
+		
+		CountDownTimer checkAlive = new CountDownTimer(10000, 10000) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				//Do nothing, no use
+			}
+			@Override
+			public void onFinish() {
+				CoreConnection.this.disconnect(); 
+				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+				msg.sendToTarget();
+			}
+		};
 
 		public void run() {
 			this.running = true;
@@ -427,7 +441,7 @@ public class CoreConnection {
 					packedFunc = readQVariantList();
 					System.out.println("Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 				} catch (IOException e) {
-					//TODO: not sure if this is really the best way to check if we are connected, by just waiting untill it fails, but will have to do for now
+					//TODO: not sure if this is really the best way to check if we are connected, by just waiting until it fails, but will have to do for now
 					CoreConnection.this.disconnect(); 
 					Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
 					msg.sendToTarget();
@@ -437,6 +451,9 @@ public class CoreConnection {
 					this.running = false;
 					return;
 				}
+				//We received a package, aka we are not disconnected, restart timer
+				checkAlive.start();
+				
 				long start = System.currentTimeMillis();
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
 				String className = "", objectName;
