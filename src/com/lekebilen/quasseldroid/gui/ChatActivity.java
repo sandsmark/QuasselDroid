@@ -313,6 +313,7 @@ public class ChatActivity extends Activity{
 
 	}	
 
+	
 	public static class ViewHolder {
 		public TextView timeView;
 		public TextView nickView;
