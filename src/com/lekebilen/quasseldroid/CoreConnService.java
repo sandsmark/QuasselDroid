@@ -317,4 +317,11 @@ public class CoreConnService extends Service{
 		return coreConn.isConnected();
 	}
 
+	/**
+	 * Called when we are disconnected from the core
+	 */
+	public void disconnectedFromCore() {
+		//TODO:
+	}
+
 }
