@@ -73,9 +73,21 @@ public class CoreConnection {
 	 * Checks whether the core is available. 
 	 */	
 	public boolean isConnected() {
-		return (connected && 
+		if (connected && 
 				socket != null && socket.isConnected() &&
-				readThread != null && readThread.isAlive());
+				readThread != null && readThread.isAlive())
+			return true;
+		else {
+			try {
+				connect();
+				return true;
+			} catch (Exception e) {
+				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
+				msg.obj = buffers.values();
+				msg.sendToTarget();
+				return false;
+			}
+		}
 	}
 	
 	/**

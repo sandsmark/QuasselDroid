@@ -304,6 +304,11 @@ public class CoreConnService extends Service{
 				IrcUser user = (IrcUser) msg.obj;
 				newUser(user);
 				break;
+			case R.id.CORECONNECTION_DISCONNECTED:
+				/**
+				 * TODO: handle disconnection
+				 */
+				break;
 			}
 		}
 	}
@@ -316,5 +321,6 @@ public class CoreConnService extends Service{
 	public boolean isConnected() {
 		return coreConn.isConnected();
 	}
+
 
 }
