@@ -422,13 +422,14 @@ public class CoreConnection {
 	private class ReadThread extends Thread {
 		boolean running = false;
 		
-		CountDownTimer checkAlive = new CountDownTimer(20000, 20000) {
+		CountDownTimer checkAlive = new CountDownTimer(30000, 30000) {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				//Do nothing, no use
 			}
 			@Override
 			public void onFinish() {
+				Log.i(TAG, "Timer finished, disconnection from core");
 				CoreConnection.this.disconnect(); 
 				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
 				msg.sendToTarget();
@@ -456,6 +457,8 @@ public class CoreConnection {
 					return;
 				}
 				//We received a package, aka we are not disconnected, restart timer
+				Log.i(TAG, "Package reviced, reseting countdown");
+				checkAlive.cancel();
 				checkAlive.start();
 				
 				long start = System.currentTimeMillis();
