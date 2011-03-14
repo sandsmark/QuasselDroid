@@ -83,8 +83,13 @@ public class CoreConnection {
 				return true;
 			} catch (Exception e) {
 				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
-				msg.obj = buffers.values();
-				msg.sendToTarget();
+				
+				// Do not crash on start up if we don't have buffer (will output invalid username/password combination)
+				if(buffers != null) {
+					msg.obj = buffers.values();
+					msg.sendToTarget();
+				}
+				
 				return false;
 			}
 		}
