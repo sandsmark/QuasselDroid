@@ -280,6 +280,7 @@ public class CoreConnService extends Service{
 				Buffer buf2 = (Buffer) msg.obj;
 				buf2.setMarkerLineMessage(msg.arg1);
 				break;
+				
 			case R.id.CORECONNECTION_LOST_CONNECTION:
 				/**
 				 * Lost connection with core, update notification
