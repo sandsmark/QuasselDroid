@@ -1,6 +1,7 @@
 package com.lekebilen.quasseldroid.gui;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -11,6 +12,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -24,6 +26,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -61,9 +65,57 @@ public class ChatActivity extends Activity{
 		backlogList.setSelection(backlogList.getChildCount());
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-
+		backlogList.setOnItemLongClickListener(itemLongClickListener);
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
 	}
+	
+	
+	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+			
+			TextView message = (TextView) arg1.findViewById(R.id.backlog_msg_view);
+			ArrayList<String> urls = (ArrayList<String>) findURIs("http://", message.getText().toString());
+			
+			if (urls.size() == 1 ){ //Open the URL
+				Intent browserIntent = new Intent("android.intent.action.VIEW", Uri.parse(urls.get(0)));
+				startActivity(browserIntent);
+			} else if (urls.size() > 1 ){
+				//Show list of urls, and make it possible to choose one
+			}
+			return false;
+		}
+	};
+	
+    /**
+     * Find all URIs with a specific URI scheme in a String
+     *
+     * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
+     * @param string    the String to look for URIs in.
+     * @return A List containing any URIs found.
+     */
+    private static List<String> findURIs(String uriScheme, String string) {
+        List<String> uris = new ArrayList<String>();
+
+        int index = 0;
+        do {
+            index = string.indexOf(uriScheme, index); // find the start index of a URL
+
+            if (index == -1) // if indexOf returned -1, we didn't find any urls
+                break;
+
+            int endIndex = string.indexOf(" ", index); // find the end index of a URL (look for a space character)
+            if (endIndex == -1)             // if indexOf returned -1, we didnt find a space character, so we set the
+                endIndex = string.length(); // end of the URL to the end of the string
+
+            uris.add(string.substring(index, endIndex));
+
+            index = endIndex; // start at the end of the URL we just added
+        } while (true);
+
+        return uris;
+    }
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
