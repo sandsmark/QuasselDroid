@@ -225,6 +225,8 @@ public class ChatActivity extends Activity{
 			this.buffer = buffer;
 			if ( buffer.getInfo().type == BufferInfo.Type.QueryBuffer ){
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
+			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
+				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name); //TODO: Add which server we are connected to
 			} else{
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
 			}
