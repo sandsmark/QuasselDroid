@@ -35,6 +35,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.Buffer;
+import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.R;
@@ -222,7 +223,11 @@ public class ChatActivity extends Activity{
 
 		public void setBuffer(Buffer buffer) {
 			this.buffer = buffer;
-			((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
+			if ( buffer.getInfo().type == BufferInfo.Type.QueryBuffer ){
+				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
+			} else{
+				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
+			}
 			notifyDataSetChanged();
 			list.scrollTo(list.getScrollX(), list.getScrollY());
 		}
