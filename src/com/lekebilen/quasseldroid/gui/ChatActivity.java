@@ -79,7 +79,7 @@ public class ChatActivity extends Activity{
 			ArrayList<String> urls = (ArrayList<String>) findURIs("http://", message.getText().toString());
 			
 			if (urls.size() == 1 ){ //Open the URL
-				Intent browserIntent = new Intent("android.intent.action.VIEW", Uri.parse(urls.get(0)));
+				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
 				startActivity(browserIntent);
 			} else if (urls.size() > 1 ){
 				//Show list of urls, and make it possible to choose one
