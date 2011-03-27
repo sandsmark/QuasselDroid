@@ -332,12 +332,11 @@ public class ChatActivity extends Activity{
 				notifyDataSetChanged();				
 				break;
 			case R.id.BUFFERUPDATE_BACKLOG:
-				int topPos= list.getFirstVisiblePosition();
 				int topId;
 				if (list.getChildCount()==0) {
 					topId = 0;
 				}else {
-					topId = ((ViewHolder)(list.getChildAt(topPos).getTag())).messageID;
+					topId = ((ViewHolder)list.getChildAt(0).getTag()).messageID;
 				}
 				notifyDataSetChanged();
 				//Log.e(TAG, "TopPos "+topPos +" msg: "+((ViewHolder)list.getChildAt(topPos).getTag()).msgView.getText());
