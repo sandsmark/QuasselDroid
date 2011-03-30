@@ -323,20 +323,6 @@ public class CoreConnection {
 			for(int network: networks) {
 				sendInitRequest("Network", Integer.toString(network));
 			}
-			sendInitRequest("BufferSyncer", "");
-			/*sendInitRequest("BufferViewManager", "");
-			sendInitRequest("AliasManager", "");
-			sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
-			sendInitRequest("IgnoreListManager", "");*/
-			
-			
-			List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
-			packedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
-			packedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
-			packedFunc.add(new QVariant<String>("", QVariant.Type.String));
-			packedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariant.Type.String));
-			sendQVariantList(packedFunc);
-			sendInitRequest("BufferViewConfig", "0");
 
 
 			readThread = new ReadThread();
@@ -569,6 +555,29 @@ public class CoreConnection {
 							msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
+							
+							
+							try {
+								sendInitRequest("BufferSyncer", "");
+								/*sendInitRequest("BufferViewManager", "");
+								sendInitRequest("AliasManager", "");
+								sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
+								sendInitRequest("IgnoreListManager", "");*/
+								
+								List<QVariant<?>> reqPackedFunc = new LinkedList<QVariant<?>>();
+								reqPackedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
+								reqPackedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
+								reqPackedFunc.add(new QVariant<String>("", QVariant.Type.String));
+								reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariant.Type.String));
+								
+								sendQVariantList(reqPackedFunc);
+								sendInitRequest("BufferViewConfig", "0");
+							} catch (IOException e) {
+								e.printStackTrace();
+								running = false;
+							}
+							
+
 						}
 						
 					/*
@@ -732,9 +741,9 @@ public class CoreConnection {
 					System.out.println("Unhandled request type: " + type.name());
 				}
 				long end = System.currentTimeMillis();
-				//if (end-start > 500) {
+				if (end-start > 500) {
 					System.err.println("Slow parsing (" + (end-start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
-				//}
+				}
 			}
 			try {
 				inStream.close();
