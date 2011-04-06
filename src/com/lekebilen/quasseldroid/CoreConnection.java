@@ -51,6 +51,7 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.lekebilen.quasseldroid.qtcomm.QVariant;
+import com.lekebilen.quasseldroid.qtcomm.QVariantType;
 
 public class CoreConnection {
 	@SuppressWarnings("unused")
@@ -110,10 +111,10 @@ public class CoreConnection {
 	 */
 	public void requestMarkBufferAsRead(int buffer) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
-		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
-		retFunc.add(new QVariant<String>("", QVariant.Type.String));
-		retFunc.add(new QVariant<String>("requestMarkBufferAsRead", QVariant.Type.String));
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BacklogManager", QVariantType.String));
+		retFunc.add(new QVariant<String>("", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestMarkBufferAsRead", QVariantType.String));
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
 		
 		try {
@@ -172,15 +173,15 @@ public class CoreConnection {
 	
 	public void requestBacklog(int buffer, int firstMsgId, int lastMsgId, int maxAmount) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
-		retFunc.add(new QVariant<String>("BacklogManager", QVariant.Type.String));
-		retFunc.add(new QVariant<String>("", QVariant.Type.String));
-		retFunc.add(new QVariant<String>("requestBacklog", QVariant.Type.String));
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BacklogManager", QVariantType.String));
+		retFunc.add(new QVariant<String>("", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestBacklog", QVariantType.String));
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
 		retFunc.add(new QVariant<Integer>(firstMsgId, "MsgId"));
 		retFunc.add(new QVariant<Integer>(lastMsgId, "MsgId"));
-		retFunc.add(new QVariant<Integer>(maxAmount, QVariant.Type.Int));
-		retFunc.add(new QVariant<Integer>(0, QVariant.Type.Int));
+		retFunc.add(new QVariant<Integer>(maxAmount, QVariantType.Int));
+		retFunc.add(new QVariant<Integer>(0, QVariantType.Int));
 		
 		try {
 			sendQVariantList(retFunc);
@@ -210,10 +211,10 @@ public class CoreConnection {
 		}
 		
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-		retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariant.Type.Int));
-		retFunc.add(new QVariant<String>("2sendInput(BufferInfo,QString)", QVariant.Type.String));
+		retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("2sendInput(BufferInfo,QString)", QVariantType.String));
 		retFunc.add(new QVariant<BufferInfo>(buffers.get(buffer).getInfo(), "BufferInfo"));
-		retFunc.add(new QVariant<String>(message, QVariant.Type.String));	
+		retFunc.add(new QVariant<String>(message, QVariantType.String));	
 		try {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
@@ -239,12 +240,12 @@ public class CoreConnection {
 			
 			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
 			Date date = new Date();
-			initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariant.Type.String));
-			initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariant.Type.Bool));
-			initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariant.Type.String));
-		 	initial.put("UseCompression", new QVariant<Boolean>(false, QVariant.Type.Bool));
-			initial.put("MsgType", new QVariant<String>("ClientInit", QVariant.Type.String));
-			initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariant.Type.Int));
+			initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
+			initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariantType.Bool));
+			initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariantType.String));
+		 	initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
+			initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
+			initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariantType.Int));
 			
 			sendQVariantMap(initial);
 			// END CLIENT INFO
@@ -279,9 +280,9 @@ public class CoreConnection {
 			
 			// START LOGIN
 			Map<String, QVariant<?>> login = new HashMap<String, QVariant<?>>();
-			login.put("MsgType", new QVariant<String>("ClientLogin", QVariant.Type.String));
-			login.put("User", new QVariant<String>(username, QVariant.Type.String));
-			login.put("Password", new QVariant<String>(password, QVariant.Type.String));
+			login.put("MsgType", new QVariant<String>("ClientLogin", QVariantType.String));
+			login.put("User", new QVariant<String>(username, QVariantType.String));
+			login.put("Password", new QVariant<String>(password, QVariantType.String));
 			sendQVariantMap(login);
 			// FINISH LOGIN
 			
@@ -331,8 +332,8 @@ public class CoreConnection {
 			TimerTask sendPingAction = new TimerTask() {
 				public void run() {
 					List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
-					packedFunc.add(new QVariant<Integer>(RequestType.HeartBeat.getValue(), QVariant.Type.Int));
-					packedFunc.add(new QVariant<Calendar>(Calendar.getInstance(), QVariant.Type.Time));
+					packedFunc.add(new QVariant<Integer>(RequestType.HeartBeat.getValue(), QVariantType.Int));
+					packedFunc.add(new QVariant<Calendar>(Calendar.getInstance(), QVariantType.Time));
 					try {
 						sendQVariantList(packedFunc);
 					} catch (IOException e) {
@@ -565,10 +566,10 @@ public class CoreConnection {
 								sendInitRequest("IgnoreListManager", "");*/
 								
 								List<QVariant<?>> reqPackedFunc = new LinkedList<QVariant<?>>();
-								reqPackedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariant.Type.Int));
-								reqPackedFunc.add(new QVariant<String>("BufferSyncer", QVariant.Type.String));
-								reqPackedFunc.add(new QVariant<String>("", QVariant.Type.String));
-								reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariant.Type.String));
+								reqPackedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+								reqPackedFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
+								reqPackedFunc.add(new QVariant<String>("", QVariantType.String));
+								reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariantType.String));
 								
 								sendQVariantList(reqPackedFunc);
 								sendInitRequest("BufferViewConfig", "0");
@@ -780,7 +781,7 @@ public class CoreConnection {
 	 * @param data the given QVariantMap to send.
 	 */
 	private void sendQVariantMap(Map<String, QVariant<?>> data) throws IOException {
-		QVariant<Map<String, QVariant<?>>> bufstruct = new QVariant<Map<String, QVariant<?>>>(data, QVariant.Type.Map);
+		QVariant<Map<String, QVariant<?>>> bufstruct = new QVariant<Map<String, QVariant<?>>>(data, QVariantType.Map);
 		sendQVariant(bufstruct);
 	}
 	
@@ -789,7 +790,7 @@ public class CoreConnection {
 	 * @param data The QVariantList to send.
 	 */
 	private void sendQVariantList(List<QVariant<?>> data) throws IOException {
-		QVariant<List<QVariant<?>>> bufstruct = new QVariant<List<QVariant<?>>>(data, QVariant.Type.List);
+		QVariant<List<QVariant<?>>> bufstruct = new QVariant<List<QVariant<?>>>(data, QVariantType.List);
 		sendQVariant(bufstruct);
 	}
 	
@@ -825,9 +826,9 @@ public class CoreConnection {
 	 */
 	private void sendInitRequest(String className, String objectName) throws IOException {
 		List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
-		packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariant.Type.Int));
-		packedFunc.add(new QVariant<String>(className, QVariant.Type.String));
-		packedFunc.add(new QVariant<String>(objectName, QVariant.Type.String));
+		packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariantType.Int));
+		packedFunc.add(new QVariant<String>(className, QVariantType.String));
+		packedFunc.add(new QVariant<String>(objectName, QVariantType.String));
 		sendQVariantList(packedFunc);
 	}
 	
