@@ -15,96 +15,96 @@ import java.util.Map;
 
 
 public class QVariant<T extends Object>{
-	static public enum Type {
-		Invalid(0),
-
-		Bool(1),
-		Int(2),
-		UInt(3),
-		LongLong(4),
-		ULongLong(5),
-		Double(6),
-		Char(7),
-		Map(8),
-		List(9),
-		String(10),
-		StringList(11),
-		ByteArray(12),
-		BitArray(13),
-		Date(14),
-		Time(15),
-		DateTime(16),
-		Url(17),
-		Locale(18),
-		Rect(19),
-		RectF(20),
-		Size(21),
-		SizeF(22),
-		Line(23),
-		LineF(24),
-		Point(25),
-		PointF(26),
-		RegExp(27),
-		Hash(28),
-		EasingCurve(29),
-		LastCoreType(29),
-
-		// value 62 is internally reserved
-		//#ifdef QT3_SUPPORT
-		ColorGroup(63),
-		//#endif
-		Font(64),
-		Pixmap(65),
-		Brush(66),
-		Color(67),
-		Palette(68),
-		Icon(69),
-		Image(70),
-		Polygon(71),
-		Region(72),
-		Bitmap(73),
-		Cursor(74),
-		SizePolicy(75),
-		KeySequence(76),
-		Pen(77),
-		TextLength(78),
-		TextFormat(79),
-		Matrix(80),
-		Transform(81),
-		Matrix4x4(82),
-		Vector2D(83),
-		Vector3D(84),
-		Vector4D(85),
-		Quaternion(86),
-		LastGuiType(86),
-
-		UserType(127),
-		//#ifdef QT3_SUPPORT
-		IconSet(69),
-		CString(12),
-		PointArray(71),
-		//#endif
-		UShort(133),
-		LastType(0xffffffff);
-		int value;
-		Type(int value){
-			this.value = value;
-		}
-		public int getValue(){
-			return value;
-		}
-	};
+//	static public enum Type {
+//		Invalid(0),
+//
+//		Bool(1),
+//		Int(2),
+//		UInt(3),
+//		LongLong(4),
+//		ULongLong(5),
+//		Double(6),
+//		Char(7),
+//		Map(8),
+//		List(9),
+//		String(10),
+//		StringList(11),
+//		ByteArray(12),
+//		BitArray(13),
+//		Date(14),
+//		Time(15),
+//		DateTime(16),
+//		Url(17),
+//		Locale(18),
+//		Rect(19),
+//		RectF(20),
+//		Size(21),
+//		SizeF(22),
+//		Line(23),
+//		LineF(24),
+//		Point(25),
+//		PointF(26),
+//		RegExp(27),
+//		Hash(28),
+//		EasingCurve(29),
+//		LastCoreType(29),
+//
+//		// value 62 is internally reserved
+//		//#ifdef QT3_SUPPORT
+//		ColorGroup(63),
+//		//#endif
+//		Font(64),
+//		Pixmap(65),
+//		Brush(66),
+//		Color(67),
+//		Palette(68),
+//		Icon(69),
+//		Image(70),
+//		Polygon(71),
+//		Region(72),
+//		Bitmap(73),
+//		Cursor(74),
+//		SizePolicy(75),
+//		KeySequence(76),
+//		Pen(77),
+//		TextLength(78),
+//		TextFormat(79),
+//		Matrix(80),
+//		Transform(81),
+//		Matrix4x4(82),
+//		Vector2D(83),
+//		Vector3D(84),
+//		Vector4D(85),
+//		Quaternion(86),
+//		LastGuiType(86),
+//
+//		UserType(127),
+//		//#ifdef QT3_SUPPORT
+//		IconSet(69),
+//		CString(12),
+//		PointArray(71),
+//		//#endif
+//		UShort(133),
+//		LastType(0xffffffff);
+//		int value;
+//		Type(int value){
+//			this.value = value;
+//		}
+//		public int getValue(){
+//			return value;
+//		}
+//	};
 
 	T data;
 	DataStreamVersion version;
-	QVariant.Type type = Type.Invalid;
+	QVariantType type = QVariantType.Invalid;
 	String userTypeName = null;
 	public QVariant(T data, String userType){
 		this.data = data;
-		this.type = Type.UserType;
+		this.type = QVariantType.UserType;
 		this.userTypeName = userType;
 	}
-	public QVariant(T data, Type t){
+	public QVariant(T data, QVariantType t){
 		this.data = data;
 		this.type = t;
 	}
@@ -114,14 +114,14 @@ public class QVariant<T extends Object>{
 	public QVariant(){
 
 	}
-	public Type getType(){
+	public QVariantType getType(){
 		return type;
 	}
 	public T getData() {
 		return data;
 	}
 	public boolean isValid(){
-		if(type==Type.Invalid)
+		if(type==QVariantType.Invalid)
 			return false;
 		if(data==null)
 			return false;
@@ -148,7 +148,7 @@ public class QVariant<T extends Object>{
 				is_null = src.readUnsignedByte()!=0;
 			
 			QVariant<U> ret = new QVariant<U>();
-			if (type == QVariant.Type.UserType.value) {
+			if (type == QVariantType.UserType.value) {
 				String name = (String)QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version);
 				name = name.trim();
 				ret.userTypeName = name;
@@ -161,20 +161,23 @@ public class QVariant<T extends Object>{
 			}
 
 			
-			for(Type tpe : QVariant.Type.values()){
-				if(tpe.getValue() == type){
-					ret.type = tpe;
-					break;
-				}
-			}
-			if (ret.type==Type.Invalid){// || is_null) { //includes data = null; FIXME: is this correct?
+//			for(QVariantType tpe : QVariantType.values()){
+//				if(tpe.getValue() == type){
+//					ret.type = tpe;
+//					break;
+//				}
+//			}
+			
+			ret.type = QVariantType.getByValue(type); //Replaced the iteration shot above, this is much more efficient
+			
+			if (ret.type==QVariantType.Invalid){// || is_null) { //includes data = null; FIXME: is this correct?
 				// Since we wrote something, we should read something
 				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
 				ret.data = null;
 				return ret;
 			}    
 			//Unchecked cast so we can read unknown qvariants at run time and then inspect the contents
-			if (ret.type == Type.UserType) {
+			if (ret.type == QVariantType.UserType) {
 				ret.data = (U) QMetaTypeRegistry.instance().getTypeForName(ret.userTypeName).getSerializer().unserialize(src, version);
 			} else {
 				ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(type).getSerializer().unserialize(src, version);
@@ -192,7 +195,7 @@ public class QVariant<T extends Object>{
 //			if (version.getValue() >= DataStreamVersion.Qt_4_2.getValue())
 				stream.writeByte(data==null?1:0);
 			
-			if (data.type == QVariant.Type.UserType) {
+			if (data.type == QVariantType.UserType) {
 //				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
 				QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().serialize(stream, data.getUserTypeName(), version);
 				QMetaTypeRegistry.instance().getTypeForName(data.getUserTypeName()).getSerializer().serialize(stream, data.data, version);
