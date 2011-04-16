@@ -97,13 +97,16 @@ public class CoreConnService extends Service{
 	private void showNotification(boolean connected) {
 		//TODO: Remove when "leaving" the application
 		CharSequence text =  "";
+		int icon;
 		if (connected){
 			text = getText(R.string.notification_connected);
+			icon = R.drawable.icon;
 		} else {
 			text = getText(R.string.notification_disconnected);
+			icon = R.drawable.inactive;
 		}
 		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(R.drawable.icon, text, System.currentTimeMillis());
+		Notification notification = new Notification(icon, text, System.currentTimeMillis());
 		// The PendingIntent to launch our activity if the user selects this notification
 		PendingIntent contentIntent;
 
