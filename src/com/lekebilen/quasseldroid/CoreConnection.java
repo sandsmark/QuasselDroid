@@ -426,7 +426,7 @@ public class CoreConnection {
 	private class ReadThread extends Thread {
 		boolean running = false;
 		
-		CountDownTimer checkAlive = new CountDownTimer(30000, 30000) {
+		CountDownTimer checkAlive = new CountDownTimer(180000, 180000) {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				//Do nothing, no use
