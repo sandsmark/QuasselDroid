@@ -214,6 +214,7 @@ public class QVariant<T extends Object>{
 		switch (type) {
 		case ByteArray:
 		case String:
+		case CString:
 			return (String)data;
 		case UInt:
 		case Int:
