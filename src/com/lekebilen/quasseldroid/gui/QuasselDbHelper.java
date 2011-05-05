@@ -60,7 +60,9 @@ public class QuasselDbHelper {
 
 	public void close() {
 		db.close();
+		db = null;
 		dbHelper.close();
+		dbHelper = null;	
 	}
 
 	public void addCore(String name, String address, int port) {
@@ -120,13 +122,14 @@ public class QuasselDbHelper {
 
 			public boolean hasCertificate(String certificate) {
 				Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
+				boolean ret = false;
 				if (c != null) { // This is retarded, fuck Android.
 					if (c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)).equals(certificate)) {
-						return true;
+						ret = true;
 					}
 					c.close();
 				}
-				return false;
+				return ret;
 			}
 		}
 
