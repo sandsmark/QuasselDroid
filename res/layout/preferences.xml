@@ -3,13 +3,13 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
   <EditTextPreference android:title="Backlog Limit"
   	android:summary="How many lines to fetch on connect"
-  	android:key="@string/backlogLimit"
+  	android:key="@string/preference_dynamic_backlog"
   	android:defaultValue="50"
   	android:numeric="integer"
   />
   <EditTextPreference android:title="Additional backlog"
   	android:summary="How many lines to fetch on scroll"
-  	android:key="@string/backlogAdditional"
+  	android:key="@string/preference_dynamic_backlog"
   	android:defaultValue="5"
   	android:numeric="integer"
   />

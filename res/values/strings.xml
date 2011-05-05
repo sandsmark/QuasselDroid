@@ -13,8 +13,8 @@
 	<string name="notification_connected">Connected to core</string>
 	<string name="notification_disconnected">Disconnected from core</string>
 	<string name="useSSL">usessl</string>
-	<string name="backlogLimit">backlogLimit</string>
-	<string name="backlogAdditional">backlogAdditional</string>
+	<string name="preference_initial_backlog_limit">backlogLimit</string>
+	<string name="preference_dynamic_backlog">dynamicBacklog</string>
 	
 	<string name="notANumber">is not a number</string>
 	<string name="preferences">Preferences</string>

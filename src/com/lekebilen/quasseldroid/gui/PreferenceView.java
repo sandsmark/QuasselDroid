@@ -21,30 +21,30 @@ public class PreferenceView extends PreferenceActivity {
     	
     	
     	//get a handle on preferences that require validation
-    	backlogLimit = getPreferenceScreen().findPreference("backlogLimit");
-    	backlogAdditional = getPreferenceScreen().findPreference("backlogAdditional");
-        //Validate numbers only
-    	backlogLimit.setOnPreferenceChangeListener(numberCheckListener);
-    	backlogAdditional.setOnPreferenceChangeListener(numberCheckListener);
+    	backlogLimit = getPreferenceScreen().findPreference(getString(R.string.preference_initial_backlog_limit));
+    	backlogAdditional = getPreferenceScreen().findPreference(getString(R.string.preference_dynamic_backlog));
+     //   //Validate numbers only
+    //	backlogLimit.setOnPreferenceChangeListener(numberCheckListener);
+    //	backlogAdditional.setOnPreferenceChangeListener(numberCheckListener);
     }
 
-    /**
-     * Checks that a preference is a valid numerical value
-     */
-    Preference.OnPreferenceChangeListener numberCheckListener = new OnPreferenceChangeListener() {
-		@Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-            //Check that the string is an integer.
-            return numberCheck(newValue);
-        }
-    };
-    private boolean numberCheck(Object newValue) {
-        if( !newValue.toString().equals("")  &&  newValue.toString().matches("\\d*") ) {
-            return true;
-        }
-        else {
-            Toast.makeText(PreferenceView.this, newValue+" "+getResources().getString(R.string.notANumber), Toast.LENGTH_SHORT).show();
-            return false;
-        }
-    }
+//    /**
+//     * Checks that a preference is a valid numerical value
+//     */
+//    Preference.OnPreferenceChangeListener numberCheckListener = new OnPreferenceChangeListener() {
+//		@Override
+//        public boolean onPreferenceChange(Preference preference, Object newValue) {
+//            //Check that the string is an integer.
+//            return numberCheck(newValue);
+//        }
+//    };
+//    private boolean numberCheck(Object newValue) {
+//        if( !newValue.toString().equals("")  &&  newValue.toString().matches("\\d*") ) {
+//            return true;
+//        }
+//        else {
+//            Toast.makeText(PreferenceView.this, newValue+" "+getResources().getString(R.string.notANumber), Toast.LENGTH_SHORT).show();
+//            return false;
+//        }
+//    }
 }

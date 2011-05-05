@@ -10,11 +10,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -47,6 +50,11 @@ public class ChatActivity extends Activity{
 
 	private BacklogAdapter adapter;
 	private ListView backlogList;
+	
+	
+	private int dynamicBacklogAmout;
+	
+	SharedPreferences preferences;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -56,6 +64,8 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.chat_layout);
+		
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		adapter = new BacklogAdapter(this, null);
 		backlogList = ((ListView)findViewById(R.id.chatBacklogList));
@@ -187,6 +197,7 @@ public class ChatActivity extends Activity{
 	@Override
 	protected void onStart() {
 		doBindService();
+		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
 		super.onStart();
 	}
 
@@ -385,8 +396,8 @@ public class ChatActivity extends Activity{
 		}
 
 		public void getMoreBacklog() {
-			adapter.buffer.setBacklogPending(10); //TODO: get amount from settings
-			boundConnService.getMoreBacklog(adapter.getBufferId(),10);
+			adapter.buffer.setBacklogPending(ChatActivity.this.dynamicBacklogAmout);
+			boundConnService.getMoreBacklog(adapter.getBufferId(),ChatActivity.this.dynamicBacklogAmout);
 		}
 
 	}	
@@ -421,7 +432,7 @@ public class ChatActivity extends Activity{
 					loading = false;
 				}
 			}
-			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+			//Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
 			if (!loading && (firstVisibleItem <= visibleThreshold)) {
 				if (adapter.buffer!=null) {
 					loading = true;

@@ -342,7 +342,7 @@ public class LoginActivity extends Activity implements Observer {
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 			if (boundConnService.isConnected()) {
-				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));				
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));					
 			} else {
 				Toast.makeText(getApplicationContext(), "Core not connected!", Toast.LENGTH_LONG).show();
 			}
