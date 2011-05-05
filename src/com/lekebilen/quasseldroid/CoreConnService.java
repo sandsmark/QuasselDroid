@@ -286,7 +286,7 @@ public class CoreConnService extends Service{
 				/**
 				 * Setting marker line message id in a buffer
 				 */
-				Log.d(TAG, "service markerlineset buffer");
+				//Log.d(TAG, "service markerlineset buffer");
 				Buffer buf2 = (Buffer) msg.obj;
 				buf2.setMarkerLineMessage(msg.arg1);
 				break;

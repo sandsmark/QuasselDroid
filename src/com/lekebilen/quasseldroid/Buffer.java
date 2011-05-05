@@ -101,13 +101,13 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		return false;
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
-		Log.d(TAG, "LASTSEEN SET");
+		Log.d(TAG, this.info.name + ": LASTSEEN SET");
 		this.lastSeenMessage = lastSeenMessage;
 		this.setChanged();
 		notifyObservers();
 	}	
 	public void setMarkerLineMessage(int markerLineMessage) {
-		Log.d(TAG, "MARKELINE SET");
+		Log.d(TAG, this.info.name+": MARKELINE SET");
 		this.markerLineMessage = markerLineMessage;
 		this.setChanged();
 		notifyObservers();
