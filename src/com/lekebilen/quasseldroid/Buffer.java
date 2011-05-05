@@ -95,19 +95,20 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	}
 	public boolean hasUnreadMessage(){
 		//Last message in the backlog has a bigger messageId than the last seen message
-		if (backlog.size() != 0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
+//		if (backlog.size() != 0) System.out.println(this.info.name +": lastseen:"+lastSeenMessage+" backlog:" + backlog.get(backlog.size()-1).messageId);
+		if (backlog.size() != 0 && lastSeenMessage!=0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
 			return true;
 		}
 		return false;
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
-		Log.d(TAG, this.info.name + ": LASTSEEN SET");
+		//Log.d(TAG, "LASTSEEN SET:"+ this.info.name+":"+lastSeenMessage);
 		this.lastSeenMessage = lastSeenMessage;
 		this.setChanged();
 		notifyObservers();
 	}	
 	public void setMarkerLineMessage(int markerLineMessage) {
-		Log.d(TAG, this.info.name+": MARKELINE SET");
+		//Log.d(TAG, "MARKERLINE SET:"+ this.info.name+":"+markerLineMessage);
 		this.markerLineMessage = markerLineMessage;
 		this.setChanged();
 		notifyObservers();

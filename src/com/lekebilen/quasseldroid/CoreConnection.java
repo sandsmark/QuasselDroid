@@ -43,6 +43,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
@@ -173,11 +174,11 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer, int amount) {
-		//		if (buffers.get(buffer).getSize()==0) {
-		//			requestBacklog(buffer, -1, -1, amount);			
-		//		}else {
-		//			requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);			
-		//		}
+		if (buffers.get(buffer).getSize()==0) {
+			requestBacklog(buffer, -1, -1, amount);			
+		}else {
+			requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);			
+		}
 	}
 
 	/**
@@ -348,6 +349,11 @@ public class CoreConnection {
 			sendInitRequest("Network", Integer.toString(network));
 		}
 		sendInitRequest("BufferSyncer", "");
+
+		for (Buffer buffer:buffers.values()) {
+			int backlogAmout = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(service).getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
+			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
+		}
 
 
 		readThread = new ReadThread();
@@ -628,9 +634,9 @@ public class CoreConnection {
 			List<QVariant<?>> packedFunc;
 			while (running) {
 				try {
-					long startWait = System.currentTimeMillis();
+					//long startWait = System.currentTimeMillis();
 					packedFunc = readQVariantList();
-					Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
+					//Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 				} catch (IOException e) {
 					//TODO: not sure if this is really the best way to check if we are connected, by just waiting until it fails, but will have to do for now
 					CoreConnection.this.disconnect(); 
@@ -643,7 +649,7 @@ public class CoreConnection {
 					return;
 				}
 				//We received a package, aka we are not disconnected, restart timer
-				Log.i(TAG, "Package reviced, reseting countdown");
+				//Log.i(TAG, "Package reviced, reseting countdown");
 				checkAlive.cancel();
 				checkAlive.start();
 
@@ -675,7 +681,6 @@ public class CoreConnection {
 					// The class name and name of the object we are about to create
 					className = (String) packedFunc.remove(0).getData();
 					objectName = (String) packedFunc.remove(0).getData();
-					Log.d(TAG, "!!!!!!!!!!!!!: " + className+ "  " + objectName);
 
 					/*
 					 * An object representing an IRC network, containing users and channels ("buffers"). 
@@ -761,6 +766,7 @@ public class CoreConnection {
 							e.printStackTrace();
 							running = false;
 						}
+
 
 
 
@@ -850,7 +856,6 @@ public class CoreConnection {
 					className = (String)foo; // This is either a byte buffer or a string
 					objectName = (String) packedFunc.remove(0).getData();
 					String function = packedFunc.remove(0).toString();
-					Log.i(TAG, "Sync request recived: " +function);
 
 					/*
 					 * The BacklogManager object is responsible for synchronizing backlog
