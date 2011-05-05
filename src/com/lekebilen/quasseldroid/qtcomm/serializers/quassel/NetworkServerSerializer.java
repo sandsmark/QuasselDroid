@@ -19,9 +19,9 @@ public class NetworkServerSerializer implements QMetaTypeSerializer<NetworkServe
 		throw new IOException("IMPLEMENT ME! TODO DAWG");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public NetworkServer unserialize(QDataInputStream stream,
-			DataStreamVersion version) throws IOException {
+	public NetworkServer unserialize(QDataInputStream stream, DataStreamVersion version) throws IOException {
 		Map<String, QVariant<?>> map = (Map<String, QVariant<?>>)
 			QMetaTypeRegistry.instance().getTypeForName("QVariantMap").getSerializer().unserialize(stream, version);
 		

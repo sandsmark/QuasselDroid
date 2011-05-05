@@ -55,7 +55,30 @@ import com.lekebilen.quasseldroid.qtcomm.QVariantType;
 
 public class CoreConnection {
 	@SuppressWarnings("unused")
+	
 	private static final String TAG = CoreConnection.class.getSimpleName();
+	
+	private Socket socket;
+	private QDataOutputStream outStream;
+	private QDataInputStream inStream;
+	
+	private Map<Integer, Buffer> buffers;
+	private Map<Integer, String> nicks;
+	private List<Integer> networks;
+	
+	private String address;
+	private int port;
+	private String username;
+	private String password;
+	private boolean ssl;
+	
+	private CoreConnService service;
+	private Timer heartbeatTimer;
+	private ReadThread readThread;
+	
+	private boolean connected;
+
+	
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
 		this.address = address;
@@ -141,7 +164,7 @@ public class CoreConnection {
 	/**
 	 * Requests the unread backlog for a given buffer.
 	 */
-	public void requestBacklog(int buffer) {
+	public void requestUnreadBacklog(int buffer) {
 		requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
 	}
 	
@@ -150,28 +173,28 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer, int amount) {
-		if (buffers.get(buffer).getSize()==0) {
-			requestBacklog(buffer, -1, -1, amount);			
-		}else {
-			requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);			
-		}
+//		if (buffers.get(buffer).getSize()==0) {
+//			requestBacklog(buffer, -1, -1, amount);			
+//		}else {
+//			requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);			
+//		}
 	}
 	
 	/**
 	 * Requests all backlog from a given message ID until the current. 
 	 */
-	public void requestBacklog(int buffer, int firstMsgId) {
+	private void requestBacklog(int buffer, int firstMsgId) {
 		requestBacklog(buffer, firstMsgId, -1);
 	}
 	
 	/**
 	 * Requests backlog between two given message IDs.
 	 */
-	public void requestBacklog(int buffer, int firstMsgId, int lastMsgId) {
-		requestBacklog(buffer, firstMsgId, lastMsgId, Config.backlogAdditional);
+	private void requestBacklog(int buffer, int firstMsgId, int lastMsgId) {
+		requestBacklog(buffer, firstMsgId, lastMsgId, 10); //TODO: get the number from the shared preferences 
 	}
 	
-	public void requestBacklog(int buffer, int firstMsgId, int lastMsgId, int maxAmount) {
+	private void requestBacklog(int buffer, int firstMsgId, int lastMsgId, int maxAmount) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
 		retFunc.add(new QVariant<String>("BacklogManager", QVariantType.String));
@@ -306,7 +329,7 @@ public class CoreConnection {
 			buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
 			for (QVariant<?> bufferInfoQV: bufferInfos) {
 				BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
-				requestBacklog(bufferInfo.id, -1, -1, 1);
+				//requestBacklog(bufferInfo.id, -1, -1, 1);
 				buffers.put(bufferInfo.id, new Buffer(bufferInfo));
 			}
 			List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
@@ -401,360 +424,7 @@ public class CoreConnection {
         	return Invalid;
         }
 	}
-	private Socket socket;
-	private QDataOutputStream outStream;
-	private QDataInputStream inStream;
-	
-	private Map<Integer, Buffer> buffers;
-	private Map<Integer, String> nicks;
-	private List<Integer> networks;
-	
-	private String address;
-	private int port;
-	private String username;
-	private String password;
-	private boolean ssl;
-	
-	private CoreConnService service;
-	private Timer heartbeatTimer;
-	private ReadThread readThread;
-	
-	private int backlogFetchAmount = 50;
-	
-	private boolean connected;
 
-	private class ReadThread extends Thread {
-		boolean running = false;
-		
-		CountDownTimer checkAlive = new CountDownTimer(180000, 180000) {
-			@Override
-			public void onTick(long millisUntilFinished) {
-				//Do nothing, no use
-			}
-			@Override
-			public void onFinish() {
-				Log.i(TAG, "Timer finished, disconnection from core");
-				CoreConnection.this.disconnect(); 
-				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
-				msg.sendToTarget();
-			}
-		};
-
-		public void run() {
-			this.running = true;
-			
-			List<QVariant<?>> packedFunc;
-			while (running) {
-				try {
-					long startWait = System.currentTimeMillis();
-					packedFunc = readQVariantList();
-					System.out.println("Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
-				} catch (IOException e) {
-					//TODO: not sure if this is really the best way to check if we are connected, by just waiting until it fails, but will have to do for now
-					CoreConnection.this.disconnect(); 
-					Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
-					msg.sendToTarget();
-					
-					System.err.println("IO error!");	
-					e.printStackTrace();
-					this.running = false;
-					return;
-				}
-				//We received a package, aka we are not disconnected, restart timer
-				Log.i(TAG, "Package reviced, reseting countdown");
-				checkAlive.cancel();
-				checkAlive.start();
-				
-				long start = System.currentTimeMillis();
-				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
-				String className = "", objectName;
-				
-				/*
-				 * Here we handle different calls from the core.
-				 */
-				switch (type) {
-				/*
-				 * A heartbeat is a simple request sent with fixed intervals,
-				 * to make sure that both ends are still connected (apparently, TCP isn't good enough).
-				 * TODO: We should use this, and disconnect automatically when the core has gone away.
-				 */
-				case HeartBeat:
-					System.out.println("Got heartbeat");
-					break;
-				case HeartBeatReply:
-					System.out.println("Got heartbeat reply");
-					break;
-				/*
-				 * This is when the core send us a new object to create.
-				 * Since we don't actually create objects, we parse out the fields
-				 * in the objects manually.
-				 */
-				case InitData:
-					// The class name and name of the object we are about to create
-					className = (String) packedFunc.remove(0).getData();
-					objectName = (String) packedFunc.remove(0).getData();
-					
-					/*
-					 * An object representing an IRC network, containing users and channels ("buffers"). 
-					 */
-					if (className.equals("Network")) {
-						int networkId = Integer.parseInt(objectName);
-						
-						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-						// Store the network name and associated nick for "our" user
-						nicks.put(networkId, (String) initMap.get("myNick").getData());
-						
-						for (Buffer buffer: buffers.values()) {
-							if (buffer.getInfo().networkId == networkId && buffer.getInfo().name.equals("")) {
-								buffer.setName((String) initMap.get("networkName").getData());
-								break;
-							}
-						}
-						
-						// Horribly nested maps
-						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
-						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
-						
-						// Parse out the list of nicks in all channels, and topics
-						for (QVariant<?> channel:  channels.values()) {
-							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
-							String chanName = (String)chan.get("name").getData();
-							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
-							List<String> users = new ArrayList<String>(userModes.keySet());
-							String topic = (String)chan.get("topic").getData();
-							// Horribly inefficient search for the right buffer, Java sucks.
-							
-							Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();
-							
-							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
-							
-							for (String nick : userObjs.keySet()) {
-								IrcUser user = new IrcUser();
-								user.name = nick;
-								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) userObjs.get(nick).getData();
-								user.away = (Boolean) map.get("away").getData();
-								user.awayMessage = (String) map.get("awayMessage").getData();
-								user.ircOperator = (String) map.get("ircOperator").getData();
-								user.nick = (String) map.get("nick").getData();
-								user.channels = (List<String>) map.get("channels").getData();
-								
-								ircUsers.add(user);
-							}
-							
-							for (Buffer buffer: buffers.values()) {
-								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
-									buffer.setTopic(topic);
-									buffer.setNicks(users);
-									break;
-								}
-							}
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-							msg.obj = buffers.values();
-							msg.sendToTarget();
-
-							
-							msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
-							msg.obj = ircUsers;
-							msg.sendToTarget();
-							
-							
-							try {
-								sendInitRequest("BufferSyncer", "");
-								/*sendInitRequest("BufferViewManager", "");
-								sendInitRequest("AliasManager", "");
-								sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
-								sendInitRequest("IgnoreListManager", "");*/
-								
-								List<QVariant<?>> reqPackedFunc = new LinkedList<QVariant<?>>();
-								reqPackedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
-								reqPackedFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
-								reqPackedFunc.add(new QVariant<String>("", QVariantType.String));
-								reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariantType.String));
-								
-								sendQVariantList(reqPackedFunc);
-								sendInitRequest("BufferViewConfig", "0");
-							} catch (IOException e) {
-								e.printStackTrace();
-								running = false;
-							}
-							
-
-						}
-						
-					/*
-					 * An object that is used to synchronize metadata about buffers,
-					 * like the last seen message, marker lines, etc.
-					 */
-					} else if (className.equals("BufferSyncer")) {
-						// Parse out the last seen messages
-						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
-						for (int i=0; i<lastSeen.size()/2; i++) {
-							int bufferId = (Integer)lastSeen.remove(0).getData();
-							int msgId = (Integer)lastSeen.remove(0).getData();
-							if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
-								
-								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
-								msg.obj = buffers.get(bufferId);
-								msg.arg1 = msgId;
-								msg.sendToTarget();
-							}
-						}
-						// Parse out the marker lines for buffers
-						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
-						for (int i=0; i<markerLines.size()/2; i++) {
-							int bufferId = (Integer)markerLines.remove(0).getData();
-							int msgId = (Integer)markerLines.remove(0).getData();
-							if (buffers.containsKey(bufferId)){
-								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
-								msg.obj = buffers.get(bufferId);
-								msg.arg1 = msgId;
-								msg.sendToTarget();
-							}
-						}
-						/* 
-						 * We have now received everything we need to know about our buffers,
-						 * and will now notify our listeners about them.
-						 */
-						//Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-						//msg.obj = buffers.values();
-						//msg.sendToTarget();
-						/*for (int buffer: buffers.keySet()) {
-							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
-							requestBacklog(buffer, -1, -1, 1);
-						}*/
-
-					/*
-					 * A class representing another user on a given IRC network.
-					 */
-					} else if (className.equals("IrcUser")) {
-						IrcUser user = new IrcUser();
-						user.name = className;
-						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-						user.away = (Boolean) map.get("away").getData();
-						user.awayMessage = (String) map.get("awayMessage").getData();
-						user.ircOperator = (String) map.get("ircOperator").getData();
-						user.nick = (String) map.get("nick").getData();
-						user.channels = (List<String>) map.get("channels").getData();
-						
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USER_ADDED);
-						msg.obj = (IrcUser) user;
-						msg.sendToTarget();
-					/*
-					 * There are several objects that we don't care about (at the moment).
-					 */
-					} else {
-						System.out.println("Unparsed InitData: " + className + "(" + objectName + ").");
-					}
-					break;
-				/*
-				 * Sync requests are sent by the core whenever an object needs to be updated.
-				 * Again, we just parse out whatever we need manually
-				 */
-				case Sync:
-					/* See above; parse out information about object, 
-					 * and additionally a sync function name.
-					 */
-					Object foo = packedFunc.remove(0).getData();
-					//System.out.println("FUCK" + foo.toString() + " balle " + foo.getClass().getName());
-					if (foo.getClass().getName().equals("java.nio.ReadWriteHeapByteBuffer")) {
-						try {
-							System.out.println("faen i helvete: " + new String(((ByteBuffer)foo).array(), "UTF-8"));
-						} catch (UnsupportedEncodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}						
-					}
-					className = (String)foo; // This is either a byte buffer or a string
-					objectName = (String) packedFunc.remove(0).getData();
-					String function = packedFunc.remove(0).toString();
-
-					/*
-					 * The BacklogManager object is responsible for synchronizing backlog
-					 * between the core and the client.
-					 * 
-					 * The receiveBacklog function is called in the client with a given (requested)
-					 * amount of messages.
-					 */
-					if (className.equals("BacklogManager") && function.equals("receiveBacklog")) {
-						/* Here we first just dump some unused data;
-						 * the buffer id is embedded in the message itself (in a bufferinfo object),
-						 * the rest of the arguments aren't used at all, apparently.
-						 */
-						packedFunc.remove(0); // Buffer ID (Integer)
-						packedFunc.remove(0); // first message
-						packedFunc.remove(0); // last message
-						packedFunc.remove(0); // limit to how many messages to fetch
-						packedFunc.remove(0); // additional messages to fetch
-						List<QVariant<?>> data = (List<QVariant<?>>)(packedFunc.remove(0).getData());
-						Collections.reverse(data); // Apparently, we receive them in the wrong order
-						// Send our the backlog messages to our listeners
-						for (QVariant<?> message: data) {
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE);
-							msg.obj = (IrcMessage) message.getData();
-							msg.sendToTarget();
-						}
-					/* 
-					 * The addIrcUser function in the Network class is called whenever a new
-					 * IRC user appears on a given network. 
-					 */
-					} else if (className.equals("Network") && function.equals("addIrcUser")) {
-						String nick = (String) packedFunc.remove(0).getData();
-						try {
-							sendInitRequest("IrcUser", "1/" + nick);
-						} catch (IOException e) {
-							e.printStackTrace();
-							running = false; // We have obviously lost our connection, just stop this thread.
-						}
-						
-					/*
-					 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
-					 */
-					} else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
-						int buffer = (Integer) packedFunc.remove(0).getData();
-						buffers.get(buffer).setRead();
-					} else {
-						System.out.println("Unparsed Sync request: " + className + "::" + function);
-					}
-
-					break;
-
-				/*
-				 * Remote procedure calls are direct calls that are not associated with any objects.
-				 */
-				case RpcCall:
-					// Contains a normalized function signature; see QMetaObject::normalizedSignature, I guess.
-					String functionName = packedFunc.remove(0).toString();
-					
-					/*
-					 * This is called by the core when a new message should be displayed.
-					 */
-					if (functionName.equals("2displayMsg(Message)")) {
-						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE);
-						msg.obj = message;
-						msg.sendToTarget();
-						
-					} else {
-						System.out.println("Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
-					}
-					break;
-				default:
-					System.out.println("Unhandled request type: " + type.name());
-				}
-				long end = System.currentTimeMillis();
-				if (end-start > 500) {
-					System.err.println("Slow parsing (" + (end-start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
-				}
-			}
-			try {
-				inStream.close();
-			} catch (IOException e) {
-				System.out.println("WARNING: Unable to close input stream (already closed?).");
-			}
-		}
-	}
-
-	
 	/**
 	 * Convenience function to send a given QVariant.
 	 * @param data QVariant to send.
@@ -932,6 +602,337 @@ public class CoreConnection {
 	     public X509Certificate[] getAcceptedIssuers() {
 	         return defaultTrustManager.getAcceptedIssuers();
 	     }
+	}
+
+	private class ReadThread extends Thread {
+		boolean running = false;
+		
+		CountDownTimer checkAlive = new CountDownTimer(180000, 180000) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				//Do nothing, no use
+			}
+			@Override
+			public void onFinish() {
+				Log.i(TAG, "Timer finished, disconnection from core");
+				CoreConnection.this.disconnect(); 
+				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+				msg.sendToTarget();
+			}
+		};
+	
+		public void run() {
+			this.running = true;
+			
+			List<QVariant<?>> packedFunc;
+			while (running) {
+				try {
+					long startWait = System.currentTimeMillis();
+					packedFunc = readQVariantList();
+					Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
+				} catch (IOException e) {
+					//TODO: not sure if this is really the best way to check if we are connected, by just waiting until it fails, but will have to do for now
+					CoreConnection.this.disconnect(); 
+					Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+					msg.sendToTarget();
+					
+					System.err.println("IO error!");	
+					e.printStackTrace();
+					this.running = false;
+					return;
+				}
+				//We received a package, aka we are not disconnected, restart timer
+				Log.i(TAG, "Package reviced, reseting countdown");
+				checkAlive.cancel();
+				checkAlive.start();
+				
+				long start = System.currentTimeMillis();
+				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
+				String className = "", objectName;
+				
+				/*
+				 * Here we handle different calls from the core.
+				 */
+				switch (type) {
+				/*
+				 * A heartbeat is a simple request sent with fixed intervals,
+				 * to make sure that both ends are still connected (apparently, TCP isn't good enough).
+				 * TODO: We should use this, and disconnect automatically when the core has gone away.
+				 */
+				case HeartBeat:
+					Log.i(TAG, "Got heartbeat");
+					break;
+				case HeartBeatReply:
+					Log.i(TAG, "Got heartbeat reply");
+					break;
+				/*
+				 * This is when the core send us a new object to create.
+				 * Since we don't actually create objects, we parse out the fields
+				 * in the objects manually.
+				 */
+				case InitData:
+					// The class name and name of the object we are about to create
+					className = (String) packedFunc.remove(0).getData();
+					objectName = (String) packedFunc.remove(0).getData();
+					
+					/*
+					 * An object representing an IRC network, containing users and channels ("buffers"). 
+					 */
+					if (className.equals("Network")) {
+						int networkId = Integer.parseInt(objectName);
+						
+						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+						// Store the network name and associated nick for "our" user
+						nicks.put(networkId, (String) initMap.get("myNick").getData());
+						
+						for (Buffer buffer: buffers.values()) {
+							if (buffer.getInfo().networkId == networkId && buffer.getInfo().name.equals("")) {
+								buffer.setName((String) initMap.get("networkName").getData());
+								break;
+							}
+						}
+						
+						// Horribly nested maps
+						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
+						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
+						
+						// Parse out the list of nicks in all channels, and topics
+						for (QVariant<?> channel:  channels.values()) {
+							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
+							String chanName = (String)chan.get("name").getData();
+							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
+							List<String> users = new ArrayList<String>(userModes.keySet());
+							String topic = (String)chan.get("topic").getData();
+							// Horribly inefficient search for the right buffer, Java sucks.
+							
+							Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();
+							
+							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
+							
+							for (String nick : userObjs.keySet()) {
+								IrcUser user = new IrcUser();
+								user.name = nick;
+								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) userObjs.get(nick).getData();
+								user.away = (Boolean) map.get("away").getData();
+								user.awayMessage = (String) map.get("awayMessage").getData();
+								user.ircOperator = (String) map.get("ircOperator").getData();
+								user.nick = (String) map.get("nick").getData();
+								user.channels = (List<String>) map.get("channels").getData();
+								
+								ircUsers.add(user);
+							}
+							
+							for (Buffer buffer: buffers.values()) {
+								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
+									buffer.setTopic(topic);
+									buffer.setNicks(users);
+									break;
+								}
+							}
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+							msg.obj = buffers.values();
+							msg.sendToTarget();
+	
+							
+							msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
+							msg.obj = ircUsers;
+							msg.sendToTarget();
+							
+							
+							try {
+								sendInitRequest("BufferSyncer", "");
+								/*sendInitRequest("BufferViewManager", "");
+								sendInitRequest("AliasManager", "");
+								sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
+								sendInitRequest("IgnoreListManager", "");*/
+								
+								List<QVariant<?>> reqPackedFunc = new LinkedList<QVariant<?>>();
+								reqPackedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+								reqPackedFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
+								reqPackedFunc.add(new QVariant<String>("", QVariantType.String));
+								reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariantType.String));
+								
+								sendQVariantList(reqPackedFunc);
+								sendInitRequest("BufferViewConfig", "0");
+							} catch (IOException e) {
+								e.printStackTrace();
+								running = false;
+							}
+							
+	
+						}
+						
+					/*
+					 * An object that is used to synchronize metadata about buffers,
+					 * like the last seen message, marker lines, etc.
+					 */
+					} else if (className.equals("BufferSyncer")) {
+						// Parse out the last seen messages
+						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
+						for (int i=0; i<lastSeen.size()/2; i++) {
+							int bufferId = (Integer)lastSeen.remove(0).getData();
+							int msgId = (Integer)lastSeen.remove(0).getData();
+							if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
+								
+								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
+								msg.obj = buffers.get(bufferId);
+								msg.arg1 = msgId;
+								msg.sendToTarget();
+							}
+						}
+						// Parse out the marker lines for buffers
+						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
+						for (int i=0; i<markerLines.size()/2; i++) {
+							int bufferId = (Integer)markerLines.remove(0).getData();
+							int msgId = (Integer)markerLines.remove(0).getData();
+							if (buffers.containsKey(bufferId)){
+								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
+								msg.obj = buffers.get(bufferId);
+								msg.arg1 = msgId;
+								msg.sendToTarget();
+							}
+						}
+						/* 
+						 * We have now received everything we need to know about our buffers,
+						 * and will now notify our listeners about them.
+						 */
+						//Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+						//msg.obj = buffers.values();
+						//msg.sendToTarget();
+						/*for (int buffer: buffers.keySet()) {
+							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
+							requestBacklog(buffer, -1, -1, 1);
+						}*/
+	
+					/*
+					 * A class representing another user on a given IRC network.
+					 */
+					} else if (className.equals("IrcUser")) {
+						IrcUser user = new IrcUser();
+						user.name = className;
+						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+						user.away = (Boolean) map.get("away").getData();
+						user.awayMessage = (String) map.get("awayMessage").getData();
+						user.ircOperator = (String) map.get("ircOperator").getData();
+						user.nick = (String) map.get("nick").getData();
+						user.channels = (List<String>) map.get("channels").getData();
+						
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USER_ADDED);
+						msg.obj = (IrcUser) user;
+						msg.sendToTarget();
+					/*
+					 * There are several objects that we don't care about (at the moment).
+					 */
+					} else {
+						System.out.println("Unparsed InitData: " + className + "(" + objectName + ").");
+					}
+					break;
+				/*
+				 * Sync requests are sent by the core whenever an object needs to be updated.
+				 * Again, we just parse out whatever we need manually
+				 */
+				case Sync:
+					/* See above; parse out information about object, 
+					 * and additionally a sync function name.
+					 */
+					Object foo = packedFunc.remove(0).getData();
+					//System.out.println("FUCK" + foo.toString() + " balle " + foo.getClass().getName());
+					if (foo.getClass().getName().equals("java.nio.ReadWriteHeapByteBuffer")) {
+						try {
+							System.out.println("faen i helvete: " + new String(((ByteBuffer)foo).array(), "UTF-8"));
+						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}						
+					}
+					className = (String)foo; // This is either a byte buffer or a string
+					objectName = (String) packedFunc.remove(0).getData();
+					String function = packedFunc.remove(0).toString();
+	
+					/*
+					 * The BacklogManager object is responsible for synchronizing backlog
+					 * between the core and the client.
+					 * 
+					 * The receiveBacklog function is called in the client with a given (requested)
+					 * amount of messages.
+					 */
+					if (className.equals("BacklogManager") && function.equals("receiveBacklog")) {
+						/* Here we first just dump some unused data;
+						 * the buffer id is embedded in the message itself (in a bufferinfo object),
+						 * the rest of the arguments aren't used at all, apparently.
+						 */
+						packedFunc.remove(0); // Buffer ID (Integer)
+						packedFunc.remove(0); // first message
+						packedFunc.remove(0); // last message
+						packedFunc.remove(0); // limit to how many messages to fetch
+						packedFunc.remove(0); // additional messages to fetch
+						List<QVariant<?>> data = (List<QVariant<?>>)(packedFunc.remove(0).getData());
+						Collections.reverse(data); // Apparently, we receive them in the wrong order
+						// Send our the backlog messages to our listeners
+						for (QVariant<?> message: data) {
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE);
+							msg.obj = (IrcMessage) message.getData();
+							msg.sendToTarget();
+						}
+					/* 
+					 * The addIrcUser function in the Network class is called whenever a new
+					 * IRC user appears on a given network. 
+					 */
+					} else if (className.equals("Network") && function.equals("addIrcUser")) {
+						String nick = (String) packedFunc.remove(0).getData();
+						try {
+							sendInitRequest("IrcUser", "1/" + nick);
+						} catch (IOException e) {
+							e.printStackTrace();
+							running = false; // We have obviously lost our connection, just stop this thread.
+						}
+						
+					/*
+					 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
+					 */
+					} else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
+						int buffer = (Integer) packedFunc.remove(0).getData();
+						buffers.get(buffer).setRead();
+					} else {
+						System.out.println("Unparsed Sync request: " + className + "::" + function);
+					}
+	
+					break;
+	
+				/*
+				 * Remote procedure calls are direct calls that are not associated with any objects.
+				 */
+				case RpcCall:
+					// Contains a normalized function signature; see QMetaObject::normalizedSignature, I guess.
+					String functionName = packedFunc.remove(0).toString();
+					
+					/*
+					 * This is called by the core when a new message should be displayed.
+					 */
+					if (functionName.equals("2displayMsg(Message)")) {
+						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE);
+						msg.obj = message;
+						msg.sendToTarget();
+						
+					} else {
+						System.out.println("Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
+					}
+					break;
+				default:
+					System.out.println("Unhandled request type: " + type.name());
+				}
+				long end = System.currentTimeMillis();
+				if (end-start > 500) {
+					System.err.println("Slow parsing (" + (end-start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
+				}
+			}
+			try {
+				inStream.close();
+			} catch (IOException e) {
+				System.out.println("WARNING: Unable to close input stream (already closed?).");
+			}
+		}
 	}
 }
 

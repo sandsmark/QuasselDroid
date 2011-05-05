@@ -227,7 +227,7 @@ public class CoreConnService extends Service{
 					}
 					buffer.addBacklogMessage(message);	
 				}else {
-					Log.e(TAG, "Getting message buffer already have");
+					Log.e(TAG, "Getting message buffer already have"+ buffer.toString());
 				}
 				break;
 			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
@@ -251,7 +251,7 @@ public class CoreConnService extends Service{
 					}
 					buffer.addMessage(message);					
 				}else {
-					Log.e(TAG, "Getting message buffer already have");
+					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
 				}
 
 				break;
@@ -278,7 +278,7 @@ public class CoreConnService extends Service{
 				/**
 				 * Setting last seen message id in a buffer
 				 */
-				Log.d(TAG, "service lastseenset buffer");
+				//Log.d(TAG, "service lastseenset buffer");
 				Buffer buf = (Buffer) msg.obj;
 				buf.setLastSeenMessage(msg.arg1);
 				break;
