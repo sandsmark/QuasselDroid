@@ -46,6 +46,8 @@ public class ChatActivity extends Activity{
 	public static final int MESSAGE_RECEIVED = 0;
 
 	private BacklogAdapter adapter;
+	private ListView backlogList;
+
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
 	/** Called when the activity is first created. */
@@ -56,7 +58,7 @@ public class ChatActivity extends Activity{
 		setContentView(R.layout.chat_layout);
 
 		adapter = new BacklogAdapter(this, null);
-		ListView backlogList = ((ListView)findViewById(R.id.chatBacklogList));
+		backlogList = ((ListView)findViewById(R.id.chatBacklogList));
 		backlogList.setCacheColorHint(0xffffff);
 		backlogList.setAdapter(adapter);
 		backlogList.setOnScrollListener(new BacklogScrollListener(5));
@@ -190,6 +192,12 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected void onStop() {
+		//Dont save position if list is at bottom
+		if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
+			adapter.buffer.setTopMessageShown(0);
+		}else{
+			adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+		}
 		boundConnService.markBufferAsRead(adapter.getBufferId());
 		doUnbindService();
 		super.onStop();
@@ -249,7 +257,6 @@ public class ChatActivity extends Activity{
 
 		@Override
 		public long getItemId(int position) {
-			//return position;
 			return buffer.getBacklogEntry(position).messageId;
 		}
 
@@ -269,8 +276,6 @@ public class ChatActivity extends Activity{
 			} else {
 				holder = (ViewHolder)convertView.getTag();
 			}
-
-			//Log.i(TAG, position + "   "+ getCount());
 
 			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { //Set separator line here
 				holder.separatorView.getLayoutParams().height = 1;
@@ -332,25 +337,37 @@ public class ChatActivity extends Activity{
 				notifyDataSetChanged();				
 				break;
 			case R.id.BUFFERUPDATE_BACKLOG:
-				int topId;
-				if (list.getChildCount()==0) {
-					topId = 0;
-				}else {
-					topId = ((ViewHolder)list.getChildAt(0).getTag()).messageID;
-				}
+				int topId = getListTopMessageId();
 				notifyDataSetChanged();
-				//Log.e(TAG, "TopPos "+topPos +" msg: "+((ViewHolder)list.getChildAt(topPos).getTag()).msgView.getText());
-				for(int i=0;i<adapter.getCount();i++){
-					//Log.d(TAG, "FOR: "+adapter.getItemId(i) + " msg: "+adapter.getItem(i).content);
-					if (adapter.getItemId(i)==topId){
-						list.setSelectionFromTop(i,5);
-						break;
-						
-					}
-				}
+				setListTopMessage(topId);
 				break;
 			}
 
+		}
+		
+		/*
+		 * Returns the messageid for the ircmessage that is currently at the top of the screen
+		 */
+		public int getListTopMessageId() {
+			int topId;
+			if (list.getChildCount()==0) {
+				topId = 0;
+			}else {
+				topId = ((ViewHolder)list.getChildAt(0).getTag()).messageID;
+			}
+			return topId;
+		}
+		
+		/*
+		 * Sets what message from the adapter will be at the top of the visible screen
+		 */
+		public void setListTopMessage(int messageid) {
+			for(int i=0;i<adapter.getCount();i++){
+				if (adapter.getItemId(i)==messageid){
+					list.setSelectionFromTop(i,5);
+					break;
+				}
+			}
 		}
 
 		public void stopObserving() {
@@ -444,7 +461,13 @@ public class ChatActivity extends Activity{
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
 			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));
-			Log.d(TAG, "Buffer gotten, nr or msg on it in the start is: "+adapter.getCount());
+			
+			//Move list to correect position
+			if (adapter.buffer.getTopMessageShown() == 0) {
+				backlogList.setSelection(adapter.getCount()-1);
+			}else{
+				adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
+			}
 
 		}
 

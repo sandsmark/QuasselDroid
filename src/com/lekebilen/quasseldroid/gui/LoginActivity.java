@@ -54,6 +54,8 @@ public class LoginActivity extends Activity implements Observer {
 	EditText password;
 	CheckBox rememberMe;
 	Button connect;
+	
+	public Cursor c;
 
 
 	/* EXample of how to get a preference
@@ -83,7 +85,7 @@ public class LoginActivity extends Activity implements Observer {
 
 		//setup the core spinner
 		//dbHelper.addCore("testcore", "test.core.com", 8848);
-		Cursor c = dbHelper.getAllCores();
+		c = dbHelper.getAllCores();
 		startManagingCursor(c);
 
 		String[] from = new String[] {QuasselDbHelper.KEY_NAME};
@@ -131,6 +133,13 @@ public class LoginActivity extends Activity implements Observer {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		if (c != null) {
+			c.close();
+		}
+		if (dbHelper != null) {
+			dbHelper.close();
+		}
+
 	}
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {

@@ -18,6 +18,13 @@ import com.lekebilen.quasseldroid.gui.ChatActivity;
 public class Buffer extends Observable implements Comparable<Buffer> {
 	private BufferInfo info;
 	private ArrayList<IrcMessage> backlog = null;
+	/*
+	 * the message id of the message that was on top of the screen when this buffer was last displayed
+	 * used to remember position when going back to a buffer
+	 */
+	private int topMessageShown = 0;
+	
+
 	private int lastSeenMessage;
 	private int markerLineMessage;
 	private int lastHighlightMessageId;
@@ -161,6 +168,15 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public void setName(String name) {
 		info.name = name;
 		notifyObservers();
+	}
+	
+	public int getTopMessageShown() {
+		return topMessageShown;
+	}
+
+
+	public void setTopMessageShown(int topMessageShown) {
+		this.topMessageShown = topMessageShown;
 	}
 
 	@Override
