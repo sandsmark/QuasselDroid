@@ -23,11 +23,11 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * used to remember position when going back to a buffer
 	 */
 	private int topMessageShown = 0;
-	
 
 	private int lastSeenMessage;
 	private int markerLineMessage;
 	private int lastHighlightMessageId;
+	private int lastPlainMessageId;
 	private static final String TAG = Buffer.class.getSimpleName();
 	private List<String> nicks;
 	private String topic;
@@ -50,6 +50,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private void newBufferEntry(IrcMessage message) {		
 		if (message.isHighlighted() && message.messageId > lastHighlightMessageId){
 			lastHighlightMessageId = message.messageId;
+			this.setChanged();
+		}
+		if (message.type==IrcMessage.Type.Plain && message.messageId > lastPlainMessageId) {
+			lastPlainMessageId = message.messageId;
 			this.setChanged();
 		}
 		
@@ -88,27 +92,37 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		return backlogPending>0;
 	}
 	public boolean hasUnseenHighlight(){
-		if (lastHighlightMessageId > lastSeenMessage){
+		if (backlog.size() != 0 && lastSeenMessage!=0 && lastHighlightMessageId > lastSeenMessage){
 			return true;
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if the buffer has any unread messages, not including joins/parts/quits etc
+	 */
 	public boolean hasUnreadMessage(){
+		if (backlog.size() != 0 && lastSeenMessage!=0 && lastPlainMessageId>lastSeenMessage){
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Checks if the buffer has any unread activity, can be anything
+	 */
+	public boolean hasUnreadActivity(){
 		//Last message in the backlog has a bigger messageId than the last seen message
-//		if (backlog.size() != 0) System.out.println(this.info.name +": lastseen:"+lastSeenMessage+" backlog:" + backlog.get(backlog.size()-1).messageId);
 		if (backlog.size() != 0 && lastSeenMessage!=0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
 			return true;
 		}
 		return false;
 	}
 	public void setLastSeenMessage(int lastSeenMessage) {
-		//Log.d(TAG, "LASTSEEN SET:"+ this.info.name+":"+lastSeenMessage);
 		this.lastSeenMessage = lastSeenMessage;
 		this.setChanged();
 		notifyObservers();
 	}	
 	public void setMarkerLineMessage(int markerLineMessage) {
-		//Log.d(TAG, "MARKERLINE SET:"+ this.info.name+":"+markerLineMessage);
 		this.markerLineMessage = markerLineMessage;
 		this.setChanged();
 		notifyObservers();

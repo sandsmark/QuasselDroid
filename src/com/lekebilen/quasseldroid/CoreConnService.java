@@ -45,7 +45,7 @@ public class CoreConnService extends Service{
 	Handler notifyHandler;
 	Handler incomingHandler;
 	NotificationManager notifyManager;
-	
+
 	SharedPreferences preferences;
 
 
@@ -212,19 +212,13 @@ public class CoreConnService extends Service{
 				 */
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
-
-
-				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
+	
 				if(buffer != null && !buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks
 					 */
-					Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+coreConn.getNick(buffer.getInfo().networkId)+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
-					Matcher matcher = regexHighlight.matcher(message.content);
-					if (matcher.find()) {
-						message.setFlag(IrcMessage.Flag.Highlight);
-					}
+					checkMessageForHighlight(buffer, message);
 					buffer.addBacklogMessage(message);	
 				}else {
 					Log.e(TAG, "Getting message buffer already have"+ buffer.toString());
@@ -237,18 +231,12 @@ public class CoreConnService extends Service{
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 
-
-				//TODO: Perhaps not check twice if the message is in the buffer (hasMessage and addBacklog)
 				if(buffer != null && !buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks
 					 */
-					Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+coreConn.getNick(buffer.getInfo().networkId)+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
-					Matcher matcher = regexHighlight.matcher(message.content);
-					if (matcher.find()) {
-						message.setFlag(IrcMessage.Flag.Highlight);
-					}
+					checkMessageForHighlight(buffer, message);
 					buffer.addMessage(message);					
 				}else {
 					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
@@ -273,7 +261,7 @@ public class CoreConnService extends Service{
 				 */
 				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
 				break;
-				
+
 			case R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE:
 				/**
 				 * Setting last seen message id in a buffer
@@ -290,7 +278,7 @@ public class CoreConnService extends Service{
 				Buffer buf2 = (Buffer) msg.obj;
 				buf2.setMarkerLineMessage(msg.arg1);
 				break;
-				
+
 			case R.id.CORECONNECTION_LOST_CONNECTION:
 				/**
 				 * Lost connection with core, update notification
@@ -320,6 +308,22 @@ public class CoreConnService extends Service{
 				 * TODO: handle disconnection
 				 */
 				break;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Checks if there is a highlight in the message and then sets the flag of that message to highlight
+	 * @param buffer the buffer the message belongs to
+	 * @param message the message to check
+	 */
+	public void checkMessageForHighlight(Buffer buffer, IrcMessage message) {
+		if (message.type==IrcMessage.Type.Plain) {
+			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+coreConn.getNick(buffer.getInfo().networkId)+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+			Matcher matcher = regexHighlight.matcher(message.content);
+			if (matcher.find()) {
+				message.setFlag(IrcMessage.Flag.Highlight);
 			}
 		}
 	}

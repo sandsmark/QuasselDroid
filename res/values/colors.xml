@@ -2,9 +2,10 @@
 <resources>
 	<color name="logo_text_color">#0686fd</color>
 	
-	<color name="unread_buffer_color">#00FF00</color>
-	<color name="highlight_buffer_color">#FF8Cff</color>
-	<color name="read_buffer_color">#000000</color>
+	<color name="buffer_unread_color">#0000ff</color>
+	<color name="buffer_highlight_color">#FF8Cff</color>
+	<color name="buffer_read_color">#000000</color>
 	<color name="ircmessage_highlight_color">#FF8C00</color>
 	<color name="ircmessage_normal_color">#ffffff</color>
+	<color name="buffer_activity_color">#00FF00</color>
 </resources>

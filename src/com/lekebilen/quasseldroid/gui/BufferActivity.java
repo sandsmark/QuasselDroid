@@ -171,11 +171,13 @@ public class BufferActivity extends ListActivity {
 
 			//Check here if there are any unread messages in the buffer, and then set this color if there is
 			if (entry.hasUnseenHighlight()){
-				holder.bufferView.setTextColor(getResources().getColor(R.color.highlight_buffer_color));
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
 			} else if (entry.hasUnreadMessage()){
-				holder.bufferView.setTextColor(getResources().getColor(R.color.unread_buffer_color));
-			} else {
-				holder.bufferView.setTextColor(getResources().getColor(R.color.read_buffer_color));
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
+			} else if (entry.hasUnreadActivity()) {
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
+			}else {
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
 			}
 			return convertView;
 		}
