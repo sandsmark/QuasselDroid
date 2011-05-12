@@ -136,7 +136,7 @@ public class CoreConnection {
 	public void requestMarkBufferAsRead(int buffer) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
-		retFunc.add(new QVariant<String>("BacklogManager", QVariantType.String));
+		retFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
 		retFunc.add(new QVariant<String>("", QVariantType.String));
 		retFunc.add(new QVariant<String>("requestMarkBufferAsRead", QVariantType.String));
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
