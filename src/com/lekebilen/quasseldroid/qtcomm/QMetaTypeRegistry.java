@@ -40,9 +40,9 @@ public class QMetaTypeRegistry {
 	Map<String,Integer> lookupName;
 	Map<Integer,Integer> lookupId;
 	private QMetaTypeRegistry(){
+		types = new ArrayList<QMetaType<?>>();
 		lookupName = new HashMap<String,Integer>();
 		lookupId = new HashMap<Integer,Integer>();
-		types = new ArrayList<QMetaType<?>>();
 		//:%s/QT_ADD_STATIC_METATYPE(\(\"[^\"]\+\"\)\, QMetaType::\([^)]\+\)),/types.add(new QMetaType(QMetaType.Type.\2.getValue(),\1));/g
 		types.add(new QMetaType<java.lang.Void>(QMetaType.Type.Void.getValue(), "void", new com.lekebilen.quasseldroid.qtcomm.serializers.Void()));
 		types.add(new QMetaType<Boolean>(QMetaType.Type.Bool.getValue(),"bool", new Bool()));

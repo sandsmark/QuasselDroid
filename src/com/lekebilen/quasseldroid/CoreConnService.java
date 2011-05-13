@@ -282,6 +282,10 @@ public class CoreConnService extends Service{
 				/**
 				 * Lost connection with core, update notification
 				 */
+				Intent intent = new Intent(CoreConnService.this, LoginActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
 				showNotification(false);
 				break;
 
@@ -301,11 +305,6 @@ public class CoreConnService extends Service{
 				 */
 				IrcUser user = (IrcUser) msg.obj;
 				newUser(user);
-				break;
-			case R.id.CORECONNECTION_DISCONNECTED:
-				/**
-				 * TODO: handle disconnection
-				 */
 				break;
 			}
 		}
