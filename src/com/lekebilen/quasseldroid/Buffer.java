@@ -200,6 +200,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 			return info.networkId - another.info.networkId;
 		else if (info.type != another.info.type)
 			return info.type.value - another.info.type.value;
-		else return info.name.compareTo(another.info.name);
+		else return info.name.compareToIgnoreCase(another.info.name);
 	}
 }

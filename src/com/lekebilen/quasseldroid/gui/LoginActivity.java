@@ -34,9 +34,10 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.lekebilen.quasseldroid.CoreConnService;
-import com.lekebilen.quasseldroid.CoreConnection;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.io.CoreConnection;
+import com.lekebilen.quasseldroid.io.QuasselDbHelper;
+import com.lekebilen.quasseldroid.service.CoreConnService;
 
 public class LoginActivity extends Activity implements Observer {
 

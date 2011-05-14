@@ -16,7 +16,9 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,9 +41,9 @@ import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferInfo;
-import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.service.CoreConnService;
 
 public class ChatActivity extends Activity{
 
@@ -55,6 +57,8 @@ public class ChatActivity extends Activity{
 	private int dynamicBacklogAmout;
 	
 	SharedPreferences preferences;
+
+	private ResultReceiver statusReceiver;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -80,6 +84,16 @@ public class ChatActivity extends Activity{
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
 		backlogList.setOnItemLongClickListener(itemLongClickListener);
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
+		
+		statusReceiver = new ResultReceiver(null) {
+
+			@Override
+			protected void onReceiveResult(int resultCode, Bundle resultData) {
+				if (resultCode==CoreConnService.CONNECTION_LOST) finish();
+				super.onReceiveResult(resultCode, resultData);
+			}
+			
+		};
 	}
 	
 	
@@ -480,6 +494,7 @@ public class ChatActivity extends Activity{
 				adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
 			}
 
+			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -510,6 +525,7 @@ public class ChatActivity extends Activity{
 				adapter.buffer.setLastSeenMessage(adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
 			}
 			adapter.stopObserving();
+			boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
 			adapter.clearBuffer();

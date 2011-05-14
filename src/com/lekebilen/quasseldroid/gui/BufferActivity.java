@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,8 +24,8 @@ import android.widget.TextView;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferCollection;
-import com.lekebilen.quasseldroid.CoreConnService;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.service.CoreConnService;
 
 public class BufferActivity extends ListActivity {
 
@@ -33,10 +34,10 @@ public class BufferActivity extends ListActivity {
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 
-
-	//ArrayList<Buffer> bufferList;
 	BufferListAdapter bufferListAdapter;
-	//	IncomingHandler handler;
+	
+	ResultReceiver statusReciver;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,10 +51,16 @@ public class BufferActivity extends ListActivity {
 		getListView().setDividerHeight(0);
 		getListView().setCacheColorHint(0xffffffff);
 		setListAdapter(bufferListAdapter);
+		
+		statusReciver = new ResultReceiver(null) {
 
-		//		handler = new IncomingHandler();
-
-
+			@Override
+			protected void onReceiveResult(int resultCode, Bundle resultData) {
+				if (resultCode==CoreConnService.CONNECTION_LOST) finish();
+				super.onReceiveResult(resultCode, resultData);
+			}
+			
+		};
 	}
 
 	@Override
@@ -343,6 +350,8 @@ public class BufferActivity extends ListActivity {
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
+			
+			boundConnService.registerStatusReceiver(statusReciver);
 
 			//Testing to see if i can add item to adapter in service
 			bufferListAdapter.setBuffers(boundConnService.getBufferList(bufferListAdapter));
@@ -365,6 +374,10 @@ public class BufferActivity extends ListActivity {
 		// class name because we want a specific service implementation that
 		// we know will be running in our own process (and thus won't be
 		// supporting component replacement by other applications).
+		
+		// Send a ResultReciver with the intent to the service, so that we can 
+		// get a notification if the connection status changes like we disconnect. 
+		
 		bindService(new Intent(BufferActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
 		isBound = true;
 		Log.i(TAG, "BINDING");
@@ -374,6 +387,7 @@ public class BufferActivity extends ListActivity {
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
 			bufferListAdapter.stopObserving();
+			boundConnService.unregisterStatusReceiver(statusReciver);
 			// Detach our existing connection.
 			unbindService(mConnection);
 			isBound = false;
