@@ -56,7 +56,7 @@ public class BufferActivity extends ListActivity {
 
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_LOST) finish();
+				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
 				super.onReceiveResult(resultCode, resultData);
 			}
 			

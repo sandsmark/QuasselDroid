@@ -10,6 +10,7 @@ import android.R.bool;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +21,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,6 +51,8 @@ public class LoginActivity extends Activity implements Observer {
 	public static final String PREFS_REMEMBERME = "rememberMe";
 	SharedPreferences settings;
 	QuasselDbHelper dbHelper;
+	
+	private ResultReceiver statusReceiver;
 
 	Spinner core;
 	EditText username;
@@ -103,13 +107,26 @@ public class LoginActivity extends Activity implements Observer {
 
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
+		
+		statusReceiver = new ResultReceiver(null) {
 
-		//Not sure if this is good design so commented out for now
-		/*if(rememberMe.isChecked()){
-        	ScrollView sw=((ScrollView)findViewById(R.id.accountScroll));//scroll to bottom (connect button)
-        	sw.scrollTo(0, sw.getHeight());
-        }*/
+			@Override
+			protected void onReceiveResult(int resultCode, Bundle resultData) {
+				if (resultCode==CoreConnService.CONNECTION_CONNECTED) {
+					removeDialog(R.id.DIALOG_CONNECTING);
+					LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+				}else if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
+					if (resultData!=null){
+						removeDialog(R.id.DIALOG_CONNECTING);
+						Toast.makeText(LoginActivity.this, resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
+					}
+				}
+				super.onReceiveResult(resultCode, resultData);
+			}
+			
+		};
 	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.login_menu, menu);
@@ -179,6 +196,7 @@ public class LoginActivity extends Activity implements Observer {
 			((EditText)dialog.findViewById(R.id.dialog_name_field)).setText(res.getString("name"));
 			((EditText)dialog.findViewById(R.id.dialog_address_field)).setText(res.getString("address"));
 			((EditText)dialog.findViewById(R.id.dialog_port_field)).setText(Integer.toString(res.getInt("port")));
+			break;
 		}
 
 		super.onPrepareDialog(id, dialog);
@@ -196,7 +214,6 @@ public class LoginActivity extends Activity implements Observer {
 		case R.id.DIALOG_EDIT_CORE: //fallthrough
 		case R.id.DIALOG_ADD_CORE:
 			Log.i("Ken", "Creating dialog");
-			//TODO:Ken:Add dialog
 			dialog = new Dialog(this);
 			dialog.setContentView(R.layout.dialog_add_core);
 			dialog.setTitle("Add new core");
@@ -245,6 +262,13 @@ public class LoginActivity extends Activity implements Observer {
 			dialog.findViewById(R.id.cancel_button).setOnClickListener(buttonListener);
 			dialog.findViewById(R.id.save_button).setOnClickListener(buttonListener);	
 			break;
+		
+		case R.id.DIALOG_CONNECTING:
+			ProgressDialog prog = new ProgressDialog(LoginActivity.this);
+			prog.setMessage("Connecting...");
+			prog.setCancelable(false);
+			dialog = prog;
+			break;
 
 		default:
 			dialog = null;
@@ -270,7 +294,6 @@ public class LoginActivity extends Activity implements Observer {
 				dg.show();							
 				return;
 			}
-
 			SharedPreferences.Editor settingsedit = settings.edit();
 			if(rememberMe.isChecked()){//save info
 				settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
@@ -299,6 +322,8 @@ public class LoginActivity extends Activity implements Observer {
 				Toast.makeText(LoginActivity.this, "This application requires a internett connection", Toast.LENGTH_LONG).show();
 				return;
 			}
+			
+			showDialog(R.id.DIALOG_CONNECTING);
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
@@ -342,11 +367,7 @@ public class LoginActivity extends Activity implements Observer {
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-			if (boundConnService.isConnected()) {
-				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));					
-			} else {
-				Toast.makeText(getApplicationContext(), "Core not connected!", Toast.LENGTH_LONG).show();
-			}
+			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -367,6 +388,7 @@ public class LoginActivity extends Activity implements Observer {
 	void doUnbindService() {
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
+			boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
 		}

@@ -45,6 +45,7 @@ import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferInfo;
@@ -100,6 +101,9 @@ public class CoreConnection {
 		this.nicks = new HashMap<Integer, String>();
 
 		this.connected = false;
+		
+		readThread = new ReadThread();
+		readThread.start();
 	}
 
 	/**
@@ -365,9 +369,6 @@ public class CoreConnection {
 		}
 
 
-		readThread = new ReadThread();
-		readThread.start();
-
 		TimerTask sendPingAction = new TimerTask() {
 			public void run() {
 				List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
@@ -385,8 +386,11 @@ public class CoreConnection {
 		heartbeatTimer.schedule(sendPingAction, 30000, 30000); // Send heartbeats every 30 seconds
 
 		// END SIGNAL PROXY
-		System.out.println("Connected!");
+		Log.i(TAG, "Connected!");
 		connected = true;
+		
+		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_CONNECTED);
+		msg.sendToTarget();
 	}
 
 	/**
@@ -639,6 +643,21 @@ public class CoreConnection {
 
 		public void run() {
 			this.running = true;
+			
+			try {
+				connect();
+				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
+			} catch (UnknownHostException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Unknown host!").sendToTarget();
+				//Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
+			} catch (IOException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+				//Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
+				//Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
+			}
 
 			List<QVariant<?>> packedFunc;
 			while (running) {
