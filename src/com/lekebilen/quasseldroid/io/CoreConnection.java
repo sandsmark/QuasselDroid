@@ -455,8 +455,8 @@ public class CoreConnection {
 		outStream.writeUInt(bos.size(), 32);
 
 		// Sanity check, check that we can decode our own stuff before sending it off
-		QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
-		QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
+		//QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		//QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
 
 		// Send data 
 		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);

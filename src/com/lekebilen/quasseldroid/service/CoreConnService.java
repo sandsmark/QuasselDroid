@@ -219,6 +219,9 @@ public class CoreConnService extends Service{
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
+			if (msg == null)
+				return;
+			
 			Buffer buffer;
 			IrcMessage message;
 			switch (msg.what) {
@@ -228,8 +231,12 @@ public class CoreConnService extends Service{
 				 */
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
+				if (buffer == null) {
+					Log.e(TAG, "Getting null buffer " + message);
+					return;
+				}
 	
-				if(buffer != null && !buffer.hasMessage(message)) {
+				if(!buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks
@@ -246,8 +253,12 @@ public class CoreConnService extends Service{
 				 */
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
+				if (buffer == null) {
+					Log.e(TAG, "Getting null buffer " + message);
+					return;
+				}
 
-				if(buffer != null && !buffer.hasMessage(message)) {
+				if(!buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks
