@@ -252,17 +252,19 @@ public class CoreConnService extends Service{
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 
-				if(buffer != null && !buffer.hasMessage(message)) {
+				if(buffer != null) {
+					if (!buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
-					 * TODO: Add support for custom highlight masks
-					 */
+					 * TODO: Add support for custom highlight masks					 */
 					checkMessageForHighlight(buffer, message);
 					buffer.addMessage(message);					
-				}else {
-					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
+					}else {
+						Log.e(TAG, "Getting message buffer already have " + buffer.toString());
+					}
+				}else{
+					Log.e(TAG, "Getting message but don't have buffer: " + message);
 				}
-
 				break;
 
 			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
