@@ -101,7 +101,7 @@ public class CoreConnection {
 		this.nicks = new HashMap<Integer, String>();
 
 		this.connected = false;
-		
+
 		readThread = new ReadThread();
 		readThread.start();
 	}
@@ -115,20 +115,20 @@ public class CoreConnection {
 				readThread != null && readThread.isAlive())
 			return true;
 		else {
-// No fucking clue wth the following is suppose to achieve so just commenting it out for now.
-//			try {
-//				connect();
-//				return true;
-//			} catch (Exception e) {
-//				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
-//
-//				// Do not crash on start up if we don't have buffer (will output invalid username/password combination)
-//				if(buffers != null) {
-//					msg.obj = buffers.values();
-//					msg.sendToTarget();
-//				}
+			// No fucking clue wth the following is suppose to achieve so just commenting it out for now.
+			//			try {
+			//				connect();
+			//				return true;
+			//			} catch (Exception e) {
+			//				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
+			//
+			//				// Do not crash on start up if we don't have buffer (will output invalid username/password combination)
+			//				if(buffers != null) {
+			//					msg.obj = buffers.values();
+			//					msg.sendToTarget();
+			//				}
 
-				return false;
+			return false;
 			//}
 		}
 	}
@@ -388,7 +388,7 @@ public class CoreConnection {
 		// END SIGNAL PROXY
 		Log.i(TAG, "Connected!");
 		connected = true;
-		
+
 		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_CONNECTED);
 		msg.sendToTarget();
 	}
@@ -398,7 +398,9 @@ public class CoreConnection {
 	 * Java sucks.
 	 */
 	public void disconnect() {
-		heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+		if (heartbeatTimer!=null) {
+			heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+		}
 		try {
 			outStream.close();
 		} catch (IOException e) {
@@ -643,7 +645,7 @@ public class CoreConnection {
 
 		public void run() {
 			this.running = true;
-			
+
 			try {
 				connect();
 				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
