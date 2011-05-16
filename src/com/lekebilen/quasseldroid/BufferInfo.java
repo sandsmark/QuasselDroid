@@ -3,6 +3,9 @@ package com.lekebilen.quasseldroid;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+/**
+ * Class holds the basic information about a buffer, the name, the type of buffer, the network etc
+ */
 public class BufferInfo {
 	public enum Type {
 		    InvalidBuffer (0x00),

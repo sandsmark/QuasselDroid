@@ -171,12 +171,12 @@ public class ChatActivity extends Activity{
 		String inputNick = inputfield.getText().toString();
 
 		if ( "".equals(inputNick) ) {
-			if ( adapter.buffer.nicks().size() > 0 ) {
-				inputfield.setText(adapter.buffer.nicks().get(0)+ ": ");
-				inputfield.setSelection(adapter.buffer.nicks().get(0).length() + 2);
+			if ( adapter.buffer.getNicks().size() > 0 ) {
+				inputfield.setText(adapter.buffer.getNicks().get(0)+ ": ");
+				inputfield.setSelection(adapter.buffer.getNicks().get(0).length() + 2);
 			}
 		} else {
-			for (String nick : adapter.buffer.nicks()) {
+			for (String nick : adapter.buffer.getNicks()) {
 				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
 					inputfield.setText(nick+ ": ");
 					inputfield.setSelection(nick.length() + 2);
@@ -261,7 +261,7 @@ public class ChatActivity extends Activity{
 			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name); //TODO: Add which server we are connected to
 			} else{
-				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
+				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.getTopic());
 			}
 			notifyDataSetChanged();
 			list.scrollTo(list.getScrollX(), list.getScrollY());
