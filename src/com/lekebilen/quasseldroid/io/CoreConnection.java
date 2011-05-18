@@ -343,7 +343,6 @@ public class CoreConnection {
 		buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
 		for (QVariant<?> bufferInfoQV: bufferInfos) {
 			BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
-			//requestBacklog(bufferInfo.id, -1, -1, 1);
 			buffers.put(bufferInfo.id, new Buffer(bufferInfo));
 		}
 		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
@@ -368,6 +367,13 @@ public class CoreConnection {
 			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
 		}
 
+		//Send buffers to CoreConService
+		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+		msg.obj = buffers.values();
+		msg.sendToTarget();
+
+
+
 
 		TimerTask sendPingAction = new TimerTask() {
 			public void run() {
@@ -389,7 +395,7 @@ public class CoreConnection {
 		Log.i(TAG, "Connected!");
 		connected = true;
 
-		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_CONNECTED);
+		msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_CONNECTED);
 		msg.sendToTarget();
 	}
 
@@ -767,12 +773,8 @@ public class CoreConnection {
 									break;
 								}
 							}
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-							msg.obj = buffers.values();
-							msg.sendToTarget();
-
-
-							msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
+							
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
 
@@ -831,17 +833,6 @@ public class CoreConnection {
 								msg.sendToTarget();
 							}
 						}
-						/* 
-						 * We have now received everything we need to know about our buffers,
-						 * and will now notify our listeners about them.
-						 */
-						//Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-						//msg.obj = buffers.values();
-						//msg.sendToTarget();
-						/*for (int buffer: buffers.keySet()) {
-							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
-							requestBacklog(buffer, -1, -1, 1);
-						}*/
 
 						/*
 						 * A class representing another user on a given IRC network.

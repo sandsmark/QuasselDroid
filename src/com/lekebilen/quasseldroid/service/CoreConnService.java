@@ -277,11 +277,8 @@ public class CoreConnService extends Service{
 				 * New buffer received, so update out channel holder with the new buffer
 				 */
 				buffer = (Buffer)msg.obj;
-				if (!bufferCollection.hasBuffer(buffer.getInfo().id)) {
-					bufferCollection.addBuffer(buffer);
-				} else {
-					Log.e(TAG, "Getting already gotten buffer");
-				}
+				bufferCollection.addBuffer(buffer);
+				
 				break;
 			case R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS:
 				/**
