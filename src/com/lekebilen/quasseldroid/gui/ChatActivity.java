@@ -314,6 +314,22 @@ public class ChatActivity extends Activity{
 				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 				//TODO: implement the rest
+			case Kick:
+				holder.nickView.setText("<-*");
+				int nickEnd = entry.content.toString().indexOf(" ");
+				String nick = entry.content.toString().substring(0, nickEnd);
+				String reason = entry.content.toString().substring(nickEnd+1);
+				holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				break;
+				
+			case Mode:
+				holder.nickView.setText("***");
+				holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				break;
 			case Plain:
 			default:
 				if(entry.isSelf()) {
