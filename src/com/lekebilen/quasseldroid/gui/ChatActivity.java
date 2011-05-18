@@ -288,9 +288,12 @@ public class ChatActivity extends Activity{
 			
 			switch (entry.type) {
 			case Action:
+			case Server:
 				holder.nickView.setText("*");
 				holder.msgView.setTypeface(Typeface.DEFAULT_BOLD);
-				holder.msgView.setText(entry.getNick() + " " + entry.content);
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_servermessage_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_servermessage_color));
+				holder.msgView.setText(entry.content);
 				break;
 			case Join:
 				holder.nickView.setText("-->");
