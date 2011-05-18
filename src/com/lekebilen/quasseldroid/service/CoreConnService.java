@@ -227,8 +227,10 @@ public class CoreConnService extends Service{
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			if (msg == null)
+			if (msg == null) {
+				Log.e(TAG, "Msg was null?");
 				return;
+			}
 			
 			Buffer buffer;
 			IrcMessage message;
@@ -240,7 +242,7 @@ public class CoreConnService extends Service{
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 				if (buffer == null) {
-					Log.e(TAG, "Getting null buffer " + message);
+					Log.e(TAG, "A messages buffer is null:" + message);
 					return;
 				}
 	
@@ -263,7 +265,7 @@ public class CoreConnService extends Service{
 				message = (IrcMessage)msg.obj;
 				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
 				if (buffer == null) {
-					Log.e(TAG, "Getting null buffer " + message);
+					Log.e(TAG, "A messages buffer is null: " + message);
 					return;
 				}
 
