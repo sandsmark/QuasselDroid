@@ -165,15 +165,6 @@ public class CoreConnection {
 	/**
 	 * Requests all buffers.
 	 */
-	public void requestBuffers() {
-		//try {
-		//sendInitRequest("BufferSyncer", "");
-
-		//} catch (IOException e) {
-		//	e.printStackTrace();
-		//	connected = false;
-		//}
-	}
 
 	/**
 	 * Requests the unread backlog for a given buffer.
@@ -355,7 +346,7 @@ public class CoreConnection {
 		// Now the fun part starts, where we play signal proxy
 
 		// START SIGNAL PROXY INIT
-		//sendInitRequest("BacklogManager", "");
+	
 		// We must do this here, to get network names early enough
 		for(int network: networks) {
 			sendInitRequest("Network", Integer.toString(network));

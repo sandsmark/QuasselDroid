@@ -217,7 +217,6 @@ public class CoreConnService extends Service{
 
 	public BufferCollection getBufferList(Observer obs) {
 		bufferCollection.addObserver(obs);
-		coreConn.requestBuffers();
 		return bufferCollection;
 	}
 
