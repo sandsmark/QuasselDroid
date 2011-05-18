@@ -103,6 +103,10 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		}
 		return false;
 	}
+	
+	public boolean isSelf() {
+		return ((flags & Flag.Self.value) != 0);
+	}
 
 	public void addURL(Context context, String url) {
 		urls.add(url);

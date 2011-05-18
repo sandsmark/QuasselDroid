@@ -284,11 +284,7 @@ public class ChatActivity extends Activity{
 			IrcMessage entry = this.getItem(position);
 			holder.messageID = entry.messageId;
 			holder.timeView.setText(entry.getTime());
-			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
-
-			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
-			holder.msgView.setTextColor(0xff000000);
-			holder.msgView.setTypeface(Typeface.DEFAULT);
+			
 			
 			switch (entry.type) {
 			case Action:
@@ -297,20 +293,35 @@ public class ChatActivity extends Activity{
 				holder.msgView.setText(entry.getNick() + " " + entry.content);
 				break;
 			case Join:
-				holder.nickView.setText("->’");
+				holder.nickView.setText("-->");
 				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 			case Part:
-				holder.nickView.setText("<-");
+				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 			case Quit:				
-				holder.nickView.setText("<-");
+				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 				//TODO: implement the rest
 			case Plain:
 			default:
+				if(entry.isSelf()) {
+					holder.nickView.setTextColor(Color.BLACK); //TODO: probably move to color file, or somewhere else it needs to be, so user can select color them self
+				}else{
+					int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
+					holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
+				}
+				holder.msgView.setTextColor(0xff000000);
+				holder.msgView.setTypeface(Typeface.DEFAULT);
+				
 				holder.nickView.setText("<" + entry.getNick() + ">");
 				holder.msgView.setText(entry.content);
 				break;

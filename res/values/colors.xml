@@ -9,4 +9,5 @@
 	<color name="ircmessage_normal_color">#ffffff</color>
 	<color name="buffer_activity_color">#00FF00</color>
 	<color name="ircmessage_url_color">#0000FF</color>
+	<color name="ircmessage_commandmessages_color">#960096</color>
 </resources>
