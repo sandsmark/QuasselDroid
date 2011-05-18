@@ -70,6 +70,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	
 	private boolean temporarilyHidden = false;
 	private boolean permanentlyHidden = false;
+	private boolean autoSort = true;
+	private int order = -1;
 	
 	public Buffer(BufferInfo info) {
 		this.info = info;
@@ -360,5 +362,21 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	public boolean permanentlyHidden() {
 		return permanentlyHidden;
+	}
+
+	public void setAutoSort(boolean autoSort) {
+		this.autoSort = autoSort;
+	}
+
+	public boolean autoSort() {
+		return autoSort;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 }

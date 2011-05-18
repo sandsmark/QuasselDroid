@@ -844,8 +844,10 @@ public class CoreConnection {
 					} else if (className.equals("BufferViewConfig")) {
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
-						List<QVariant<?>>  permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
+						List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
+						List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
 						int networkId = (Integer) map.get("networkId").getData(); // let's hope we don't need this, LAWLERZ!!1
+						boolean autoSort = (Boolean) map.get("sortAlphabetically").getData();
 						
 						for (QVariant bufferId: tempList) {
 							buffers.get(bufferId.getData()).setTemporarilyHidden(true);
@@ -853,6 +855,17 @@ public class CoreConnection {
 						
 						for (QVariant bufferId: permList) {
 							buffers.get(bufferId.getData()).setPermanentlyHidden(true);
+						}
+						
+						int order = 0;
+						for (QVariant bufferId: orderList) {
+							if (!buffers.containsKey(bufferId.getData())) {
+								System.err.println("got buffer info for non-existant buffer id: " + bufferId.getData());
+								continue;
+							}
+							buffers.get(bufferId.getData()).setAutoSort(autoSort);
+							buffers.get(bufferId.getData()).setOrder(order);
+							order++;
 						}
 						
 						
