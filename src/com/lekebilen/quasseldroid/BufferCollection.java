@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.util.Log;
+
 public class BufferCollection extends Observable implements Observer {
 	
 	private HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
@@ -21,6 +23,7 @@ public class BufferCollection extends Observable implements Observer {
 	
 	public void addBuffer(Buffer buffer) {
 		if (buffers.containsKey(buffer.getInfo().id)) {
+			Log.e(TAG, "Getting buffer already have: " + buffer.getInfo().name);
 			return;
 		}
 		
@@ -53,8 +56,11 @@ public class BufferCollection extends Observable implements Observer {
 	public void addBuffers(Collection<Buffer> buffers) {
 		boolean changed = false;
 		for (Buffer buffer: buffers) {
-			if (this.buffers.containsKey(buffer.getInfo().id))
+			if (this.buffers.containsKey(buffer.getInfo().id)) {
+				Log.e(TAG, "Getting buffer in buffers we already have: " + buffer.getInfo().name);
 				continue;
+			}
+			Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().type);
 			
 			changed = true;
 			this.buffers.put(buffer.getInfo().id, buffer);

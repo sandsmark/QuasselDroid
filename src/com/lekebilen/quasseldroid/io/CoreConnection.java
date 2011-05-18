@@ -45,6 +45,7 @@ import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferInfo;
@@ -100,6 +101,9 @@ public class CoreConnection {
 		this.nicks = new HashMap<Integer, String>();
 
 		this.connected = false;
+
+		readThread = new ReadThread();
+		readThread.start();
 	}
 
 	/**
@@ -111,20 +115,20 @@ public class CoreConnection {
 				readThread != null && readThread.isAlive())
 			return true;
 		else {
-// No fucking clue wth the following is suppose to achieve so just commenting it out for now.
-//			try {
-//				connect();
-//				return true;
-//			} catch (Exception e) {
-//				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
-//
-//				// Do not crash on start up if we don't have buffer (will output invalid username/password combination)
-//				if(buffers != null) {
-//					msg.obj = buffers.values();
-//					msg.sendToTarget();
-//				}
+			// No fucking clue wth the following is suppose to achieve so just commenting it out for now.
+			//			try {
+			//				connect();
+			//				return true;
+			//			} catch (Exception e) {
+			//				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
+			//
+			//				// Do not crash on start up if we don't have buffer (will output invalid username/password combination)
+			//				if(buffers != null) {
+			//					msg.obj = buffers.values();
+			//					msg.sendToTarget();
+			//				}
 
-				return false;
+			return false;
 			//}
 		}
 	}
@@ -339,7 +343,6 @@ public class CoreConnection {
 		buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
 		for (QVariant<?> bufferInfoQV: bufferInfos) {
 			BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
-			//requestBacklog(bufferInfo.id, -1, -1, 1);
 			buffers.put(bufferInfo.id, new Buffer(bufferInfo));
 		}
 		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
@@ -364,9 +367,13 @@ public class CoreConnection {
 			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
 		}
 
+		//Send buffers to CoreConService
+		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+		msg.obj = buffers.values();
+		msg.sendToTarget();
 
-		readThread = new ReadThread();
-		readThread.start();
+
+
 
 		TimerTask sendPingAction = new TimerTask() {
 			public void run() {
@@ -385,8 +392,11 @@ public class CoreConnection {
 		heartbeatTimer.schedule(sendPingAction, 30000, 30000); // Send heartbeats every 30 seconds
 
 		// END SIGNAL PROXY
-		System.out.println("Connected!");
+		Log.i(TAG, "Connected!");
 		connected = true;
+
+		msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_CONNECTED);
+		msg.sendToTarget();
 	}
 
 	/**
@@ -394,7 +404,9 @@ public class CoreConnection {
 	 * Java sucks.
 	 */
 	public void disconnect() {
-		heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+		if (heartbeatTimer!=null) {
+			heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+		}
 		try {
 			outStream.close();
 		} catch (IOException e) {
@@ -640,6 +652,21 @@ public class CoreConnection {
 		public void run() {
 			this.running = true;
 
+			try {
+				connect();
+				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
+			} catch (UnknownHostException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Unknown host!").sendToTarget();
+				//Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
+			} catch (IOException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+				//Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
+				//Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
+			}
+
 			List<QVariant<?>> packedFunc;
 			while (running) {
 				try {
@@ -746,12 +773,8 @@ public class CoreConnection {
 									break;
 								}
 							}
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-							msg.obj = buffers.values();
-							msg.sendToTarget();
-
-
-							msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
+							
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
 
@@ -810,17 +833,6 @@ public class CoreConnection {
 								msg.sendToTarget();
 							}
 						}
-						/* 
-						 * We have now received everything we need to know about our buffers,
-						 * and will now notify our listeners about them.
-						 */
-						//Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
-						//msg.obj = buffers.values();
-						//msg.sendToTarget();
-						/*for (int buffer: buffers.keySet()) {
-							// Here we might fetch backlog for all buffers, but we don't want to, because phones are slow:
-							requestBacklog(buffer, -1, -1, 1);
-						}*/
 
 						/*
 						 * A class representing another user on a given IRC network.

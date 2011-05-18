@@ -52,7 +52,12 @@ public class CoreConnService extends Service{
 	private static final String TAG = CoreConnService.class.getSimpleName();
 	
 	/** Id for result code in the resultReciver that is going to notify the activity currently on screen about the change */
-	public static final int CONNECTION_LOST = 0;
+	public static final int CONNECTION_DISCONNECTED = 0;
+	public static final int CONNECTION_CONNECTED = 1;
+	public static final String STATUS_KEY = "status";
+	
+	private Pattern URLPattern= Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
+
 
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
@@ -153,6 +158,9 @@ public class CoreConnService extends Service{
 	 * @param intent
 	 */
 	private void handleIntent(Intent intent) {
+		if (coreConn!=null) {
+			this.disconnectFromCore();
+		}
 		Bundle connectData = intent.getExtras();
 		String address = connectData.getString("address");
 		int port = connectData.getInt("port");
@@ -162,18 +170,18 @@ public class CoreConnService extends Service{
 		Log.i(TAG, "Connecting to core: "+address+":"+port+" with username " +username);
 		bufferCollection = new BufferCollection();
 		coreConn = new CoreConnection(address, port, username, password, ssl, this);
-		try {
-			coreConn.connect();
-			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
-			showNotification(true);
-		} catch (UnknownHostException e) {
-			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
-		} catch (IOException e) {
-			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-		} catch (GeneralSecurityException e) {
-			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
-		}
+//		try {
+//			coreConn.connect();
+//			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
+//			showNotification(true);
+//		} catch (UnknownHostException e) {
+//			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
+//		} catch (IOException e) {
+//			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
+//			e.printStackTrace();
+//		} catch (GeneralSecurityException e) {
+//			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
+//		}
 	}
 
 	public void newUser(IrcUser user) {
@@ -242,6 +250,7 @@ public class CoreConnService extends Service{
 					 * TODO: Add support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
+					checkForURL(message);
 					buffer.addBacklogMessage(message);	
 				}else {
 					Log.e(TAG, "Getting message buffer already have"+ buffer.toString());
@@ -261,14 +270,13 @@ public class CoreConnService extends Service{
 				if(!buffer.hasMessage(message)) {
 					/**
 					 * Check if we are highlighted in the message, 
-					 * TODO: Add support for custom highlight masks
-					 */
+					 * TODO: Add support for custom highlight masks					 */
 					checkMessageForHighlight(buffer, message);
+					checkForURL(message);
 					buffer.addMessage(message);					
-				}else {
-					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
-				}
-
+					}else {
+						Log.e(TAG, "Getting message buffer already have " + buffer.toString());
+					}
 				break;
 
 			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
@@ -276,11 +284,8 @@ public class CoreConnService extends Service{
 				 * New buffer received, so update out channel holder with the new buffer
 				 */
 				buffer = (Buffer)msg.obj;
-				if (!bufferCollection.hasBuffer(buffer.getInfo().id)) {
-					bufferCollection.addBuffer(buffer);
-				} else {
-					Log.e(TAG, "Getting already gotten buffer");
-				}
+				bufferCollection.addBuffer(buffer);
+				
 				break;
 			case R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS:
 				/**
@@ -306,12 +311,28 @@ public class CoreConnService extends Service{
 				buf2.setMarkerLineMessage(msg.arg1);
 				break;
 
+			case R.id.CORECONNECTION_CONNECTED:
+				/**
+				 * CoreConn has connected to a core
+				 */
+				showNotification(true);
+				for (ResultReceiver statusReceiver:statusReceivers) {
+					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
+				}
+				break;
+				
 			case R.id.CORECONNECTION_LOST_CONNECTION:
 				/**
 				 * Lost connection with core, update notification
 				 */
 				for (ResultReceiver statusReceiver:statusReceivers) {
-					statusReceiver.send(CoreConnService.CONNECTION_LOST, null);
+					if(msg.obj!=null) { //Have description of what is wrong, used only for login atm
+						Bundle bundle = new Bundle();
+						bundle.putString(CoreConnService.STATUS_KEY, (String)msg.obj);
+						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED,bundle);
+					}else{
+						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
+					}
 				}
 				showNotification(false);
 				break;
@@ -334,6 +355,7 @@ public class CoreConnService extends Service{
 				newUser(user);
 				break;
 			}
+			
 		}
 	}
 	
@@ -350,6 +372,18 @@ public class CoreConnService extends Service{
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
 			}
+		}
+	}
+	
+	/**
+	 * Check if a message contains a URL that we need to support to open in a browser
+	 * Set the url fields in the message so we can get it later
+	 * @param message ircmessage to check
+	 */
+	public void checkForURL(IrcMessage message) {
+		Matcher matcher = URLPattern.matcher(message.content);
+		if (matcher.find()) {
+			message.addURL(this, matcher.group(0));
 		}
 	}
 
@@ -370,7 +404,9 @@ public class CoreConnService extends Service{
 	public void registerStatusReceiver(ResultReceiver resultReceiver) {
 		statusReceivers.add(resultReceiver);
 		if (!coreConn.isConnected()) {
-			resultReceiver.send(CoreConnService.CONNECTION_LOST, null);
+			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
+		}else{
+			resultReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
 		}
 		
 	}

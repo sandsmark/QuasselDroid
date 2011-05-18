@@ -1,9 +1,17 @@
 package com.lekebilen.quasseldroid;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
+import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 
 public class IrcMessage implements Comparable<IrcMessage>{
@@ -60,10 +68,12 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public Date timestamp; //TODO: timezones, Java bleh as usual
 	public int messageId;
 	public BufferInfo bufferInfo;
-	public String content;
+	public SpannableString content;
 	public String sender;
 	public Type type;
 	public byte flags;
+	
+	private ArrayList<String> urls = new ArrayList<String>();
 
 
 	public int compareTo(IrcMessage other) {
@@ -92,5 +102,23 @@ public class IrcMessage implements Comparable<IrcMessage>{
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean isSelf() {
+		return ((flags & Flag.Self.value) != 0);
+	}
+
+	public void addURL(Context context, String url) {
+		urls.add(url);
+		int start = content.toString().indexOf(url);
+		content.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.ircmessage_url_color)), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE); 
+	}
+	
+	public ArrayList<String> getURLs() {
+		return urls;
+	}
+
+	public boolean hasURLs() {
+		return !urls.isEmpty();
 	}
 }

@@ -52,10 +52,10 @@ public class ChatActivity extends Activity{
 
 	private BacklogAdapter adapter;
 	private ListView backlogList;
-	
-	
+
+
 	private int dynamicBacklogAmout;
-	
+
 	SharedPreferences preferences;
 
 	private ResultReceiver statusReceiver;
@@ -68,7 +68,7 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.chat_layout);
-		
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		adapter = new BacklogAdapter(this, null);
@@ -84,65 +84,37 @@ public class ChatActivity extends Activity{
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
 		backlogList.setOnItemLongClickListener(itemLongClickListener);
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
-		
+
 		statusReceiver = new ResultReceiver(null) {
 
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_LOST) finish();
+				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
 				super.onReceiveResult(resultCode, resultData);
 			}
-			
+
 		};
 	}
-	
-	
+
+
 	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
 
 		@Override
-		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-			
-			TextView message = (TextView) arg1.findViewById(R.id.backlog_msg_view);
-			ArrayList<String> urls = (ArrayList<String>) findURIs("http://", message.getText().toString());
-			
-			if (urls.size() == 1 ){ //Open the URL
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
-				startActivity(browserIntent);
-			} else if (urls.size() > 1 ){
-				//Show list of urls, and make it possible to choose one
+		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+			IrcMessage message = adapter.getItem(position);
+			if (message.hasURLs()) {
+				ArrayList<String> urls = (ArrayList<String>) message.getURLs();
+
+				if (urls.size() == 1 ){ //Open the URL
+					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
+					startActivity(browserIntent);
+				} else if (urls.size() > 1 ){
+					//Show list of urls, and make it possible to choose one
+				}
 			}
 			return false;
 		}
 	};
-	
-    /**
-     * Find all URIs with a specific URI scheme in a String
-     *
-     * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
-     * @param string    the String to look for URIs in.
-     * @return A List containing any URIs found.
-     */
-    private static List<String> findURIs(String uriScheme, String string) {
-        List<String> uris = new ArrayList<String>();
-
-        int index = 0;
-        do {
-            index = string.indexOf(uriScheme, index); // find the start index of a URL
-
-            if (index == -1) // if indexOf returned -1, we didn't find any urls
-                break;
-
-            int endIndex = string.indexOf(" ", index); // find the end index of a URL (look for a space character)
-            if (endIndex == -1)             // if indexOf returned -1, we didnt find a space character, so we set the
-                endIndex = string.length(); // end of the URL to the end of the string
-
-            uris.add(string.substring(index, endIndex));
-
-            index = endIndex; // start at the end of the URL we just added
-        } while (true);
-
-        return uris;
-    }
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -171,12 +143,12 @@ public class ChatActivity extends Activity{
 		String inputNick = inputfield.getText().toString();
 
 		if ( "".equals(inputNick) ) {
-			if ( adapter.buffer.nicks().size() > 0 ) {
-				inputfield.setText(adapter.buffer.nicks().get(0)+ ": ");
-				inputfield.setSelection(adapter.buffer.nicks().get(0).length() + 2);
+			if ( adapter.buffer.getNicks().size() > 0 ) {
+				inputfield.setText(adapter.buffer.getNicks().get(0)+ ": ");
+				inputfield.setSelection(adapter.buffer.getNicks().get(0).length() + 2);
 			}
 		} else {
-			for (String nick : adapter.buffer.nicks()) {
+			for (String nick : adapter.buffer.getNicks()) {
 				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
 					inputfield.setText(nick+ ": ");
 					inputfield.setSelection(nick.length() + 2);
@@ -261,7 +233,7 @@ public class ChatActivity extends Activity{
 			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name); //TODO: Add which server we are connected to
 			} else{
-				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.topic());
+				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.getTopic());
 			}
 			notifyDataSetChanged();
 			list.scrollTo(list.getScrollX(), list.getScrollY());
@@ -302,7 +274,8 @@ public class ChatActivity extends Activity{
 				holder = (ViewHolder)convertView.getTag();
 			}
 
-			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { //Set separator line here
+			//Set separator line here
+			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { 
 				holder.separatorView.getLayoutParams().height = 1;
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
@@ -311,33 +284,63 @@ public class ChatActivity extends Activity{
 			IrcMessage entry = this.getItem(position);
 			holder.messageID = entry.messageId;
 			holder.timeView.setText(entry.getTime());
-			int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
-
-			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
-			holder.msgView.setTextColor(0xff000000);
-			holder.msgView.setTypeface(Typeface.DEFAULT);
-
+			
+			
 			switch (entry.type) {
 			case Action:
+			case Server:
 				holder.nickView.setText("*");
 				holder.msgView.setTypeface(Typeface.DEFAULT_BOLD);
-				holder.msgView.setText(entry.getNick() + " " + entry.content);
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_servermessage_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_servermessage_color));
+				holder.msgView.setText(entry.content);
 				break;
 			case Join:
-				holder.nickView.setText("->’");
+				holder.nickView.setText("-->");
 				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 			case Part:
-				holder.nickView.setText("<-");
+				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 			case Quit:				
-				holder.nickView.setText("<-");
+				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
 				//TODO: implement the rest
+			case Kick:
+				holder.nickView.setText("<-*");
+				int nickEnd = entry.content.toString().indexOf(" ");
+				String nick = entry.content.toString().substring(0, nickEnd);
+				String reason = entry.content.toString().substring(nickEnd+1);
+				holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				break;
+				
+			case Mode:
+				holder.nickView.setText("***");
+				holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				break;
 			case Plain:
 			default:
+				if(entry.isSelf()) {
+					holder.nickView.setTextColor(Color.BLACK); //TODO: probably move to color file, or somewhere else it needs to be, so user can select color them self
+				}else{
+					int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
+					holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
+				}
+				holder.msgView.setTextColor(0xff000000);
+				holder.msgView.setTypeface(Typeface.DEFAULT);
+				
 				holder.nickView.setText("<" + entry.getNick() + ">");
 				holder.msgView.setText(entry.content);
 				break;
@@ -369,7 +372,7 @@ public class ChatActivity extends Activity{
 			}
 
 		}
-		
+
 		/*
 		 * Returns the messageid for the ircmessage that is currently at the top of the screen
 		 */
@@ -382,7 +385,7 @@ public class ChatActivity extends Activity{
 			}
 			return topId;
 		}
-		
+
 		/*
 		 * Sets what message from the adapter will be at the top of the visible screen
 		 */
@@ -416,7 +419,7 @@ public class ChatActivity extends Activity{
 
 	}	
 
-	
+
 	public static class ViewHolder {
 		public TextView timeView;
 		public TextView nickView;
@@ -486,7 +489,7 @@ public class ChatActivity extends Activity{
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
 			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));
-			
+
 			//Move list to correect position
 			if (adapter.buffer.getTopMessageShown() == 0) {
 				backlogList.setSelection(adapter.getCount()-1);
