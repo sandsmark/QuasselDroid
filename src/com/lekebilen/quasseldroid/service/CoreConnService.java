@@ -55,6 +55,9 @@ public class CoreConnService extends Service{
 	public static final int CONNECTION_DISCONNECTED = 0;
 	public static final int CONNECTION_CONNECTED = 1;
 	public static final String STATUS_KEY = "status";
+	
+	private Pattern URLPattern= Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", Pattern.CASE_INSENSITIVE);
+
 
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
@@ -240,6 +243,7 @@ public class CoreConnService extends Service{
 					 * TODO: Add support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
+					checkForURL(message);
 					buffer.addBacklogMessage(message);	
 				}else {
 					Log.e(TAG, "Getting message buffer already have"+ buffer.toString());
@@ -258,6 +262,7 @@ public class CoreConnService extends Service{
 					 * Check if we are highlighted in the message, 
 					 * TODO: Add support for custom highlight masks					 */
 					checkMessageForHighlight(buffer, message);
+					checkForURL(message);
 					buffer.addMessage(message);					
 					}else {
 						Log.e(TAG, "Getting message buffer already have " + buffer.toString());
@@ -363,6 +368,18 @@ public class CoreConnService extends Service{
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
 			}
+		}
+	}
+	
+	/**
+	 * Check if a message contains a URL that we need to support to open in a browser
+	 * Set the url fields in the message so we can get it later
+	 * @param message ircmessage to check
+	 */
+	public void checkForURL(IrcMessage message) {
+		Matcher matcher = URLPattern.matcher(message.content);
+		if (matcher.find()) {
+			message.addURL(matcher.group(0));
 		}
 	}
 

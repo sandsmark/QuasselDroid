@@ -52,10 +52,10 @@ public class ChatActivity extends Activity{
 
 	private BacklogAdapter adapter;
 	private ListView backlogList;
-	
-	
+
+
 	private int dynamicBacklogAmout;
-	
+
 	SharedPreferences preferences;
 
 	private ResultReceiver statusReceiver;
@@ -68,7 +68,7 @@ public class ChatActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.chat_layout);
-		
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 		adapter = new BacklogAdapter(this, null);
@@ -84,7 +84,7 @@ public class ChatActivity extends Activity{
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
 		backlogList.setOnItemLongClickListener(itemLongClickListener);
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
-		
+
 		statusReceiver = new ResultReceiver(null) {
 
 			@Override
@@ -92,57 +92,29 @@ public class ChatActivity extends Activity{
 				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
 				super.onReceiveResult(resultCode, resultData);
 			}
-			
+
 		};
 	}
-	
-	
+
+
 	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
 
 		@Override
-		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-			
-			TextView message = (TextView) arg1.findViewById(R.id.backlog_msg_view);
-			ArrayList<String> urls = (ArrayList<String>) findURIs("http://", message.getText().toString());
-			
-			if (urls.size() == 1 ){ //Open the URL
-				Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
-				startActivity(browserIntent);
-			} else if (urls.size() > 1 ){
-				//Show list of urls, and make it possible to choose one
+		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+			IrcMessage message = adapter.getItem(position);
+			if (message.hasURLs()) {
+				ArrayList<String> urls = (ArrayList<String>) message.getURLs();
+
+				if (urls.size() == 1 ){ //Open the URL
+					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
+					startActivity(browserIntent);
+				} else if (urls.size() > 1 ){
+					//Show list of urls, and make it possible to choose one
+				}
 			}
 			return false;
 		}
 	};
-	
-    /**
-     * Find all URIs with a specific URI scheme in a String
-     *
-     * @param uriScheme the URI scheme to look for. (http://, git:// svn://, etc.)
-     * @param string    the String to look for URIs in.
-     * @return A List containing any URIs found.
-     */
-    private static List<String> findURIs(String uriScheme, String string) {
-        List<String> uris = new ArrayList<String>();
-
-        int index = 0;
-        do {
-            index = string.indexOf(uriScheme, index); // find the start index of a URL
-
-            if (index == -1) // if indexOf returned -1, we didn't find any urls
-                break;
-
-            int endIndex = string.indexOf(" ", index); // find the end index of a URL (look for a space character)
-            if (endIndex == -1)             // if indexOf returned -1, we didnt find a space character, so we set the
-                endIndex = string.length(); // end of the URL to the end of the string
-
-            uris.add(string.substring(index, endIndex));
-
-            index = endIndex; // start at the end of the URL we just added
-        } while (true);
-
-        return uris;
-    }
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -369,7 +341,7 @@ public class ChatActivity extends Activity{
 			}
 
 		}
-		
+
 		/*
 		 * Returns the messageid for the ircmessage that is currently at the top of the screen
 		 */
@@ -382,7 +354,7 @@ public class ChatActivity extends Activity{
 			}
 			return topId;
 		}
-		
+
 		/*
 		 * Sets what message from the adapter will be at the top of the visible screen
 		 */
@@ -416,7 +388,7 @@ public class ChatActivity extends Activity{
 
 	}	
 
-	
+
 	public static class ViewHolder {
 		public TextView timeView;
 		public TextView nickView;
@@ -486,7 +458,7 @@ public class ChatActivity extends Activity{
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
 			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));
-			
+
 			//Move list to correect position
 			if (adapter.buffer.getTopMessageShown() == 0) {
 				backlogList.setSelection(adapter.getCount()-1);

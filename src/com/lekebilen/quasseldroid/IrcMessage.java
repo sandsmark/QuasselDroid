@@ -1,7 +1,9 @@
 package com.lekebilen.quasseldroid;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import android.util.Log;
@@ -64,6 +66,8 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public String sender;
 	public Type type;
 	public byte flags;
+	
+	private ArrayList<String> urls = new ArrayList<String>();
 
 
 	public int compareTo(IrcMessage other) {
@@ -92,5 +96,17 @@ public class IrcMessage implements Comparable<IrcMessage>{
 			return true;
 		}
 		return false;
+	}
+
+	public void addURL(String url) {
+		urls.add(url);	
+	}
+	
+	public ArrayList<String> getURLs() {
+		return urls;
+	}
+
+	public boolean hasURLs() {
+		return !urls.isEmpty();
 	}
 }
