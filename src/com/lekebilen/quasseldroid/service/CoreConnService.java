@@ -56,7 +56,7 @@ public class CoreConnService extends Service{
 	public static final int CONNECTION_CONNECTED = 1;
 	public static final String STATUS_KEY = "status";
 	
-	private Pattern URLPattern= Pattern.compile("^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", Pattern.CASE_INSENSITIVE);
+	private Pattern URLPattern= Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
 
 	private CoreConnection coreConn;
