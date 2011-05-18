@@ -841,6 +841,22 @@ public class CoreConnection {
 						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USER_ADDED);
 						msg.obj = (IrcUser) user;
 						msg.sendToTarget();
+					} else if (className.equals("BufferViewConfig")) {
+						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
+						List<QVariant<?>>  permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
+						int networkId = (Integer) map.get("networkId").getData(); // let's hope we don't need this, LAWLERZ!!1
+						
+						for (QVariant bufferId: tempList) {
+							buffers.get(bufferId.getData()).setTemporarilyHidden(true);
+						}
+						
+						for (QVariant bufferId: permList) {
+							buffers.get(bufferId.getData()).setPermanentlyHidden(true);
+						}
+						
+						
+						
 						/*
 						 * There are several objects that we don't care about (at the moment).
 						 */

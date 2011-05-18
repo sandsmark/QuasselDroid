@@ -67,6 +67,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	private List<IrcMessage> backlogStash;
 
+	
+	private boolean temporarilyHidden = false;
+	private boolean permanentlyHidden = false;
+	
 	public Buffer(BufferInfo info) {
 		this.info = info;
 		backlog = new ArrayList<IrcMessage>();
@@ -340,5 +344,21 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		else if (info.type != another.info.type)
 			return info.type.value - another.info.type.value;
 		else return info.name.compareToIgnoreCase(another.info.name);
+	}
+
+	public void setTemporarilyHidden(boolean temporarilyHidden) {
+		this.temporarilyHidden = temporarilyHidden;
+	}
+
+	public boolean temporarilyHidden() {
+		return temporarilyHidden;
+	}
+
+	public void setPermanentlyHidden(boolean permanentlyHidden) {
+		this.permanentlyHidden = permanentlyHidden;
+	}
+
+	public boolean permanentlyHidden() {
+		return permanentlyHidden;
 	}
 }
