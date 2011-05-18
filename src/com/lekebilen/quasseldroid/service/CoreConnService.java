@@ -379,7 +379,7 @@ public class CoreConnService extends Service{
 	public void checkForURL(IrcMessage message) {
 		Matcher matcher = URLPattern.matcher(message.content);
 		if (matcher.find()) {
-			message.addURL(matcher.group(0));
+			message.addURL(this, matcher.group(0));
 		}
 	}
 

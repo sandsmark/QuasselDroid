@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
+import android.text.Spannable;
+import android.text.SpannableString;
+
 import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
@@ -22,7 +25,7 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 		stream.writeUInt(data.type.getValue(), 32);
 		stream.writeByte(data.flags);
 		stream.writeBytes(data.sender);// TODO FIXME
-		stream.writeBytes(data.content);//ditto
+		stream.writeBytes(data.content.toString());//ditto
 	}
 
 	@Override
@@ -35,7 +38,7 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 		ret.flags = stream.readByte();
 		ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().unserialize(stream, version);
 		ret.sender = (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
-		ret.content =  (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
+		ret.content =  SpannableString.valueOf((String)QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version));
 		
 		return ret;
 	}

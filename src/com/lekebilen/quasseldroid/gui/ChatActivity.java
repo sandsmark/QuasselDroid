@@ -274,7 +274,8 @@ public class ChatActivity extends Activity{
 				holder = (ViewHolder)convertView.getTag();
 			}
 
-			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { //Set separator line here
+			//Set separator line here
+			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { 
 				holder.separatorView.getLayoutParams().height = 1;
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
@@ -288,7 +289,7 @@ public class ChatActivity extends Activity{
 			holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 			holder.msgView.setTextColor(0xff000000);
 			holder.msgView.setTypeface(Typeface.DEFAULT);
-
+			
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("*");

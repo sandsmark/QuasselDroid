@@ -10,7 +10,7 @@
 			android:layout_height="wrap_content" android:id="@+id/backlog_nick_view"
 			android:paddingLeft="10dip" android:paddingRight="10dip" />
 		<TextView android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/backlog_msg_view" />
+			android:layout_height="wrap_content" android:id="@+id/backlog_msg_view" android:bufferType="spannable"/>
 	</LinearLayout>
 	<TextView android:layout_width="fill_parent"
 		android:layout_height="0sp" android:id="@+id/backlog_list_separator"

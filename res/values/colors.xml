@@ -8,4 +8,5 @@
 	<color name="ircmessage_highlight_color">#FF8C00</color>
 	<color name="ircmessage_normal_color">#ffffff</color>
 	<color name="buffer_activity_color">#00FF00</color>
+	<color name="ircmessage_url_color">#0000FF</color>
 </resources>
