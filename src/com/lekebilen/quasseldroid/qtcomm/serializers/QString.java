@@ -30,8 +30,10 @@ public class QString implements QMetaTypeSerializer<String> {
 		int len = (int)stream.readUInt(32);
 		if(len == 0xFFFFFFFF)
 			return new String();
-		byte data[] = new byte[len];
+
+		byte [] data = new byte[len];
+		
 		stream.readFully(data);
-		return new String(data,"UTF-16BE");
+		return new String(data, "UTF-16BE");
 	}
 }

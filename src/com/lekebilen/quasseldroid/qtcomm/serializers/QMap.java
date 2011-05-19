@@ -19,20 +19,26 @@ import com.lekebilen.quasseldroid.qtcomm.QVariant;
 public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
 	String keyType;
 	String valueType;
+	QMetaTypeSerializer<T> keySerializer;
+	QMetaTypeSerializer<V> valueSerializer;
 	
 	public QMap (String element1Type, String element2Type){
 		this.keyType = element1Type;
 		this.valueType = element2Type;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void serialize(QDataOutputStream stream,
 			Map<T, V> data, DataStreamVersion version)
 			throws IOException {
 		stream.writeUInt(data.size(), 32);
+		keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
+		valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
+
 		for (T key : data.keySet()) {
-			QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer().serialize(stream, key, version);
-			QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer().serialize(stream, data.get(key), version);
+			keySerializer.serialize(stream, key, version);
+			valueSerializer.serialize(stream, data.get(key), version);
 		}
 	}
 
@@ -41,12 +47,11 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
 			DataStreamVersion version) throws IOException {
 		
 		Map map = new HashMap<String, T>();
-		
+		keySerializer = QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer();
+		valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();		
 		int len = (int) stream.readUInt(32);
 		for (int i=0; i<len; i++) {
-			T key = (T)QMetaTypeRegistry.instance().getTypeForName(keyType).getSerializer().unserialize(stream, version);
-			V value = (V)QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer().unserialize(stream, version);
-			map.put(key, value);
+			map.put((T)keySerializer.unserialize(stream, version), (V)valueSerializer.unserialize(stream, version));
 		}
 		return map;
 	}

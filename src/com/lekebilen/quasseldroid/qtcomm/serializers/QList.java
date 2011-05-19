@@ -20,6 +20,7 @@ import com.lekebilen.quasseldroid.qtcomm.QVariant;
 
 public class QList<T> implements QMetaTypeSerializer<List<T>> {
 	String elementType;
+	QMetaTypeSerializer<T> serializer;
 	public QList(String elementType){
 		this.elementType = elementType;
 	}
@@ -32,8 +33,10 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 			throws IOException {
 		List<T> list = makeList();
 		int len = (int)stream.readUInt(32);
+		serializer = (QMetaTypeSerializer<T>)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();
+
 		for(int i=0;i<len;i++){
-			list.add((T)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer().unserialize(stream, version));
+			list.add((T)serializer.unserialize(stream, version));
 		}
 		return list;
 	}
@@ -43,8 +46,10 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
 	public void serialize(QDataOutputStream stream, List<T> data,
 			DataStreamVersion version) throws IOException {
 		stream.writeUInt(data.size(), 32);
+		serializer = (QMetaTypeSerializer<T>)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();
+
 		for(T element: data){
-			((QMetaTypeSerializer<Object>)QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer()).serialize(stream, (Object)element, version);
+			serializer.serialize(stream, element, version);
 		}
 	}
 }
