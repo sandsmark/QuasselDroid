@@ -387,6 +387,7 @@ public class CoreConnection {
 			sendInitRequest("Network", Integer.toString(network));
 		}
 		sendInitRequest("BufferSyncer", "");
+		sendInitRequest("BufferViewConfig", "0");
 
 		for (Buffer buffer:buffers.values()) {
 			int backlogAmout = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(service).getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
@@ -820,7 +821,6 @@ public class CoreConnection {
 							reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariantType.String));
 
 							sendQVariantList(reqPackedFunc);
-							sendInitRequest("BufferViewConfig", "0");
 						} catch (IOException e) {
 							e.printStackTrace();
 							running = false;
@@ -899,7 +899,12 @@ public class CoreConnection {
 								continue;
 							}
 							buffers.get(bufferId.getData()).setAutoSort(autoSort);
-							buffers.get(bufferId.getData()).setOrder(order);
+							//buffers.get(bufferId.getData()).setOrder(order);
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ORDER);
+							msg.arg1 = (Integer) bufferId.getData();
+							msg.arg2 = order;
+							msg.sendToTarget();
+							
 							order++;
 						}
 						

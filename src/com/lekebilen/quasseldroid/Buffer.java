@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import java.util.Observable;
 
 import android.app.PendingIntent;
+import android.test.IsolatedContext;
 import android.util.Log;
 
 import com.lekebilen.quasseldroid.BufferInfo.Type;
@@ -20,6 +21,7 @@ import com.lekebilen.quasseldroid.gui.ChatActivity;
  */
 public class Buffer extends Observable implements Comparable<Buffer> {
 	private static final String TAG = Buffer.class.getSimpleName();
+	public static final String BUFFER_ORDER_CHANGED = "order changed";
 	/**
 	 * Information object about this buffer, contains name, type of buffer etc
 	 */
@@ -346,13 +348,15 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		else if (info.type != another.info.type)
 			return info.type.value - another.info.type.value;
 		else return info.name.compareToIgnoreCase(another.info.name);
+		//TODO: sandsmark FIXME PLX
+		
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {
 		this.temporarilyHidden = temporarilyHidden;
 	}
 
-	public boolean temporarilyHidden() {
+	public boolean isTemporarilyHidden() {
 		return temporarilyHidden;
 	}
 
@@ -360,7 +364,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		this.permanentlyHidden = permanentlyHidden;
 	}
 
-	public boolean permanentlyHidden() {
+	public boolean isPermanentlyHidden() {
 		return permanentlyHidden;
 	}
 
@@ -368,12 +372,15 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		this.autoSort = autoSort;
 	}
 
-	public boolean autoSort() {
+	public boolean isAutoSort() {
 		return autoSort;
 	}
 
 	public void setOrder(int order) {
+		Log.d(TAG, "Order " +this.getInfo().name + " : " + order);
 		this.order = order;
+		this.setChanged();
+		notifyObservers(Buffer.BUFFER_ORDER_CHANGED);
 	}
 
 	public int getOrder() {

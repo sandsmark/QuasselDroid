@@ -18,6 +18,7 @@
 <item type="id" name="CORECONNECTION_SET_MARKERLINE_TO_SERVICE"></item>
 <item type="id" name="CORECONNECTION_NEW_USER_ADDED"></item>
 <item type="id" name="CORECONNECTION_NEW_USERLIST_ADDED"></item>
+<item type="id" name="CORECONNECTION_SET_BUFFER_ORDER"></item>
 
 <item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>
 <item type="id" name="CORECONNECTION_ADD_MULTIPLE_BUFFERS"></item>

@@ -342,6 +342,14 @@ public class CoreConnService extends Service{
 				IrcUser user = (IrcUser) msg.obj;
 				newUser(user);
 				break;
+			
+			case R.id.CORECONNECTION_SET_BUFFER_ORDER:
+				/**
+				 * Buffer order changed so set the new one
+				 */
+				bufferCollection.getBuffer(msg.arg1).setOrder(msg.arg2);
+				break;
+			
 			}
 			
 		}

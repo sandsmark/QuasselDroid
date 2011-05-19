@@ -60,7 +60,7 @@ public class BufferCollection extends Observable implements Observer {
 				Log.e(TAG, "Getting buffer in buffers we already have: " + buffer.getInfo().name);
 				continue;
 			}
-			//Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().id);
+		Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().id);
 			
 			changed = true;
 			this.buffers.put(buffer.getInfo().id, buffer);
@@ -77,6 +77,9 @@ public class BufferCollection extends Observable implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
+		if (arg1!=null && arg1.equals(Buffer.BUFFER_ORDER_CHANGED)) {
+			Collections.sort(bufferList);
+		}
 		this.setChanged();
 		notifyObservers();
 		
