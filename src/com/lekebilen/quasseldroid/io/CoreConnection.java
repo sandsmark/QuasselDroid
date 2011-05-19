@@ -842,8 +842,8 @@ public class CoreConnection {
 							if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
 
 								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
-								msg.obj = buffers.get(bufferId);
-								msg.arg1 = msgId;
+								msg.arg1 = bufferId;
+								msg.arg2 = msgId;
 								msg.sendToTarget();
 							}
 						}
@@ -854,8 +854,8 @@ public class CoreConnection {
 							int msgId = (Integer)markerLines.remove(0).getData();
 							if (buffers.containsKey(bufferId)){
 								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
-								msg.obj = buffers.get(bufferId);
-								msg.arg1 = msgId;
+								msg.arg1 = bufferId;
+								msg.arg2 = msgId;
 								msg.sendToTarget();
 							}
 						}
@@ -973,21 +973,26 @@ public class CoreConnection {
 
 						}
 					} else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
-						int buffer = (Integer) packedFunc.remove(0).getData();
+						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
-						//buffers.get(buffer).setLastSeenMessage(msgId); KENJI FIX ME
-
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
+						msg.arg1 = bufferId;
+						msg.arg2 = msgId;
+						msg.sendToTarget();
+						
 					} else if (className.equals("BufferSyncer") && function.equals("setMarkerLine")) {
-						int buffer = (Integer) packedFunc.remove(0).getData();
+						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
-						//buffers.get(buffer).setMarkerLineMessage(msgId); // KENJI PLX2FIX
-
-												
+						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
+						msg.arg1 = bufferId;
+						msg.arg2 = msgId;
+						msg.sendToTarget();			
 						
 						/*
 						 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
 						 */
 					} else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
+						//TODO: this basicly does shit. So find out if it effects anything and what it should do
 						int buffer = (Integer) packedFunc.remove(0).getData();
 						buffers.get(buffer).setRead();
 					} else {

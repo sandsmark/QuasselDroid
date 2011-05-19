@@ -290,17 +290,13 @@ public class CoreConnService extends Service{
 				/**
 				 * Setting last seen message id in a buffer
 				 */
-				//Log.d(TAG, "service lastseenset buffer");
-				Buffer buf = (Buffer) msg.obj;
-				buf.setLastSeenMessage(msg.arg1);
+				bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(msg.arg2);
 				break;
 			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
 				/**
 				 * Setting marker line message id in a buffer
 				 */
-				//Log.d(TAG, "service markerlineset buffer");
-				Buffer buf2 = (Buffer) msg.obj;
-				buf2.setMarkerLineMessage(msg.arg1);
+				bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(msg.arg2);
 				break;
 
 			case R.id.CORECONNECTION_CONNECTED:

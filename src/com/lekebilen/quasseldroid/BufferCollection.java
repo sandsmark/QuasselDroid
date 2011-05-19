@@ -60,7 +60,7 @@ public class BufferCollection extends Observable implements Observer {
 				Log.e(TAG, "Getting buffer in buffers we already have: " + buffer.getInfo().name);
 				continue;
 			}
-			Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().type);
+			//Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().id);
 			
 			changed = true;
 			this.buffers.put(buffer.getInfo().id, buffer);
