@@ -161,6 +161,25 @@ public class CoreConnection {
 			connected = false;
 		}
 	}
+	
+	public void requestSetLastMsgRead(int buffer, int msgid) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
+		retFunc.add(new QVariant<String>("", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariantType.String));
+		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
+		retFunc.add(new QVariant<Integer>(msgid, "BufferId"));
+
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+			connected = false;
+		}
+	}
+	
+
 
 	/**
 	 * Requests all buffers.
