@@ -342,13 +342,23 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	@Override
 	public int compareTo(Buffer another) {
+		if (!autoSort) {
+			return this.order - another.order;
+		}
+				 
 		if (info.networkId != another.info.networkId)
 			return info.networkId - another.info.networkId;
 		else if (info.type != another.info.type)
 			return info.type.value - another.info.type.value;
+		else if (this.temporarilyHidden && !another.temporarilyHidden)
+			return 1;
+		else if (!this.temporarilyHidden && another.temporarilyHidden)
+			return -1;
+		else if (this.permanentlyHidden && !another.permanentlyHidden)
+			return 1;
+		else if (!this.permanentlyHidden && another.permanentlyHidden)
+			return -1;
 		else return info.name.compareToIgnoreCase(another.info.name);
-		//TODO: sandsmark FIXME PLX
-		
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {
