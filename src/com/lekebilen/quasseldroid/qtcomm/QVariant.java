@@ -54,7 +54,6 @@ public class QVariant<T extends Object>{
 		@SuppressWarnings("unchecked")
 		@Override
 		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException{	    
-			
 			int type = (int)src.readUInt(32);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?

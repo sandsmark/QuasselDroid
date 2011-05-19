@@ -12,7 +12,9 @@ import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeSerializer;
 
 public class QString implements QMetaTypeSerializer<String> {
-
+	static int buflen = -1;
+	static byte [] buf = null;
+	
 	@Override
 	public void serialize(QDataOutputStream stream, String data,
 			DataStreamVersion version) throws IOException {
@@ -29,11 +31,14 @@ public class QString implements QMetaTypeSerializer<String> {
 			throws IOException {
 		int len = (int)stream.readUInt(32);
 		if(len == 0xFFFFFFFF)
-			return new String();
+			return "";
 
-		byte [] data = new byte[len];
+		if (len > buflen) {
+			buf = new byte[len];
+			buflen = len;
+		}
 		
-		stream.readFully(data);
-		return new String(data, "UTF-16BE");
+		stream.readFully(buf, 0, len);
+		return new String(buf, 0, len, "UTF-16BE");
 	}
 }
