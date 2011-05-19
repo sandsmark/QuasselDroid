@@ -937,6 +937,10 @@ public class CoreConnection {
 							running = false; // We have obviously lost our connection, just stop this thread.
 
 						}
+					} else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
+						int buffer = (Integer) packedFunc.remove(0).getData();
+						int msgId = (Integer) packedFunc.remove(0).getData();
+						//buffers.get(buffer).setLastSeenMessage(msgId); KENJI FIX ME
 
 						/*
 						 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
