@@ -977,6 +977,13 @@ public class CoreConnection {
 						int msgId = (Integer) packedFunc.remove(0).getData();
 						//buffers.get(buffer).setLastSeenMessage(msgId); KENJI FIX ME
 
+					} else if (className.equals("BufferSyncer") && function.equals("setMarkerLine")) {
+						int buffer = (Integer) packedFunc.remove(0).getData();
+						int msgId = (Integer) packedFunc.remove(0).getData();
+						//buffers.get(buffer).setMarkerLineMessage(msgId); // KENJI PLX2FIX
+
+												
+						
 						/*
 						 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
 						 */
