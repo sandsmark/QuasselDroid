@@ -77,7 +77,7 @@ public class BufferCollection extends Observable implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		if (arg1!=null && arg1.equals(Buffer.BUFFER_ORDER_CHANGED)) {
+		if (arg1!=null && arg1 == (Integer)R.id.BUFFER_ORDER_CHANGED) {
 			Collections.sort(bufferList);
 		}
 		this.setChanged();

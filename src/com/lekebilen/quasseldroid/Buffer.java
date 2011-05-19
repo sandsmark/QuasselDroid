@@ -21,7 +21,6 @@ import com.lekebilen.quasseldroid.gui.ChatActivity;
  */
 public class Buffer extends Observable implements Comparable<Buffer> {
 	private static final String TAG = Buffer.class.getSimpleName();
-	public static final String BUFFER_ORDER_CHANGED = "order changed";
 	/**
 	 * Information object about this buffer, contains name, type of buffer etc
 	 */
@@ -380,7 +379,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		Log.d(TAG, "Order " +this.getInfo().name + " : " + order);
 		this.order = order;
 		this.setChanged();
-		notifyObservers(Buffer.BUFFER_ORDER_CHANGED);
+		notifyObservers(R.id.BUFFER_ORDER_CHANGED);
 	}
 
 	public int getOrder() {
