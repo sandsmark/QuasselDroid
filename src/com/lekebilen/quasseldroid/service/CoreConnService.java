@@ -408,11 +408,8 @@ public class CoreConnService extends Service{
 	 * @param resultReceiver - Receiver that will get the status updates
 	 */
 	public void registerStatusReceiver(ResultReceiver resultReceiver) {
-		if (coreConn == null)
-			return;
-		
 		statusReceivers.add(resultReceiver);
-		if (!coreConn.isConnected()) {
+		if (coreConn!=null && !coreConn.isConnected()) {
 			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
 		}else{
 			resultReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);

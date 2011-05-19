@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.google.common.base.Predicate;
-
 import android.util.Log;
 
 public class BufferCollection extends Observable implements Observer {
