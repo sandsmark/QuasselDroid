@@ -1,10 +1,7 @@
 package com.lekebilen.quasseldroid.service;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.security.GeneralSecurityException;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Observer;
 import java.util.regex.Matcher;
@@ -24,20 +21,14 @@ import android.os.Message;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.ViewDebug.IntToString;
-import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferCollection;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.R;
-import com.lekebilen.quasseldroid.IrcMessage.Flag;
-import com.lekebilen.quasseldroid.IrcMessage.Type;
-import com.lekebilen.quasseldroid.R.drawable;
-import com.lekebilen.quasseldroid.R.id;
-import com.lekebilen.quasseldroid.R.string;
 import com.lekebilen.quasseldroid.gui.BufferActivity;
+import com.lekebilen.quasseldroid.gui.ChatActivity;
 import com.lekebilen.quasseldroid.gui.LoginActivity;
 import com.lekebilen.quasseldroid.io.CoreConnection;
 
@@ -372,6 +363,20 @@ public class CoreConnService extends Service{
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
+
+				// Create a notification about the highlight
+				String text = buffer.getInfo().name + ": <" + message.getNick() + "> " + message.content;
+				Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
+				Intent launch = new Intent(this, ChatActivity.class);
+				launch.putExtra(BufferActivity.BUFFER_ID_EXTRA, buffer.getInfo().id);
+				launch.putExtra(BufferActivity.BUFFER_NAME_EXTRA, buffer.getInfo().name);
+				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
+			
+				// Set the info for the views that show in the notification panel.
+				notification.setLatestEventInfo(this, getText(R.string.app_name),
+						text, contentIntent);
+				// Send the notification.
+				notifyManager.notify(R.id.NOTIFICATION, notification);
 			}
 		}
 	}
@@ -403,6 +408,9 @@ public class CoreConnService extends Service{
 	 * @param resultReceiver - Receiver that will get the status updates
 	 */
 	public void registerStatusReceiver(ResultReceiver resultReceiver) {
+		if (coreConn == null)
+			return;
+		
 		statusReceivers.add(resultReceiver);
 		if (!coreConn.isConnected()) {
 			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
