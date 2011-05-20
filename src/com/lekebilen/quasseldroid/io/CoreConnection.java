@@ -887,11 +887,16 @@ public class CoreConnection {
 						for (QVariant bufferId: tempList) {
 							if (!buffers.containsKey(bufferId.getData())) {
 								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
+								continue;
 							}
-								buffers.get(bufferId.getData()).setTemporarilyHidden(true);
+							buffers.get(bufferId.getData()).setTemporarilyHidden(true);
 						}
 						
 						for (QVariant bufferId: permList) {
+							if (!buffers.containsKey(bufferId.getData())) {
+								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
+								continue;
+							}
 							buffers.get(bufferId.getData()).setPermanentlyHidden(true);
 						}
 						
