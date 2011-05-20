@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -695,9 +696,10 @@ public class CoreConnection {
 			}
 
 			List<QVariant<?>> packedFunc;
+			final long startWait = System.currentTimeMillis();
 			while (running) {
+				
 				try {
-					//long startWait = System.currentTimeMillis();
 					packedFunc = readQVariantList();
 					//Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 				} catch (IOException e) {
@@ -828,7 +830,8 @@ public class CoreConnection {
 
 
 
-
+						long endWait = System.currentTimeMillis();
+						Log.e("TIMER", "NETWORK DONE: "+(endWait-startWait));
 						/*
 						 * An object that is used to synchronize metadata about buffers,
 						 * like the last seen message, marker lines, etc.
