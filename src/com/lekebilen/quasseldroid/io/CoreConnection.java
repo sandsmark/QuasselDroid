@@ -885,7 +885,10 @@ public class CoreConnection {
 						boolean autoSort = (Boolean) map.get("sortAlphabetically").getData();
 						
 						for (QVariant bufferId: tempList) {
-							buffers.get(bufferId.getData()).setTemporarilyHidden(true);
+							if (!buffers.containsKey(bufferId.getData())) {
+								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
+							}
+								buffers.get(bufferId.getData()).setTemporarilyHidden(true);
 						}
 						
 						for (QVariant bufferId: permList) {
