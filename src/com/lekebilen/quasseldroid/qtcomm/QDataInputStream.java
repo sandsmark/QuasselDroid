@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class QDataInputStream extends DataInputStream{
+	byte[] buf = new byte[4]; 
+
 	public QDataInputStream(InputStream base){
 		super(base);
 	}
@@ -21,10 +23,8 @@ public class QDataInputStream extends DataInputStream{
 		switch (size) {
 		case 64:
 			return readLong();
-		case 32:
-			byte[] buf = new byte[4]; 
+		case 32: 
 			readFully(buf);
-			
 			long ret =  ((buf[0]&255) << 24 | (buf[1]&255) << 16 | (buf[2]&255) << 8 | (buf[3]&255)) & 0xFFFFFFFFL;
 			return ret;
 		case 16:
