@@ -367,20 +367,21 @@ public class CoreConnService extends Service{
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
-
-				// Create a notification about the highlight
-				String text = buffer.getInfo().name + ": <" + message.getNick() + "> " + message.content;
-				Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
-				Intent launch = new Intent(this, ChatActivity.class);
-				launch.putExtra(BufferActivity.BUFFER_ID_EXTRA, buffer.getInfo().id);
-				launch.putExtra(BufferActivity.BUFFER_NAME_EXTRA, buffer.getInfo().name);
-				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-			
-				// Set the info for the views that show in the notification panel.
-				notification.setLatestEventInfo(this, getText(R.string.app_name),
-						text, contentIntent);
-				// Send the notification.
-				notifyManager.notify(R.id.NOTIFICATION, notification);
+				
+				//FIXME: move to somewhere proper
+//				// Create a notification about the highlight
+//				String text = buffer.getInfo().name + ": <" + message.getNick() + "> " + message.content;
+//				Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
+//				Intent launch = new Intent(this, ChatActivity.class);
+//				launch.putExtra(BufferActivity.BUFFER_ID_EXTRA, buffer.getInfo().id);
+//				launch.putExtra(BufferActivity.BUFFER_NAME_EXTRA, buffer.getInfo().name);
+//				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
+//			
+//				// Set the info for the views that show in the notification panel.
+//				notification.setLatestEventInfo(this, getText(R.string.app_name),
+//						text, contentIntent);
+//				// Send the notification.
+//				notifyManager.notify(R.id.NOTIFICATION, notification);
 			}
 		}
 	}

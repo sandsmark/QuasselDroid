@@ -11,4 +11,5 @@
 	<color name="ircmessage_url_color">#0000FF</color>
 	<color name="ircmessage_commandmessages_color">#960096</color>
 	<color name="ircmessage_servermessage_color">#916409</color>
+	<color name="ircmessage_actionmessage_color">#0000F5</color>
 </resources>
