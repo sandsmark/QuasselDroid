@@ -290,13 +290,21 @@ public class CoreConnService extends Service{
 				/**
 				 * Setting last seen message id in a buffer
 				 */
-				bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(msg.arg2);
+				if(bufferCollection.hasBuffer(msg.arg1)) {
+					bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(msg.arg2);
+				} else{
+					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
+				}
 				break;
 			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
 				/**
 				 * Setting marker line message id in a buffer
 				 */
-				bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(msg.arg2);
+				if(bufferCollection.hasBuffer(msg.arg1)) {
+					bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(msg.arg2);
+				} else{
+					Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
+				}
 				break;
 
 			case R.id.CORECONNECTION_CONNECTED:
@@ -414,10 +422,10 @@ public class CoreConnService extends Service{
 	 */
 	public void registerStatusReceiver(ResultReceiver resultReceiver) {
 		statusReceivers.add(resultReceiver);
-		if (coreConn!=null && !coreConn.isConnected()) {
-			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
-		}else{
+		if (coreConn!=null && coreConn.isConnected()) {
 			resultReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
+		}else{
+			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
 		}
 		
 	}

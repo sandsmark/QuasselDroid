@@ -1013,8 +1013,8 @@ public class CoreConnection {
 						 */
 					} else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
 						//TODO: this basicly does shit. So find out if it effects anything and what it should do
-						int buffer = (Integer) packedFunc.remove(0).getData();
-						buffers.get(buffer).setRead();
+						//int buffer = (Integer) packedFunc.remove(0).getData();
+						//buffers.get(buffer).setRead();
 					} else {
 						System.out.println("Unparsed Sync request: " + className + "::" + function);
 					}

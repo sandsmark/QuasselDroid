@@ -125,6 +125,7 @@ public class LoginActivity extends Activity implements Observer {
 			}
 			
 		};
+		
 	}
 	
 	@Override
@@ -137,6 +138,7 @@ public class LoginActivity extends Activity implements Observer {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		doBindService();
 	}
 	
 	@Override
@@ -341,8 +343,6 @@ public class LoginActivity extends Activity implements Observer {
 			startService(connectIntent);
 			//else if (boundConnService.isConnected())
 			//	LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
-				
-			doBindService();
 		}
 	};
 
