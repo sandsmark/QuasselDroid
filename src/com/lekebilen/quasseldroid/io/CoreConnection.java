@@ -388,10 +388,11 @@ public class CoreConnection {
 			sendInitRequest("Network", Integer.toString(network));
 		}
 		sendInitRequest("BufferSyncer", "");
+		//sendInitRequest("BufferViewManager", ""); this is about where this should be, but don't know what it does
 		sendInitRequest("BufferViewConfig", "0");
 
+		int backlogAmout = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(service).getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
 		for (Buffer buffer:buffers.values()) {
-			int backlogAmout = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(service).getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
 			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
 		}
 
@@ -839,27 +840,30 @@ public class CoreConnection {
 					} else if (className.equals("BufferSyncer")) {
 						// Parse out the last seen messages
 						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
-						for (int i=0; i<lastSeen.size()/2; i++) {
-							int bufferId = (Integer)lastSeen.remove(0).getData();
-							int msgId = (Integer)lastSeen.remove(0).getData();
+						for (int i=0; i<lastSeen.size(); i+=2) {
+							int bufferId = (Integer)lastSeen.get(i).getData();
+							int msgId = (Integer)lastSeen.get(i+1).getData();
 							if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
-
 								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
 								msg.arg1 = bufferId;
 								msg.arg2 = msgId;
 								msg.sendToTarget();
+							}else{
+								Log.e(TAG, "Getting last seen message for buffer we dont have " +bufferId);
 							}
 						}
 						// Parse out the marker lines for buffers
 						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
-						for (int i=0; i<markerLines.size()/2; i++) {
-							int bufferId = (Integer)markerLines.remove(0).getData();
-							int msgId = (Integer)markerLines.remove(0).getData();
+						for (int i=0; i<markerLines.size(); i+=2) {
+							int bufferId = (Integer)markerLines.get(i).getData();
+							int msgId = (Integer)markerLines.get(i+1).getData();
 							if (buffers.containsKey(bufferId)){
 								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
 								msg.arg1 = bufferId;
 								msg.arg2 = msgId;
 								msg.sendToTarget();
+							}else{
+								Log.e(TAG, "Getting markerlinemessage for buffer we dont have " +bufferId);
 							}
 						}
 
