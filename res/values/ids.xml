@@ -21,6 +21,7 @@
 <item type="id" name="CORECONNECTION_NEW_USERLIST_ADDED"></item>
 <item type="id" name="CORECONNECTION_SET_BUFFER_ORDER"></item>
 <item type="id" name="BUFFER_ORDER_CHANGED"></item>
+<item type="id" name="BUFFER_HIDDEN_CHANGED"></item>
 <item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>
 <item type="id" name="CORECONNECTION_ADD_MULTIPLE_BUFFERS"></item>
 <item name="CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE" type="id"></item>
@@ -28,4 +29,7 @@
 <item type="id" name="BUFFERUPDATE_NEWMESSAGE"></item>
 <item type="id" name="CORECONNECTION_DISCONNECTED"></item>
 <item type="id" name="CORECONNECTION_CONNECTED"></item>
+<item type="id" name="CORECONNECTION_SET_BUFFER_PERM_HIDDEN"></item>
+<item type="id" name="CORECONNECTION_SET_BUFFER_TEMP_HIDDEN"></item>
+
 </resources>

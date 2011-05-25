@@ -891,12 +891,16 @@ public class CoreConnection {
 						int networkId = (Integer) map.get("networkId").getData(); // let's hope we don't need this, LAWLERZ!!1
 						boolean autoSort = (Boolean) map.get("sortAlphabetically").getData();
 						
+						//TODO: mabye send this in a bulk to the service so it wont sort and shit every time
 						for (QVariant bufferId: tempList) {
 							if (!buffers.containsKey(bufferId.getData())) {
 								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
 								continue;
 							}
-							buffers.get(bufferId.getData()).setTemporarilyHidden(true);
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_TEMP_HIDDEN);
+							msg.arg1 = ((Integer) bufferId.getData());
+							msg.obj = true;
+							msg.sendToTarget();
 						}
 						
 						for (QVariant bufferId: permList) {
@@ -904,7 +908,10 @@ public class CoreConnection {
 								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
 								continue;
 							}
-							buffers.get(bufferId.getData()).setPermanentlyHidden(true);
+							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_PERM_HIDDEN);
+							msg.arg1 = ((Integer) bufferId.getData());
+							msg.obj = true;
+							msg.sendToTarget();
 						}
 						
 						int order = 0;

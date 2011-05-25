@@ -368,7 +368,22 @@ public class CoreConnService extends Service{
 				bufferCollection.getBuffer(msg.arg1).setOrder(msg.arg2);
 				break;
 			
+			case R.id.CORECONNECTION_SET_BUFFER_TEMP_HIDDEN:
+				/**
+				 * Buffer has been marked as temporary hidden, update buffer
+				 */
+				bufferCollection.getBuffer(msg.arg1).setTemporarilyHidden((Boolean)msg.obj);
+				break;
+				
+			case R.id.CORECONNECTION_SET_BUFFER_PERM_HIDDEN:
+				/**
+				 * Buffer has been marked as permanently hidden, update buffer
+				 */
+				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden((Boolean)msg.obj);
+				break;
 			}
+			
+				
 			
 		}
 	}
