@@ -30,6 +30,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	private ArrayList<IrcMessage> backlog = null;
 	/**
+	 * Filtered version of the backlog, without hidden messages
+	 */
+	private ArrayList<IrcMessage> filteredBacklog;
+	/**
 	 * The message id of the message that was on top of the screen when this buffer was last displayed
 	 * used to remember position when going back to a buffer
 	 */
@@ -68,20 +72,26 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	private List<IrcMessage> backlogStash;
 
-	
+
 	private boolean temporarilyHidden = false;
 	private boolean permanentlyHidden = false;
+	/**
+	 * List with all the message types that this buffer should filter
+	 */
+	private ArrayList<IrcMessage.Type> filterTypes;
 	/**
 	 * Sais if the buffer is custom order or sorted automaticly alphabetical
 	 * But currently not in use, core seems to send correct order even if autoSort i true so?
 	 */
 	private boolean autoSort = true;
 	private int order = -1;
-	
+
 	public Buffer(BufferInfo info) {
 		this.info = info;
 		backlog = new ArrayList<IrcMessage>();
+		filteredBacklog = new ArrayList<IrcMessage>();
 		backlogStash = new ArrayList<IrcMessage>();
+		filterTypes= new ArrayList<IrcMessage.Type>();
 	}
 
 	/**
@@ -92,7 +102,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		newBufferEntry(message);
 		notifyObservers(R.id.BUFFERUPDATE_NEWMESSAGE);
 	}
-	
+
 	/**
 	 * Private method that adds a new entry to the correct position in the backlog list based on message id
 	 * Also updates the buffer if the message contains highlights etc
@@ -107,21 +117,46 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 			lastPlainMessageId = message.messageId;
 			this.setChanged();
 		}
-		
-		if (backlog.isEmpty()) {
-			backlog.add(message);
+
+		insertMessageInBufferList(backlog, message);
+		if(filterTypes.size()!=0 && !isMessageFiltered(message)){
+			insertMessageInBufferList(filteredBacklog, message);
+		}
+	}
+	
+	/**
+	 * Inserts a message into the correct position in a buffer
+	 */
+	private void insertMessageInBufferList(ArrayList<IrcMessage> list, IrcMessage msg) {
+		if (list.isEmpty()) {
+			list.add(msg);
 			this.setChanged();	
 		}else {
-			int i = Collections.binarySearch(backlog, message);
+			int i = Collections.binarySearch(list, msg);
 			if (i<0) {
-				backlog.add(i*-1-1, message);
+				list.add(i*-1-1, msg);
 				this.setChanged();
 			}else {
 				Log.e(TAG, "Getting message buffer already has");
 			}
 		}
 	}
-	
+
+	/**
+	 * Used to check if a message is filtered in this buffer, aka should not be 
+	 * shown in the list on screen
+	 * @param msg the ircmessage to check
+	 * @return true if the message should be filtered, false if it shouldn't
+	 */
+	private boolean isMessageFiltered(IrcMessage msg) {
+		if (filterTypes.contains(msg.type)){
+			return true;
+		}else{
+			return false;
+		}
+
+	}
+
 	/**
 	 * Use when you want to add a backlog message to the buffer, for new messages use the addNewMessage method
 	 * Message will be put in stash untill all pending backlog entries are recived and then all will be added to the backlog at the same time. 
@@ -129,7 +164,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void addBacklogMessage(IrcMessage message) {
 		backlogStash.add(message);
-		
+
 		if (backlogPending==0 || backlogPending<=backlogStash.size()) {
 			for (IrcMessage item : backlogStash) {
 				newBufferEntry(item);
@@ -139,7 +174,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		}
 		notifyObservers(R.id.BUFFERUPDATE_BACKLOG);
 	}
-	
+
 	/**
 	 * Set how much backlog has been requested and is pending for this buffer
 	 * @param amount the nr of backlog entries requested
@@ -147,7 +182,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public void setBacklogPending(int amount) {
 		backlogPending = amount;
 	}
-	
+
 	/**
 	 * Check if this buffer is waiting for any backlog
 	 * @return true if buffer is waiting for backlog, otherwise false
@@ -155,7 +190,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public boolean hasPendingBacklog() {
 		return backlogPending>0;
 	}
-	
+
 	/**
 	 * Check if this buffer has any unseen highlights
 	 * @return true if buffer has unseen highlights, otherwise false
@@ -166,7 +201,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks if the buffer has any unread messages, not including joins/parts/quits etc
 	 */
@@ -187,7 +222,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Set the lastseen message of this buffer, called from chat if uses has seen a new message or from service if core sends a sync request
 	 * @param lastSeenMessage the msgid of the last seen message on te buffer
@@ -197,7 +232,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		this.setChanged();
 		notifyObservers();
 	}	
-	
+
 	/**
 	 * Set the marker line position for this buffer. Changed from userinteraction of from core sync request
 	 * @param markerLineMessage the msgid for the marker line, line will be placed under this message
@@ -207,7 +242,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		this.setChanged();
 		notifyObservers();
 	}
-	
+
 	/**
 	 * Get the bufferinformation object
 	 * @return the information object for this buffer
@@ -215,16 +250,19 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public BufferInfo getInfo() {
 		return info;
 	}
-	
+
 	/**
 	 * Get a massage from this buffer
 	 * @param pos the position of the message in this buffer
 	 * @return the Ircmessage at pos
 	 */
 	public IrcMessage getBacklogEntry(int pos) {
+		if(filterTypes.size()!=0){
+			return filteredBacklog.get(pos);			
+		}
 		return backlog.get(pos);
 	}
-	
+
 	/**
 	 * Get the id for the last seen message 
 	 * @return msgid of last seen message
@@ -232,7 +270,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public int getLastSeenMessage() {
 		return lastSeenMessage;
 	}
-	
+
 	/**
 	 * Get the id for the marker line, id is the message above the marker line
 	 * @return msgid of ircmessage above marker line
@@ -249,22 +287,26 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public boolean hasMessage(IrcMessage message) {
 		return Collections.binarySearch(backlog, message)>=0;
 	}
-	
+
 	/**
-	 * Get the size of the backlog list, number of messages in the buffer
+	 * Get the size of the backlog list, number of messages in the buffer, or if buffer is filtered return the size
+	 * of the filtered list
 	 * @return number of messages in buffer
 	 */
 	public int getSize() {
+		if(filterTypes.size()!=0){
+			return filteredBacklog.size();
+		}
 		return backlog.size();
 	}
-	
+
 	/**
 	 * Set this buffer as read TODO: we dont really know what this means atm
 	 */
 	public void setRead() {
 		if (backlog.isEmpty())
 			return;
-		
+
 		lastSeenMessage = backlog.get(backlog.size()-1).messageId;
 	}
 
@@ -283,7 +325,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public List<String> getNicks() {
 		return nicks;
 	}
-	
+
 	/**
 	 * Remove a specific nick from the nick list
 	 * @param nick the nick to remove
@@ -291,7 +333,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public void removeNick(String nick) {
 		nicks.remove(nick);
 	}
-	
+
 	/**
 	 * Add a specific nick to the nick list
 	 * @param nick the nick to add
@@ -316,7 +358,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public String getTopic() {
 		return topic;
 	}
-	
+
 	/**
 	 * Set the name of the buffer, displayed in the bufferlist of the phone
 	 * @param name the buffer name
@@ -325,7 +367,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		info.name = name;
 		notifyObservers();
 	}
-	
+
 	/**
 	 * Get the msgid for the message that was on top of the screen the last time this buffer was displayed
 	 * Used to restore the users position if we exits and enters a buffer
@@ -351,7 +393,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		else if (!(this.temporarilyHidden || this.permanentlyHidden) && (another.temporarilyHidden || another.permanentlyHidden))
 			return -1;
 		else if ((this.temporarilyHidden || this.permanentlyHidden) && !(another.temporarilyHidden || another.permanentlyHidden))
-				return -1;
+			return -1;
 		else if (this.temporarilyHidden && !another.temporarilyHidden)
 			return -1;
 		else if (!this.temporarilyHidden && another.temporarilyHidden)
@@ -401,5 +443,47 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	public int getOrder() {
 		return order;
+	}
+	
+	/**
+	 * Add a new IrcMesssage type that this buffer should filter(hidde type)
+	 * @param type
+	 */
+	public void addFilterType(IrcMessage.Type type) {
+		filterTypes.add(type);
+		filterBuffer();
+		this.setChanged();
+		notifyObservers();
+	}
+
+	/**
+	 * Remove a ircmessage type that should no longer be filtered
+	 * @param type
+	 */
+	public void removeFilterType(IrcMessage.Type type) {
+		filterTypes.remove(type);
+		filterBuffer();
+		this.setChanged();
+		notifyObservers();
+	}
+	
+	/**
+	 * Clear all filters from this buffer
+	 */
+	public void clearFilters() {
+		filterTypes.clear();
+	}
+	
+	/**
+	 * Filter buffer, creates the filteredBacklog list from scratch. Should be called
+	 * if some of the filter types have changed, so we can build the list again
+	 */
+	public void filterBuffer() {
+		filteredBacklog.clear();
+		for (IrcMessage msg : backlog) {
+			if(!isMessageFiltered(msg)) {
+				filteredBacklog.add(msg);
+			}
+		}
 	}
 }
