@@ -195,7 +195,11 @@ public class ChatActivity extends Activity{
 		}else{
 			adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
 		}
-		boundConnService.markBufferAsRead(adapter.getBufferId());
+		if (adapter.buffer.getSize()!= 0){
+			boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
+			boundConnService.markBufferAsRead(adapter.getBufferId());
+			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
+		}
 		doUnbindService();
 		super.onStop();
 	}
@@ -528,9 +532,6 @@ public class ChatActivity extends Activity{
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
 			// Detach our existing connection.
-			if (adapter.buffer.getSize()!= 0){
-				adapter.buffer.setLastSeenMessage(adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
-			}
 			adapter.stopObserving();
 			boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);

@@ -152,7 +152,7 @@ public class CoreConnection {
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
 		retFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
 		retFunc.add(new QVariant<String>("", QVariantType.String));
-		retFunc.add(new QVariant<String>("requestMarkBufferAsRead", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestMarkBufferAsRead", QVariantType.ByteArray));
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
 
 		try {
@@ -168,9 +168,9 @@ public class CoreConnection {
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
 		retFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
 		retFunc.add(new QVariant<String>("", QVariantType.String));
-		retFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestSetLastSeenMsg", QVariantType.ByteArray));
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
-		retFunc.add(new QVariant<Integer>(msgid, "BufferId"));
+		retFunc.add(new QVariant<Integer>(msgid, "MsgId"));
 
 		try {
 			sendQVariantList(retFunc);
@@ -185,9 +185,9 @@ public class CoreConnection {
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
 		retFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
 		retFunc.add(new QVariant<String>("", QVariantType.String));
-		retFunc.add(new QVariant<String>("requestSetMarkerLine", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestSetMarkerLine", QVariantType.ByteArray));
 		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
-		retFunc.add(new QVariant<Integer>(msgid, "BufferId"));
+		retFunc.add(new QVariant<Integer>(msgid, "MsgId"));
 
 		try {
 			sendQVariantList(retFunc);

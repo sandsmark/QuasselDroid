@@ -193,6 +193,16 @@ public class CoreConnService extends Service{
 	public void markBufferAsRead(int bufferId){
 		coreConn.requestMarkBufferAsRead(bufferId);
 	}
+	
+	public void setLastSeen(int bufferId, int msgId) {
+		coreConn.requestSetLastMsgRead(bufferId, msgId);
+		bufferCollection.getBuffer(bufferId).setLastSeenMessage(msgId);
+	}
+	
+	public void setMarkerLine(int bufferId, int msgId) {
+		coreConn.requestSetMarkerLine(bufferId, msgId);
+		bufferCollection.getBuffer(bufferId).setMarkerLineMessage(msgId);
+	}
 
 	public Buffer getBuffer(int bufferId, Observer obs){
 		bufferCollection.getBuffer(bufferId).addObserver(obs);
