@@ -255,7 +255,7 @@ public class CoreConnService extends Service{
 					checkForURL(message);
 					buffer.addBacklogMessage(message);	
 				}else {
-					Log.e(TAG, "Getting message buffer already have"+ buffer.toString());
+					Log.e(TAG, "Getting message buffer already have "+ buffer.getInfo().name);
 				}
 				break;
 			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:

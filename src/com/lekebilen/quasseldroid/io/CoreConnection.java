@@ -217,7 +217,7 @@ public class CoreConnection {
 		if (buffers.get(buffer).getSize()==0) {
 			requestBacklog(buffer, -1, -1, amount);			
 		}else {
-			requestBacklog(buffer, -1, buffers.get(buffer).getBacklogEntry(0).messageId, amount);			
+			requestBacklog(buffer, -1, buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId, amount);			
 		}
 	}
 

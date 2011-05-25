@@ -6,11 +6,15 @@ import java.util.Observable;
 import java.util.Observer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -43,6 +47,7 @@ import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.IrcMessage.Type;
 import com.lekebilen.quasseldroid.service.CoreConnService;
 
 public class ChatActivity extends Activity{
@@ -161,7 +166,7 @@ public class ChatActivity extends Activity{
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.standard_menu, menu);
+		getMenuInflater().inflate(R.menu.chat_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
@@ -173,6 +178,9 @@ public class ChatActivity extends Activity{
 			break;
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
+			break;
+		case R.id.menu_hide_events:
+			showDialog(R.id.DIALOG_HIDE_EVENTS);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -206,6 +214,46 @@ public class ChatActivity extends Activity{
 
 
 
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		Dialog dialog;
+		switch (id) {
+		case R.id.DIALOG_HIDE_EVENTS:
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Hide Events");
+			String[] filterList = IrcMessage.Type.getFilterList();
+			boolean[] checked = new boolean[filterList.length];
+			ArrayList<IrcMessage.Type> filters = adapter.buffer.getFilters();
+			for (int i=0;i<checked.length;i++) {
+				if(filters.contains(IrcMessage.Type.valueOf(filterList[i]))) {
+					checked[i]=true;
+				}else{
+					checked[i]=false;
+				}
+			}
+			builder.setMultiChoiceItems(filterList, checked, new OnMultiChoiceClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+					IrcMessage.Type type = IrcMessage.Type.valueOf(IrcMessage.Type.getFilterList()[which]);
+					if(isChecked)
+						adapter.addFilter(type);
+					else
+						adapter.removeFilter(type);
+				}
+			});
+			dialog = builder.create();
+			break;
+		
+		default:
+			dialog = null;
+			break;
+		}
+		return dialog;
+	}
+
+
+
 	public class BacklogAdapter extends BaseAdapter implements Observer {
 
 		//private ArrayList<IrcMessage> backlog;
@@ -215,20 +263,9 @@ public class ChatActivity extends Activity{
 
 
 		public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
-			//			if (backlog==null) {
-			//				this.backlog = new ArrayList<IrcMessage>();
-			//			}else {
-			//				this.backlog = backlog;				
-			//			}
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		}
-
-		//		public void addItem(IrcMessage item) {
-		//			Log.i(TAG, item.timestamp.toString());
-		//			//this.backlog.add(item);
-		//			notifyDataSetChanged();
-		//		}
 
 		public void setBuffer(Buffer buffer) {
 			this.buffer = buffer;
@@ -288,8 +325,8 @@ public class ChatActivity extends Activity{
 			IrcMessage entry = this.getItem(position);
 			holder.messageID = entry.messageId;
 			holder.timeView.setText(entry.getTime());
-			
-			
+
+
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("-*-");
@@ -331,7 +368,7 @@ public class ChatActivity extends Activity{
 				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
-				
+
 			case Mode:
 				holder.nickView.setText("***");
 				holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
@@ -348,7 +385,7 @@ public class ChatActivity extends Activity{
 				}
 				holder.msgView.setTextColor(0xff000000);
 				holder.msgView.setTypeface(Typeface.DEFAULT);
-				
+
 				holder.nickView.setText("<" + entry.getNick() + ">");
 				holder.msgView.setText(entry.content);
 				break;
@@ -425,6 +462,15 @@ public class ChatActivity extends Activity{
 			boundConnService.getMoreBacklog(adapter.getBufferId(),ChatActivity.this.dynamicBacklogAmout);
 		}
 
+		public void removeFilter(Type type) {
+			buffer.removeFilterType(type);
+			
+		}
+
+		public void addFilter(Type type) {
+			buffer.addFilterType(type);
+			
+		}
 	}	
 
 
@@ -457,7 +503,7 @@ public class ChatActivity extends Activity{
 					loading = false;
 				}
 			}
-			//Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
 			if (!loading && (firstVisibleItem <= visibleThreshold)) {
 				if (adapter.buffer!=null) {
 					loading = true;

@@ -25,4 +25,5 @@
 <string name="remote_service_connected">Remote service connected</string>
 <string name="remote_service_disconnected">Remote serviced disconnected</string>
 <string name="description">An Android-based client for the decentralized Quassel IRC client.</string>
+<string name="menu_hide_events">Hide Events</string>
 </resources>

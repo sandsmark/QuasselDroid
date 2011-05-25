@@ -35,6 +35,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		NetsplitQuit (0x10000),
 		Invite    (0x20000);
 		int value;
+		static String[] filterList = {Type.Join.name(),Type.Part.name(),Type.Quit.name(),Type.Nick.name(),Type.Mode.name(),Type.Topic.name(),Type.DayChange.name()};
 		Type(int value){
 			this.value = value;
 		}
@@ -47,6 +48,10 @@ public class IrcMessage implements Comparable<IrcMessage>{
 					return type;
 			}
 			return Plain;
+		}
+
+		public static String[] getFilterList(){
+			return filterList;
 		}
 	}
 	public enum Flag {
@@ -72,7 +77,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public String sender;
 	public Type type;
 	public byte flags;
-	
+
 	private ArrayList<String> urls = new ArrayList<String>();
 
 
@@ -92,18 +97,18 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public String getNick(){
 		return sender.split("!")[0];
 	}
-	
+
 	public void setFlag(Flag flag) {
 		this.flags |= flag.value;
 	}
-	
+
 	public boolean isHighlighted() {
 		if (((flags & Flag.Highlight.value) != 0) && ((flags & Flag.Self.value) == 0)) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	public boolean isSelf() {
 		return ((flags & Flag.Self.value) != 0);
 	}
@@ -113,7 +118,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		int start = content.toString().indexOf(url);
 		content.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.ircmessage_url_color)), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE); 
 	}
-	
+
 	public ArrayList<String> getURLs() {
 		return urls;
 	}

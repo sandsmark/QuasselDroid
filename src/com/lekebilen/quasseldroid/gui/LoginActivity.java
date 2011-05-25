@@ -207,15 +207,10 @@ public class LoginActivity extends Activity implements Observer {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		final Dialog dialog;
-
-		if ( id == R.id.DIALOG_ADD_CORE || id == R.id.DIALOG_EDIT_CORE ){
-
-		}
 		switch (id) {
 
 		case R.id.DIALOG_EDIT_CORE: //fallthrough
 		case R.id.DIALOG_ADD_CORE:
-			Log.i("Ken", "Creating dialog");
 			dialog = new Dialog(this);
 			dialog.setContentView(R.layout.dialog_add_core);
 			dialog.setTitle("Add new core");

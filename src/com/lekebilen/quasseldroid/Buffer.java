@@ -262,6 +262,16 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		}
 		return backlog.get(pos);
 	}
+	
+	/**
+	 * Returns the ircmessage at pos from the hole backlog. Used when you want a message
+	 * that is not based on the filtered backlog postitions
+	 * @param pos the position
+	 * @return the IrcMessage at pos in the original backlog
+	 */
+	public IrcMessage getUnfilteredBacklogEntry(int pos) {
+		return backlog.get(pos);
+	}
 
 	/**
 	 * Get the id for the last seen message 
@@ -465,6 +475,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		filterBuffer();
 		this.setChanged();
 		notifyObservers();
+	}
+	
+	public ArrayList<IrcMessage.Type> getFilters() {
+		return filterTypes;
 	}
 	
 	/**
