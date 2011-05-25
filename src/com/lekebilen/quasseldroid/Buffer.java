@@ -71,6 +71,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	
 	private boolean temporarilyHidden = false;
 	private boolean permanentlyHidden = false;
+	/**
+	 * Sais if the buffer is custom order or sorted automaticly alphabetical
+	 * But currently not in use, core seems to send correct order even if autoSort i true so?
+	 */
 	private boolean autoSort = true;
 	private int order = -1;
 	
@@ -342,23 +346,26 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	@Override
 	public int compareTo(Buffer another) {
-		if (!autoSort) {
-			return this.order - another.order;
-		}
-				 
 		if (info.networkId != another.info.networkId)
 			return info.networkId - another.info.networkId;
-		else if (info.type != another.info.type)
-			return info.type.value - another.info.type.value;
+		else if (!(this.temporarilyHidden || this.permanentlyHidden) && (another.temporarilyHidden || another.permanentlyHidden))
+			return -1;
+		else if ((this.temporarilyHidden || this.permanentlyHidden) && !(another.temporarilyHidden || another.permanentlyHidden))
+				return -1;
 		else if (this.temporarilyHidden && !another.temporarilyHidden)
-			return 1;
+			return -1;
 		else if (!this.temporarilyHidden && another.temporarilyHidden)
-			return -1;
-		else if (this.permanentlyHidden && !another.permanentlyHidden)
 			return 1;
-		else if (!this.permanentlyHidden && another.permanentlyHidden)
+		else if (this.permanentlyHidden && !another.permanentlyHidden)
 			return -1;
-		else return info.name.compareToIgnoreCase(another.info.name);
+		else if (!this.permanentlyHidden && another.permanentlyHidden)
+			return 1;
+		else if ((this.permanentlyHidden&& another.permanentlyHidden)||(this.temporarilyHidden&&another.temporarilyHidden))
+			if (info.type != another.info.type)
+				return info.type.value - another.info.type.value;
+			else return info.name.compareToIgnoreCase(another.info.name);
+		else
+			return this.order - another.order;
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {
