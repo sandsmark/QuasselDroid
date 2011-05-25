@@ -375,6 +375,12 @@ public class ChatActivity extends Activity{
 				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
 				break;
+			case Nick:
+				holder.nickView.setText("<->");
+				holder.msgView.setText(entry.getNick()+" is now known as " + entry.content.toString());
+				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				break;
 			case Plain:
 			default:
 				if(entry.isSelf()) {
