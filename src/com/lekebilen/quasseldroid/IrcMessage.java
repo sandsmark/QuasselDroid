@@ -12,6 +12,7 @@ import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 public class IrcMessage implements Comparable<IrcMessage>{
@@ -116,7 +117,8 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public void addURL(Context context, String url) {
 		urls.add(url);
 		int start = content.toString().indexOf(url);
-		content.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.ircmessage_url_color)), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE); 
+		content.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.ircmessage_url_color)), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+		content.setSpan(new UnderlineSpan(), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 	}
 
 	public ArrayList<String> getURLs() {
