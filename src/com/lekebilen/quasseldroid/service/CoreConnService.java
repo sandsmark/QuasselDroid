@@ -1,3 +1,26 @@
+/**
+    QuasselDroid - Quassel client for Android
+ 	Copyright (C) 2011 Ken Børge Viktil
+ 	Copyright (C) 2011 Magnus Fjell
+ 	Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+ 	This program is distributed in the hope that it will be useful,
+ 	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 	GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.lekebilen.quasseldroid.service;
 
 import java.util.ArrayList;
@@ -7,10 +30,12 @@ import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -162,18 +187,6 @@ public class CoreConnService extends Service{
 		Log.i(TAG, "Connecting to core: "+address+":"+port+" with username " +username);
 		bufferCollection = new BufferCollection();
 		coreConn = new CoreConnection(address, port, username, password, ssl, this);
-//		try {
-//			coreConn.connect();
-//			// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
-//			showNotification(true);
-//		} catch (UnknownHostException e) {
-//			Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
-//		} catch (IOException e) {
-//			Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
-//			e.printStackTrace();
-//		} catch (GeneralSecurityException e) {
-//			Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
-//		}
 	}
 
 	public void newUser(IrcUser user) {
@@ -398,10 +411,32 @@ public class CoreConnService extends Service{
 				 */
 				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden((Boolean)msg.obj);
 				break;
-			}
-			
 				
-			
+			case R.id.CORECONNECTION_INVALID_CERTIFICATE:
+				/**
+				 * Received a mismatching certificate
+				 */
+			case R.id.CORECONNECTION_NEW_CERTIFICATE:
+				/**
+				 * Received a new, unseen certificate
+				 */
+				AlertDialog.Builder builder = new AlertDialog.Builder(CoreConnService.this);
+				final String hashedCert = (String)msg.obj;
+				builder.setMessage("Received a new certificate, do you trust it?\n" + hashedCert)
+				       .setCancelable(false)
+				       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+								preferences.edit().putString("certificate", hashedCert).commit();
+				           }
+				       })
+				       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				                dialog.cancel();
+				           }
+				       });
+				AlertDialog alert = builder.create();
+
+			}
 		}
 	}
 	
@@ -487,7 +522,8 @@ public class CoreConnService extends Service{
 
 	public void disconnectFromCore() {
 		notifyManager.cancel(R.id.NOTIFICATION);
-		coreConn.disconnect();
+		if (coreConn != null)
+			coreConn.disconnect();
 	}
 
 	public boolean isConnected() {
