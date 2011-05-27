@@ -49,6 +49,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
+import com.lekebilen.quasseldroid.BufferCollection;
 import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
@@ -898,7 +899,8 @@ public class CoreConnection {
 						List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
 						List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
 						int networkId = (Integer) map.get("networkId").getData(); // let's hope we don't need this, LAWLERZ!!1
-						boolean autoSort = (Boolean) map.get("sortAlphabetically").getData();
+						BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
+						
 						
 						//TODO: mabye send this in a bulk to the service so it wont sort and shit every time
 						for (QVariant bufferId: tempList) {
@@ -929,7 +931,6 @@ public class CoreConnection {
 								System.err.println("got buffer info for non-existant buffer id: " + bufferId.getData());
 								continue;
 							}
-							buffers.get(bufferId.getData()).setAutoSort(autoSort);
 							//buffers.get(bufferId.getData()).setOrder(order);
 							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ORDER);
 							msg.arg1 = (Integer) bufferId.getData();

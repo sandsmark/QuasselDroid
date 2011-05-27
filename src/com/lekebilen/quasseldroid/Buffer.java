@@ -79,12 +79,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * List with all the message types that this buffer should filter
 	 */
 	private ArrayList<IrcMessage.Type> filterTypes;
-	/**
-	 * Sais if the buffer is custom order or sorted automaticly alphabetical
-	 * But currently not in use, core seems to send correct order even if autoSort i true so?
-	 */
-	private boolean autoSort = true;
-	private int order = -1;
+
+	private int order = Integer.MAX_VALUE;
 
 	public Buffer(BufferInfo info) {
 		this.info = info;
@@ -416,7 +412,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 			if (info.type != another.info.type)
 				return info.type.value - another.info.type.value;
 			else return info.name.compareToIgnoreCase(another.info.name);
-		} else if (!autoSort)
+		} else if (!BufferCollection.orderAlphabetical)
 			return this.order - another.order;
 		else {
 			if (info.type != another.info.type)
@@ -443,14 +439,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	public boolean isPermanentlyHidden() {
 		return permanentlyHidden;
-	}
-
-	public void setAutoSort(boolean autoSort) {
-		this.autoSort = autoSort;
-	}
-
-	public boolean isAutoSort() {
-		return autoSort;
 	}
 
 	public void setOrder(int order) {
