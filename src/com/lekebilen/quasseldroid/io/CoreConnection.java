@@ -341,6 +341,8 @@ public class CoreConnection {
 			inStream = new QDataInputStream(sslSocket.getInputStream());
 			outStream = new QDataOutputStream(sslSocket.getOutputStream());
 			socket = sslSocket;
+		} else {
+			System.out.println("CAKE NO SSL?????");
 		}
 		// FINISHED SSL CONNECTION
 
