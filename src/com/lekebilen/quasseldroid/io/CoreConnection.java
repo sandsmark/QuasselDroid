@@ -735,6 +735,15 @@ public class CoreConnection {
 				 */
 				case HeartBeat:
 					Log.i(TAG, "Got heartbeat");
+					List<QVariant<?>> packet = new LinkedList<QVariant<?>>();
+					packet.add(new QVariant<Integer>(RequestType.HeartBeatReply.getValue(), QVariantType.Int));
+					packet.add(new QVariant<Calendar>(Calendar.getInstance(), QVariantType.Time));
+					try {
+						sendQVariantList(packet);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					break;
 				case HeartBeatReply:
 					Log.i(TAG, "Got heartbeat reply");

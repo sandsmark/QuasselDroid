@@ -125,6 +125,7 @@ public class CoreConnService extends Service{
 		}
 		// Set the icon, scrolling text and timestamp
 		Notification notification = new Notification(icon, text, System.currentTimeMillis());
+		notification.flags |= Notification.FLAG_ONGOING_EVENT;
 		// The PendingIntent to launch our activity if the user selects this notification
 		PendingIntent contentIntent;
 
