@@ -1,17 +1,31 @@
 /**
- * Copyright Martin Sandsmark 2011 
- * LGPL 2.1 / GPLv3
+    QuasselDroid - Quassel client for Android
+ 	Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+ 	This program is distributed in the hope that it will be useful,
+ 	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 	GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
  */
 
 package com.lekebilen.quasseldroid.io;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -46,16 +60,12 @@ import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.lekebilen.quasseldroid.Buffer;
 import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.R;
-import com.lekebilen.quasseldroid.R.id;
-import com.lekebilen.quasseldroid.R.string;
-import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
