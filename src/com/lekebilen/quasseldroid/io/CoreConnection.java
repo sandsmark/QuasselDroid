@@ -27,11 +27,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,16 +42,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.net.SocketFactory;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -66,6 +57,7 @@ import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.R;
+import com.lekebilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
@@ -93,7 +85,7 @@ public class CoreConnection {
 	private String password;
 	private boolean ssl;
 
-	private CoreConnService service;
+	CoreConnService service;
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
 
@@ -301,7 +293,7 @@ public class CoreConnection {
 	/**
 	 * Initiates a connection.
 	 */
-	public void connect() throws UnknownHostException, IOException, GeneralSecurityException {	
+	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException {	
 		// START CREATE SOCKETS
 		SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 		socket = (Socket)factory.createSocket(address, port);
@@ -337,7 +329,7 @@ public class CoreConnection {
 		// START SSL CONNECTION
 		if (ssl) {
 			SSLContext sslContext = SSLContext.getInstance("TLS");
-			TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager() };
+			TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager(this) };
 			sslContext.init(null, trustManagers, null);
 			SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 			SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, address, port, true);
@@ -569,108 +561,6 @@ public class CoreConnection {
 		sendQVariantList(packedFunc);
 	}
 
-	/**
-	 * A custom trust manager for the SSL socket so we can
-	 * let the user manually verify certificates.
-	 * @author sandsmark
-	 */
-	private class CustomTrustManager implements javax.net.ssl.X509TrustManager {
-		/*
-		 * The default X509TrustManager returned by SunX509.  We'll delegate
-		 * decisions to it, and fall back to the logic in this class if the
-		 * default X509TrustManager doesn't trust it.
-		 */
-		X509TrustManager defaultTrustManager;
-
-		CustomTrustManager() throws GeneralSecurityException {
-			KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-			TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-			tmf.init(ks);
-
-			TrustManager tms [] = tmf.getTrustManagers();
-
-			/*
-			 * Iterate over the returned trustmanagers, look
-			 * for an instance of X509TrustManager.  If found,
-			 * use that as our "default" trust manager.
-			 */
-			for (int i = 0; i < tms.length; i++) {
-				if (tms[i] instanceof X509TrustManager) {
-					defaultTrustManager = (X509TrustManager) tms[i];
-					return;
-				}
-			}
-
-			throw new GeneralSecurityException("Couldn't initialize certificate management!");
-		}
-
-		/*
-		 * Delegate to the default trust manager.
-		 */
-		public void checkClientTrusted(X509Certificate[] chain, String authType)
-		throws CertificateException {
-			try {
-				defaultTrustManager.checkClientTrusted(chain, authType);
-			} catch (CertificateException excep) {
-
-			}
-		}
-
-		/*
-		 * Delegate to the default trust manager.
-		 */
-		public void checkServerTrusted(X509Certificate[] chain, String authType)
-		throws CertificateException {
-			try {
-				defaultTrustManager.checkServerTrusted(chain, authType);
-			} catch (CertificateException excep) {
-				/* Here we either check the certificate against the last stored one,
-				 * or throw a security exception to let the user know that something is wrong.
-				 */
-				String hashedCert = hash(chain[0].getEncoded());
-				SharedPreferences preferences = CoreConnection.this.service.getSharedPreferences("CertificateStorage", Context.MODE_PRIVATE);
-				if (preferences.contains("certificate")) { 
-					if (!preferences.getString("certificate", "lol").equals(hashedCert)) {
-						throw new CertificateException();
-					}
-					// We haven't seen a certificate from this core before, just store it
-					// TODO: let the user decide whether to trust it or not.
-				} else {
-					System.out.println("Storing new certificate: " + hashedCert);
-					preferences.edit().putString("certificate", hashedCert).commit();
-				}
-			}
-		}
-
-		/**
-		 * Java sucks.
-		 * @param s The bytes to hash
-		 * @return a hash representing the input bytes.
-		 */
-		private String hash(byte[] s) {
-			try {
-				MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
-				digest.update(s);
-				byte messageDigest[] = digest.digest();
-				StringBuffer hexString = new StringBuffer();
-				for (int i=0; i<messageDigest.length; i++)
-					hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
-				return hexString.toString();	    	        
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-			return "";
-		}
-
-
-		/*
-		 * Merely pass this through.
-		 */
-		public X509Certificate[] getAcceptedIssuers() {
-			return defaultTrustManager.getAcceptedIssuers();
-		}
-	}
-
 	private class ReadThread extends Thread {
 		boolean running = false;
 
@@ -696,14 +586,25 @@ public class CoreConnection {
 				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			} catch (UnknownHostException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Unknown host!").sendToTarget();
-				//Toast.makeText(getApplicationContext(), "Unknown host!", Toast.LENGTH_LONG).show();
+				disconnect();
+				return;
 			} catch (IOException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
-				//Toast.makeText(getApplicationContext(), "IO error while connecting!", Toast.LENGTH_LONG).show();
 				e.printStackTrace();
+				disconnect();
+				return;
+			} catch (NewCertificateException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, e.hashedCert()).sendToTarget();
+				disconnect();
+				return;
+			} catch (CertificateException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
+				disconnect();
+				return;
 			} catch (GeneralSecurityException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
-				//Toast.makeText(getApplicationContext(), "Invalid username/password combination.", Toast.LENGTH_LONG).show();
+				disconnect();
+				return;
 			}
 
 			List<QVariant<?>> packedFunc;

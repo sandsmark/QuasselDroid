@@ -406,7 +406,8 @@ public class LoginActivity extends Activity implements Observer {
 	void doUnbindService() {
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
-			boundConnService.unregisterStatusReceiver(statusReceiver);
+			if (boundConnService != null)
+				boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
 		}
