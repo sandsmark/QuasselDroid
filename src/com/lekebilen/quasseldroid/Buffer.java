@@ -412,12 +412,17 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 			return -1;
 		else if (!this.permanentlyHidden && another.permanentlyHidden)
 			return 1;
-		else if ((this.permanentlyHidden&& another.permanentlyHidden)||(this.temporarilyHidden&&another.temporarilyHidden))
+		else if ((this.permanentlyHidden&& another.permanentlyHidden)||(this.temporarilyHidden&&another.temporarilyHidden)) {
 			if (info.type != another.info.type)
 				return info.type.value - another.info.type.value;
 			else return info.name.compareToIgnoreCase(another.info.name);
-		else
+		} else if (!autoSort)
 			return this.order - another.order;
+		else {
+			if (info.type != another.info.type)
+				return info.type.value - another.info.type.value;
+			else return info.name.compareToIgnoreCase(another.info.name);
+		}
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {

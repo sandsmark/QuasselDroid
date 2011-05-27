@@ -433,6 +433,56 @@ public class CoreConnService extends Service{
 			message.addURL(this, matcher.group(0));
 		}
 	}
+	
+	/**
+	 * Parse mIRC color codes in IrcMessage
+	 */
+	// fuck this shit
+/*	public void parseColorCodes(IrcMessage message) {
+		while (true) {
+			String content = message.content.toString();
+			int start = content.indexOf(3); 
+			if (start == -1) {
+				return;
+			}
+			start++;
+			int fg = -1;
+			int bg = -1;
+			if (Character.isDigit(content.charAt(start + 1))) {
+				if (Character.isDigit(content.charAt(start + 2))) {
+					fg = Integer.parseInt(content.substring(start, start + 2));
+					start += 2;
+				} else {
+					fg = Integer.parseInt(content.substring(start, start + 1));
+					start += 1;
+				}
+			}
+			
+			if (content.charAt(start + 1))
+				^C5,12colored text and background^C
+
+			switch (fg) {
+			case 0 white
+			1 black
+			2 blue (navy)
+			3 green
+			4 red
+			5 brown (maroon)
+			6 purple
+			7 orange (olive)
+			8 yellow
+			9 light green (lime)
+			10 teal (a green/blue cyan)
+			11 light cyan (cyan) (aqua)
+			12 light blue (royal)
+			13 pink (light purple) (fuchsia)
+			14 grey
+			15 light grey (silver)
+
+			}
+			
+		}
+	}*/
 
 	public void disconnectFromCore() {
 		notifyManager.cancel(R.id.NOTIFICATION);
