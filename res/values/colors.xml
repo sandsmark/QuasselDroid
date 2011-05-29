@@ -12,4 +12,19 @@
 	<color name="ircmessage_commandmessages_color">#960096</color>
 	<color name="ircmessage_servermessage_color">#916409</color>
 	<color name="ircmessage_actionmessage_color">#0000F5</color>
+	<color name="ircmessage_white">#fff</color>
+	<color name="ircmessage_black">#000</color>
+	<color name="ircmessage_blue">#0A0A85</color>
+	<color name="ircmessage_green">#0f0</color>
+	<color name="ircmessage_red">#f00</color>
+	<color name="ircmessage_brown">#800000</color>
+	<color name="ircmessage_purple">#800080</color>
+	<color name="ircmessage_orange">#808000</color>
+	<color name="ircmessage_yellow">#FFFF00</color>
+	<color name="ircmessage_light_green">#BFFF00</color>
+	<color name="ircmessage_teal">#008080</color>
+	<color name="ircmessage_light_cyan">#00FFFF</color>
+	<color name="ircmessage_light_blue">#4169E1</color>
+	<color name="ircmessage_pink">#F984EF</color>
+	<color name="ircmessage_gray">#888</color>
 </resources>
