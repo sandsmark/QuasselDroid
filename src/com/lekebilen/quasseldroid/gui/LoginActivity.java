@@ -45,6 +45,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -352,7 +353,7 @@ public class LoginActivity extends Activity implements Observer {
 			connectIntent.putExtra("port", res.getInt("port"));
 			connectIntent.putExtra("username", username.getText().toString());
 			connectIntent.putExtra("password", password.getText().toString());
-			connectIntent.putExtra("ssl", settings.getBoolean("useSSL", false)); //default should be to not use ssl 
+			connectIntent.putExtra("ssl", PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).getBoolean(getString(R.string.useSSL), false)); //default should be to not use ssl 
 
 			
 			

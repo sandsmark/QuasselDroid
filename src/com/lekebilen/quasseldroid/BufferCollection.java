@@ -130,11 +130,11 @@ public class BufferCollection extends Observable implements Observer {
 	public void update(Observable arg0, Object arg1) {
 		if (arg1!=null && (Integer)arg1 == R.id.BUFFER_ORDER_CHANGED) {
 			Collections.sort(bufferList);
-			for (Buffer buf:bufferList) {
-				Log.d("REKKEFØLGE", buf.getInfo().name + " : " +buf.getOrder());
-			}
+//			for (Buffer buf:bufferList) {
+//				Log.d("REKKEFØLGE", buf.getInfo().name + " : " +buf.getOrder());
+//			}
 			filterBuffers();
-			Log.e(TAG, "UPDATEEEEEEEEE");
+//			Log.e(TAG, "UPDATEEEEEEEEE");
 		}else if (arg1!=null && (Integer)arg1 == R.id.BUFFER_HIDDEN_CHANGED){
 			filterBuffers();
 		}
