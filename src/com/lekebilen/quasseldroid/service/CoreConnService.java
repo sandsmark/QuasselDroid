@@ -45,6 +45,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 
 import com.lekebilen.quasseldroid.Buffer;
@@ -231,6 +235,9 @@ public class CoreConnService extends Service{
 
 
 	public BufferCollection getBufferList(Observer obs) {
+		if (bufferCollection == null)
+			return null;
+		
 		bufferCollection.addObserver(obs);
 		return bufferCollection;
 	}
@@ -473,52 +480,115 @@ public class CoreConnService extends Service{
 	/**
 	 * Parse mIRC color codes in IrcMessage
 	 */
-	// fuck this shit
-/*	public void parseColorCodes(IrcMessage message) {
+	public void parseColorCodes(IrcMessage message) {
+		final char formattingIndicator = 3;
+		
+		/*if (message.content.toString().indexOf(formattingIndicator) == -1)
+				return;*/
+		String content = message.content.toString();
+		
+		SpannableStringBuilder newString = new SpannableStringBuilder(content);
 		while (true) {
-			String content = message.content.toString();
-			int start = content.indexOf(3); 
+			content = newString.toString();
+//			^C5,12colored text and background^C
+			int start = content.indexOf(formattingIndicator);
+			
 			if (start == -1) {
 				return;
 			}
-			start++;
+			
+			int end = start + 1;
 			int fg = -1;
 			int bg = -1;
-			if (Character.isDigit(content.charAt(start + 1))) {
-				if (Character.isDigit(content.charAt(start + 2))) {
-					fg = Integer.parseInt(content.substring(start, start + 2));
-					start += 2;
+			if (Character.isDigit(content.charAt(end + 1))) {
+				if (Character.isDigit(content.charAt(end + 2))) {
+					fg = Integer.parseInt(content.substring(end, end + 2));
+					end += 2;
 				} else {
-					fg = Integer.parseInt(content.substring(start, start + 1));
-					start += 1;
+					fg = Integer.parseInt(content.substring(end, end + 1));
+					end += 1;
 				}
 			}
 			
-			if (content.charAt(start + 1))
-				^C5,12colored text and background^C
-
-			switch (fg) {
-			case 0 white
-			1 black
-			2 blue (navy)
-			3 green
-			4 red
-			5 brown (maroon)
-			6 purple
-			7 orange (olive)
-			8 yellow
-			9 light green (lime)
-			10 teal (a green/blue cyan)
-			11 light cyan (cyan) (aqua)
-			12 light blue (royal)
-			13 pink (light purple) (fuchsia)
-			14 grey
-			15 light grey (silver)
-
+			if (content.charAt(end + 1) == ',') {
+				end++;
+				
+				if (Character.isDigit(content.charAt(end + 1))) {
+					if (Character.isDigit(content.charAt(end + 2))) {
+						bg = Integer.parseInt(content.substring(end, end + 2));
+						end += 2;
+					} else {
+						bg = Integer.parseInt(content.substring(end, end + 1));
+						end += 1;
+					}
+				}
 			}
-			
+			int length = end - start;
+			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
+			newString.delete(start, end);
+			if (fg != -1) {
+				newString.setSpan(new ForegroundColorSpan(getResources().getColor(mircCodeToColor(fg))), start, endOfSpan, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+			}
+			if (bg != -1) {
+				newString.setSpan(new BackgroundColorSpan(getResources().getColor(mircCodeToColor(bg))), start, endOfSpan, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+			}
 		}
-	}*/
+		//message.content = newString.; BURN IN HELL JAVA
+	}
+	
+	private int mircCodeToColor(int code) {
+		int color;
+		switch (code) {
+		case 0: //white
+			color = R.color.ircmessage_white;
+			break;
+		case 1: //black
+			color = R.color.ircmessage_black;
+			break;
+		case 2: //blue (navy)
+			color = R.color.ircmessage_blue;
+			break;
+		case 3: //green
+			color = R.color.ircmessage_green;
+			break;
+		case 4: //red
+			color = R.color.ircmessage_red;
+			break;
+		case 5: //brown (maroon)
+			color = R.color.ircmessage_brown;
+			break;
+		case 6: //purple
+			color = R.color.ircmessage_purple;
+			break;
+		case 7: //orange (olive)
+			color = R.color.ircmessage_orange;
+			break;
+		case 8: //yellow
+			color = R.color.ircmessage_yellow;
+			break;
+		case 9: //light green (lime)
+			color = R.color.ircmessage_light_green;
+			break;
+		case 10: //teal (a green/blue cyan)
+			color = R.color.ircmessage_teal;
+			break;
+		case 11: //light cyan (cyan) (aqua)
+			color = R.color.ircmessage_light_cyan;
+			break;
+		case 12: //light blue (royal)
+			color = R.color.ircmessage_light_blue;
+			break;
+		case 13: //pink (light purple) (fuchsia)
+			color = R.color.ircmessage_pink;
+			break;
+		case 14: //grey
+			color = R.color.ircmessage_gray;
+			break;
+		default:
+			color = R.color.ircmessage_normal_color;
+		}
+		return color;
+	}
 
 	public void disconnectFromCore() {
 		notifyManager.cancel(R.id.NOTIFICATION);

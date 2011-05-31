@@ -310,7 +310,7 @@ public class CoreConnection {
 		initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
 		initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariantType.Bool));
 		initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariantType.String));
-		initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
+		initial.put("UseCompression", new QVariant<Boolean>(true, QVariantType.Bool));
 		initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
 		initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariantType.Int));
 
@@ -525,30 +525,27 @@ public class CoreConnection {
 		QVariant<List<QVariant<?>>> bufstruct = new QVariant<List<QVariant<?>>>(data, QVariantType.List);
 		sendQVariant(bufstruct);
 	}
+	
+	
+	private QVariant<?> readQVariant() throws IOException {
+		int length = (int)inStream.readUInt(32);
+		byte [] data = new byte[length];
+		inStream.read(data);
+		return (QVariant<?>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+	}
 
 	/**
 	 * A convenience function to read a QVariantMap.
 	 */
 	private Map<String, QVariant<?>> readQVariantMap() throws IOException {
-		// Length of this packet (why do they send this? noone knows!).
-		inStream.readUInt(32);
-		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
-
-		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
-
-		return ret;
+		return (Map<String, QVariant<?>>)((QVariant <Map<String, QVariant<?>>>)readQVariant()).getData();
 	}
 
 	/**
 	 * A convenience function to read a QVariantList.
 	 */	
 	private List<QVariant<?>> readQVariantList() throws IOException {	
-		inStream.readUInt(32); // Length
-		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
-
-		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
-
-		return ret;
+		return (List<QVariant<?>>)((QVariant <List<QVariant<?>>>)readQVariant()).getData();
 	}
 
 	/**
