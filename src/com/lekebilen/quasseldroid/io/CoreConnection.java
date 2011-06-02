@@ -310,7 +310,7 @@ public class CoreConnection {
 		initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
 		initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariantType.Bool));
 		initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariantType.String));
-		initial.put("UseCompression", new QVariant<Boolean>(true, QVariantType.Bool));
+		initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
 		initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
 		initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariantType.Int));
 
