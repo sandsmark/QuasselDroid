@@ -525,27 +525,30 @@ public class CoreConnection {
 		QVariant<List<QVariant<?>>> bufstruct = new QVariant<List<QVariant<?>>>(data, QVariantType.List);
 		sendQVariant(bufstruct);
 	}
-	
-	
-	private QVariant<?> readQVariant() throws IOException {
-		int length = (int)inStream.readUInt(32);
-		byte [] data = new byte[length];
-		inStream.read(data);
-		return (QVariant<?>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
-	}
 
 	/**
 	 * A convenience function to read a QVariantMap.
 	 */
 	private Map<String, QVariant<?>> readQVariantMap() throws IOException {
-		return (Map<String, QVariant<?>>)((QVariant <Map<String, QVariant<?>>>)readQVariant()).getData();
+		// Length of this packet (why do they send this? noone knows!).
+		inStream.readUInt(32);
+		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+
+		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
+
+		return ret;
 	}
 
 	/**
 	 * A convenience function to read a QVariantList.
 	 */	
 	private List<QVariant<?>> readQVariantList() throws IOException {	
-		return (List<QVariant<?>>)((QVariant <List<QVariant<?>>>)readQVariant()).getData();
+		inStream.readUInt(32); // Length
+		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+
+		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
+
+		return ret;
 	}
 
 	/**
