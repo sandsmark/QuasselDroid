@@ -32,6 +32,7 @@
 				android:singleLine="true" android:text="4242" android:maxLength="5"/>
 		</TableRow>
 	</TableLayout>
+	<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/dialog_usessl_checkbox" android:text="Use SSL?"></CheckBox>
 	<LinearLayout android:id="@+id/LinearLayout01"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_marginTop="5px" android:layout_gravity="center_horizontal">

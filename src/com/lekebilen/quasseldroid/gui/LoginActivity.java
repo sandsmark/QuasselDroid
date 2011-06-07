@@ -219,9 +219,10 @@ public class LoginActivity extends Activity implements Observer {
 		case R.id.DIALOG_EDIT_CORE:
 			dialog.setTitle("Edit core");
 			Bundle res = dbHelper.getCore(core.getSelectedItemId());
-			((EditText)dialog.findViewById(R.id.dialog_name_field)).setText(res.getString("name"));
-			((EditText)dialog.findViewById(R.id.dialog_address_field)).setText(res.getString("address"));
-			((EditText)dialog.findViewById(R.id.dialog_port_field)).setText(Integer.toString(res.getInt("port")));
+			((EditText)dialog.findViewById(R.id.dialog_name_field)).setText(res.getString(QuasselDbHelper.KEY_NAME));
+			((EditText)dialog.findViewById(R.id.dialog_address_field)).setText(res.getString(QuasselDbHelper.KEY_ADDRESS));
+			((EditText)dialog.findViewById(R.id.dialog_port_field)).setText(Integer.toString(res.getInt(QuasselDbHelper.KEY_PORT)));
+			((CheckBox)dialog.findViewById(R.id.dialog_usessl_checkbox)).setChecked(res.getBoolean(QuasselDbHelper.KEY_SSL));
 			break;
 		}
 
@@ -246,30 +247,32 @@ public class LoginActivity extends Activity implements Observer {
 					EditText nameField = (EditText)dialog.findViewById(R.id.dialog_name_field);
 					EditText addressField = (EditText)dialog.findViewById(R.id.dialog_address_field);
 					EditText portField = (EditText)dialog.findViewById(R.id.dialog_port_field);
-					//Log.i("KEN", Log.i("KEN", String.valueOf()!portField.equals("")));
+					CheckBox sslBox = (CheckBox)dialog.findViewById(R.id.dialog_usessl_checkbox);
 					if (v.getId()==R.id.cancel_button) {
 						nameField.setText("");
 						addressField.setText("");
 						portField.setText("");
+						sslBox.setChecked(false);
 						dialog.dismiss();
 
 
 					}else if (v.getId()==R.id.save_button && !nameField.getText().toString().equals("") &&!addressField.getText().toString().equals("") && !portField.getText().toString().equals("")) {
-						Log.i("KEN", "Saving");
 						String name = nameField.getText().toString();
 						String address = addressField.getText().toString();
 						int port = Integer.parseInt(portField.getText().toString());
+						boolean useSSL = sslBox.isChecked();
 
 						//TODO: Ken: mabye add some better check on what state the dialog is used for, edit/add. Atleast use a string from the resources so its the same if you change it.
 						if ((String)dialog.getWindow().getAttributes().getTitle()=="Add new core") {
-							dbHelper.addCore(name, address, port);
+							dbHelper.addCore(name, address, port, useSSL);
 						}else if ((String)dialog.getWindow().getAttributes().getTitle()=="Edit core") {
-							dbHelper.updateCore(core.getSelectedItemId(), name, address, port);
+							dbHelper.updateCore(core.getSelectedItemId(), name, address, port, useSSL);
 						}
 						LoginActivity.this.updateCoreSpinner();
 						nameField.setText("");
 						addressField.setText("");
 						portField.setText("");
+						sslBox.setChecked(false);
 						dialog.dismiss();
 						if ((String)dialog.getWindow().getAttributes().getTitle()=="Add new core") {
 							Toast.makeText(LoginActivity.this, "Added core", Toast.LENGTH_LONG).show();
@@ -318,7 +321,6 @@ public class LoginActivity extends Activity implements Observer {
 			SharedPreferences.Editor settingsedit = settings.edit();
 			if(rememberMe.isChecked()){//save info
 				settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-				Log.i("SAVVED", Integer.toString(core.getSelectedItemPosition()));
 				settingsedit.putString(PREFS_USERNAME,username.getText().toString());
 				settingsedit.putString(PREFS_PASSWORD, password.getText().toString());
 				settingsedit.putBoolean(PREFS_REMEMBERME, true);
@@ -348,12 +350,12 @@ public class LoginActivity extends Activity implements Observer {
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
-			connectIntent.putExtra("name", res.getString("name"));
-			connectIntent.putExtra("address", res.getString("address"));
-			connectIntent.putExtra("port", res.getInt("port"));
+			connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
+			connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
+			connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
+			connectIntent.putExtra("ssl", res.getBoolean(QuasselDbHelper.KEY_SSL));
 			connectIntent.putExtra("username", username.getText().toString());
 			connectIntent.putExtra("password", password.getText().toString());
-			connectIntent.putExtra("ssl", PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).getBoolean(getString(R.string.useSSL), false)); //default should be to not use ssl 
 
 			
 			

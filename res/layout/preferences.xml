@@ -13,10 +13,4 @@
   	android:defaultValue="20"
   	android:numeric="integer"
   />
-  <CheckBoxPreference 
-  	android:title="SSL"
-  	android:defaultValue="false"
-  	android:summary="Use SSL"
-  	android:key="@string/useSSL"
-  />
 </PreferenceScreen>
