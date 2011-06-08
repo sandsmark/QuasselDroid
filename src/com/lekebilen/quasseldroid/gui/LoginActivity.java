@@ -73,6 +73,7 @@ public class LoginActivity extends Activity implements Observer {
 	public static final String PREFS_USERNAME = "username";
 	public static final String PREFS_PASSWORD = "password";
 	public static final String PREFS_REMEMBERME = "rememberMe";
+	
 	SharedPreferences settings;
 	QuasselDbHelper dbHelper;
 	
@@ -83,7 +84,8 @@ public class LoginActivity extends Activity implements Observer {
 	EditText password;
 	CheckBox rememberMe;
 	Button connect;
-
+	
+	private String hashedCert;//ugly
 
 	/* EXample of how to get a preference
 	 * SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -144,6 +146,10 @@ public class LoginActivity extends Activity implements Observer {
 						removeDialog(R.id.DIALOG_CONNECTING);
 						Toast.makeText(LoginActivity.this, resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
 					}
+				} else if (resultCode == CoreConnService.CONNECTION_NEW_CERTIFICATE) {
+					hashedCert = resultData.getString(CoreConnService.CERT_KEY);
+					removeDialog(R.id.DIALOG_CONNECTING);
+					showDialog(R.id.DIALOG_NEW_CERTIFICATE);
 				}
 				super.onReceiveResult(resultCode, resultData);
 			}
@@ -294,6 +300,25 @@ public class LoginActivity extends Activity implements Observer {
 			dialog = prog;
 			break;
 
+		case R.id.DIALOG_NEW_CERTIFICATE:
+			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+			final SharedPreferences certPrefs = getSharedPreferences("CertificateStorage", Context.MODE_PRIVATE);
+			builder.setMessage("Received a new certificate, do you trust it?\n" + hashedCert)
+			       .setCancelable(false)
+			       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+							certPrefs.edit().putString("certificate", hashedCert).commit();
+							onConnect.onClick(null);
+			           }
+			       })
+			       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                dialog.cancel();
+			           }
+			       });
+			dialog = builder.create();
+			break;
+			
 		default:
 			dialog = null;
 			break;

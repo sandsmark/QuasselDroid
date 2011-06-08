@@ -320,10 +320,10 @@ public class CoreConnection {
 		// START CORE INFO
 		inStream = new QDataInputStream(socket.getInputStream());
 		Map<String, QVariant<?>> reply = readQVariantMap();
-		System.out.println("CORE INFO: ");
+		/*System.out.println("CORE INFO: ");
 		for (String key : reply.keySet()) {
 			System.out.println("\t" + key + " : " + reply.get(key));
-		}
+		}*/
 		// TODO: We should check that the core is new and dandy here. 
 		// END CORE INFO
 
@@ -342,7 +342,7 @@ public class CoreConnection {
 			outStream = new QDataOutputStream(sslSocket.getOutputStream());
 			socket = sslSocket;
 		} else {
-			System.out.println("CAKE NO SSL?????");
+			System.err.println("SSL DISABLED!");
 		}
 		// FINISHED SSL CONNECTION
 
@@ -365,10 +365,10 @@ public class CoreConnection {
 
 		// START SESSION INIT
 		reply = readQVariantMap();
-		System.out.println("SESSION INIT: ");
+		/*System.out.println("SESSION INIT: ");
 		for (String key : reply.keySet()) {
 			System.out.println("\t" + key + " : " + reply.get(key));
-		}
+		}*/
 
 		Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
 		List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
@@ -872,14 +872,14 @@ public class CoreConnection {
 					 */
 					Object foo = packedFunc.remove(0).getData();
 					//System.out.println("FUCK" + foo.toString() + " balle " + foo.getClass().getName());
-					if (foo.getClass().getName().equals("java.nio.ReadWriteHeapByteBuffer")) {
+					/*if (foo.getClass().getName().equals("java.nio.ReadWriteHeapByteBuffer")) {
 						try {
 							System.out.println("faen i helvete: " + new String(((ByteBuffer)foo).array(), "UTF-8"));
 						} catch (UnsupportedEncodingException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}						
-					}
+					}*/
 					className = (String)foo; // This is either a byte buffer or a string
 					objectName = (String) packedFunc.remove(0).getData();
 					String function = packedFunc.remove(0).toString();

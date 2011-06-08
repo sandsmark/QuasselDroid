@@ -99,7 +99,7 @@ public class BufferCollection extends Observable implements Observer {
 				Log.e(TAG, "Getting buffer in buffers we already have: " + buffer.getInfo().name);
 				continue;
 			}
-			Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().id);
+			//Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().id);
 
 			changed = true;
 			this.buffers.put(buffer.getInfo().id, buffer);
@@ -131,7 +131,7 @@ public class BufferCollection extends Observable implements Observer {
 		if (arg1!=null && (Integer)arg1 == R.id.BUFFER_ORDER_CHANGED) {
 			Collections.sort(bufferList);
 //			for (Buffer buf:bufferList) {
-//				Log.d("REKKEFØLGE", buf.getInfo().name + " : " +buf.getOrder());
+//				Log.d("REKKEFï¿½LGE", buf.getInfo().name + " : " +buf.getOrder());
 //			}
 			filterBuffers();
 //			Log.e(TAG, "UPDATEEEEEEEEE");

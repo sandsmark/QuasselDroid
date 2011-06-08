@@ -74,7 +74,9 @@ public class CoreConnService extends Service{
 	/** Id for result code in the resultReciver that is going to notify the activity currently on screen about the change */
 	public static final int CONNECTION_DISCONNECTED = 0;
 	public static final int CONNECTION_CONNECTED = 1;
+	public static final int CONNECTION_NEW_CERTIFICATE = 2;
 	public static final String STATUS_KEY = "status";
+	public static final String CERT_KEY = "certificate";
 	
 	private Pattern URLPattern= Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
@@ -427,21 +429,13 @@ public class CoreConnService extends Service{
 				/**
 				 * Received a new, unseen certificate
 				 */
-				AlertDialog.Builder builder = new AlertDialog.Builder(CoreConnService.this);
-				final String hashedCert = (String)msg.obj;
-				builder.setMessage("Received a new certificate, do you trust it?\n" + hashedCert)
-				       .setCancelable(false)
-				       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-								preferences.edit().putString("certificate", hashedCert).commit();
-				           }
-				       })
-				       .setNegativeButton("No", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				                dialog.cancel();
-				           }
-				       });
-				AlertDialog alert = builder.create();
+				Bundle bundle = new Bundle();
+				bundle.putString(CERT_KEY, (String)msg.obj);
+				for (ResultReceiver statusReceiver:statusReceivers) {
+					statusReceiver.send(CoreConnService.CONNECTION_NEW_CERTIFICATE, bundle);
+				}
+				
+
 
 			}
 		}
