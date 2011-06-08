@@ -220,6 +220,9 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected void onStop() {
+		super.onStop();
+		if (adapter.buffer == null) return;
+		
 		//Dont save position if list is at bottom
 		if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
 			adapter.buffer.setTopMessageShown(0);
@@ -232,7 +235,6 @@ public class ChatActivity extends Activity{
 			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
 		}
 		doUnbindService();
-		super.onStop();
 	}
 
 
