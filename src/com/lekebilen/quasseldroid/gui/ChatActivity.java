@@ -231,9 +231,9 @@ public class ChatActivity extends Activity{
 			adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
 		}
 		if (adapter.buffer.getUnfilteredSize()!= 0){
-			boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
+			boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
 			boundConnService.markBufferAsRead(adapter.getBufferId());
-			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
+			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
 		}
 		doUnbindService();
 	}
