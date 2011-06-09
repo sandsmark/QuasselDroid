@@ -214,9 +214,9 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected void onStart() {
-		doBindService();
-		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
 		super.onStart();
+		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
+		doBindService();
 	}
 
 	@Override
@@ -614,7 +614,6 @@ public class ChatActivity extends Activity{
 			boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
-			adapter.clearBuffer();
 
 		}
 	}
