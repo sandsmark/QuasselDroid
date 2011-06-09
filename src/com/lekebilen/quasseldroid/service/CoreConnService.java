@@ -301,11 +301,9 @@ public class CoreConnService extends Service{
 						// Create a notification about the highlight
 						String text = buffer.getInfo().name + ": <" + message.getNick() + "> " + message.content;
 						Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
-						Intent launch = new Intent(CoreConnService.this, ChatActivity.class);
-						launch.putExtra(BufferActivity.BUFFER_ID_EXTRA, buffer.getInfo().id);
-						launch.putExtra(BufferActivity.BUFFER_NAME_EXTRA, buffer.getInfo().name);
-						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);
-					
+						Intent launch = new Intent(CoreConnService.this, BufferActivity.class);
+						launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);					
 						// Set the info for the views that show in the notification panel.
 						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name),
 								text, contentIntent);
