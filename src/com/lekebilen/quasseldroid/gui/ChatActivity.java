@@ -226,7 +226,7 @@ public class ChatActivity extends Activity{
 		}else{
 			adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
 		}
-		if (adapter.buffer.getSize()!= 0){
+		if (adapter.buffer.getUnfilteredSize()!= 0){
 			boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
 			boundConnService.markBufferAsRead(adapter.getBufferId());
 			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getBacklogEntry(adapter.buffer.getSize()-1).messageId);
@@ -339,7 +339,7 @@ public class ChatActivity extends Activity{
 			}
 
 			//Set separator line here
-			if (buffer.getLastSeenMessage() == getItem(position).messageId && position != (getCount()-1)) { 
+			if (position != (getCount()-1) && (buffer.getMarkerLineMessage() == getItem(position).messageId || (buffer.isMarkerLineFiltered() && getItem(position).messageId<buffer.getMarkerLineMessage() && getItem(position+1).messageId>buffer.getMarkerLineMessage()))) { 
 				holder.separatorView.getLayoutParams().height = 1;
 			} else {
 				holder.separatorView.getLayoutParams().height = 0;
@@ -532,7 +532,7 @@ public class ChatActivity extends Activity{
 					loading = false;
 				}
 			}
-			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+//			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
 			if (!loading && (firstVisibleItem <= visibleThreshold)) {
 				if (adapter.buffer!=null) {
 					loading = true;

@@ -217,9 +217,10 @@ public class CoreConnection {
 	 * @param buffer Buffer id to request moar for
 	 */
 	public void requestMoreBacklog(int buffer, int amount) {
-		if (buffers.get(buffer).getSize()==0) {
+		if (buffers.get(buffer).getUnfilteredSize()==0) {
 			requestBacklog(buffer, -1, -1, amount);			
 		}else {
+//			Log.e(TAG, "GETTING: "+buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId);
 			requestBacklog(buffer, -1, buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId, amount);			
 		}
 	}

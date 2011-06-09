@@ -229,7 +229,7 @@ public class CoreConnService extends Service{
 	}
 
 	public void getMoreBacklog(int bufferId, int amount){
-		Log.d(TAG, "GETING MORE BACKLOG");
+		Log.d(TAG, "GEtTING MORE BACKLOG");
 		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
@@ -276,7 +276,7 @@ public class CoreConnService extends Service{
 					checkForURL(message);
 					buffer.addBacklogMessage(message);	
 				}else {
-					Log.e(TAG, "Getting message buffer already have "+ buffer.getInfo().name);
+					Log.e(TAG, "Getting message buffer already have "+ buffer.getInfo().name + " " + message.messageId);
 				}
 				break;
 			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:

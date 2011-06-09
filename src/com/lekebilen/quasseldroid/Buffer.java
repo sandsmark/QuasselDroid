@@ -107,6 +107,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private int order = Integer.MAX_VALUE;
 	
 	private QuasselDbHelper dbHelper;
+	
+	private boolean isMarkerLineFiltered = false;
 
 	public Buffer(BufferInfo info, QuasselDbHelper dbHelper) {
 		this.info = info;
@@ -173,7 +175,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * @param msg the ircmessage to check
 	 * @return true if the message should be filtered, false if it shouldn't
 	 */
-	private boolean isMessageFiltered(IrcMessage msg) {
+	public boolean isMessageFiltered(IrcMessage msg) {
 		if (filterTypes.contains(msg.type)){
 			return true;
 		}else{
@@ -332,6 +334,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		if(filterTypes.size()!=0){
 			return filteredBacklog.size();
 		}
+		return backlog.size();
+	}
+	
+	/**
+	 * Get the size of the hole backlog unfiltered. Used in request more backlog for instance to know the size of the buffer we have
+	 * @return
+	 */
+	public int getUnfilteredSize() {
 		return backlog.size();
 	}
 
@@ -520,6 +530,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 			this.filterTypes.add(filter);
 		}
 		dbHelper.close();
+		filterBuffer();
 		
 	}
 	
@@ -531,8 +542,17 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		filteredBacklog.clear();
 		for (IrcMessage msg : backlog) {
 			if(!isMessageFiltered(msg)) {
+				if(getMarkerLineMessage()==msg.messageId){
+					isMarkerLineFiltered = false;
+				}
 				filteredBacklog.add(msg);
+			}else if(getMarkerLineMessage()==msg.messageId){
+				isMarkerLineFiltered = true;
 			}
 		}
+	}
+	
+	public boolean isMarkerLineFiltered() {
+		return isMarkerLineFiltered;
 	}
 }
