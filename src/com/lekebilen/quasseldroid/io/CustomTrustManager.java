@@ -73,7 +73,6 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	 */
 	public void checkServerTrusted(X509Certificate[] chain, String authType)
 	throws CertificateException, NewCertificateException {
-		System.out.println("CHECKING CERITFICATE LOOOOOOL");
 		try {
 			defaultTrustManager.checkServerTrusted(chain, authType);
 		} catch (CertificateException excep) {
@@ -86,10 +85,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 				if (!preferences.getString("certificate", "lol").equals(hashedCert)) {
 					throw new CertificateException();
 				}
-				// We haven't seen a certificate from this core before, just store it
-				// TODO: let the user decide whether to trust it or not.
 			} else {
-				System.out.println("GOT NEW CERTIFICATE LOL: " + hashedCert);
 				throw new NewCertificateException(hashedCert);
 				//System.out.println("Storing new certificate: " + hashedCert);
 				//preferences.edit().putString("certificate", hashedCert).commit();

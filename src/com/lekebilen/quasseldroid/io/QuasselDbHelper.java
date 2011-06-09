@@ -51,12 +51,19 @@ public class QuasselDbHelper {
 	private static final String DATABASE_NAME = "data";
 	private static final String CORE_TABLE = "cores";
 	private static final String CERTIFICATE_TABLE = "certificates";
+<<<<<<< HEAD
 	private static final String HIDDENEVENTS_TABLE = "hiddenevents";
 	private static final String DATABASE_CREATE_TABLE1 = 
 		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
 	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (content text);";
 	private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
 	private static final int DATABASE_VERSION = 5;
+=======
+	private static final String DATABASE_CREATE = 
+		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);\n" +
+		"create table certificates (content text);";
+	private static final int DATABASE_VERSION = 2;
+>>>>>>> dacb3e1f11517a7d77e72122bc73053f25140d9f
 
 	private static final String TAG = "DbHelper";
 	private final Context context;

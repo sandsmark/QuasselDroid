@@ -85,6 +85,13 @@ public class BufferActivity extends ListActivity {
 			
 		};
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (boundConnService == null) return;
+		boundConnService.cancelHighlight();
+	}
 
 	@Override
 	protected void onStart() {
@@ -143,7 +150,11 @@ public class BufferActivity extends ListActivity {
 
 		public void setBuffers(BufferCollection buffers){
 			this.bufferCollection = buffers;
-			bufferCollection.addObserver(this);
+			
+			if (buffers == null)
+				return;
+			
+			this.bufferCollection.addObserver(this);
 			notifyDataSetChanged();
 		}
 
@@ -223,6 +234,7 @@ public class BufferActivity extends ListActivity {
 		}
 
 		public void stopObserving() {
+			if (bufferCollection == null) return;
 			bufferCollection.deleteObserver(this);
 			
 		}
@@ -410,7 +422,8 @@ public class BufferActivity extends ListActivity {
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
 			bufferListAdapter.stopObserving();
-			boundConnService.unregisterStatusReceiver(statusReciver);
+			if (boundConnService != null)
+				boundConnService.unregisterStatusReceiver(statusReciver);
 			// Detach our existing connection.
 			unbindService(mConnection);
 			isBound = false;

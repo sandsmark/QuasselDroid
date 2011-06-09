@@ -33,5 +33,7 @@
 <item type="id" name="CORECONNECTION_SET_BUFFER_TEMP_HIDDEN"></item>
 <item name="CORECONNECTION_INVALID_CERTIFICATE" type="id"></item>
 <item type="id" name="CORECONNECTION_NEW_CERTIFICATE"></item>
+<item type="id" name="DIALOG_NEW_CERTIFICATE"></item>
+<item type="id" name="NOTIFICATION_HIGHLIGHT"></item>
 
 </resources>

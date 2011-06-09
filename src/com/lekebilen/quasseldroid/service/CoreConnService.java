@@ -75,7 +75,9 @@ public class CoreConnService extends Service{
 	/** Id for result code in the resultReciver that is going to notify the activity currently on screen about the change */
 	public static final int CONNECTION_DISCONNECTED = 0;
 	public static final int CONNECTION_CONNECTED = 1;
+	public static final int CONNECTION_NEW_CERTIFICATE = 2;
 	public static final String STATUS_KEY = "status";
+	public static final String CERT_KEY = "certificate";
 	
 	private Pattern URLPattern= Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
@@ -106,6 +108,10 @@ public class CoreConnService extends Service{
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;
+	}
+	
+	public void cancelHighlight() {
+		notifyManager.cancel(R.id.NOTIFICATION_HIGHLIGHT);
 	}
 
 	@Override
@@ -299,16 +305,14 @@ public class CoreConnService extends Service{
 						// Create a notification about the highlight
 						String text = buffer.getInfo().name + ": <" + message.getNick() + "> " + message.content;
 						Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
-						Intent launch = new Intent(CoreConnService.this, ChatActivity.class);
-						launch.putExtra(BufferActivity.BUFFER_ID_EXTRA, buffer.getInfo().id);
-						launch.putExtra(BufferActivity.BUFFER_NAME_EXTRA, buffer.getInfo().name);
-						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);
-					
+						Intent launch = new Intent(CoreConnService.this, BufferActivity.class);
+						launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);					
 						// Set the info for the views that show in the notification panel.
 						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name),
 								text, contentIntent);
 						// Send the notification.
-						notifyManager.notify(R.id.NOTIFICATION, notification);
+						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT, notification);
 					}
 					
 					checkForURL(message);
@@ -427,21 +431,13 @@ public class CoreConnService extends Service{
 				/**
 				 * Received a new, unseen certificate
 				 */
-				AlertDialog.Builder builder = new AlertDialog.Builder(CoreConnService.this);
-				final String hashedCert = (String)msg.obj;
-				builder.setMessage("Received a new certificate, do you trust it?\n" + hashedCert)
-				       .setCancelable(false)
-				       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-								preferences.edit().putString("certificate", hashedCert).commit();
-				           }
-				       })
-				       .setNegativeButton("No", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				                dialog.cancel();
-				           }
-				       });
-				AlertDialog alert = builder.create();
+				Bundle bundle = new Bundle();
+				bundle.putString(CERT_KEY, (String)msg.obj);
+				for (ResultReceiver statusReceiver:statusReceivers) {
+					statusReceiver.send(CoreConnService.CONNECTION_NEW_CERTIFICATE, bundle);
+				}
+				
+
 
 			}
 		}
