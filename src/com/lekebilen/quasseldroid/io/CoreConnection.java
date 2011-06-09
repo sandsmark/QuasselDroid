@@ -442,7 +442,8 @@ public class CoreConnection {
 			heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
 		}
 		try {
-			outStream.close();
+			if (outStream != null)
+				outStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
