@@ -109,6 +109,10 @@ public class CoreConnService extends Service{
 	public IBinder onBind(Intent intent) {
 		return binder;
 	}
+	
+	public void cancelHighlight() {
+		notifyManager.cancel(R.id.NOTIFICATION_HIGHLIGHT);
+	}
 
 	@Override
 	public void onCreate() {
@@ -308,7 +312,7 @@ public class CoreConnService extends Service{
 						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name),
 								text, contentIntent);
 						// Send the notification.
-						notifyManager.notify(R.id.NOTIFICATION, notification);
+						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT, notification);
 					}
 					
 					checkForURL(message);

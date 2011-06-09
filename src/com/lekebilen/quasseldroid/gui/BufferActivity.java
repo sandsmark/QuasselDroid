@@ -85,6 +85,13 @@ public class BufferActivity extends ListActivity {
 			
 		};
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (boundConnService == null) return;
+		boundConnService.cancelHighlight();
+	}
 
 	@Override
 	protected void onStart() {
