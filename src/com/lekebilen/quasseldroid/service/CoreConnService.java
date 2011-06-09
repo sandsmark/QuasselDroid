@@ -60,6 +60,7 @@ import com.lekebilen.quasseldroid.gui.BufferActivity;
 import com.lekebilen.quasseldroid.gui.ChatActivity;
 import com.lekebilen.quasseldroid.gui.LoginActivity;
 import com.lekebilen.quasseldroid.io.CoreConnection;
+import com.lekebilen.quasseldroid.io.QuasselDbHelper;
 
 /**
  * This Service holds the connection to the core from the phone, 
@@ -87,7 +88,6 @@ public class CoreConnService extends Service{
 	ArrayList<ResultReceiver> statusReceivers;
 
 	SharedPreferences preferences;
-
 
 	BufferCollection bufferCollection;
 	HashMap<String, IrcUser> ircUsers = new HashMap<String, IrcUser>();

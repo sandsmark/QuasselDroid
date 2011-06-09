@@ -38,6 +38,7 @@ import android.util.Log;
 
 import com.lekebilen.quasseldroid.BufferInfo.Type;
 import com.lekebilen.quasseldroid.gui.ChatActivity;
+import com.lekebilen.quasseldroid.io.QuasselDbHelper;
 
 /**
  * Class holds all the data for a Quassel buffer, this includes all the messages in the buffer, as well as the different states for the buffer.
@@ -104,13 +105,18 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private ArrayList<IrcMessage.Type> filterTypes;
 
 	private int order = Integer.MAX_VALUE;
+	
+	private QuasselDbHelper dbHelper;
 
-	public Buffer(BufferInfo info) {
+	public Buffer(BufferInfo info, QuasselDbHelper dbHelper) {
 		this.info = info;
 		backlog = new ArrayList<IrcMessage>();
 		filteredBacklog = new ArrayList<IrcMessage>();
 		backlogStash = new ArrayList<IrcMessage>();
 		filterTypes= new ArrayList<IrcMessage.Type>();
+		this.dbHelper = dbHelper;
+		
+		loadFilters();
 	}
 
 	/**
@@ -481,6 +487,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void addFilterType(IrcMessage.Type type) {
 		filterTypes.add(type);
+		dbHelper.open();
+		dbHelper.addHiddenEvent(type, getInfo().id);
+		dbHelper.close();
 		filterBuffer();
 		this.setChanged();
 		notifyObservers();
@@ -492,6 +501,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void removeFilterType(IrcMessage.Type type) {
 		filterTypes.remove(type);
+		dbHelper.open();
+		dbHelper.deleteHiddenEvent(type, getInfo().id);
+		dbHelper.close();
 		filterBuffer();
 		this.setChanged();
 		notifyObservers();
@@ -501,11 +513,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		return filterTypes;
 	}
 	
-	/**
-	 * Clear all filters from this buffer
-	 */
-	public void clearFilters() {
-		filterTypes.clear();
+	private void loadFilters() {
+		dbHelper.open();
+		IrcMessage.Type[] filteredEvents = dbHelper.getHiddenEvents(getInfo().id);
+		for (IrcMessage.Type filter : filteredEvents) {
+			this.filterTypes.add(filter);
+		}
+		dbHelper.close();
+		
 	}
 	
 	/**

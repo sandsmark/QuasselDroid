@@ -23,6 +23,8 @@
 
 package com.lekebilen.quasseldroid.io;
 
+import com.lekebilen.quasseldroid.IrcMessage;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -30,6 +32,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.text.method.HideReturnsTransformationMethod;
 import android.util.Log;
 
 public class QuasselDbHelper {
@@ -39,6 +42,8 @@ public class QuasselDbHelper {
 	public static final String KEY_PORT = "port";
 	public static final String KEY_SSL = "ssl";
 	public static final String KEY_CERTIFICATE = "certificates";
+	public static final String KEY_BUFFERID = "bufferid";
+	public static final String KEY_EVENT = "event";
 
 	private DatabaseHelper dbHelper;
 	private SQLiteDatabase db;
@@ -46,10 +51,12 @@ public class QuasselDbHelper {
 	private static final String DATABASE_NAME = "data";
 	private static final String CORE_TABLE = "cores";
 	private static final String CERTIFICATE_TABLE = "certificates";
-	private static final String DATABASE_CREATE = 
-		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);\n" +
-		"create table certificates (content text);";
-	private static final int DATABASE_VERSION = 1;
+	private static final String HIDDENEVENTS_TABLE = "hiddenevents";
+	private static final String DATABASE_CREATE_TABLE1 = 
+		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
+	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (content text);";
+	private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
+	private static final int DATABASE_VERSION = 5;
 
 	private static final String TAG = "DbHelper";
 	private final Context context;
@@ -61,7 +68,9 @@ public class QuasselDbHelper {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL(DATABASE_CREATE);
+			db.execSQL(DATABASE_CREATE_TABLE1);
+			db.execSQL(DATABASE_CREATE_TABLE2);
+			db.execSQL(DATABASE_CREATE_TABLE3);
 		}
 
 		@Override
@@ -70,6 +79,7 @@ public class QuasselDbHelper {
 					+ newVersion + ", which will destroy all old data");
 			db.execSQL("DROP TABLE IF EXISTS " + CORE_TABLE);
 			db.execSQL("DROP TABLE IF EXISTS " + CERTIFICATE_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + HIDDENEVENTS_TABLE);
 			onCreate(db);
 		}
 	}
@@ -155,6 +165,48 @@ public class QuasselDbHelper {
 			c.close();
 		}
 		return ret;
+	}
+	
+	public void addHiddenEvent(IrcMessage.Type event, int bufferId) {
+		try {
+			ContentValues initialValues = new ContentValues();
+			initialValues.put(KEY_EVENT, event.name());
+			initialValues.put(KEY_BUFFERID, bufferId);
+			db.insert(HIDDENEVENTS_TABLE, null, initialValues);
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void cleanupEvents(Integer[] bufferids) {
+		StringBuilder list = new StringBuilder("(");
+		for (int id : bufferids) {
+			list.append(id + ",");
+		}
+		list.deleteCharAt(list.length()-1);
+		list.append(")");
+		db.delete(HIDDENEVENTS_TABLE, KEY_BUFFERID +" NOT IN "+list.toString(), null);
+	}
+
+	public void deleteHiddenEvent(IrcMessage.Type event, int bufferId) {
+		db.delete(HIDDENEVENTS_TABLE, KEY_EVENT + "='" + event.name() + "' AND "+KEY_BUFFERID + "=" +bufferId, null);
+	}
+
+	public IrcMessage.Type[] getHiddenEvents(int bufferId) throws SQLException {
+		Cursor cursor = db.query(true, HIDDENEVENTS_TABLE, new String[] {KEY_EVENT}, KEY_BUFFERID + "=" + bufferId, null, null, null, null, null);
+		IrcMessage.Type[] events = null;
+		if (cursor != null || cursor.getCount()==0) {
+			events =  new IrcMessage.Type[cursor.getCount()];
+			cursor.moveToFirst();
+			int i = 0;
+			while (!cursor.isAfterLast()) {
+				events[i] = IrcMessage.Type.valueOf(cursor.getString(0));
+				i++;
+				cursor.moveToNext();
+			}
+			cursor.close(); 
+		}
+		return events;
 	}
 }
 

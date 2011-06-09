@@ -373,10 +373,17 @@ public class CoreConnection {
 		Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
 		List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
 		buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
+		QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
+		ArrayList<Integer> bufferIds = new ArrayList<Integer>();
 		for (QVariant<?> bufferInfoQV: bufferInfos) {
 			BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
-			buffers.put(bufferInfo.id, new Buffer(bufferInfo));
+			buffers.put(bufferInfo.id, new Buffer(bufferInfo, dbHelper));
+			bufferIds.add(bufferInfo.id);
 		}
+		dbHelper.open();
+		dbHelper.cleanupEvents(bufferIds.toArray(new Integer[bufferIds.size()]));
+		dbHelper.close();
+		
 		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
 		networks = new ArrayList<Integer>(networkIds.size());
 		for (QVariant<?> networkId: networkIds) {
