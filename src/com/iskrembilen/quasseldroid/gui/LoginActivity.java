@@ -205,8 +205,8 @@ public class LoginActivity extends Activity implements Observer {
 		case R.id.menu_delete_core:
 			dbHelper.deleteCore(core.getSelectedItemId());
 			Toast.makeText(LoginActivity.this, "Deleted core", Toast.LENGTH_LONG).show();
+			updateCoreSpinner();
 			//TODO: mabye add some confirm dialog when deleting a core
-			//TODO: also looks like core gets deleted from database, but it still shows up in the ui
 			break;
 		case R.id.menu_preferences:
 			Intent i = new Intent(LoginActivity.this, PreferenceView.class);
@@ -263,9 +263,9 @@ public class LoginActivity extends Activity implements Observer {
 
 
 					}else if (v.getId()==R.id.save_button && !nameField.getText().toString().equals("") &&!addressField.getText().toString().equals("") && !portField.getText().toString().equals("")) {
-						String name = nameField.getText().toString();
-						String address = addressField.getText().toString();
-						int port = Integer.parseInt(portField.getText().toString());
+						String name = nameField.getText().toString().trim();
+						String address = addressField.getText().toString().trim();
+						int port = Integer.parseInt(portField.getText().toString().trim());
 						boolean useSSL = sslBox.isChecked();
 
 						//TODO: Ken: mabye add some better check on what state the dialog is used for, edit/add. Atleast use a string from the resources so its the same if you change it.
@@ -379,16 +379,11 @@ public class LoginActivity extends Activity implements Observer {
 			connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
 			connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
 			connectIntent.putExtra("ssl", res.getBoolean(QuasselDbHelper.KEY_SSL));
-			connectIntent.putExtra("username", username.getText().toString());
+			connectIntent.putExtra("username", username.getText().toString().trim());
 			connectIntent.putExtra("password", password.getText().toString());
-
 			
-			
-			//Start CoreConnectService with connect data
-			//if (boundConnService == null)
 			startService(connectIntent);
-			//else if (boundConnService.isConnected())
-			//	LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+
 		}
 	};
 
