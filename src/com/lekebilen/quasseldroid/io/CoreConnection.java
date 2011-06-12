@@ -59,6 +59,7 @@ import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.IrcUser;
 import com.lekebilen.quasseldroid.R;
 import com.lekebilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
+import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaType;
@@ -293,8 +294,9 @@ public class CoreConnection {
 
 	/**
 	 * Initiates a connection.
+	 * @throws EmptyQVariantException 
 	 */
-	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException {	
+	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException {	
 		// START CREATE SOCKETS
 		SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 		socket = (Socket)factory.createSocket(address, port);
@@ -528,8 +530,9 @@ public class CoreConnection {
 
 	/**
 	 * A convenience function to read a QVariantMap.
+	 * @throws EmptyQVariantException 
 	 */
-	private Map<String, QVariant<?>> readQVariantMap() throws IOException {
+	private Map<String, QVariant<?>> readQVariantMap() throws IOException, EmptyQVariantException {
 		// Length of this packet (why do they send this? noone knows!).
 		inStream.readUInt(32);
 		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
@@ -541,8 +544,9 @@ public class CoreConnection {
 
 	/**
 	 * A convenience function to read a QVariantList.
+	 * @throws EmptyQVariantException 
 	 */	
-	private List<QVariant<?>> readQVariantList() throws IOException {	
+	private List<QVariant<?>> readQVariantList() throws IOException, EmptyQVariantException {	
 		inStream.readUInt(32); // Length
 		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
@@ -580,8 +584,19 @@ public class CoreConnection {
 				msg.sendToTarget();
 			}
 		};
-
+		
 		public void run() {
+			try {
+				doRun();
+			} catch (EmptyQVariantException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Protocol error!").sendToTarget();
+				e.printStackTrace();
+				disconnect();
+				return;
+			}
+		}
+
+		public void doRun() throws EmptyQVariantException {
 			this.running = true;
 
 			try {
@@ -606,6 +621,11 @@ public class CoreConnection {
 				return;
 			} catch (GeneralSecurityException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
+				disconnect();
+				return;
+			} catch (EmptyQVariantException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+				e.printStackTrace();
 				disconnect();
 				return;
 			}

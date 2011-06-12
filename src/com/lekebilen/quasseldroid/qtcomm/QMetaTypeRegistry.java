@@ -193,10 +193,10 @@ public class QMetaTypeRegistry {
 		if(lookupName.containsKey(name)) return types.get(lookupName.get(name));
 		throw new IllegalArgumentException("Unable to find meta type: " + name);
 	}
-	public static Object unserialize(Type type,QDataInputStream stream, DataStreamVersion version) throws IOException {
+	public static Object unserialize(Type type,QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
 		return instance().getTypeForId(type.getValue()).getSerializer().unserialize(stream, version);
 	}
-	public static Object unserialize(Type type,QDataInputStream stream) throws IOException {
+	public static Object unserialize(Type type,QDataInputStream stream) throws IOException, EmptyQVariantException {
 		return unserialize(type, stream, DataStreamVersion.Qt_4_2);
 	}
 	@SuppressWarnings("unchecked")

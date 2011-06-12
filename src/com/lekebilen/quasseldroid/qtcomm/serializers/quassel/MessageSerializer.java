@@ -31,6 +31,7 @@ import android.text.SpannableString;
 import com.lekebilen.quasseldroid.BufferInfo;
 import com.lekebilen.quasseldroid.IrcMessage;
 import com.lekebilen.quasseldroid.qtcomm.DataStreamVersion;
+import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.lekebilen.quasseldroid.qtcomm.QDataInputStream;
 import com.lekebilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.lekebilen.quasseldroid.qtcomm.QMetaTypeRegistry;
@@ -51,7 +52,7 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 
 	@Override
 	public IrcMessage unserialize(QDataInputStream stream,
-			DataStreamVersion version) throws IOException {
+			DataStreamVersion version) throws IOException, EmptyQVariantException {
 		IrcMessage ret = new IrcMessage();
 		ret.messageId = stream.readInt();
 		ret.timestamp = new Date(stream.readUInt(32) * 1000);

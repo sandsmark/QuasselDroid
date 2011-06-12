@@ -97,7 +97,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public Date timestamp; //TODO: timezones, Java bleh as usual
 	public int messageId;
 	public BufferInfo bufferInfo;
-	public SpannableString content;
+	public Spannable content;
 	public String sender;
 	public Type type;
 	public byte flags;
