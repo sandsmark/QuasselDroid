@@ -35,15 +35,19 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
@@ -74,6 +78,7 @@ public class BufferActivity extends ListActivity {
 		getListView().setDividerHeight(0);
 		getListView().setCacheColorHint(0xffffffff);
 		setListAdapter(bufferListAdapter);
+		registerForContextMenu(getListView());
 
 		statusReciver = new ResultReceiver(null) {
 
@@ -125,6 +130,34 @@ public class BufferActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		int bufferId = (int) ((AdapterView.AdapterContextMenuInfo)menuInfo).id;
+		if (bufferListAdapter.bufferCollection.getBuffer(bufferId).isActive()) {
+			menu.add(Menu.NONE, R.id.CONTEXT_MENU_PART, Menu.NONE, "Part");			
+		}else{
+			menu.add(Menu.NONE, R.id.CONTEXT_MENU_JOIN, Menu.NONE, "Join");
+		}
+	}
+
+
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		switch (item.getItemId()) {
+		case R.id.CONTEXT_MENU_JOIN:
+			boundConnService.sendMessage((int)info.id, "/join "+bufferListAdapter.bufferCollection.getBuffer((int)info.id).getInfo().name);
+			return true;
+		case R.id.CONTEXT_MENU_PART:
+			boundConnService.sendMessage((int)info.id, "/part "+bufferListAdapter.bufferCollection.getBuffer((int)info.id).getInfo().name);
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
 
 
 	@Override
@@ -173,8 +206,8 @@ public class BufferActivity extends ListActivity {
 		}
 
 		@Override
-		public long getItemId(int arg0) {
-			return arg0;
+		public long getItemId(int pos) {
+			return bufferCollection.getPos(pos).getInfo().id;
 		}
 
 		@Override

@@ -824,7 +824,21 @@ public class CoreConnection {
 						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USER_ADDED);
 						msg.obj = (IrcUser) user;
 						msg.sendToTarget();
-					} else if (className.equals("BufferViewConfig")) {
+					}
+					//TODO: after making network object come back and fix this. Needs that shit
+//					else if (className.equals("IrcChannel")) {
+//						System.out.println(packedFunc.toString() + " Object: "+objectName);
+//						// topic, UserModes, password, ChanModes, name
+//						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+////						String bufferName = map.get("name");
+//						Buffer buffer;
+////						if(buffers.containsKey(bufferName) {
+////							buffer = buffers.get(bufferName);
+////						}
+//						
+//						
+//					} 
+					else if (className.equals("BufferViewConfig")) {
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
 						List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
@@ -934,13 +948,31 @@ public class CoreConnection {
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
 						try {
-							sendInitRequest("IrcUser", "1/" + nick);
+							sendInitRequest("IrcUser", objectName+"/" + nick);
 						} catch (IOException e) {
 							e.printStackTrace();
 							running = false; // We have obviously lost our connection, just stop this thread.
 
 						}
-					} else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
+					} else if (className.equals("Network") && function.equals("addIrcChannel")) {
+						String bufferName = (String) packedFunc.remove(0).getData();
+						try {
+							sendInitRequest("IrcChannel", objectName+"/" + bufferName);
+						} catch (IOException e) {
+							e.printStackTrace();
+							running = false; // We have obviously lost our connection, just stop this thread.
+						}
+						
+					} 
+					//TODO: need network objects to lookup buffers in given networks
+//					else if (className.equals("IrcUser") && function.equals("partChannel")) {
+//						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
+//						String[] tmp = objectName.split("/");
+//						int networkId = Integer.parseInt(tmp[1]);
+//						String userName = tmp[1];
+//						
+//					} 
+					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
 						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
