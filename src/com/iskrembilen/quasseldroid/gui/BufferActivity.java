@@ -58,9 +58,9 @@ public class BufferActivity extends ListActivity {
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 
 	BufferListAdapter bufferListAdapter;
-	
+
 	ResultReceiver statusReciver;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,7 +74,7 @@ public class BufferActivity extends ListActivity {
 		getListView().setDividerHeight(0);
 		getListView().setCacheColorHint(0xffffffff);
 		setListAdapter(bufferListAdapter);
-		
+
 		statusReciver = new ResultReceiver(null) {
 
 			@Override
@@ -82,10 +82,10 @@ public class BufferActivity extends ListActivity {
 				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
 				super.onReceiveResult(resultCode, resultData);
 			}
-			
+
 		};
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -104,8 +104,8 @@ public class BufferActivity extends ListActivity {
 		doUnbindService();
 		super.onStop();
 	}
-	
-	
+
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.standard_menu, menu);
@@ -150,10 +150,10 @@ public class BufferActivity extends ListActivity {
 
 		public void setBuffers(BufferCollection buffers){
 			this.bufferCollection = buffers;
-			
+
 			if (buffers == null)
 				return;
-			
+
 			this.bufferCollection.addObserver(this);
 			notifyDataSetChanged();
 		}
@@ -208,18 +208,21 @@ public class BufferActivity extends ListActivity {
 				holder.bufferView.setText("XXXX " + entry.getInfo().name);
 			}
 
-				
-
-			//Check here if there are any unread messages in the buffer, and then set this color if there is
-			if (entry.hasUnseenHighlight()){
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
-			} else if (entry.hasUnreadMessage()){
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
-			} else if (entry.hasUnreadActivity()) {
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
-			}else {
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
+			if(!entry.isActive()) {
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_parted_color));
+			}else{
+				//Check here if there are any unread messages in the buffer, and then set this color if there is
+				if (entry.hasUnseenHighlight()){
+					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
+				} else if (entry.hasUnreadMessage()){
+					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
+				} else if (entry.hasUnreadActivity()) {
+					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
+				}else {
+					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
+				}
 			}
+
 			return convertView;
 		}
 
@@ -236,7 +239,7 @@ public class BufferActivity extends ListActivity {
 		public void stopObserving() {
 			if (bufferCollection == null) return;
 			bufferCollection.deleteObserver(this);
-			
+
 		}
 	}
 
@@ -385,7 +388,7 @@ public class BufferActivity extends ListActivity {
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-			
+
 			boundConnService.registerStatusReceiver(statusReciver);
 
 			//Testing to see if i can add item to adapter in service
@@ -409,10 +412,10 @@ public class BufferActivity extends ListActivity {
 		// class name because we want a specific service implementation that
 		// we know will be running in our own process (and thus won't be
 		// supporting component replacement by other applications).
-		
+
 		// Send a ResultReciver with the intent to the service, so that we can 
 		// get a notification if the connection status changes like we disconnect. 
-		
+
 		bindService(new Intent(BufferActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
 		isBound = true;
 		Log.i(TAG, "BINDING");

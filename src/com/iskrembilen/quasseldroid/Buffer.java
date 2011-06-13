@@ -88,6 +88,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	private String topic;
 	/**
+	 * Is this buffer joined or parted. Default is parted until we are told other vice
+	 */
+	private boolean active = false;
+	/**
 	 * Number of backlog entries that we have asked for but not yet recived, used to determine when we have recived all the backlog we requested
 	 * so we don't request the same backlog more then once
 	 */
@@ -118,6 +122,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		backlogStash = new ArrayList<IrcMessage>();
 		filterTypes= new ArrayList<IrcMessage.Type>();
 		this.dbHelper = dbHelper;
+		
+		//Default active to true if channel is a query buffer, they are "always" active
+		//TODO: in quassel query are shown as offline if no shared channel, fix later
+		if(info.type==BufferInfo.Type.QueryBuffer) active=true;
 		
 		loadFilters();
 	}
@@ -555,5 +563,23 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	
 	public boolean isMarkerLineFiltered() {
 		return isMarkerLineFiltered;
+	}
+	
+	/**
+	 * Get if buffer is active or parted
+	 * @return true if active
+	 */
+	public boolean isActive() {
+		return this.active;
+	}
+	
+	/**
+	 * Set is buffer is active or parted
+	 * @param active true if buffer is active, false if parted
+	 */
+	public void setActive(boolean active){
+		this.active = active;
+		this.setChanged();
+		notifyObservers();
 	}
 }

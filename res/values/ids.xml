@@ -20,6 +20,7 @@
 <item type="id" name="CORECONNECTION_NEW_USER_ADDED"></item>
 <item type="id" name="CORECONNECTION_NEW_USERLIST_ADDED"></item>
 <item type="id" name="CORECONNECTION_SET_BUFFER_ORDER"></item>
+<item type="id" name="CORECONNECTION_SET_BUFFER_ACTIVE"></item>
 <item type="id" name="BUFFER_ORDER_CHANGED"></item>
 <item type="id" name="BUFFER_HIDDEN_CHANGED"></item>
 <item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>

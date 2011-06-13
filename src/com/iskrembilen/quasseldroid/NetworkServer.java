@@ -41,4 +41,8 @@ public class NetworkServer {
 		this.proxyUser = proxyUser;
 		this.proxyPassword = proxyPassword;
 	}
+	
+	public String toString() {
+		return ""+this.host+":"+this.port;
+	}
 }

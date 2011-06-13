@@ -544,7 +544,7 @@ public class CoreConnection {
 		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
-
+//		System.out.println(ret.toString());
 		return ret;
 	}
 
@@ -556,7 +556,7 @@ public class CoreConnection {
 		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
-
+//		System.out.println(ret.toString());
 		return ret;
 	}
 
@@ -646,6 +646,7 @@ public class CoreConnection {
 				long start = System.currentTimeMillis();
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
 				String className = "", objectName;
+				
 
 				/*
 				 * Here we handle different calls from the core.
@@ -694,6 +695,10 @@ public class CoreConnection {
 						for (Buffer buffer: buffers.values()) {
 							if (buffer.getInfo().networkId == networkId && buffer.getInfo().name.equals("")) {
 								buffer.setName((String) initMap.get("networkName").getData());
+								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ACTIVE);
+								msg.arg1 = buffer.getInfo().id;
+								msg.obj = (Boolean)initMap.get("isConnected").getData();
+								msg.sendToTarget();
 								break;
 							}
 						}
@@ -732,6 +737,10 @@ public class CoreConnection {
 								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
 									buffer.setTopic(topic);
 									buffer.setNicks(users);
+									Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ACTIVE);
+									msg.arg1 = buffer.getInfo().id;
+									msg.obj = true;
+									msg.sendToTarget();
 									break;
 								}
 							}

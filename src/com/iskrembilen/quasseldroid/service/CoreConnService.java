@@ -439,9 +439,12 @@ public class CoreConnService extends Service{
 				for (ResultReceiver statusReceiver:statusReceivers) {
 					statusReceiver.send(CoreConnService.CONNECTION_NEW_CERTIFICATE, bundle);
 				}
-				
-
-
+				break;
+			case R.id.CORECONNECTION_SET_BUFFER_ACTIVE:
+				/**
+				 * Set buffer as active or parted
+				 */
+				bufferCollection.getBuffer(msg.arg1).setActive((Boolean)msg.obj);
 			}
 		}
 	}
