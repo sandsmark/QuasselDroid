@@ -168,8 +168,12 @@ public class ChatActivity extends Activity{
 	//Nick autocomplete when pressing the search-button
 	@Override
 	public boolean onSearchRequested() {
-		EditText inputfield = (EditText)findViewById(R.id.ChatInputView); 
-		String inputNick = inputfield.getText().toString();
+		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+		String inputString = inputfield.getText().toString();
+		String[] inputWords = inputString.split(" ");
+		String inputNick = inputWords[inputWords.length-1];
+		Log.d("HEIAAAAAAAAAAA",inputString.lastIndexOf(" ") + "");
+		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
 
 		if ( "".equals(inputNick) ) {
 			if ( adapter.buffer.getNicks().size() > 0 ) {
@@ -179,8 +183,9 @@ public class ChatActivity extends Activity{
 		} else {
 			for (String nick : adapter.buffer.getNicks()) {
 				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
-					inputfield.setText(nick+ ": ");
-					inputfield.setSelection(nick.length() + 2);
+					String additional = inputWords.length > 1 ? " ": ": ";
+					inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + nick+  additional);
+					inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
 					break;
 				}
 			}
