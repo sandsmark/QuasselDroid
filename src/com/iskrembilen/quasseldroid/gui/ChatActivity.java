@@ -190,6 +190,7 @@ public class ChatActivity extends Activity{
 				}
 			}
 		}
+		
 		return false;  // don't go ahead and show the search box
 	}
 
