@@ -445,7 +445,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		if (info.networkId != another.info.networkId)
 			return info.networkId - another.info.networkId;
 		else if (!(this.temporarilyHidden || this.permanentlyHidden) && (another.temporarilyHidden || another.permanentlyHidden))
-			return -1;
+			return 1;
 		else if ((this.temporarilyHidden || this.permanentlyHidden) && !(another.temporarilyHidden || another.permanentlyHidden))
 			return -1;
 		else if (this.temporarilyHidden && !another.temporarilyHidden)
