@@ -56,7 +56,7 @@ public class QuasselDbHelper {
 		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
 	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (content text);";
 	private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 1;
 
 	private static final String TAG = "DbHelper";
 	private final Context context;
