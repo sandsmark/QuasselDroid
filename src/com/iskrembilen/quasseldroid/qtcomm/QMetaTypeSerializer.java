@@ -23,7 +23,6 @@ package com.iskrembilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
 
-import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 
 
 public interface QMetaTypeSerializer<T extends Object> {

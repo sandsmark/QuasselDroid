@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 
 
 public class QVariant<T extends Object>{

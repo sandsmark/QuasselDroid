@@ -46,6 +46,7 @@ import android.os.Message;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
@@ -293,7 +294,7 @@ public class CoreConnService extends Service {
 					 */
 					checkMessageForHighlight(buffer, message);
 					checkForURL(message);
-					// parseColorCodes(message);
+					parseColorCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
 					Log.e(TAG,
@@ -319,7 +320,7 @@ public class CoreConnService extends Service {
 					 * support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
-					// parseColorCodes(message);
+					parseColorCodes(message);
 					if (message.isHighlighted()) {
 						// Create a notification about the highlight
 						String text = buffer.getInfo().name + ": <"
@@ -559,27 +560,25 @@ public class CoreConnService extends Service {
 			int fg = -1;
 			int bg = -1;
 			if (end < content.length()) {
-				if (Character.isDigit(content.charAt(end + 1))) {
-					if (Character.isDigit(content.charAt(end + 2))) {
+				if (Character.isDigit(content.charAt(end))) {
+					if (Character.isDigit(content.charAt(end + 1))) {
 						fg = Integer.parseInt(content.substring(end, end + 2));
 						end += 2;
 					} else {
-						fg = Integer.parseInt(content.substring(end, end + 1));
+						fg = Integer.parseInt(content.substring(end, end+1));
 						end += 1;
 					}
 				}
-
-				if (content.charAt(end + 1) == ',') {
+				
+				if (content.charAt(end) == ',') {
 					end++;
 
-					if (Character.isDigit(content.charAt(end + 1))) {
-						if (Character.isDigit(content.charAt(end + 2))) {
-							bg = Integer.parseInt(content.substring(end,
-									end + 2));
+					if (Character.isDigit(content.charAt(end))) {
+						if (Character.isDigit(content.charAt(end + 1))) {
+							bg = Integer.parseInt(content.substring(end, end + 2));
 							end += 2;
 						} else {
-							bg = Integer.parseInt(content.substring(end,
-									end + 1));
+							bg = Integer.parseInt(content.substring(end, end + 1));
 							end += 1;
 						}
 					}
@@ -587,7 +586,6 @@ public class CoreConnService extends Service {
 			}
 			int length = end - start;
 			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
-			System.out.println("lolcaek: " + newString.subSequence(start, end));
 			newString.delete(start, end);
 			if (fg != -1) {
 				newString.setSpan(new ForegroundColorSpan(getResources()
@@ -601,6 +599,7 @@ public class CoreConnService extends Service {
 			}
 		}
 		message.content = newString; // BURN IN HELL JAVA
+		//message.content = new SpannableString("CAKE");
 	}
 
 	private int mircCodeToColor(int code) {

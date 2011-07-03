@@ -27,11 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
-import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 
 public class QList<T> implements QMetaTypeSerializer<List<T>> {
 	String elementType;

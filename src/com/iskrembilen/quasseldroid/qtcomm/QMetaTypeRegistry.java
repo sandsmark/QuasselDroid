@@ -46,7 +46,6 @@ import com.iskrembilen.quasseldroid.qtcomm.serializers.UnsignedInteger;
 import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.BufferInfoSerializer;
 import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.MessageSerializer;
 import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.NetworkServerSerializer;
-import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 
 
 public class QMetaTypeRegistry {

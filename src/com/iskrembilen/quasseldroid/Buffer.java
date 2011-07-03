@@ -24,22 +24,13 @@
 package com.iskrembilen.quasseldroid;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.TreeSet;
-
 import java.util.Observable;
 
-import android.app.PendingIntent;
-import android.test.IsolatedContext;
 import android.util.Log;
 
-import com.iskrembilen.quasseldroid.BufferInfo.Type;
-import com.iskrembilen.quasseldroid.gui.ChatActivity;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
-import com.iskrembilen.quasseldroid.R;
 
 /**
  * Class holds all the data for a Quassel buffer, this includes all the messages in the buffer, as well as the different states for the buffer.
@@ -88,9 +79,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	private String topic;
 	/**
-	 * Is this buffer joined or parted. Default is parted until we are told other vice
+	 * Is this buffer joined or parted. Default is joined until we are told otherwise, else it is inconsistent with users and stuff.
 	 */
-	private boolean active = false;
+	private boolean active = true;
 	/**
 	 * Number of backlog entries that we have asked for but not yet recived, used to determine when we have recived all the backlog we requested
 	 * so we don't request the same backlog more then once

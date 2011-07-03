@@ -57,6 +57,7 @@ import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
@@ -64,7 +65,6 @@ import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
-import com.lekebilen.quasseldroid.qtcomm.EmptyQVariantException;
 
 public class CoreConnection {
 	@SuppressWarnings("unused")
