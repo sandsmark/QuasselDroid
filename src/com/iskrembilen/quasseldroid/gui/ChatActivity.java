@@ -172,7 +172,6 @@ public class ChatActivity extends Activity{
 		String inputString = inputfield.getText().toString();
 		String[] inputWords = inputString.split(" ");
 		String inputNick = inputWords[inputWords.length-1];
-		Log.d("HEIAAAAAAAAAAA",inputString.lastIndexOf(" ") + "");
 		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
 
 		if ( "".equals(inputNick) ) {
@@ -190,7 +189,6 @@ public class ChatActivity extends Activity{
 				}
 			}
 		}
-		
 		return false;  // don't go ahead and show the search box
 	}
 
