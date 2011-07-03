@@ -8,6 +8,9 @@
 <item type="id" name="DIALOG_CONNECTING"></item>
 <item type="id" name="DIALOG_HIDE_EVENTS"></item>
 
+<item type="id" name="CONTEXT_MENU_JOIN"></item>
+<item type="id" name="CONTEXT_MENU_PART"></item>
+
 <item type="id" name="BUFFER_LIST_UPDATED"></item>
 <item type="id" name="CHAT_MESSAGES_UPDATED"></item>
 
@@ -20,6 +23,7 @@
 <item type="id" name="CORECONNECTION_NEW_USER_ADDED"></item>
 <item type="id" name="CORECONNECTION_NEW_USERLIST_ADDED"></item>
 <item type="id" name="CORECONNECTION_SET_BUFFER_ORDER"></item>
+<item type="id" name="CORECONNECTION_SET_BUFFER_ACTIVE"></item>
 <item type="id" name="BUFFER_ORDER_CHANGED"></item>
 <item type="id" name="BUFFER_HIDDEN_CHANGED"></item>
 <item type="id" name="CORECONNECTION_LOST_CONNECTION"></item>

@@ -5,6 +5,7 @@
 	<color name="buffer_unread_color">#0000F5</color>
 	<color name="buffer_highlight_color">#FF8Cff</color>
 	<color name="buffer_read_color">#000000</color>
+	<color name="buffer_parted_color">#C0C0C0</color>
 	<color name="ircmessage_highlight_color">#FF8C00</color>
 	<color name="ircmessage_normal_color">#ffffff</color>
 	<color name="buffer_activity_color">#008000</color>
