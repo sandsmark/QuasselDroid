@@ -480,8 +480,7 @@ public class CoreConnService extends Service {
 				Bundle bundle = new Bundle();
 				bundle.putString(CERT_KEY, (String) msg.obj);
 				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(
-							CoreConnService.CONNECTION_NEW_CERTIFICATE, bundle);
+					statusReceiver.send(CoreConnService.CONNECTION_NEW_CERTIFICATE, bundle);
 				}
 				break;
 			case R.id.CORECONNECTION_SET_BUFFER_ACTIVE:

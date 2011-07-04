@@ -14,6 +14,7 @@ import javax.net.ssl.X509TrustManager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * A custom trust manager for the SSL socket so we can
@@ -33,7 +34,6 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 	X509TrustManager defaultTrustManager;
 
 	CustomTrustManager(CoreConnection coreConnection) throws GeneralSecurityException {
-		System.out.println("CAKE");
 		this.coreConnection = coreConnection;
 		KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 		TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -64,7 +64,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 		try {
 			defaultTrustManager.checkClientTrusted(chain, authType);
 		} catch (CertificateException excep) {
-
+			Log.e(CustomTrustManager.class.getName(), "checkClientTrusted failed", excep);
 		}
 	}
 
@@ -121,7 +121,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 		return defaultTrustManager.getAcceptedIssuers();
 	}
 	
-	class NewCertificateException extends SecurityException {
+	class NewCertificateException extends CertificateException {
 		private String hashedCert;
 		public NewCertificateException(String hashedCert) {
 			this.hashedCert = hashedCert;

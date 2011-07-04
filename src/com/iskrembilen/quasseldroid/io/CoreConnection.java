@@ -118,21 +118,7 @@ public class CoreConnection {
 				readThread != null && readThread.isAlive())
 			return true;
 		else {
-			// No fucking clue wth the following is suppose to achieve so just commenting it out for now.
-			//			try {
-			//				connect();
-			//				return true;
-			//			} catch (Exception e) {
-			//				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_DISCONNECTED);
-			//
-			//				// Do not crash on start up if we don't have buffer (will output invalid username/password combination)
-			//				if(buffers != null) {
-			//					msg.obj = buffers.values();
-			//					msg.sendToTarget();
-			//				}
-
 			return false;
-			//}
 		}
 	}
 
@@ -164,7 +150,7 @@ public class CoreConnection {
 			connected = false;
 		}
 	}
-	
+
 	public void requestSetLastMsgRead(int buffer, int msgid) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
 		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
@@ -384,7 +370,7 @@ public class CoreConnection {
 		dbHelper.open();
 		dbHelper.cleanupEvents(bufferIds.toArray(new Integer[bufferIds.size()]));
 		dbHelper.close();
-		
+
 		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
 		networks = new ArrayList<Integer>(networkIds.size());
 		for (QVariant<?> networkId: networkIds) {
@@ -395,7 +381,7 @@ public class CoreConnection {
 		// Now the fun part starts, where we play signal proxy
 
 		// START SIGNAL PROXY INIT
-	
+
 		// We must do this here, to get network names early enough
 		for(int network: networks) {
 			sendInitRequest("Network", Integer.toString(network));
@@ -425,8 +411,8 @@ public class CoreConnection {
 				try {
 					sendQVariantList(packedFunc);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					disconnect();
 				}
 			}
 		};
@@ -545,7 +531,7 @@ public class CoreConnection {
 		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
-//		System.out.println(ret.toString());
+		//		System.out.println(ret.toString());
 		return ret;
 	}
 
@@ -558,7 +544,7 @@ public class CoreConnection {
 		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
 		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
-//		System.out.println(ret.toString());
+		//		System.out.println(ret.toString());
 		return ret;
 	}
 
@@ -591,7 +577,7 @@ public class CoreConnection {
 				msg.sendToTarget();
 			}
 		};
-		
+
 		public void run() {
 			try {
 				doRun();
@@ -611,16 +597,16 @@ public class CoreConnection {
 				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			} catch (UnknownHostException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Unknown host!").sendToTarget();
-				disconnect();
 				return;
 			} catch (IOException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
-				e.printStackTrace();
-				disconnect();
-				return;
-			} catch (NewCertificateException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, e.hashedCert()).sendToTarget();
-				disconnect();
+				if(e.getCause() instanceof NewCertificateException) {
+					service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
+					disconnect();
+				}else{
+					service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+					e.printStackTrace();
+					disconnect();
+				}
 				return;
 			} catch (CertificateException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
@@ -640,7 +626,7 @@ public class CoreConnection {
 			List<QVariant<?>> packedFunc;
 			final long startWait = System.currentTimeMillis();
 			while (running) {
-				
+
 				try {
 					packedFunc = readQVariantList();
 					//Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
@@ -664,7 +650,7 @@ public class CoreConnection {
 				long start = System.currentTimeMillis();
 				RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
 				String className = "", objectName;
-				
+
 
 				/*
 				 * Here we handle different calls from the core.
@@ -762,7 +748,7 @@ public class CoreConnection {
 									break;
 								}
 							}
-							
+
 							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
@@ -863,8 +849,8 @@ public class CoreConnection {
 						List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
 						int networkId = (Integer) map.get("networkId").getData(); // let's hope we don't need this, LAWLERZ!!1
 						BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
-						
-						
+
+
 						//TODO: mabye send this in a bulk to the service so it wont sort and shit every time
 						for (QVariant bufferId: tempList) {
 							if (!buffers.containsKey(bufferId.getData())) {
@@ -876,7 +862,7 @@ public class CoreConnection {
 							msg.obj = true;
 							msg.sendToTarget();
 						}
-						
+
 						for (QVariant bufferId: permList) {
 							if (!buffers.containsKey(bufferId.getData())) {
 								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
@@ -887,7 +873,7 @@ public class CoreConnection {
 							msg.obj = true;
 							msg.sendToTarget();
 						}
-						
+
 						int order = 0;
 						for (QVariant bufferId: orderList) {
 							if (!buffers.containsKey(bufferId.getData())) {
@@ -899,12 +885,12 @@ public class CoreConnection {
 							msg.arg1 = (Integer) bufferId.getData();
 							msg.arg2 = order;
 							msg.sendToTarget();
-							
+
 							order++;
 						}
-						
-						
-						
+
+
+
 						/*
 						 * There are several objects that we don't care about (at the moment).
 						 */
@@ -980,7 +966,7 @@ public class CoreConnection {
 							e.printStackTrace();
 							running = false; // We have obviously lost our connection, just stop this thread.
 						}
-						
+
 					} 
 					//TODO: need network objects to lookup buffers in given networks
 //					else if (className.equals("IrcUser") && function.equals("partChannel")) {
@@ -997,7 +983,7 @@ public class CoreConnection {
 						msg.arg1 = bufferId;
 						msg.arg2 = msgId;
 						msg.sendToTarget();
-						
+
 					} else if (className.equals("BufferSyncer") && function.equals("setMarkerLine")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
@@ -1005,7 +991,7 @@ public class CoreConnection {
 						msg.arg1 = bufferId;
 						msg.arg2 = msgId;
 						msg.sendToTarget();			
-						
+
 						/*
 						 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
 						 */
