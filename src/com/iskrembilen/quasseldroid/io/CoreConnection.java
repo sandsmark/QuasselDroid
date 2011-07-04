@@ -255,7 +255,7 @@ public class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			disconnect();
 		}
 	}
 
@@ -601,13 +601,14 @@ public class CoreConnection {
 				disconnect();
 				return;
 			} catch (IOException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
-				e.printStackTrace();
-				disconnect();
-				return;
-			} catch (NewCertificateException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, e.hashedCert()).sendToTarget();
-				disconnect();
+				if (e.getCause() instanceof NewCertificateException) {
+					service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();
+					disconnect();
+				} else{
+					service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+					e.printStackTrace();
+					disconnect();
+				}
 				return;
 			} catch (CertificateException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
