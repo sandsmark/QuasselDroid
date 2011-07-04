@@ -30,14 +30,13 @@ import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,22 +45,21 @@ import android.os.Message;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
-import com.iskrembilen.quasseldroid.gui.ChatActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
-import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
-import com.iskrembilen.quasseldroid.R;
 
 /**
  * This Service holds the connection to the core from the phone, it handles all
@@ -295,6 +293,7 @@ public class CoreConnService extends Service {
 					checkMessageForHighlight(buffer, message);
 					checkForURL(message);
 					parseColorCodes(message);
+					parseStyleCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
 					Log.e(TAG,
@@ -321,6 +320,7 @@ public class CoreConnService extends Service {
 					 */
 					checkMessageForHighlight(buffer, message);
 					parseColorCodes(message);
+					parseStyleCodes(message);
 					if (message.isHighlighted()) {
 						// Create a notification about the highlight
 						String text = buffer.getInfo().name + ": <"
@@ -530,6 +530,75 @@ public class CoreConnService extends Service {
 	}
 
 	/**
+	 * Parse mIRC style codes in IrcMessage
+	 */
+	public void parseStyleCodes(IrcMessage message) {
+		final char boldIndicator = 2;
+		final char normalIndicator = 15;
+		final char italicIndicator = 29;
+		final char underlineIndicator = 31;
+		
+		String content = message.content.toString();
+
+		if (content.indexOf(boldIndicator) == -1 
+			&& content.indexOf(italicIndicator) == -1
+			&& content.indexOf(underlineIndicator) == -1)
+			return;
+		
+		SpannableStringBuilder newString = new SpannableStringBuilder(content);
+
+		
+		SpannableStringBuilder loel = new SpannableStringBuilder("ABCDE");
+		int lol = loel.toString().indexOf('E');
+		loel.delete(lol, lol + 1);
+		
+		while (true) {
+			content = newString.toString();
+			
+			int start = content.indexOf(boldIndicator);
+			int end = content.indexOf(boldIndicator, start+1);
+			int style = Typeface.BOLD;
+			
+			if (start == -1) {
+				start = content.indexOf(italicIndicator);
+				end = content.indexOf(italicIndicator, start+1);
+				style = Typeface.ITALIC;
+			}
+			
+			if (start == -1) {
+				start = content.indexOf(underlineIndicator);
+				end = content.indexOf(underlineIndicator, start+1);
+				style = -1;
+			}
+			
+			if (start == -1)
+				break;
+			
+			if (end == -1)
+				end = content.indexOf(normalIndicator, start);
+			
+			if (end == -1)
+				end = content.length();
+			
+
+			if (style == -1) {
+				newString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+			} else {
+				newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+			}
+			
+			if (content.charAt(end) == boldIndicator
+				|| content.charAt(end) == italicIndicator
+				|| content.charAt(end) == normalIndicator
+				|| content.charAt(end) == underlineIndicator)
+				newString.delete(end, end+1);
+			
+			newString.delete(start, start+1);
+		}
+		message.content = newString;
+	}
+	
+	/**
 	 * Parse mIRC color codes in IrcMessage
 	 */
 	public void parseColorCodes(IrcMessage message) {
@@ -540,11 +609,12 @@ public class CoreConnService extends Service {
 		 * return;
 		 */
 		String content = message.content.toString();
-
-		SpannableStringBuilder newString = new SpannableStringBuilder(content);
-
 		if (content.indexOf(formattingIndicator) == -1)
 			return;
+		
+		SpannableStringBuilder newString = new SpannableStringBuilder(content);
+
+
 
 		while (true) {
 			content = newString.toString();
