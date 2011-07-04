@@ -80,9 +80,7 @@ public class CoreConnService extends Service {
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
 
-	private Pattern URLPattern = Pattern.compile(
-			"((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)",
-			Pattern.CASE_INSENSITIVE);
+	private Pattern URLPattern = Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
@@ -296,9 +294,7 @@ public class CoreConnService extends Service {
 					parseStyleCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
-					Log.e(TAG,
-							"Getting message buffer already have "
-									+ buffer.getInfo().name);
+					Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
 				}
 				break;
 			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
@@ -323,33 +319,22 @@ public class CoreConnService extends Service {
 					parseStyleCodes(message);
 					if (message.isHighlighted()) {
 						// Create a notification about the highlight
-						String text = buffer.getInfo().name + ": <"
-								+ message.getNick() + "> " + message.content;
-						Notification notification = new Notification(
-								R.drawable.highlight, text,
-								System.currentTimeMillis());
-						Intent launch = new Intent(CoreConnService.this,
-								BufferActivity.class);
+						String text = buffer.getInfo().name + ": <"	+ message.getNick() + "> " + message.content;
+						Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
+						Intent launch = new Intent(CoreConnService.this, BufferActivity.class);
 						launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						PendingIntent contentIntent = PendingIntent
-								.getActivity(CoreConnService.this, 0, launch, 0);
+						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);
 						// Set the info for the views that show in the
 						// notification panel.
-						notification
-								.setLatestEventInfo(CoreConnService.this,
-										getText(R.string.app_name), text,
-										contentIntent);
+						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name), text, contentIntent);
 						// Send the notification.
-						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT,
-								notification);
+						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT, notification);
 					}
 
 					checkForURL(message);
 					buffer.addMessage(message);
 				} else {
-					Log.e(TAG,
-							"Getting message buffer already have "
-									+ buffer.toString());
+					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
 				}
 				break;
 
@@ -374,12 +359,9 @@ public class CoreConnService extends Service {
 				 * Setting last seen message id in a buffer
 				 */
 				if (bufferCollection.hasBuffer(msg.arg1)) {
-					bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(
-							msg.arg2);
+					bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(msg.arg2);
 				} else {
-					Log.e(TAG,
-							"Getting set last seen message on unknown buffer: "
-									+ msg.arg1);
+					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
 				break;
 			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
@@ -387,12 +369,9 @@ public class CoreConnService extends Service {
 				 * Setting marker line message id in a buffer
 				 */
 				if (bufferCollection.hasBuffer(msg.arg1)) {
-					bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(
-							msg.arg2);
+					bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(msg.arg2);
 				} else {
-					Log.e(TAG,
-							"Getting set marker line message on unknown buffer: "
-									+ msg.arg1);
+					Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
 				}
 				break;
 
@@ -402,8 +381,7 @@ public class CoreConnService extends Service {
 				 */
 				showNotification(true);
 				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED,
-							null);
+					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
 				}
 				break;
 
@@ -415,14 +393,10 @@ public class CoreConnService extends Service {
 					if (msg.obj != null) { // Have description of what is wrong,
 											// used only for login atm
 						Bundle bundle = new Bundle();
-						bundle.putString(CoreConnService.STATUS_KEY,
-								(String) msg.obj);
-						statusReceiver
-								.send(CoreConnService.CONNECTION_DISCONNECTED,
-										bundle);
+						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
+						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
 					} else {
-						statusReceiver.send(
-								CoreConnService.CONNECTION_DISCONNECTED, null);
+						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
 					}
 				}
 				showNotification(false);
@@ -457,16 +431,14 @@ public class CoreConnService extends Service {
 				/**
 				 * Buffer has been marked as temporary hidden, update buffer
 				 */
-				bufferCollection.getBuffer(msg.arg1).setTemporarilyHidden(
-						(Boolean) msg.obj);
+				bufferCollection.getBuffer(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
 				break;
 
 			case R.id.CORECONNECTION_SET_BUFFER_PERM_HIDDEN:
 				/**
 				 * Buffer has been marked as permanently hidden, update buffer
 				 */
-				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden(
-						(Boolean) msg.obj);
+				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
 				break;
 
 			case R.id.CORECONNECTION_INVALID_CERTIFICATE:
@@ -503,9 +475,7 @@ public class CoreConnService extends Service {
 	 */
 	public void checkMessageForHighlight(Buffer buffer, IrcMessage message) {
 		if (message.type == IrcMessage.Type.Plain) {
-			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"
-					+ coreConn.getNick(buffer.getInfo().networkId)
-					+ "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + coreConn.getNick(buffer.getInfo().networkId) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
@@ -668,7 +638,6 @@ public class CoreConnService extends Service {
 			}
 		}
 		message.content = newString; // BURN IN HELL JAVA
-		//message.content = new SpannableString("CAKE");
 	}
 
 	private int mircCodeToColor(int code) {
