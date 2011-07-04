@@ -200,11 +200,19 @@ public class LoginActivity extends Activity implements Observer {
 			showDialog(R.id.DIALOG_ADD_CORE);
 			break;
 		case R.id.menu_edit_core:
-			showDialog(R.id.DIALOG_EDIT_CORE);
+			if(dbHelper.hasCores()) {
+				showDialog(R.id.DIALOG_EDIT_CORE);
+			} else {
+				Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
+			}
 			break;
 		case R.id.menu_delete_core:
-			dbHelper.deleteCore(core.getSelectedItemId());
-			Toast.makeText(LoginActivity.this, "Deleted core", Toast.LENGTH_LONG).show();
+			if(dbHelper.hasCores()) {
+				dbHelper.deleteCore(core.getSelectedItemId());
+				Toast.makeText(LoginActivity.this, "Deleted core", Toast.LENGTH_LONG).show();
+			} else {
+				Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
+			}
 			updateCoreSpinner();
 			//TODO: mabye add some confirm dialog when deleting a core
 			break;
