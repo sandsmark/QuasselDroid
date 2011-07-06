@@ -797,18 +797,21 @@ public class CoreConnection {
 								Log.e(TAG, "Getting last seen message for buffer we dont have " +bufferId);
 							}
 						}
-						// Parse out the marker lines for buffers
-						List<QVariant<?>> markerLines = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines").getData();
-						for (int i=0; i<markerLines.size(); i+=2) {
-							int bufferId = (Integer)markerLines.get(i).getData();
-							int msgId = (Integer)markerLines.get(i+1).getData();
-							if (buffers.containsKey(bufferId)){
-								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
-								msg.arg1 = bufferId;
-								msg.arg2 = msgId;
-								msg.sendToTarget();
-							}else{
-								Log.e(TAG, "Getting markerlinemessage for buffer we dont have " +bufferId);
+						// Parse out the marker lines for buffers if the core supports them
+						QVariant<?> rawMarkerLines = ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("MarkerLines");
+						if(rawMarkerLines != null) {
+							List<QVariant<?>> markerLines = (List<QVariant<?>>) rawMarkerLines.getData();
+							for (int i=0; i<markerLines.size(); i+=2) {
+								int bufferId = (Integer)markerLines.get(i).getData();
+								int msgId = (Integer)markerLines.get(i+1).getData();
+								if (buffers.containsKey(bufferId)){
+									Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
+									msg.arg1 = bufferId;
+									msg.arg2 = msgId;
+									msg.sendToTarget();
+								}else{
+									Log.e(TAG, "Getting markerlinemessage for buffer we dont have " +bufferId);
+								}
 							}
 						}
 
