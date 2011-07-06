@@ -146,10 +146,13 @@ public class LoginActivity extends Activity implements Observer {
 						removeDialog(R.id.DIALOG_CONNECTING);
 						Toast.makeText(LoginActivity.this, resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
 					}
-				} else if (resultCode == CoreConnService.CONNECTION_NEW_CERTIFICATE) {
+				} else if (resultCode == CoreConnService.NEW_CERTIFICATE) {
 					hashedCert = resultData.getString(CoreConnService.CERT_KEY);
 					removeDialog(R.id.DIALOG_CONNECTING);
 					showDialog(R.id.DIALOG_NEW_CERTIFICATE);
+				} else if(resultCode == CoreConnService.UNSUPPORTED_PROTOCOL) {
+					removeDialog(R.id.DIALOG_CONNECTING);
+					Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();
 				}
 				super.onReceiveResult(resultCode, resultData);
 			}

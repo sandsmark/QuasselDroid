@@ -76,7 +76,9 @@ public class CoreConnService extends Service {
 	 */
 	public static final int CONNECTION_DISCONNECTED = 0;
 	public static final int CONNECTION_CONNECTED = 1;
-	public static final int CONNECTION_NEW_CERTIFICATE = 2;
+	public static final int NEW_CERTIFICATE = 2;
+	public static final int UNSUPPORTED_PROTOCOL = 3;
+	
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
 
@@ -452,7 +454,7 @@ public class CoreConnService extends Service {
 				Bundle bundle = new Bundle();
 				bundle.putString(CERT_KEY, (String) msg.obj);
 				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.CONNECTION_NEW_CERTIFICATE, bundle);
+					statusReceiver.send(CoreConnService.NEW_CERTIFICATE, bundle);
 				}
 				break;
 			case R.id.CORECONNECTION_SET_BUFFER_ACTIVE:
@@ -460,6 +462,14 @@ public class CoreConnService extends Service {
 				 * Set buffer as active or parted
 				 */
 				bufferCollection.getBuffer(msg.arg1).setActive((Boolean)msg.obj);
+				break;
+			case R.id.CORECONNECTION_UNSUPPORTED_PROTOCOL:
+				/**
+				 * The protocol version of the core is not supported so tell user it is to old
+				 */
+				for (ResultReceiver statusReceiver : statusReceivers) {
+					statusReceiver.send(CoreConnService.UNSUPPORTED_PROTOCOL, null);
+				}
 			}
 		}
 	}

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,9 +54,11 @@ import android.util.Log;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.BufferInfo;
+import com.iskrembilen.quasseldroid.CoreInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
 import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
@@ -78,6 +81,7 @@ public class CoreConnection {
 	private Map<Integer, Buffer> buffers;
 	private Map<Integer, String> nicks;
 	private List<Integer> networks;
+	private CoreInfo coreInfo;
 
 	private String address;
 	private int port;
@@ -280,8 +284,9 @@ public class CoreConnection {
 	/**
 	 * Initiates a connection.
 	 * @throws EmptyQVariantException 
+	 * @throws UnsupportedProtocolException 
 	 */
-	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException {	
+	public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException, UnsupportedProtocolException {	
 		// START CREATE SOCKETS
 		SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 		socket = (Socket)factory.createSocket(address, port);
@@ -307,11 +312,24 @@ public class CoreConnection {
 		// START CORE INFO
 		inStream = new QDataInputStream(socket.getInputStream());
 		Map<String, QVariant<?>> reply = readQVariantMap();
-		/*System.out.println("CORE INFO: ");
-		for (String key : reply.keySet()) {
+		System.out.println("CORE INFO: ");
+		coreInfo = new CoreInfo();
+		coreInfo.setCoreFeatures((Integer)reply.get("CoreFeatures").getData());
+		coreInfo.setCoreInfo((String)reply.get("CoreInfo").getData());
+		coreInfo.setSupportSsl((Boolean)reply.get("SupportSsl").getData());
+		coreInfo.setCoreDate(new Date((String)reply.get("CoreDate").getData()));
+		coreInfo.setCoreStartTime((GregorianCalendar)reply.get("CoreStartTime").getData());
+		coreInfo.setCoreVersion((String)reply.get("CoreVersion").getData());
+		coreInfo.setConfigured((Boolean)reply.get("Configured").getData());
+		coreInfo.setLoginEnabled((Boolean)reply.get("LoginEnabled").getData());
+		coreInfo.setMsgType((String)reply.get("MsgType").getData());
+		coreInfo.setProtocolVersion(((Long)reply.get("ProtocolVersion").getData()).intValue());
+		coreInfo.setSupportsCompression((Boolean)reply.get("SupportsCompression").getData());
+		if(coreInfo.getProtocolVersion()<10)
+			throw new UnsupportedProtocolException("Protocol version is old: "+coreInfo.getProtocolVersion());
+		/*for (String key : reply.keySet()) {
 			System.out.println("\t" + key + " : " + reply.get(key));
 		}*/
-		// TODO: We should check that the core is new and dandy here. 
 		// END CORE INFO
 
 		// START SSL CONNECTION
@@ -598,6 +616,11 @@ public class CoreConnection {
 			} catch (UnknownHostException e) {
 				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Unknown host!").sendToTarget();
 				return;
+			} catch (UnsupportedProtocolException e) {
+				service.getHandler().obtainMessage(R.id.CORECONNECTION_UNSUPPORTED_PROTOCOL).sendToTarget();
+				Log.w(TAG, e);
+				disconnect();
+				return;
 			} catch (IOException e) {
 				if(e.getCause() instanceof NewCertificateException) {
 					service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
@@ -813,6 +836,8 @@ public class CoreConnection {
 									Log.e(TAG, "Getting markerlinemessage for buffer we dont have " +bufferId);
 								}
 							}
+						}else{
+							Log.e(TAG, "Marker lines are null in BufferSyncer, should not happen");
 						}
 
 						/*
