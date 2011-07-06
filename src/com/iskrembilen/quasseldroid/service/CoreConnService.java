@@ -457,11 +457,6 @@ public class CoreConnService extends Service{
 	 */
 	public void checkMessageForHighlight(Buffer buffer, IrcMessage message) {
 		if (message.type==IrcMessage.Type.Plain) {
-			String nick = coreConn.getNick(buffer.getInfo().networkId);
-			if(nick == null) {
-				Log.e(TAG, "Nick is null in check message for highlight");
-				return;
-			}else if(nick.equals("")) return;
 			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))"+coreConn.getNick(buffer.getInfo().networkId)+"(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
