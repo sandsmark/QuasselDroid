@@ -319,13 +319,20 @@ public class CoreConnection {
 		coreInfo.setSupportSsl((Boolean)reply.get("SupportSsl").getData());
 		coreInfo.setCoreDate(new Date((String)reply.get("CoreDate").getData()));
 		coreInfo.setCoreStartTime((GregorianCalendar)reply.get("CoreStartTime").getData());
-		coreInfo.setCoreVersion((String)reply.get("CoreVersion").getData());
+		String coreVersion = (String)reply.get("CoreVersion").getData(); //CoreVersion : v0.7.1 (git-<a href="http://git.quassel-irc.org/?p=quassel.git;a=commit;h=aa285964d0e486a681f56254dc123857c15c66fa">aa28596</a>)
+		coreVersion = coreVersion.substring(coreVersion.indexOf("v")+1, coreVersion.indexOf(" "));
+		coreInfo.setCoreVersion(coreVersion);
 		coreInfo.setConfigured((Boolean)reply.get("Configured").getData());
 		coreInfo.setLoginEnabled((Boolean)reply.get("LoginEnabled").getData());
 		coreInfo.setMsgType((String)reply.get("MsgType").getData());
 		coreInfo.setProtocolVersion(((Long)reply.get("ProtocolVersion").getData()).intValue());
 		coreInfo.setSupportsCompression((Boolean)reply.get("SupportsCompression").getData());
-		if(coreInfo.getProtocolVersion()<10)
+		int version = Integer.parseInt(coreVersion.substring(0, coreVersion.indexOf(".")));
+		int release = Integer.parseInt(coreVersion.substring(coreVersion.indexOf(".")+1, coreVersion.indexOf(".", coreVersion.indexOf(".")+1)));
+//		int modification = Integer.parseInt(coreVersion.substring(coreVersion.indexOf(".", coreVersion.indexOf(".")+1)+1, coreVersion.length()));
+		
+		//Check that the protocol version is atleast 10 and the version is above 0.6.0
+		if(coreInfo.getProtocolVersion()<10 || !(version>0 || (version==0 && release>=6)))
 			throw new UnsupportedProtocolException("Protocol version is old: "+coreInfo.getProtocolVersion());
 		/*for (String key : reply.keySet()) {
 			System.out.println("\t" + key + " : " + reply.get(key));
