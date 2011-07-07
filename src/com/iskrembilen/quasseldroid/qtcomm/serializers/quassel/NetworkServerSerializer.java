@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.iskrembilen.quasseldroid.NetworkServer;
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
@@ -42,7 +43,7 @@ public class NetworkServerSerializer implements QMetaTypeSerializer<NetworkServe
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public NetworkServer unserialize(QDataInputStream stream, DataStreamVersion version) throws IOException {
+	public NetworkServer unserialize(QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
 		Map<String, QVariant<?>> map = (Map<String, QVariant<?>>)
 			QMetaTypeRegistry.instance().getTypeForName("QVariantMap").getSerializer().unserialize(stream, version);
 		

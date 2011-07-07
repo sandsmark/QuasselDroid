@@ -146,10 +146,13 @@ public class LoginActivity extends Activity implements Observer {
 						removeDialog(R.id.DIALOG_CONNECTING);
 						Toast.makeText(LoginActivity.this, resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
 					}
-				} else if (resultCode == CoreConnService.CONNECTION_NEW_CERTIFICATE) {
+				} else if (resultCode == CoreConnService.NEW_CERTIFICATE) {
 					hashedCert = resultData.getString(CoreConnService.CERT_KEY);
 					removeDialog(R.id.DIALOG_CONNECTING);
 					showDialog(R.id.DIALOG_NEW_CERTIFICATE);
+				} else if(resultCode == CoreConnService.UNSUPPORTED_PROTOCOL) {
+					removeDialog(R.id.DIALOG_CONNECTING);
+					Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();
 				}
 				super.onReceiveResult(resultCode, resultData);
 			}
@@ -200,11 +203,19 @@ public class LoginActivity extends Activity implements Observer {
 			showDialog(R.id.DIALOG_ADD_CORE);
 			break;
 		case R.id.menu_edit_core:
-			showDialog(R.id.DIALOG_EDIT_CORE);
+			if(dbHelper.hasCores()) {
+				showDialog(R.id.DIALOG_EDIT_CORE);
+			} else {
+				Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
+			}
 			break;
 		case R.id.menu_delete_core:
-			dbHelper.deleteCore(core.getSelectedItemId());
-			Toast.makeText(LoginActivity.this, "Deleted core", Toast.LENGTH_LONG).show();
+			if(dbHelper.hasCores()) {
+				dbHelper.deleteCore(core.getSelectedItemId());
+				Toast.makeText(LoginActivity.this, "Deleted core", Toast.LENGTH_LONG).show();
+			} else {
+				Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
+			}
 			updateCoreSpinner();
 			//TODO: mabye add some confirm dialog when deleting a core
 			break;

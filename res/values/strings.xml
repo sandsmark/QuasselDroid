@@ -15,6 +15,7 @@
 	<string name="useSSL">usessl</string>
 	<string name="preference_initial_backlog_limit">backlogLimit</string>
 	<string name="preference_dynamic_backlog">dynamicBacklog</string>
+	<string name="preference_fontsize_channel_list">fontsizeChannelList</string>	
 	
 	<string name="notANumber">is not a number</string>
 	<string name="preferences">Preferences</string>

@@ -39,5 +39,6 @@
 <item type="id" name="CORECONNECTION_NEW_CERTIFICATE"></item>
 <item type="id" name="DIALOG_NEW_CERTIFICATE"></item>
 <item type="id" name="NOTIFICATION_HIGHLIGHT"></item>
+<item type="id" name="CORECONNECTION_UNSUPPORTED_PROTOCOL"></item>
 
 </resources>

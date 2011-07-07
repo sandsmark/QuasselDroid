@@ -23,11 +23,9 @@
 package com.iskrembilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
+
 
 
 public class QVariant<T extends Object>{
@@ -53,7 +51,10 @@ public class QVariant<T extends Object>{
 	public QVariantType getType(){
 		return type;
 	}
-	public T getData() {
+	public T getData() throws EmptyQVariantException {
+		if (data == null)
+			throw new EmptyQVariantException();
+			
 		return data;
 	}
 	public boolean isValid(){
@@ -69,7 +70,7 @@ public class QVariant<T extends Object>{
 		}
 		@SuppressWarnings("unchecked")
 		@Override
-		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException{	    
+		public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException, EmptyQVariantException{	    
 			int type = (int)src.readUInt(32);
 			if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
 				//FIXME: Implement?

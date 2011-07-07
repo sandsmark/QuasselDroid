@@ -23,14 +23,11 @@
 package com.iskrembilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import android.util.Log;
 
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
@@ -193,10 +190,10 @@ public class QMetaTypeRegistry {
 		if(lookupName.containsKey(name)) return types.get(lookupName.get(name));
 		throw new IllegalArgumentException("Unable to find meta type: " + name);
 	}
-	public static Object unserialize(Type type,QDataInputStream stream, DataStreamVersion version) throws IOException {
+	public static Object unserialize(Type type,QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
 		return instance().getTypeForId(type.getValue()).getSerializer().unserialize(stream, version);
 	}
-	public static Object unserialize(Type type,QDataInputStream stream) throws IOException {
+	public static Object unserialize(Type type,QDataInputStream stream) throws IOException, EmptyQVariantException {
 		return unserialize(type, stream, DataStreamVersion.Qt_4_2);
 	}
 	@SuppressWarnings("unchecked")

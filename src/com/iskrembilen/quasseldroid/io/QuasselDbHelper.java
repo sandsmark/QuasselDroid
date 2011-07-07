@@ -117,6 +117,19 @@ public class QuasselDbHelper {
 	public void deleteCore(long rowId) {
 		db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
 	}
+	
+	public boolean hasCores() {
+		Cursor c = db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
+		boolean hasCores;
+		if (c != null && c.getCount()>0) {
+			hasCores = true;
+		}else{
+			hasCores = false;
+		}
+		
+		if(c != null) c.close();
+		return hasCores;
+	}
 
 	public Cursor getAllCores() {
 		return db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);

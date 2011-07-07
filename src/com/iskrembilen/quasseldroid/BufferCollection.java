@@ -41,7 +41,7 @@ public class BufferCollection extends Observable implements Observer {
 	private List<Buffer> bufferList = new ArrayList<Buffer>();
 	private List<Buffer> filteredList = new ArrayList<Buffer>();
 	
-	public static boolean orderAlphabetical;
+	public static boolean orderAlphabetical = true;
 
 	private static final String TAG = BufferCollection.class.getSimpleName();
 
