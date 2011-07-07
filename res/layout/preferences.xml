@@ -13,9 +13,4 @@
   	android:defaultValue="20"
   	android:numeric="integer"
   />
-  <EditTextPreference android:title="Fontsize of channel list"
-  android:summary=""
-  android:key="@string/preference_fontsize_channel_list"
-  android:defaultValue="21"
-  android:numeric="integer"/>
 </PreferenceScreen>

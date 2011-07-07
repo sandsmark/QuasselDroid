@@ -31,13 +31,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -67,8 +64,6 @@ public class BufferActivity extends ListActivity {
 	BufferListAdapter bufferListAdapter;
 
 	ResultReceiver statusReciver;
-	
-	SharedPreferences preferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -94,8 +89,6 @@ public class BufferActivity extends ListActivity {
 			}
 
 		};
-		
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 
 	@Override
@@ -224,7 +217,6 @@ public class BufferActivity extends ListActivity {
 				convertView = inflater.inflate(R.layout.buffer_list_item, null);
 				holder = new ViewHolder();
 				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_SP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder)convertView.getTag();
