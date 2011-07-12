@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -327,9 +329,16 @@ public class CoreConnection {
 		coreInfo.setMsgType((String)reply.get("MsgType").getData());
 		coreInfo.setProtocolVersion(((Long)reply.get("ProtocolVersion").getData()).intValue());
 		coreInfo.setSupportsCompression((Boolean)reply.get("SupportsCompression").getData());
-		int version = Integer.parseInt(coreVersion.substring(0, coreVersion.indexOf(".")));
-		int release = Integer.parseInt(coreVersion.substring(coreVersion.indexOf(".")+1, coreVersion.indexOf(".", coreVersion.indexOf(".")+1)));
-//		int modification = Integer.parseInt(coreVersion.substring(coreVersion.indexOf(".", coreVersion.indexOf(".")+1)+1, coreVersion.length()));
+		
+		Matcher matcher = Pattern.compile("(\\d+)\\W(\\d+)\\W", Pattern.CASE_INSENSITIVE).matcher(coreInfo.getCoreVersion());
+		System.out.println(coreInfo.getCoreVersion());
+		int version, release;
+		if (matcher.find()) {
+			version = Integer.parseInt(matcher.group(1));
+			release = Integer.parseInt(matcher.group(2));
+		} else {
+			throw new IOException("Can't match core version, illegal version?");
+		}
 		
 		//Check that the protocol version is atleast 10 and the version is above 0.6.0
 		if(coreInfo.getProtocolVersion()<10 || !(version>0 || (version==0 && release>=6)))
@@ -633,7 +642,7 @@ public class CoreConnection {
 					service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
 					disconnect();
 				}else{
-					service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+					service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting! " + e.getMessage()).sendToTarget();
 					e.printStackTrace();
 					disconnect();
 				}
