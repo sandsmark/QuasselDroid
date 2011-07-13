@@ -640,6 +640,10 @@ public class CoreConnService extends Service {
 			}
 			int length = end - start;
 			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
+			
+			if (endOfSpan <= 0) // check for malformed messages
+				return;
+			
 			newString.delete(start, end);
 			if (fg != -1) {
 				newString.setSpan(new ForegroundColorSpan(getResources()
