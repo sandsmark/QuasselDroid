@@ -642,7 +642,7 @@ public class CoreConnService extends Service {
 			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
 			
 			if (endOfSpan <= 0) // check for malformed messages
-				return;
+				endOfSpan = content.length() - length;
 			
 			newString.delete(start, end);
 			if (fg != -1) {
