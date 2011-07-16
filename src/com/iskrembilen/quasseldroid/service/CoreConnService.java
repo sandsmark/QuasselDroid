@@ -530,12 +530,7 @@ public class CoreConnService extends Service {
 			&& content.indexOf(underlineIndicator) == -1)
 			return;
 		
-		SpannableStringBuilder newString = new SpannableStringBuilder(content);
-
-		
-		SpannableStringBuilder loel = new SpannableStringBuilder("ABCDE");
-		int lol = loel.toString().indexOf('E');
-		loel.delete(lol, lol + 1);
+		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
 		
 		while (true) {
 			content = newString.toString();
@@ -563,7 +558,7 @@ public class CoreConnService extends Service {
 				end = content.indexOf(normalIndicator, start);
 			
 			if (end == -1)
-				end = content.length();
+				end = content.length()-1;
 			
 
 			if (style == -1) {
@@ -597,7 +592,7 @@ public class CoreConnService extends Service {
 		if (content.indexOf(formattingIndicator) == -1)
 			return;
 		
-		SpannableStringBuilder newString = new SpannableStringBuilder(content);
+		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
 
 
 
