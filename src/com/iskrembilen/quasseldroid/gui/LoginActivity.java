@@ -377,7 +377,7 @@ public class LoginActivity extends Activity implements Observer {
 			//Check that the phone has either mobile or wifi connection to querry teh bus oracle
 			ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 			//0 is mobile, 1 is wifi
-			if (!(conn.getNetworkInfo(0).isConnected() || conn.getNetworkInfo(1).isConnected())) {
+			if (conn.getActiveNetworkInfo() != null && !conn.getActiveNetworkInfo().isConnected()) {
 				Toast.makeText(LoginActivity.this, "This application requires a internett connection", Toast.LENGTH_LONG).show();
 				return;
 			}
