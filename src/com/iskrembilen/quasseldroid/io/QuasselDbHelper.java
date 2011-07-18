@@ -208,7 +208,7 @@ public class QuasselDbHelper {
 	public IrcMessage.Type[] getHiddenEvents(int bufferId) throws SQLException {
 		Cursor cursor = db.query(true, HIDDENEVENTS_TABLE, new String[] {KEY_EVENT}, KEY_BUFFERID + "=" + bufferId, null, null, null, null, null);
 		IrcMessage.Type[] events = null;
-		if (cursor != null || cursor.getCount()==0) {
+		if (cursor != null && cursor.getCount() > 0) {
 			events =  new IrcMessage.Type[cursor.getCount()];
 			cursor.moveToFirst();
 			int i = 0;
