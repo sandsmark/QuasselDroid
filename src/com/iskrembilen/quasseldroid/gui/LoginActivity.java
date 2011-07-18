@@ -23,13 +23,9 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.security.GeneralSecurityException;
 import java.util.Observable;
 import java.util.Observer;
 
-import android.R.bool;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -45,7 +41,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,15 +50,13 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.io.CoreConnection;
+import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
-import com.iskrembilen.quasseldroid.R;
 
 public class LoginActivity extends Activity implements Observer {
 

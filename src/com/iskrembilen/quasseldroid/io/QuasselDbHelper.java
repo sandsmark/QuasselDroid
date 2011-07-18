@@ -23,8 +23,6 @@
 
 package com.iskrembilen.quasseldroid.io;
 
-import com.iskrembilen.quasseldroid.IrcMessage;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -32,8 +30,9 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
-import android.text.method.HideReturnsTransformationMethod;
 import android.util.Log;
+
+import com.iskrembilen.quasseldroid.IrcMessage;
 
 public class QuasselDbHelper {
 	public static final String KEY_ID = "_id";
