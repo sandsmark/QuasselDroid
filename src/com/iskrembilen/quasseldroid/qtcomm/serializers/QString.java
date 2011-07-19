@@ -24,12 +24,6 @@
 package com.iskrembilen.quasseldroid.qtcomm.serializers;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-
-import android.util.Log;
 
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;

@@ -23,7 +23,6 @@
 
 package com.iskrembilen.quasseldroid;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class IrcUser {

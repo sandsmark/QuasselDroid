@@ -72,7 +72,6 @@ import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 
 public class CoreConnection {
-	@SuppressWarnings("unused")
 
 	private static final String TAG = CoreConnection.class.getSimpleName();
 

@@ -526,8 +526,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private void loadFilters() {
 		dbHelper.open();
 		IrcMessage.Type[] filteredEvents = dbHelper.getHiddenEvents(getInfo().id);
-		for (IrcMessage.Type filter : filteredEvents) {
-			this.filterTypes.add(filter);
+		if (filteredEvents != null) {
+			for (IrcMessage.Type filter : filteredEvents) {
+				this.filterTypes.add(filter);
+			}
 		}
 		dbHelper.close();
 		filterBuffer();
