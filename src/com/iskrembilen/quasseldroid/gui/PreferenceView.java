@@ -23,13 +23,11 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
-import com.iskrembilen.quasseldroid.R;
-
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
-import android.widget.Toast;
+
+import com.iskrembilen.quasseldroid.R;
 
 public class PreferenceView extends PreferenceActivity {
 	

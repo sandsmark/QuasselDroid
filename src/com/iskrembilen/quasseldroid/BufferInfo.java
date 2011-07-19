@@ -23,8 +23,6 @@
 
 package com.iskrembilen.quasseldroid;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 /**
  * Class holds the basic information about a buffer, the name, the type of buffer, the network etc
