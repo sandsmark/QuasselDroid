@@ -560,6 +560,10 @@ public class CoreConnService extends Service {
 			if (end == -1)
 				end = content.length()-1;
 			
+			if(start==end) {
+				newString.delete(start, start+1);
+				break;
+			}
 
 			if (style == -1) {
 				newString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
