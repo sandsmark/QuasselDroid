@@ -13,9 +13,12 @@
   	android:defaultValue="20"
   	android:numeric="integer"
   />
-  <EditTextPreference android:title="Fontsize of channel list"
-  android:summary=""
-  android:key="@string/preference_fontsize_channel_list"
-  android:defaultValue="21"
-  android:numeric="integer"/>
+  <ListPreference 
+ 	android:title="Bufferlist fontsize"
+  	android:summary="The fontsize of the bufferlist"
+  	android:key="@string/preference_fontsize_channel_list"
+  	android:entries="@array/entries_fontsize_preference"
+  	android:entryValues="@array/entryvalues_fontsize_preference"
+  	android:dialogTitle="Choose fontsize for the bufferlist"
+  	android:defaultValue="20"/>
 </PreferenceScreen>
