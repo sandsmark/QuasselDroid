@@ -32,9 +32,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -57,7 +60,7 @@ import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.R;
 
-public class BufferActivity extends ListActivity {
+public class BufferActivity extends ListActivity{
 
 	private static final String TAG = BufferActivity.class.getSimpleName();
 
@@ -69,6 +72,7 @@ public class BufferActivity extends ListActivity {
 	ResultReceiver statusReciver;
 	
 	SharedPreferences preferences;
+	OnSharedPreferenceChangeListener listener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +100,17 @@ public class BufferActivity extends ListActivity {
 		};
 		
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		listener =new OnSharedPreferenceChangeListener() {
+
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals(getResources().getString(R.string.preference_fontsize_channel_list))){
+					bufferListAdapter.notifyDataSetChanged();
+				}
+
+			}
+		};
+		preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
 	}
 
 	@Override
@@ -115,6 +130,12 @@ public class BufferActivity extends ListActivity {
 	protected void onStop() {
 		doUnbindService();
 		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		preferences.unregisterOnSharedPreferenceChangeListener(listener);
+		super.onDestroy();
 	}
 
 
@@ -164,7 +185,8 @@ public class BufferActivity extends ListActivity {
 			return super.onContextItemSelected(item);
 		}
 	}
-
+    
+	
 
 
 	@Override
@@ -224,7 +246,7 @@ public class BufferActivity extends ListActivity {
 				convertView = inflater.inflate(R.layout.buffer_list_item, null);
 				holder = new ViewHolder();
 				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_SP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
+				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder)convertView.getTag();
@@ -348,7 +370,4 @@ public class BufferActivity extends ListActivity {
 			bufferListAdapter.clearBuffers();
 		}
 	}
-
-
-
 }
