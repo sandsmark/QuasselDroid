@@ -191,6 +191,8 @@ public class QuasselDbHelper {
 	}
 
 	public void cleanupEvents(Integer[] bufferids) {
+		if(bufferids.length==0)
+			return;
 		StringBuilder list = new StringBuilder("(");
 		for (int id : bufferids) {
 			list.append(id + ",");
