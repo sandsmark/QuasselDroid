@@ -143,7 +143,7 @@ public class ChatActivity extends Activity{
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
-			if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction()==0 ) { //On key down as well
+			if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction()==KeyEvent.ACTION_DOWN ) { //On key down as well
 				EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
 				String inputText = inputfield.getText().toString();
 
@@ -153,7 +153,7 @@ public class ChatActivity extends Activity{
 				}
 
 				return true;
-			} else if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == 0) {
+			} else if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN) {
 				onSearchRequested(); // lawl
 				return true;
 			}
