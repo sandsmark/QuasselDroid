@@ -291,6 +291,7 @@ public class CoreConnection {
 		// START CREATE SOCKETS
 		SocketFactory factory = (SocketFactory)SocketFactory.getDefault();
 		socket = (Socket)factory.createSocket(address, port);
+		socket.setKeepAlive(true);
 		outStream = new QDataOutputStream(socket.getOutputStream());
 		// END CREATE SOCKETS 
 
