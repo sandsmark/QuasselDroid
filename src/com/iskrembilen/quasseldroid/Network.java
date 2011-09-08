@@ -8,7 +8,7 @@ public class Network {
 	private Buffer statusBuffer;
 	private String networkName;
 	private Boolean isConnected;
-	private List<Buffer> bufferList;
+	private BufferCollection buffers;
 	private List<IrcUser> userList;
 
 	
@@ -16,8 +16,8 @@ public class Network {
 
 	public Network(int networkId) {
 		this.networkId = networkId;
-		bufferList = new ArrayList<Buffer>();
 		userList = new ArrayList<IrcUser>();
+		buffers = new BufferCollection();
 	}
 	
 	
@@ -33,13 +33,13 @@ public class Network {
 		return networkId;
 	}
 	
-	public List<Buffer> getBufferList() {
-		return bufferList;
+	public BufferCollection getBuffers() {
+		return buffers;
 	}
 
 
 	public void addBuffer(Buffer buffer) {
-		bufferList.add(buffer);
+		buffers.addBuffer(buffer);
 	}
 
 

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -143,5 +144,9 @@ public class BufferCollection extends Observable implements Observer {
 		this.setChanged();
 		notifyObservers();
 
+	}
+
+	public List<Buffer> getRawBufferList() {
+		return bufferList;
 	}
 }

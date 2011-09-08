@@ -438,11 +438,6 @@ public class CoreConnection {
 			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
 		}
 
-		//Send buffers to CoreConService
-		Message msg = service.getHandler().obtainMessage(R.id.ADD_MULTIPLE_BUFFERS);
-		msg.obj = buffers.values();
-		msg.sendToTarget();
-
 		TimerTask sendPingAction = new TimerTask() {
 			public void run() {
 				List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
@@ -463,7 +458,7 @@ public class CoreConnection {
 		Log.i(TAG, "Connected!");
 		connected = true;
 
-		msg = service.getHandler().obtainMessage(R.id.CONNECTED);
+		Message msg = service.getHandler().obtainMessage(R.id.CONNECTED);
 		msg.sendToTarget();
 	}
 
@@ -776,7 +771,7 @@ public class CoreConnection {
 							}
 							network.setUserList(ircUsers);
 
-							for (Buffer buffer: network.getBufferList()) {
+							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
 								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
 									buffer.setNicks(users);
@@ -784,8 +779,11 @@ public class CoreConnection {
 									break;
 								}
 							}
+							Message msg = service.getHandler().obtainMessage(R.id.ADD_NETWORKS);
+							msg.obj = networks;
+							msg.sendToTarget();
 
-							Message msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);
+							msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
 

@@ -629,7 +629,9 @@ public class CoreConnService extends Service {
 				 */
 				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
 				break;
-
+			case R.id.ADD_NETWORKS:
+				//TODO: NETWORKS ADD THEM
+				break;
 			case R.id.SET_LAST_SEEN_TO_SERVICE:
 				/**
 				 * Setting last seen message id in a buffer
