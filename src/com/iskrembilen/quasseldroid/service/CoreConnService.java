@@ -26,6 +26,7 @@ package com.iskrembilen.quasseldroid.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,6 +57,7 @@ import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
@@ -93,7 +95,7 @@ public class CoreConnService extends Service {
 
 	SharedPreferences preferences;
 
-	BufferCollection bufferCollection;
+	private List<Network> networks;
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -203,7 +205,6 @@ public class CoreConnService extends Service {
 		Boolean ssl = connectData.getBoolean("ssl");
 		Log.i(TAG, "Connecting to core: " + address + ":" + port
 				+ " with username " + username);
-		bufferCollection = new BufferCollection();
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
 	}
@@ -230,7 +231,7 @@ public class CoreConnService extends Service {
 
 	public void setLastSeen(int bufferId, int msgId) {
 		coreConn.requestSetLastMsgRead(bufferId, msgId);
-		bufferCollection.getBuffer(bufferId).setLastSeenMessage(msgId);
+		networks.getBuffer(bufferId).setLastSeenMessage(msgId);
 	}
 
 	public void setMarkerLine(int bufferId, int msgId) {
@@ -249,12 +250,8 @@ public class CoreConnService extends Service {
 		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
-	public BufferCollection getBufferList(Observer obs) {
-		if (bufferCollection == null)
-			return null;
-
-		bufferCollection.addObserver(obs);
-		return bufferCollection;
+	public List<Network> getNetworkList(Observer obs) {
+		return networks;
 	}
 
 	/**
@@ -537,6 +534,7 @@ public class CoreConnService extends Service {
 	 * read thread.
 	 */
 	class IncomingHandler extends Handler {
+
 		@Override
 		public void handleMessage(Message msg) {
 			if (msg == null) {
@@ -630,7 +628,7 @@ public class CoreConnService extends Service {
 				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
 				break;
 			case R.id.ADD_NETWORKS:
-				//TODO: NETWORKS ADD THEM
+				this.networks = (List<Network>)msg.obj;
 				break;
 			case R.id.SET_LAST_SEEN_TO_SERVICE:
 				/**

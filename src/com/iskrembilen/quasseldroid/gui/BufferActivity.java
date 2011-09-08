@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -59,6 +60,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.R;
 
@@ -203,7 +205,7 @@ public class BufferActivity extends ExpandableListActivity {
 //	}
 	
 	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
-		private BufferCollection bufferCollection;
+		private List<Network> networks;
 		private LayoutInflater inflater;
 		
 		public BufferListAdapter(Context context) {
@@ -211,13 +213,13 @@ public class BufferActivity extends ExpandableListActivity {
 
 		}
 		
-		public void setBuffers(BufferCollection buffers){
-			this.bufferCollection = buffers;
+		public void setNetworks(List<Network> networks){
+			this.networks = networks;
 			
-			if (buffers == null)
+			if (networks == null)
 				return;
-			
-			this.bufferCollection.addObserver(this);
+			for (Network network : networks)
+				network.addObserver(this);
 			notifyDataSetChanged();
 		}
 		
@@ -228,8 +230,7 @@ public class BufferActivity extends ExpandableListActivity {
 
 		@Override
 		public Buffer getChild(int groupPosition, int childPosition) {
-			// TODO Auto-generated method stub
-			return null;
+			return networks.get(groupPosition).getBuffers().getBuffer(childPosition);
 		}
 
 		@Override
@@ -285,25 +286,24 @@ public class BufferActivity extends ExpandableListActivity {
 
 		@Override
 		public int getChildrenCount(int groupPosition) {
-			if (bufferCollection==null) {
+			if (networks==null) {
 				return 0;
 			}else {
-				return bufferCollection.getBufferCount();
+				return networks.get(groupPosition).getBuffers().getBufferCount();
 			}
 		}
 
 		@Override
-		public Object getGroup(int groupPosition) {
-			// TODO Auto-generated method stub
-			return null;
+		public Network getGroup(int groupPosition) {
+			return networks.get(groupPosition);
 		}
 
 		@Override
 		public int getGroupCount() {
-			if (bufferCollection==null) {
+			if (networks==null) {
 				return 0;
 			}else {
-				return 1;
+				networks.size();
 			}
 		}
 
@@ -331,13 +331,14 @@ public class BufferActivity extends ExpandableListActivity {
 		}
 		
 		public void clearBuffers() {
-			bufferCollection = null;
+			networks = null;
+			notifyDataSetChanged();
 		}
 
 		public void stopObserving() {
-			if (bufferCollection == null) return;
-			bufferCollection.deleteObserver(this);
-			
+			if (networks == null) return;
+			for(Network network : networks)
+				network.deleteObserver(this);
 		}
 		
 	}
@@ -470,7 +471,7 @@ public class BufferActivity extends ExpandableListActivity {
 			boundConnService.registerStatusReceiver(statusReciver);
 
 			//Testing to see if i can add item to adapter in service
-			bufferListAdapter.setBuffers(boundConnService.getBufferList(bufferListAdapter));
+			bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 
 
 		}

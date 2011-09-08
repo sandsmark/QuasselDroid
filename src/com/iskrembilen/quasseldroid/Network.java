@@ -2,8 +2,10 @@ package com.iskrembilen.quasseldroid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
-public class Network {
+public class Network extends Observable implements Observer{
 	private int networkId;
 	private Buffer statusBuffer;
 	private String networkName;
@@ -72,9 +74,12 @@ public class Network {
 	public List<IrcUser> getUserList() {
 		return userList;
 	}
-	
-	
 
-	
 
+	@Override
+	public void update(Observable observable, Object data) {
+		setChanged();
+		notifyObservers();
+		
+	}
 }
