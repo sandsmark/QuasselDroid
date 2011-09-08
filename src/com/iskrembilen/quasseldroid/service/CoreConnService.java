@@ -547,7 +547,7 @@ public class CoreConnService extends Service {
 			Buffer buffer;
 			IrcMessage message;
 			switch (msg.what) {
-			case R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE:
+			case R.id.NEW_BACKLOGITEM_TO_SERVICE:
 				/**
 				 * New message on one buffer so update that buffer with the new
 				 * message
@@ -573,7 +573,7 @@ public class CoreConnService extends Service {
 					Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
 				}
 				break;
-			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
+			case R.id.NEW_MESSAGE_TO_SERVICE:
 				/**
 				 * New message on one buffer so update that buffer with the new
 				 * message
@@ -614,7 +614,7 @@ public class CoreConnService extends Service {
 				}
 				break;
 
-			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
+			case R.id.NEW_BUFFER_TO_SERVICE:
 				/**
 				 * New buffer received, so update out channel holder with the
 				 * new buffer
@@ -623,14 +623,14 @@ public class CoreConnService extends Service {
 				bufferCollection.addBuffer(buffer);
 
 				break;
-			case R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS:
+			case R.id.ADD_MULTIPLE_BUFFERS:
 				/**
 				 * Complete list of buffers received
 				 */
 				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
 				break;
 
-			case R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE:
+			case R.id.SET_LAST_SEEN_TO_SERVICE:
 				/**
 				 * Setting last seen message id in a buffer
 				 */
@@ -640,7 +640,7 @@ public class CoreConnService extends Service {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
 				break;
-			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
+			case R.id.SET_MARKERLINE_TO_SERVICE:
 				/**
 				 * Setting marker line message id in a buffer
 				 */
@@ -651,7 +651,7 @@ public class CoreConnService extends Service {
 				}
 				break;
 
-			case R.id.CORECONNECTION_CONNECTED:
+			case R.id.CONNECTED:
 				/**
 				 * CoreConn has connected to a core
 				 */
@@ -661,7 +661,7 @@ public class CoreConnService extends Service {
 				}
 				break;
 
-			case R.id.CORECONNECTION_LOST_CONNECTION:
+			case R.id.LOST_CONNECTION:
 				/**
 				 * Lost connection with core, update notification
 				 */
@@ -678,7 +678,7 @@ public class CoreConnService extends Service {
 				showNotification(false);
 				break;
 
-//			case R.id.CORECONNECTION_NEW_USERLIST_ADDED:
+//			case R.id.NEW_USERLIST_ADDED:
 //				/**
 //				 * Initial list of users
 //				 */
@@ -688,7 +688,7 @@ public class CoreConnService extends Service {
 //				}
 //				break;
 
-			case R.id.CORECONNECTION_NEW_USER_ADDED:
+			case R.id.NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
 				 */
@@ -696,32 +696,32 @@ public class CoreConnService extends Service {
 //				newUser(user);
 				break;
 
-			case R.id.CORECONNECTION_SET_BUFFER_ORDER:
+			case R.id.SET_BUFFER_ORDER:
 				/**
 				 * Buffer order changed so set the new one
 				 */
 				bufferCollection.getBuffer(msg.arg1).setOrder(msg.arg2);
 				break;
 
-			case R.id.CORECONNECTION_SET_BUFFER_TEMP_HIDDEN:
+			case R.id.SET_BUFFER_TEMP_HIDDEN:
 				/**
 				 * Buffer has been marked as temporary hidden, update buffer
 				 */
 				bufferCollection.getBuffer(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
 				break;
 
-			case R.id.CORECONNECTION_SET_BUFFER_PERM_HIDDEN:
+			case R.id.SET_BUFFER_PERM_HIDDEN:
 				/**
 				 * Buffer has been marked as permanently hidden, update buffer
 				 */
 				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
 				break;
 
-			case R.id.CORECONNECTION_INVALID_CERTIFICATE:
+			case R.id.INVALID_CERTIFICATE:
 				/**
 				 * Received a mismatching certificate
 				 */
-			case R.id.CORECONNECTION_NEW_CERTIFICATE:
+			case R.id.NEW_CERTIFICATE:
 				/**
 				 * Received a new, unseen certificate
 				 */
@@ -731,13 +731,13 @@ public class CoreConnService extends Service {
 					statusReceiver.send(CoreConnService.NEW_CERTIFICATE, bundle);
 				}
 				break;
-			case R.id.CORECONNECTION_SET_BUFFER_ACTIVE:
+			case R.id.SET_BUFFER_ACTIVE:
 				/**
 				 * Set buffer as active or parted
 				 */
 				bufferCollection.getBuffer(msg.arg1).setActive((Boolean)msg.obj);
 				break;
-			case R.id.CORECONNECTION_UNSUPPORTED_PROTOCOL:
+			case R.id.UNSUPPORTED_PROTOCOL:
 				/**
 				 * The protocol version of the core is not supported so tell user it is to old
 				 */

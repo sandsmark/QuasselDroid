@@ -439,7 +439,7 @@ public class CoreConnection {
 		}
 
 		//Send buffers to CoreConService
-		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
+		Message msg = service.getHandler().obtainMessage(R.id.ADD_MULTIPLE_BUFFERS);
 		msg.obj = buffers.values();
 		msg.sendToTarget();
 
@@ -463,7 +463,7 @@ public class CoreConnection {
 		Log.i(TAG, "Connected!");
 		connected = true;
 
-		msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_CONNECTED);
+		msg = service.getHandler().obtainMessage(R.id.CONNECTED);
 		msg.sendToTarget();
 	}
 
@@ -613,7 +613,7 @@ public class CoreConnection {
 			public void onFinish() {
 				Log.i(TAG, "Timer finished, disconnection from core");
 				CoreConnection.this.disconnect(); 
-				Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+				Message msg = service.getHandler().obtainMessage(R.id.LOST_CONNECTION);
 				msg.sendToTarget();
 			}
 		};
@@ -622,7 +622,7 @@ public class CoreConnection {
 			try {
 				doRun();
 			} catch (EmptyQVariantException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Protocol error!").sendToTarget();
+				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Protocol error!").sendToTarget();
 				e.printStackTrace();
 				disconnect();
 				return;
@@ -636,33 +636,33 @@ public class CoreConnection {
 				connect();
 				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			} catch (UnknownHostException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Unknown host!").sendToTarget();
+				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Unknown host!").sendToTarget();
 				return;
 			} catch (UnsupportedProtocolException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_UNSUPPORTED_PROTOCOL).sendToTarget();
+				service.getHandler().obtainMessage(R.id.UNSUPPORTED_PROTOCOL).sendToTarget();
 				Log.w(TAG, e);
 				disconnect();
 				return;
 			} catch (IOException e) {
 				if(e.getCause() instanceof NewCertificateException) {
-					service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
+					service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
 					disconnect();
 				}else{
-					service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting! " + e.getMessage()).sendToTarget();
+					service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "IO error while connecting! " + e.getMessage()).sendToTarget();
 					e.printStackTrace();
 					disconnect();
 				}
 				return;
 			} catch (CertificateException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
+				service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
 				disconnect();
 				return;
 			} catch (GeneralSecurityException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
+				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
 				disconnect();
 				return;
 			} catch (EmptyQVariantException e) {
-				service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION, "IO error while connecting!").sendToTarget();
+				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "IO error while connecting!").sendToTarget();
 				e.printStackTrace();
 				disconnect();
 				return;
@@ -678,7 +678,7 @@ public class CoreConnection {
 				} catch (IOException e) {
 					//TODO: not sure if this is really the best way to check if we are connected, by just waiting until it fails, but will have to do for now
 					CoreConnection.this.disconnect(); 
-					Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_LOST_CONNECTION);
+					Message msg = service.getHandler().obtainMessage(R.id.LOST_CONNECTION);
 					msg.sendToTarget();
 
 					System.err.println("IO error!");	
@@ -785,7 +785,7 @@ public class CoreConnection {
 								}
 							}
 
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USERLIST_ADDED);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
 
@@ -827,7 +827,7 @@ public class CoreConnection {
 							int bufferId = (Integer)lastSeen.get(i).getData();
 							int msgId = (Integer)lastSeen.get(i+1).getData();
 							if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
-								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
+								Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
 								msg.arg1 = bufferId;
 								msg.arg2 = msgId;
 								msg.sendToTarget();
@@ -843,7 +843,7 @@ public class CoreConnection {
 								int bufferId = (Integer)markerLines.get(i).getData();
 								int msgId = (Integer)markerLines.get(i+1).getData();
 								if (buffers.containsKey(bufferId)){
-									Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
+									Message msg = service.getHandler().obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
 									msg.arg1 = bufferId;
 									msg.arg2 = msgId;
 									msg.sendToTarget();
@@ -868,7 +868,7 @@ public class CoreConnection {
 						user.nick = (String) map.get("nick").getData();
 						user.channels = (List<String>) map.get("channels").getData();
 
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_USER_ADDED);
+						Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_ADDED);
 						msg.obj = (IrcUser) user;
 						msg.sendToTarget();
 					}
@@ -900,7 +900,7 @@ public class CoreConnection {
 								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
 								continue;
 							}
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_TEMP_HIDDEN);
+							Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
 							msg.arg1 = ((Integer) bufferId.getData());
 							msg.obj = true;
 							msg.sendToTarget();
@@ -911,7 +911,7 @@ public class CoreConnection {
 								Log.e(TAG, "TempList, dont't have buffer: " +bufferId.getData());
 								continue;
 							}
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_PERM_HIDDEN);
+							Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
 							msg.arg1 = ((Integer) bufferId.getData());
 							msg.obj = true;
 							msg.sendToTarget();
@@ -924,7 +924,7 @@ public class CoreConnection {
 								continue;
 							}
 							//buffers.get(bufferId.getData()).setOrder(order);
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ORDER);
+							Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
 							msg.arg1 = (Integer) bufferId.getData();
 							msg.arg2 = order;
 							msg.sendToTarget();
@@ -984,7 +984,7 @@ public class CoreConnection {
 						Collections.reverse(data); // Apparently, we receive them in the wrong order
 						// Send our the backlog messages to our listeners
 						for (QVariant<?> message: data) {
-							Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
 							msg.obj = (IrcMessage) message.getData();
 							msg.sendToTarget();
 						}
@@ -1022,7 +1022,7 @@ public class CoreConnection {
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE);
+						Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
 						msg.arg1 = bufferId;
 						msg.arg2 = msgId;
 						msg.sendToTarget();
@@ -1030,7 +1030,7 @@ public class CoreConnection {
 					} else if (className.equals("BufferSyncer") && function.equals("setMarkerLine")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE);
+						Message msg = service.getHandler().obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
 						msg.arg1 = bufferId;
 						msg.arg2 = msgId;
 						msg.sendToTarget();			
@@ -1060,7 +1060,7 @@ public class CoreConnection {
 					 */
 					if (functionName.equals("2displayMsg(Message)")) {
 						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
-						Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE);
+						Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
 						msg.obj = message;
 						msg.sendToTarget();
 
