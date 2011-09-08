@@ -55,6 +55,7 @@ import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.CoreInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
@@ -81,8 +82,8 @@ public class CoreConnection {
 
 	private Map<Integer, Buffer> buffers;
 	private Map<Integer, String> nicks;
-	private List<Integer> networks;
 	private CoreInfo coreInfo;
+	private Map<Integer, Network> networks;
 
 	private String address;
 	private int port;
@@ -391,24 +392,33 @@ public class CoreConnection {
 		}*/
 
 		Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
+		System.out.println(sessionState);
+		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
+		networks = new HashMap<Integer, Network>(networkIds.size());
+		for (QVariant<?> networkId: networkIds) {
+			Integer id = (Integer) networkId.getData();
+			networks.put(id, new Network(id));
+		}
+		
 		List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
 		buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
 		QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
 		ArrayList<Integer> bufferIds = new ArrayList<Integer>();
 		for (QVariant<?> bufferInfoQV: bufferInfos) {
 			BufferInfo bufferInfo = (BufferInfo)bufferInfoQV.getData();
-			buffers.put(bufferInfo.id, new Buffer(bufferInfo, dbHelper));
+			Buffer buffer = new Buffer(bufferInfo, dbHelper);
+			buffers.put(bufferInfo.id, buffer);
+			if(bufferInfo.type==BufferInfo.Type.StatusBuffer){
+				networks.get(bufferInfo.networkId).setStatusBuffer(buffer);
+			}else{
+				networks.get(bufferInfo.networkId).addBuffer(buffer);
+			}
 			bufferIds.add(bufferInfo.id);
 		}
 		dbHelper.open();
 		dbHelper.cleanupEvents(bufferIds.toArray(new Integer[bufferIds.size()]));
 		dbHelper.close();
 
-		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
-		networks = new ArrayList<Integer>(networkIds.size());
-		for (QVariant<?> networkId: networkIds) {
-			networks.add((Integer) networkId.getData());
-		}
 		// END SESSION INIT
 
 		// Now the fun part starts, where we play signal proxy
@@ -416,8 +426,8 @@ public class CoreConnection {
 		// START SIGNAL PROXY INIT
 
 		// We must do this here, to get network names early enough
-		for(int network: networks) {
-			sendInitRequest("Network", Integer.toString(network));
+		for(Network network: networks.values()) {
+			sendInitRequest("Network", Integer.toString(network.getId()));
 		}
 		sendInitRequest("BufferSyncer", "");
 		//sendInitRequest("BufferViewManager", ""); this is about where this should be, but don't know what it does
@@ -432,9 +442,6 @@ public class CoreConnection {
 		Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS);
 		msg.obj = buffers.values();
 		msg.sendToTarget();
-
-
-
 
 		TimerTask sendPingAction = new TimerTask() {
 			public void run() {
@@ -729,21 +736,14 @@ public class CoreConnection {
 					 */
 					if (className.equals("Network")) {
 						int networkId = Integer.parseInt(objectName);
+						Network network = networks.get(networkId);
 
 						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						// Store the network name and associated nick for "our" user
 						nicks.put(networkId, (String) initMap.get("myNick").getData());
 
-						for (Buffer buffer: buffers.values()) {
-							if (buffer.getInfo().networkId == networkId && buffer.getInfo().name.equals("")) {
-								buffer.setName((String) initMap.get("networkName").getData());
-								Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ACTIVE);
-								msg.arg1 = buffer.getInfo().id;
-								msg.obj = (Boolean)initMap.get("isConnected").getData();
-								msg.sendToTarget();
-								break;
-							}
-						}
+						network.setName((String) initMap.get("networkName").getData());
+						network.setConnected((Boolean)initMap.get("isConnected").getData());
 
 						// Horribly nested maps
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
@@ -774,15 +774,13 @@ public class CoreConnection {
 
 								ircUsers.add(user);
 							}
+							network.setUserList(ircUsers);
 
-							for (Buffer buffer: buffers.values()) {
-								if (buffer.getInfo().name.equals(chanName) && buffer.getInfo().networkId == networkId) {
+							for (Buffer buffer: network.getBufferList()) {
+								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
 									buffer.setNicks(users);
-									Message msg = service.getHandler().obtainMessage(R.id.CORECONNECTION_SET_BUFFER_ACTIVE);
-									msg.arg1 = buffer.getInfo().id;
-									msg.obj = true;
-									msg.sendToTarget();
+									buffer.setActive(true);
 									break;
 								}
 							}
@@ -792,6 +790,8 @@ public class CoreConnection {
 							msg.sendToTarget();
 
 						}
+						
+						
 
 						try {
 							//sendInitRequest("BufferSyncer", "");
@@ -815,7 +815,7 @@ public class CoreConnection {
 
 
 						long endWait = System.currentTimeMillis();
-						Log.e("TIMER", "NETWORK DONE: "+(endWait-startWait));
+						Log.w(TAG, "Network parsed, took: "+(endWait-startWait));
 						/*
 						 * An object that is used to synchronize metadata about buffers,
 						 * like the last seen message, marker lines, etc.

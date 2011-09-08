@@ -26,6 +26,7 @@ package com.iskrembilen.quasseldroid.gui;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.app.ExpandableListActivity;
 import android.app.ListActivity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -51,6 +52,7 @@ import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -60,7 +62,7 @@ import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.R;
 
-public class BufferActivity extends ListActivity{
+public class BufferActivity extends ExpandableListActivity {
 
 	private static final String TAG = BufferActivity.class.getSimpleName();
 
@@ -84,10 +86,10 @@ public class BufferActivity extends ListActivity{
 		//bufferList = new ArrayList<Buffer>();
 
 		bufferListAdapter = new BufferListAdapter(this);
-		getListView().setDividerHeight(0);
-		getListView().setCacheColorHint(0xffffffff);
+		getExpandableListView().setDividerHeight(0);
+		getExpandableListView().setCacheColorHint(0xffffffff);
 		setListAdapter(bufferListAdapter);
-		registerForContextMenu(getListView());
+//		registerForContextMenu(getListView());
 
 		statusReciver = new ResultReceiver(null) {
 
@@ -189,23 +191,162 @@ public class BufferActivity extends ListActivity{
 	
 
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
+//	@Override
+//	protected void onListItemClick(ListView l, View v, int position, long id) {
+//		super.onListItemClick(l, v, position, id);
+//
+//		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
+//		i.putExtra(BUFFER_ID_EXTRA, bufferListAdapter.getItem(position).getInfo().id);
+//		i.putExtra(BUFFER_NAME_EXTRA, bufferListAdapter.getItem(position).getInfo().name);
+//
+//		startActivity(i);
+//	}
+	
+	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
+		private BufferCollection bufferCollection;
+		private LayoutInflater inflater;
+		
+		public BufferListAdapter(Context context) {
+			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
-		i.putExtra(BUFFER_ID_EXTRA, bufferListAdapter.getItem(position).getInfo().id);
-		i.putExtra(BUFFER_NAME_EXTRA, bufferListAdapter.getItem(position).getInfo().name);
+		}
+		
+		public void setBuffers(BufferCollection buffers){
+			this.bufferCollection = buffers;
+			
+			if (buffers == null)
+				return;
+			
+			this.bufferCollection.addObserver(this);
+			notifyDataSetChanged();
+		}
+		
+		@Override
+		public void update(Observable observable, Object data) {
+			notifyDataSetChanged();
+		}
 
-		startActivity(i);
+		@Override
+		public Buffer getChild(int groupPosition, int childPosition) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public long getChildId(int groupPosition, int childPosition) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public View getChildView(int groupPosition, int childPosition,
+				boolean isLastChild, View convertView, ViewGroup parent) {
+			ViewHolder holder = null;
+			if (convertView==null) {
+				convertView = inflater.inflate(R.layout.buffer_list_item, null);
+				holder = new ViewHolder();
+				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder)convertView.getTag();
+			}
+			Buffer entry = getChild(groupPosition, childPosition);
+			switch (entry.getInfo().type) {
+			case StatusBuffer:
+				holder.bufferView.setText(entry.getInfo().name);
+				break;
+			case ChannelBuffer:
+				holder.bufferView.setText("\t" + entry.getInfo().name);
+				break;
+			case QueryBuffer:
+				String nick = entry.getInfo().name;
+//				if (boundConnService.hasUser(nick)){
+//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+//				}
+				holder.bufferView.setText("\t" + nick);
+				break;
+			case GroupBuffer:
+			case InvalidBuffer:
+				holder.bufferView.setText("XXXX " + entry.getInfo().name);
+			}				
+
+			//Check here if there are any unread messages in the buffer, and then set this color if there is
+			if (entry.hasUnseenHighlight()){
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
+			} else if (entry.hasUnreadMessage()){
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
+			} else if (entry.hasUnreadActivity()) {
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
+			}else {
+				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
+			}
+			return convertView;
+		}
+
+		@Override
+		public int getChildrenCount(int groupPosition) {
+			if (bufferCollection==null) {
+				return 0;
+			}else {
+				return bufferCollection.getBufferCount();
+			}
+		}
+
+		@Override
+		public Object getGroup(int groupPosition) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int getGroupCount() {
+			if (bufferCollection==null) {
+				return 0;
+			}else {
+				return 1;
+			}
+		}
+
+		@Override
+		public long getGroupId(int groupPosition) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public View getGroupView(int groupPosition, boolean isExpanded,
+				View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean hasStableIds() {
+			return true;
+		}
+
+		@Override
+		public boolean isChildSelectable(int groupPosition, int childPosition) {
+			return true;
+		}
+		
+		public void clearBuffers() {
+			bufferCollection = null;
+		}
+
+		public void stopObserving() {
+			if (bufferCollection == null) return;
+			bufferCollection.deleteObserver(this);
+			
+		}
+		
 	}
 
-
-	public class BufferListAdapter extends BaseAdapter implements Observer {
+	public class BufferListAdapter1 extends BaseAdapter implements Observer {
 		private BufferCollection bufferCollection;
 		private LayoutInflater inflater;
 
-		public BufferListAdapter(Context context) {
+		public BufferListAdapter1(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		}
@@ -261,9 +402,9 @@ public class BufferActivity extends ListActivity{
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
-				if (boundConnService.hasUser(nick)){
-					nick += boundConnService.getUser(nick).away ? " (Away)": "";
-				}
+//				if (boundConnService.hasUser(nick)){
+//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+//				}
 				holder.bufferView.setText("\t" + nick);
 				break;
 			case GroupBuffer:

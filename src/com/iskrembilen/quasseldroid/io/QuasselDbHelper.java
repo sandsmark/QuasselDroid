@@ -116,7 +116,7 @@ public class QuasselDbHelper {
 	public void deleteCore(long rowId) {
 		db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
 	}
-	
+
 	public boolean hasCores() {
 		Cursor c = db.query(CORE_TABLE, new String[] {KEY_ID,KEY_NAME}, null, null, null, null, null);
 		boolean hasCores;
@@ -125,7 +125,7 @@ public class QuasselDbHelper {
 		}else{
 			hasCores = false;
 		}
-		
+
 		if(c != null) c.close();
 		return hasCores;
 	}
@@ -178,7 +178,7 @@ public class QuasselDbHelper {
 		}
 		return ret;
 	}
-	
+
 	public void addHiddenEvent(IrcMessage.Type event, int bufferId) {
 		try {
 			ContentValues initialValues = new ContentValues();
@@ -209,14 +209,16 @@ public class QuasselDbHelper {
 	public IrcMessage.Type[] getHiddenEvents(int bufferId) throws SQLException {
 		Cursor cursor = db.query(true, HIDDENEVENTS_TABLE, new String[] {KEY_EVENT}, KEY_BUFFERID + "=" + bufferId, null, null, null, null, null);
 		IrcMessage.Type[] events = null;
-		if (cursor != null && cursor.getCount() > 0) {
-			events =  new IrcMessage.Type[cursor.getCount()];
-			cursor.moveToFirst();
-			int i = 0;
-			while (!cursor.isAfterLast()) {
-				events[i] = IrcMessage.Type.valueOf(cursor.getString(0));
-				i++;
-				cursor.moveToNext();
+		if (cursor != null) {
+			if(cursor.getCount() > 0) {
+				events =  new IrcMessage.Type[cursor.getCount()];
+				cursor.moveToFirst();
+				int i = 0;
+				while (!cursor.isAfterLast()) {
+					events[i] = IrcMessage.Type.valueOf(cursor.getString(0));
+					i++;
+					cursor.moveToNext();
+				}
 			}
 			cursor.close(); 
 		}

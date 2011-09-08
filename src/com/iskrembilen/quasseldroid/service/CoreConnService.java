@@ -94,7 +94,6 @@ public class CoreConnService extends Service {
 	SharedPreferences preferences;
 
 	BufferCollection bufferCollection;
-	HashMap<String, IrcUser> ircUsers = new HashMap<String, IrcUser>();
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -209,17 +208,17 @@ public class CoreConnService extends Service {
 				this);
 	}
 
-	public void newUser(IrcUser user) {
-		ircUsers.put(user.nick, user);
-	}
-
-	public IrcUser getUser(String nick) {
-		return ircUsers.get(nick);
-	}
-
-	public boolean hasUser(String nick) {
-		return ircUsers.containsKey(nick);
-	}
+//	public void newUser(IrcUser user) {
+//		ircUsers.put(user.nick, user);
+//	}
+//
+//	public IrcUser getUser(String nick) {
+//		return ircUsers.get(nick);
+//	}
+//
+//	public boolean hasUser(String nick) {
+//		return ircUsers.containsKey(nick);
+//	}
 
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
@@ -404,22 +403,22 @@ public class CoreConnService extends Service {
 				showNotification(false);
 				break;
 
-			case R.id.CORECONNECTION_NEW_USERLIST_ADDED:
-				/**
-				 * Initial list of users
-				 */
-				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
-				for (IrcUser user : users) {
-					newUser(user);
-				}
-				break;
+//			case R.id.CORECONNECTION_NEW_USERLIST_ADDED:
+//				/**
+//				 * Initial list of users
+//				 */
+//				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
+//				for (IrcUser user : users) {
+//					newUser(user);
+//				}
+//				break;
 
 			case R.id.CORECONNECTION_NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
 				 */
-				IrcUser user = (IrcUser) msg.obj;
-				newUser(user);
+//				IrcUser user = (IrcUser) msg.obj;
+//				newUser(user);
 				break;
 
 			case R.id.CORECONNECTION_SET_BUFFER_ORDER:

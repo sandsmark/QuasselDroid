@@ -39,7 +39,7 @@ public class BufferCollection extends Observable implements Observer {
 
 	private HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
 	private List<Buffer> bufferList = new ArrayList<Buffer>();
-	private List<Buffer> filteredList = new ArrayList<Buffer>();
+	private List<Buffer> filteredList = new ArrayList<Buffer>();	
 	
 	public static boolean orderAlphabetical = true;
 
