@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.service;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.DatabaseUtils;
 import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.Bundle;
@@ -272,11 +274,10 @@ public class CoreConnService extends Service {
 				Log.e(TAG, "Nick is null in check message for highlight");
 				return;
 			} else if(nick.equals("")) return;
-			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + networks.getNetworkById(buffer.getInfo().networkId).getNick() + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + Pattern.quote(networks.getNetworkById(buffer.getInfo().networkId).getNick()) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
-
 				// FIXME: move to somewhere proper
 			}
 		}
