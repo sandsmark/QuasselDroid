@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -39,15 +40,11 @@ public class BufferCollection extends Observable implements Observer {
 
 	private HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
 	private List<Buffer> bufferList = new ArrayList<Buffer>();
-	private List<Buffer> filteredList = new ArrayList<Buffer>();
+	private List<Buffer> filteredList = new ArrayList<Buffer>();	
 	
 	public static boolean orderAlphabetical = true;
 
 	private static final String TAG = BufferCollection.class.getSimpleName();
-
-	public BufferCollection() {
-
-	}
 
 	public void addBuffer(Buffer buffer) {
 		if (buffers.containsKey(buffer.getInfo().id)) {
@@ -143,5 +140,9 @@ public class BufferCollection extends Observable implements Observer {
 		this.setChanged();
 		notifyObservers();
 
+	}
+
+	public List<Buffer> getRawBufferList() {
+		return bufferList;
 	}
 }
