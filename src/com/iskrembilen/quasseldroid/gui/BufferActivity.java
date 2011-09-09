@@ -224,32 +224,29 @@ public class BufferActivity extends ExpandableListActivity {
 		
 		@Override
 		public void update(Observable observable, Object data) {
-			System.out.println("UPDATE");
 			notifyDataSetChanged();
 		}
 
 		@Override
 		public Buffer getChild(int groupPosition, int childPosition) {
-			return networks.getNetwork(groupPosition).getBuffers().getBuffer(childPosition);
+			return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
 		}
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			// TODO Auto-generated method stub
-			return 0;
+			return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
 		}
 
 		@Override
-		public View getChildView(int groupPosition, int childPosition,
-				boolean isLastChild, View convertView, ViewGroup parent) {
-			ViewHolder holder = null;
+		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+			ViewHolderChild holder = null;
 			if (convertView==null) {
 				convertView = inflater.inflate(R.layout.buffer_list_item, null);
-				holder = new ViewHolder();
+				holder = new ViewHolderChild();
 				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
 				convertView.setTag(holder);
 			} else {
-				holder = (ViewHolder)convertView.getTag();
+				holder = (ViewHolderChild)convertView.getTag();
 			}
 			Buffer entry = getChild(groupPosition, childPosition);
 			switch (entry.getInfo().type) {
@@ -309,15 +306,23 @@ public class BufferActivity extends ExpandableListActivity {
 
 		@Override
 		public long getGroupId(int groupPosition) {
-			// TODO Auto-generated method stub
-			return 0;
+			return networks.getNetwork(groupPosition).getId();
 		}
 
 		@Override
-		public View getGroupView(int groupPosition, boolean isExpanded,
-				View convertView, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			return null;
+		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+			ViewHolderGroup holder = null;
+			if (convertView==null) {
+				convertView = inflater.inflate(R.layout.buffer_list_item, null);
+				holder = new ViewHolderGroup();
+				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolderGroup)convertView.getTag();
+			}
+			Network entry = getGroup(groupPosition);
+			holder.bufferView.setText(entry.getName());
+			return convertView;
 		}
 
 		@Override
@@ -448,7 +453,10 @@ public class BufferActivity extends ExpandableListActivity {
 //		}
 //	}
 
-	public static class ViewHolder {
+	public static class ViewHolderChild {
+		public TextView bufferView;
+	}
+	public static class ViewHolderGroup {
 		public TextView bufferView;
 	}
 
