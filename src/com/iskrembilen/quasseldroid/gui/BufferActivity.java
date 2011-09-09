@@ -51,9 +51,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -75,7 +77,7 @@ public class BufferActivity extends ExpandableListActivity {
 	BufferListAdapter bufferListAdapter;
 
 	ResultReceiver statusReciver;
-	
+
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener listener;
 
@@ -92,7 +94,7 @@ public class BufferActivity extends ExpandableListActivity {
 		getExpandableListView().setDividerHeight(0);
 		getExpandableListView().setCacheColorHint(0xffffffff);
 		setListAdapter(bufferListAdapter);
-//		registerForContextMenu(getListView());
+		//		registerForContextMenu(getListView());
 
 		statusReciver = new ResultReceiver(null) {
 
@@ -103,7 +105,7 @@ public class BufferActivity extends ExpandableListActivity {
 			}
 
 		};
-		
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		listener =new OnSharedPreferenceChangeListener() {
 
@@ -136,7 +138,7 @@ public class BufferActivity extends ExpandableListActivity {
 		doUnbindService();
 		super.onStop();
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		preferences.unregisterOnSharedPreferenceChangeListener(listener);
@@ -190,30 +192,31 @@ public class BufferActivity extends ExpandableListActivity {
 			return super.onContextItemSelected(item);
 		}
 	}
-    
+
+
+
+	@Override
+	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+		openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
+		return true;
+	}
 	
-
-
-//	@Override
-//	protected void onListItemClick(ListView l, View v, int position, long id) {
-//		super.onListItemClick(l, v, position, id);
-//
-//		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
-//		i.putExtra(BUFFER_ID_EXTRA, bufferListAdapter.getItem(position).getInfo().id);
-//		i.putExtra(BUFFER_NAME_EXTRA, bufferListAdapter.getItem(position).getInfo().name);
-//
-//		startActivity(i);
-//	}
+	private void openBuffer(Buffer buffer) {
+		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
+		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
+		i.putExtra(BUFFER_NAME_EXTRA, buffer.getInfo().name);
+		startActivity(i);
+	}
 	
 	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
 		private NetworkCollection networks;
 		private LayoutInflater inflater;
-		
+
 		public BufferListAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		}
-		
+
 		public void setNetworks(NetworkCollection networks){
 			this.networks = networks;
 			if (networks == null)
@@ -221,7 +224,7 @@ public class BufferActivity extends ExpandableListActivity {
 			networks.addObserver(this);
 			notifyDataSetChanged();
 		}
-		
+
 		@Override
 		public void update(Observable observable, Object data) {
 			notifyDataSetChanged();
@@ -241,9 +244,10 @@ public class BufferActivity extends ExpandableListActivity {
 		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 			ViewHolderChild holder = null;
 			if (convertView==null) {
-				convertView = inflater.inflate(R.layout.buffer_list_item, null);
+				convertView = inflater.inflate(R.layout.buffer_child_item, null);
 				holder = new ViewHolderChild();
 				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderChild)convertView.getTag();
@@ -251,17 +255,15 @@ public class BufferActivity extends ExpandableListActivity {
 			Buffer entry = getChild(groupPosition, childPosition);
 			switch (entry.getInfo().type) {
 			case StatusBuffer:
-				holder.bufferView.setText(entry.getInfo().name);
-				break;
 			case ChannelBuffer:
-				holder.bufferView.setText("\t" + entry.getInfo().name);
+				holder.bufferView.setText(entry.getInfo().name);
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
-//				if (boundConnService.hasUser(nick)){
-//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
-//				}
-				holder.bufferView.setText("\t" + nick);
+				//				if (boundConnService.hasUser(nick)){
+				//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+				//				}
+				holder.bufferView.setText(nick);
 				break;
 			case GroupBuffer:
 			case InvalidBuffer:
@@ -313,15 +315,24 @@ public class BufferActivity extends ExpandableListActivity {
 		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 			ViewHolderGroup holder = null;
 			if (convertView==null) {
-				convertView = inflater.inflate(R.layout.buffer_list_item, null);
+				convertView = inflater.inflate(R.layout.buffer_group_item, null);
 				holder = new ViewHolderGroup();
 				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
+				holder.bufferView.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
+					}
+				});
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
 			Network entry = getGroup(groupPosition);
 			holder.bufferView.setText(entry.getName());
+			holder.bufferView.setTag(groupPosition); //Used in click listener to know what item this is
 			return convertView;
 		}
 
@@ -334,124 +345,124 @@ public class BufferActivity extends ExpandableListActivity {
 		public boolean isChildSelectable(int groupPosition, int childPosition) {
 			return true;
 		}
-		
+
 		public void clearBuffers() {
 			networks = null;
 			notifyDataSetChanged();
-		}
+		}	
 
 		public void stopObserving() {
 			if (networks == null) return;
 			for(Network network : networks.getNetworkList())
 				network.deleteObserver(this);
 		}
-		
+
 	}
 
-//	public class BufferListAdapter1 extends BaseAdapter implements Observer {
-//		private BufferCollection bufferCollection;
-//		private LayoutInflater inflater;
-//
-//		public BufferListAdapter1(Context context) {
-//			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//
-//		}
-//
-//		public void setBuffers(BufferCollection buffers){
-//			this.bufferCollection = buffers;
-//
-//			if (buffers == null)
-//				return;
-//
-//			this.bufferCollection.addObserver(this);
-//			notifyDataSetChanged();
-//		}
-//
-//		@Override
-//		public int getCount() {
-//			if (bufferCollection==null) {
-//				return 0;
-//			}else {
-//				return bufferCollection.getBufferCount();
-//			}
-//		}
-//
-//		@Override
-//		public Buffer getItem(int position) {
-//			return bufferCollection.getPos(position);
-//		}
-//
-//		@Override
-//		public long getItemId(int pos) {
-//			return bufferCollection.getPos(pos).getInfo().id;
-//		}
-//
-//		@Override
-//		public View getView(int position, View convertView, ViewGroup parent) {
-//			ViewHolder holder = null;
-//			if (convertView==null) {
-//				convertView = inflater.inflate(R.layout.buffer_list_item, null);
-//				holder = new ViewHolder();
-//				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-//				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
-//				convertView.setTag(holder);
-//			} else {
-//				holder = (ViewHolder)convertView.getTag();
-//			}
-//			Buffer entry = this.getItem(position);
-//			switch (entry.getInfo().type) {
-//			case StatusBuffer:
-//				holder.bufferView.setText(entry.getInfo().name);
-//				break;
-//			case ChannelBuffer:
-//				holder.bufferView.setText("\t" + entry.getInfo().name);
-//				break;
-//			case QueryBuffer:
-//				String nick = entry.getInfo().name;
-////				if (boundConnService.hasUser(nick)){
-////					nick += boundConnService.getUser(nick).away ? " (Away)": "";
-////				}
-//				holder.bufferView.setText("\t" + nick);
-//				break;
-//			case GroupBuffer:
-//			case InvalidBuffer:
-//				holder.bufferView.setText("XXXX " + entry.getInfo().name);
-//			}
-//
-//			if(!entry.isActive()) {
-//				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_parted_color));
-//			}else{
-//				//Check here if there are any unread messages in the buffer, and then set this color if there is
-//				if (entry.hasUnseenHighlight()){
-//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
-//				} else if (entry.hasUnreadMessage()){
-//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
-//				} else if (entry.hasUnreadActivity()) {
-//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
-//				}else {
-//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
-//				}
-//			}
-//
-//			return convertView;
-//		}
-//
-//		@Override
-//		public void update(Observable observable, Object data) {
-//			notifyDataSetChanged();
-//
-//		}
-//
-//		public void clearBuffers() {
-//			bufferCollection = null;
-//		}
-//
-//		public void stopObserving() {
-//			if (bufferCollection == null) return;
-//			bufferCollection.deleteObserver(this);
-//
-//		}
-//	}
+	//	public class BufferListAdapter1 extends BaseAdapter implements Observer {
+	//		private BufferCollection bufferCollection;
+	//		private LayoutInflater inflater;
+	//
+	//		public BufferListAdapter1(Context context) {
+	//			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	//
+	//		}
+	//
+	//		public void setBuffers(BufferCollection buffers){
+	//			this.bufferCollection = buffers;
+	//
+	//			if (buffers == null)
+	//				return;
+	//
+	//			this.bufferCollection.addObserver(this);
+	//			notifyDataSetChanged();
+	//		}
+	//
+	//		@Override
+	//		public int getCount() {
+	//			if (bufferCollection==null) {
+	//				return 0;
+	//			}else {
+	//				return bufferCollection.getBufferCount();
+	//			}
+	//		}
+	//
+	//		@Override
+	//		public Buffer getItem(int position) {
+	//			return bufferCollection.getPos(position);
+	//		}
+	//
+	//		@Override
+	//		public long getItemId(int pos) {
+	//			return bufferCollection.getPos(pos).getInfo().id;
+	//		}
+	//
+	//		@Override
+	//		public View getView(int position, View convertView, ViewGroup parent) {
+	//			ViewHolder holder = null;
+	//			if (convertView==null) {
+	//				convertView = inflater.inflate(R.layout.buffer_list_item, null);
+	//				holder = new ViewHolder();
+	//				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+	//				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
+	//				convertView.setTag(holder);
+	//			} else {
+	//				holder = (ViewHolder)convertView.getTag();
+	//			}
+	//			Buffer entry = this.getItem(position);
+	//			switch (entry.getInfo().type) {
+	//			case StatusBuffer:
+	//				holder.bufferView.setText(entry.getInfo().name);
+	//				break;
+	//			case ChannelBuffer:
+	//				holder.bufferView.setText("\t" + entry.getInfo().name);
+	//				break;
+	//			case QueryBuffer:
+	//				String nick = entry.getInfo().name;
+	////				if (boundConnService.hasUser(nick)){
+	////					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+	////				}
+	//				holder.bufferView.setText("\t" + nick);
+	//				break;
+	//			case GroupBuffer:
+	//			case InvalidBuffer:
+	//				holder.bufferView.setText("XXXX " + entry.getInfo().name);
+	//			}
+	//
+	//			if(!entry.isActive()) {
+	//				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_parted_color));
+	//			}else{
+	//				//Check here if there are any unread messages in the buffer, and then set this color if there is
+	//				if (entry.hasUnseenHighlight()){
+	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
+	//				} else if (entry.hasUnreadMessage()){
+	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
+	//				} else if (entry.hasUnreadActivity()) {
+	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
+	//				}else {
+	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
+	//				}
+	//			}
+	//
+	//			return convertView;
+	//		}
+	//
+	//		@Override
+	//		public void update(Observable observable, Object data) {
+	//			notifyDataSetChanged();
+	//
+	//		}
+	//
+	//		public void clearBuffers() {
+	//			bufferCollection = null;
+	//		}
+	//
+	//		public void stopObserving() {
+	//			if (bufferCollection == null) return;
+	//			bufferCollection.deleteObserver(this);
+	//
+	//		}
+	//	}
 
 	public static class ViewHolderChild {
 		public TextView bufferView;
