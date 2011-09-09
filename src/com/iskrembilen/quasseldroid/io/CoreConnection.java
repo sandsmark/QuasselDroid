@@ -779,17 +779,17 @@ public class CoreConnection {
 									break;
 								}
 							}
-							Message msg = service.getHandler().obtainMessage(R.id.ADD_NETWORKS);
-							msg.obj = networks.values();
-							msg.sendToTarget();
 
-							msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);
 							msg.obj = ircUsers;
 							msg.sendToTarget();
 
 						}
 						
-						
+						Log.i(TAG, "Sending network " + network.getName() + " to service");
+						Message msg = service.getHandler().obtainMessage(R.id.ADD_NETWORK);
+						msg.obj = network;
+						msg.sendToTarget();
 
 						try {
 							//sendInitRequest("BufferSyncer", "");

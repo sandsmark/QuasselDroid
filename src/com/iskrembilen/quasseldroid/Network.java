@@ -42,6 +42,7 @@ public class Network extends Observable implements Observer{
 
 	public void addBuffer(Buffer buffer) {
 		buffers.addBuffer(buffer);
+		buffer.addObserver(this);
 	}
 
 

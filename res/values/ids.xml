@@ -40,6 +40,6 @@
 <item type="id" name="DIALOG_NEW_CERTIFICATE"></item>
 <item type="id" name="NOTIFICATION_HIGHLIGHT"></item>
 <item type="id" name="UNSUPPORTED_PROTOCOL"></item>
-<item type="id" name="ADD_NETWORKS"></item>
+<item type="id" name="ADD_NETWORK"></item>
 
 </resources>

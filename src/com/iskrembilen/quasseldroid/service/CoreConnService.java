@@ -81,7 +81,7 @@ public class CoreConnService extends Service {
 	public static final int CONNECTION_CONNECTED = 1;
 	public static final int NEW_CERTIFICATE = 2;
 	public static final int UNSUPPORTED_PROTOCOL = 3;
-	
+
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
 
@@ -211,17 +211,17 @@ public class CoreConnService extends Service {
 				this);
 	}
 
-//	public void newUser(IrcUser user) {
-//		ircUsers.put(user.nick, user);
-//	}
-//
-//	public IrcUser getUser(String nick) {
-//		return ircUsers.get(nick);
-//	}
-//
-//	public boolean hasUser(String nick) {
-//		return ircUsers.containsKey(nick);
-//	}
+	//	public void newUser(IrcUser user) {
+	//		ircUsers.put(user.nick, user);
+	//	}
+	//
+	//	public IrcUser getUser(String nick) {
+	//		return ircUsers.get(nick);
+	//	}
+	//
+	//	public boolean hasUser(String nick) {
+	//		return ircUsers.containsKey(nick);
+	//	}
 
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
@@ -304,44 +304,44 @@ public class CoreConnService extends Service {
 		final char normalIndicator = 15;
 		final char italicIndicator = 29;
 		final char underlineIndicator = 31;
-		
+
 		String content = message.content.toString();
 
 		if (content.indexOf(boldIndicator) == -1 
-			&& content.indexOf(italicIndicator) == -1
-			&& content.indexOf(underlineIndicator) == -1)
+				&& content.indexOf(italicIndicator) == -1
+				&& content.indexOf(underlineIndicator) == -1)
 			return;
-		
+
 		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
-		
+
 		while (true) {
 			content = newString.toString();
-			
+
 			int start = content.indexOf(boldIndicator);
 			int end = content.indexOf(boldIndicator, start+1);
 			int style = Typeface.BOLD;
-			
+
 			if (start == -1) {
 				start = content.indexOf(italicIndicator);
 				end = content.indexOf(italicIndicator, start+1);
 				style = Typeface.ITALIC;
 			}
-			
+
 			if (start == -1) {
 				start = content.indexOf(underlineIndicator);
 				end = content.indexOf(underlineIndicator, start+1);
 				style = -1;
 			}
-			
+
 			if (start == -1)
 				break;
-			
+
 			if (end == -1)
 				end = content.indexOf(normalIndicator, start);
-			
+
 			if (end == -1)
 				end = content.length()-1;
-			
+
 			if(start==end) {
 				newString.delete(start, start+1);
 				break;
@@ -352,18 +352,18 @@ public class CoreConnService extends Service {
 			} else {
 				newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 			}
-			
+
 			if (content.charAt(end) == boldIndicator
-				|| content.charAt(end) == italicIndicator
-				|| content.charAt(end) == normalIndicator
-				|| content.charAt(end) == underlineIndicator)
+					|| content.charAt(end) == italicIndicator
+					|| content.charAt(end) == normalIndicator
+					|| content.charAt(end) == underlineIndicator)
 				newString.delete(end, end+1);
-			
+
 			newString.delete(start, start+1);
 		}
 		message.content = newString;
 	}
-	
+
 	/**
 	 * Parse mIRC color codes in IrcMessage
 	 */
@@ -377,7 +377,7 @@ public class CoreConnService extends Service {
 		String content = message.content.toString();
 		if (content.indexOf(formattingIndicator) == -1)
 			return;
-		
+
 		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
 
 
@@ -404,7 +404,7 @@ public class CoreConnService extends Service {
 						end += 1;
 					}
 				}
-				
+
 				if (content.charAt(end) == ',') {
 					end++;
 
@@ -421,10 +421,10 @@ public class CoreConnService extends Service {
 			}
 			int length = end - start;
 			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
-			
+
 			if (endOfSpan <= 0) // check for malformed messages
 				endOfSpan = content.length() - length;
-			
+
 			newString.delete(start, end);
 			if (fg != -1) {
 				newString.setSpan(new ForegroundColorSpan(getResources()
@@ -530,7 +530,7 @@ public class CoreConnService extends Service {
 	public void unregisterStatusReceiver(ResultReceiver resultReceiver) {
 		statusReceivers.remove(resultReceiver);
 	}
-	
+
 	/**
 	 * Handler of incoming messages from CoreConnection, since it's in another
 	 * read thread.
@@ -627,14 +627,12 @@ public class CoreConnService extends Service {
 				/**
 				 * Complete list of buffers received
 				 */
-				 for (Buffer tmp : (Collection<Buffer>) msg.obj) {
-					 networks.addBuffer(tmp);
-				 }
-				break;
-			case R.id.ADD_NETWORKS:
-				for(Network network : (Collection<Network>)msg.obj) {
-					networks.addNetwork(network);
+				for (Buffer tmp : (Collection<Buffer>) msg.obj) {
+					networks.addBuffer(tmp);
 				}
+				break;
+			case R.id.ADD_NETWORK:
+				networks.addNetwork((Network)msg.obj);
 				break;
 			case R.id.SET_LAST_SEEN_TO_SERVICE:
 				/**
@@ -675,7 +673,7 @@ public class CoreConnService extends Service {
 				 */
 				for (ResultReceiver statusReceiver : statusReceivers) {
 					if (msg.obj != null) { // Have description of what is wrong,
-											// used only for login atm
+						// used only for login atm
 						Bundle bundle = new Bundle();
 						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
 						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
@@ -686,22 +684,22 @@ public class CoreConnService extends Service {
 				showNotification(false);
 				break;
 
-//			case R.id.NEW_USERLIST_ADDED:
-//				/**
-//				 * Initial list of users
-//				 */
-//				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
-//				for (IrcUser user : users) {
-//					newUser(user);
-//				}
-//				break;
+				//			case R.id.NEW_USERLIST_ADDED:
+				//				/**
+				//				 * Initial list of users
+				//				 */
+				//				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
+				//				for (IrcUser user : users) {
+				//					newUser(user);
+				//				}
+				//				break;
 
 			case R.id.NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
 				 */
-//				IrcUser user = (IrcUser) msg.obj;
-//				newUser(user);
+				//				IrcUser user = (IrcUser) msg.obj;
+				//				newUser(user);
 				break;
 
 			case R.id.SET_BUFFER_ORDER:

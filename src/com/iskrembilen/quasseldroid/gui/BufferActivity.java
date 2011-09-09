@@ -216,16 +216,15 @@ public class BufferActivity extends ExpandableListActivity {
 		
 		public void setNetworks(NetworkCollection networks){
 			this.networks = networks;
-			
 			if (networks == null)
 				return;
-			for (Network network : networks.getNetworkList())
-				network.addObserver(this);
+			networks.addObserver(this);
 			notifyDataSetChanged();
 		}
 		
 		@Override
 		public void update(Observable observable, Object data) {
+			System.out.println("UPDATE");
 			notifyDataSetChanged();
 		}
 
