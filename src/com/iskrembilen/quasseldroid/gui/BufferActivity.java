@@ -61,6 +61,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.Network;
+import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.R;
 
@@ -166,7 +167,7 @@ public class BufferActivity extends ExpandableListActivity {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		int bufferId = (int) ((AdapterView.AdapterContextMenuInfo)menuInfo).id;
-		if (bufferListAdapter.bufferCollection.getBuffer(bufferId).isActive()) {
+		if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
 			menu.add(Menu.NONE, R.id.CONTEXT_MENU_PART, Menu.NONE, "Part");			
 		}else{
 			menu.add(Menu.NONE, R.id.CONTEXT_MENU_JOIN, Menu.NONE, "Join");
@@ -180,10 +181,10 @@ public class BufferActivity extends ExpandableListActivity {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		switch (item.getItemId()) {
 		case R.id.CONTEXT_MENU_JOIN:
-			boundConnService.sendMessage((int)info.id, "/join "+bufferListAdapter.bufferCollection.getBuffer((int)info.id).getInfo().name);
+			boundConnService.sendMessage((int)info.id, "/join "+bufferListAdapter.networks.getBufferById((int)info.id).getInfo().name);
 			return true;
 		case R.id.CONTEXT_MENU_PART:
-			boundConnService.sendMessage((int)info.id, "/part "+bufferListAdapter.bufferCollection.getBuffer((int)info.id).getInfo().name);
+			boundConnService.sendMessage((int)info.id, "/part "+bufferListAdapter.networks.getBufferById((int)info.id).getInfo().name);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -205,7 +206,7 @@ public class BufferActivity extends ExpandableListActivity {
 //	}
 	
 	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
-		private List<Network> networks;
+		private NetworkCollection networks;
 		private LayoutInflater inflater;
 		
 		public BufferListAdapter(Context context) {
@@ -213,12 +214,12 @@ public class BufferActivity extends ExpandableListActivity {
 
 		}
 		
-		public void setNetworks(List<Network> networks){
+		public void setNetworks(NetworkCollection networks){
 			this.networks = networks;
 			
 			if (networks == null)
 				return;
-			for (Network network : networks)
+			for (Network network : networks.getNetworkList())
 				network.addObserver(this);
 			notifyDataSetChanged();
 		}
@@ -230,7 +231,7 @@ public class BufferActivity extends ExpandableListActivity {
 
 		@Override
 		public Buffer getChild(int groupPosition, int childPosition) {
-			return networks.get(groupPosition).getBuffers().getBuffer(childPosition);
+			return networks.getNetwork(groupPosition).getBuffers().getBuffer(childPosition);
 		}
 
 		@Override
@@ -289,13 +290,13 @@ public class BufferActivity extends ExpandableListActivity {
 			if (networks==null) {
 				return 0;
 			}else {
-				return networks.get(groupPosition).getBuffers().getBufferCount();
+				return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
 			}
 		}
 
 		@Override
 		public Network getGroup(int groupPosition) {
-			return networks.get(groupPosition);
+			return networks.getNetwork(groupPosition);
 		}
 
 		@Override
@@ -303,7 +304,7 @@ public class BufferActivity extends ExpandableListActivity {
 			if (networks==null) {
 				return 0;
 			}else {
-				networks.size();
+				return networks.size();
 			}
 		}
 
@@ -337,116 +338,116 @@ public class BufferActivity extends ExpandableListActivity {
 
 		public void stopObserving() {
 			if (networks == null) return;
-			for(Network network : networks)
+			for(Network network : networks.getNetworkList())
 				network.deleteObserver(this);
 		}
 		
 	}
 
-	public class BufferListAdapter1 extends BaseAdapter implements Observer {
-		private BufferCollection bufferCollection;
-		private LayoutInflater inflater;
-
-		public BufferListAdapter1(Context context) {
-			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-		}
-
-		public void setBuffers(BufferCollection buffers){
-			this.bufferCollection = buffers;
-
-			if (buffers == null)
-				return;
-
-			this.bufferCollection.addObserver(this);
-			notifyDataSetChanged();
-		}
-
-		@Override
-		public int getCount() {
-			if (bufferCollection==null) {
-				return 0;
-			}else {
-				return bufferCollection.getBufferCount();
-			}
-		}
-
-		@Override
-		public Buffer getItem(int position) {
-			return bufferCollection.getPos(position);
-		}
-
-		@Override
-		public long getItemId(int pos) {
-			return bufferCollection.getPos(pos).getInfo().id;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder holder = null;
-			if (convertView==null) {
-				convertView = inflater.inflate(R.layout.buffer_list_item, null);
-				holder = new ViewHolder();
-				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolder)convertView.getTag();
-			}
-			Buffer entry = this.getItem(position);
-			switch (entry.getInfo().type) {
-			case StatusBuffer:
-				holder.bufferView.setText(entry.getInfo().name);
-				break;
-			case ChannelBuffer:
-				holder.bufferView.setText("\t" + entry.getInfo().name);
-				break;
-			case QueryBuffer:
-				String nick = entry.getInfo().name;
-//				if (boundConnService.hasUser(nick)){
-//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+//	public class BufferListAdapter1 extends BaseAdapter implements Observer {
+//		private BufferCollection bufferCollection;
+//		private LayoutInflater inflater;
+//
+//		public BufferListAdapter1(Context context) {
+//			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//
+//		}
+//
+//		public void setBuffers(BufferCollection buffers){
+//			this.bufferCollection = buffers;
+//
+//			if (buffers == null)
+//				return;
+//
+//			this.bufferCollection.addObserver(this);
+//			notifyDataSetChanged();
+//		}
+//
+//		@Override
+//		public int getCount() {
+//			if (bufferCollection==null) {
+//				return 0;
+//			}else {
+//				return bufferCollection.getBufferCount();
+//			}
+//		}
+//
+//		@Override
+//		public Buffer getItem(int position) {
+//			return bufferCollection.getPos(position);
+//		}
+//
+//		@Override
+//		public long getItemId(int pos) {
+//			return bufferCollection.getPos(pos).getInfo().id;
+//		}
+//
+//		@Override
+//		public View getView(int position, View convertView, ViewGroup parent) {
+//			ViewHolder holder = null;
+//			if (convertView==null) {
+//				convertView = inflater.inflate(R.layout.buffer_list_item, null);
+//				holder = new ViewHolder();
+//				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+//				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
+//				convertView.setTag(holder);
+//			} else {
+//				holder = (ViewHolder)convertView.getTag();
+//			}
+//			Buffer entry = this.getItem(position);
+//			switch (entry.getInfo().type) {
+//			case StatusBuffer:
+//				holder.bufferView.setText(entry.getInfo().name);
+//				break;
+//			case ChannelBuffer:
+//				holder.bufferView.setText("\t" + entry.getInfo().name);
+//				break;
+//			case QueryBuffer:
+//				String nick = entry.getInfo().name;
+////				if (boundConnService.hasUser(nick)){
+////					nick += boundConnService.getUser(nick).away ? " (Away)": "";
+////				}
+//				holder.bufferView.setText("\t" + nick);
+//				break;
+//			case GroupBuffer:
+//			case InvalidBuffer:
+//				holder.bufferView.setText("XXXX " + entry.getInfo().name);
+//			}
+//
+//			if(!entry.isActive()) {
+//				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_parted_color));
+//			}else{
+//				//Check here if there are any unread messages in the buffer, and then set this color if there is
+//				if (entry.hasUnseenHighlight()){
+//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
+//				} else if (entry.hasUnreadMessage()){
+//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
+//				} else if (entry.hasUnreadActivity()) {
+//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
+//				}else {
+//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
 //				}
-				holder.bufferView.setText("\t" + nick);
-				break;
-			case GroupBuffer:
-			case InvalidBuffer:
-				holder.bufferView.setText("XXXX " + entry.getInfo().name);
-			}
-
-			if(!entry.isActive()) {
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_parted_color));
-			}else{
-				//Check here if there are any unread messages in the buffer, and then set this color if there is
-				if (entry.hasUnseenHighlight()){
-					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
-				} else if (entry.hasUnreadMessage()){
-					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
-				} else if (entry.hasUnreadActivity()) {
-					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
-				}else {
-					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
-				}
-			}
-
-			return convertView;
-		}
-
-		@Override
-		public void update(Observable observable, Object data) {
-			notifyDataSetChanged();
-
-		}
-
-		public void clearBuffers() {
-			bufferCollection = null;
-		}
-
-		public void stopObserving() {
-			if (bufferCollection == null) return;
-			bufferCollection.deleteObserver(this);
-
-		}
-	}
+//			}
+//
+//			return convertView;
+//		}
+//
+//		@Override
+//		public void update(Observable observable, Object data) {
+//			notifyDataSetChanged();
+//
+//		}
+//
+//		public void clearBuffers() {
+//			bufferCollection = null;
+//		}
+//
+//		public void stopObserving() {
+//			if (bufferCollection == null) return;
+//			bufferCollection.deleteObserver(this);
+//
+//		}
+//	}
 
 	public static class ViewHolder {
 		public TextView bufferView;

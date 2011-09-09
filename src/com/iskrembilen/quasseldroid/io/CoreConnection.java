@@ -780,7 +780,7 @@ public class CoreConnection {
 								}
 							}
 							Message msg = service.getHandler().obtainMessage(R.id.ADD_NETWORKS);
-							msg.obj = networks;
+							msg.obj = networks.values();
 							msg.sendToTarget();
 
 							msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);

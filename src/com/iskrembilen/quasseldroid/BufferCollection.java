@@ -46,10 +46,6 @@ public class BufferCollection extends Observable implements Observer {
 
 	private static final String TAG = BufferCollection.class.getSimpleName();
 
-	public BufferCollection() {
-
-	}
-
 	public void addBuffer(Buffer buffer) {
 		if (buffers.containsKey(buffer.getInfo().id)) {
 			Log.e(TAG, "Getting buffer already have: " + buffer.getInfo().name);

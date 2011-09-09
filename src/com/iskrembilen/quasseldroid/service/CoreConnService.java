@@ -58,6 +58,7 @@ import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
+import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
@@ -95,7 +96,7 @@ public class CoreConnService extends Service {
 
 	SharedPreferences preferences;
 
-	private List<Network> networks;
+	private NetworkCollection networks;
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -205,6 +206,7 @@ public class CoreConnService extends Service {
 		Boolean ssl = connectData.getBoolean("ssl");
 		Log.i(TAG, "Connecting to core: " + address + ":" + port
 				+ " with username " + username);
+		networks = new NetworkCollection();
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
 	}
@@ -231,18 +233,18 @@ public class CoreConnService extends Service {
 
 	public void setLastSeen(int bufferId, int msgId) {
 		coreConn.requestSetLastMsgRead(bufferId, msgId);
-		networks.getBuffer(bufferId).setLastSeenMessage(msgId);
+		networks.getBufferById(bufferId).setLastSeenMessage(msgId);
 	}
 
 	public void setMarkerLine(int bufferId, int msgId) {
 		coreConn.requestSetMarkerLine(bufferId, msgId);
-		bufferCollection.getBuffer(bufferId).setMarkerLineMessage(msgId);
+		networks.getBufferById(bufferId).setMarkerLineMessage(msgId);
 	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
-		bufferCollection.getBuffer(bufferId).addObserver(obs);
-		// coreConn.requestBacklog(bufferId);
-		return bufferCollection.getBuffer(bufferId);
+		Buffer buffer = networks.getBufferById(bufferId);
+		buffer.addObserver(obs);
+		return buffer;
 	}
 
 	public void getMoreBacklog(int bufferId, int amount){
@@ -250,7 +252,7 @@ public class CoreConnService extends Service {
 		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
-	public List<Network> getNetworkList(Observer obs) {
+	public NetworkCollection getNetworkList(Observer obs) {
 		return networks;
 	}
 
@@ -551,7 +553,7 @@ public class CoreConnService extends Service {
 				 * message
 				 */
 				message = (IrcMessage) msg.obj;
-				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
+				buffer = networks.getBufferById(message.bufferInfo.id);
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null:" + message);
 					return;
@@ -577,7 +579,7 @@ public class CoreConnService extends Service {
 				 * message
 				 */
 				message = (IrcMessage) msg.obj;
-				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
+				buffer = networks.getBufferById(message.bufferInfo.id);
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null: " + message);
 					return;
@@ -618,24 +620,29 @@ public class CoreConnService extends Service {
 				 * new buffer
 				 */
 				buffer = (Buffer) msg.obj;
-				bufferCollection.addBuffer(buffer);
+				networks.addBuffer(buffer);
 
 				break;
 			case R.id.ADD_MULTIPLE_BUFFERS:
 				/**
 				 * Complete list of buffers received
 				 */
-				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
+				 for (Buffer tmp : (Collection<Buffer>) msg.obj) {
+					 networks.addBuffer(tmp);
+				 }
 				break;
 			case R.id.ADD_NETWORKS:
-				this.networks = (List<Network>)msg.obj;
+				for(Network network : (Collection<Network>)msg.obj) {
+					networks.addNetwork(network);
+				}
 				break;
 			case R.id.SET_LAST_SEEN_TO_SERVICE:
 				/**
 				 * Setting last seen message id in a buffer
 				 */
-				if (bufferCollection.hasBuffer(msg.arg1)) {
-					bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(msg.arg2);
+				buffer = networks.getBufferById(msg.arg1);
+				if (buffer != null) {
+					buffer.setLastSeenMessage(msg.arg2);
 				} else {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
@@ -644,8 +651,9 @@ public class CoreConnService extends Service {
 				/**
 				 * Setting marker line message id in a buffer
 				 */
-				if (bufferCollection.hasBuffer(msg.arg1)) {
-					bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(msg.arg2);
+				buffer = networks.getBufferById(msg.arg1);
+				if (buffer != null) {
+					buffer.setMarkerLineMessage(msg.arg2);
 				} else {
 					Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
 				}
@@ -700,21 +708,21 @@ public class CoreConnService extends Service {
 				/**
 				 * Buffer order changed so set the new one
 				 */
-				bufferCollection.getBuffer(msg.arg1).setOrder(msg.arg2);
+				networks.getBufferById(msg.arg1).setOrder(msg.arg2);
 				break;
 
 			case R.id.SET_BUFFER_TEMP_HIDDEN:
 				/**
 				 * Buffer has been marked as temporary hidden, update buffer
 				 */
-				bufferCollection.getBuffer(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
+				networks.getBufferById(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
 				break;
 
 			case R.id.SET_BUFFER_PERM_HIDDEN:
 				/**
 				 * Buffer has been marked as permanently hidden, update buffer
 				 */
-				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
+				networks.getBufferById(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
 				break;
 
 			case R.id.INVALID_CERTIFICATE:
@@ -735,7 +743,7 @@ public class CoreConnService extends Service {
 				/**
 				 * Set buffer as active or parted
 				 */
-				bufferCollection.getBuffer(msg.arg1).setActive((Boolean)msg.obj);
+				networks.getBufferById(msg.arg1).setActive((Boolean)msg.obj);
 				break;
 			case R.id.UNSUPPORTED_PROTOCOL:
 				/**
