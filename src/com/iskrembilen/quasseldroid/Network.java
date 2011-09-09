@@ -12,6 +12,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private Boolean isConnected;
 	private BufferCollection buffers;
 	private List<IrcUser> userList;
+	private String nick;
 	
 	private boolean open;
 
@@ -102,5 +103,15 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public boolean isOpen() {
 		return open;
+	}
+
+
+	public String getNick() {
+		return nick;
+	}
+
+
+	public void setNick(String nick) {
+		this.nick = nick;
 	}
 }

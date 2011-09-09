@@ -35,6 +35,14 @@ public class NetworkCollection extends Observable implements Observer {
 		return null;
 	}
 	
+	public Network getNetworkById(int networkId) {
+		for(Network network : networkList) {
+			if(network.getId() == networkId)
+				return network;
+		}
+		return null;
+	}
+	
 	public void addBuffer(Buffer buffer) {
 		int id = buffer.getInfo().networkId;
 		for(Network network : networkList) {

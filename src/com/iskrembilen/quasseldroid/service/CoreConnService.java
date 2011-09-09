@@ -267,12 +267,12 @@ public class CoreConnService extends Service {
 	 */
 	public void checkMessageForHighlight(Buffer buffer, IrcMessage message) {
 		if (message.type == IrcMessage.Type.Plain) {
-			String nick = coreConn.getNick(buffer.getInfo().networkId);
+			String nick = networks.getNetworkById(buffer.getInfo().networkId).getNick();
 			if(nick == null) {
 				Log.e(TAG, "Nick is null in check message for highlight");
 				return;
 			} else if(nick.equals("")) return;
-			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + coreConn.getNick(buffer.getInfo().networkId) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + networks.getNetworkById(buffer.getInfo().networkId).getNick() + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
@@ -582,7 +582,7 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(message.bufferInfo.id);
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null: " + message);
-					return;
+					return;	
 				}
 
 				if (!buffer.hasMessage(message)) {

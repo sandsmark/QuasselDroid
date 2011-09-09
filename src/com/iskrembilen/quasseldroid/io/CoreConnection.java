@@ -81,7 +81,6 @@ public class CoreConnection {
 	private QDataInputStream inStream;
 
 	private Map<Integer, Buffer> buffers;
-	private Map<Integer, String> nicks;
 	private CoreInfo coreInfo;
 	private Map<Integer, Network> networks;
 
@@ -107,8 +106,6 @@ public class CoreConnection {
 		this.ssl = ssl;
 		this.service = parent;
 
-		this.nicks = new HashMap<Integer, String>();
-
 		this.connected = false;
 
 		readThread = new ReadThread();
@@ -126,15 +123,6 @@ public class CoreConnection {
 		else {
 			return false;
 		}
-	}
-
-	/**
-	 * Gets the users own nick on a given network.
-	 * @param networkId the network to get the nick for
-	 * @return the nick of the user
-	 */
-	public String getNick(int networkId) {
-		return nicks.get(networkId);
 	}
 
 	/**
@@ -736,7 +724,7 @@ public class CoreConnection {
 
 						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						// Store the network name and associated nick for "our" user
-						nicks.put(networkId, (String) initMap.get("myNick").getData());
+						network.setNick((String) initMap.get("myNick").getData());
 
 						network.setName((String) initMap.get("networkName").getData());
 						network.setConnected((Boolean)initMap.get("isConnected").getData());
