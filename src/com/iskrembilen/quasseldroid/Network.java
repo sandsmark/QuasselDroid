@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class Network extends Observable implements Observer{
+public class Network extends Observable implements Observer, Comparable<Network> {
 	private int networkId;
 	private Buffer statusBuffer;
 	private String networkName;
@@ -82,5 +82,11 @@ public class Network extends Observable implements Observer{
 		setChanged();
 		notifyObservers();
 		
+	}
+
+
+	@Override
+	public int compareTo(Network another) {
+		return BufferUtils.compareBuffers(this.getStatusBuffer(), another.getStatusBuffer());
 	}
 }
