@@ -201,6 +201,16 @@ public class BufferActivity extends ExpandableListActivity {
 		return true;
 	}
 	
+	@Override
+	public void onGroupExpand(int groupPosition) {
+		bufferListAdapter.getGroup(groupPosition).setOpen(true);
+	}
+	
+	@Override
+	public void onGroupCollapse(int groupPosition) {
+		bufferListAdapter.getGroup(groupPosition).setOpen(false);
+	}
+	
 	private void openBuffer(Buffer buffer) {
 		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
 		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
@@ -333,6 +343,8 @@ public class BufferActivity extends ExpandableListActivity {
 			Network entry = getGroup(groupPosition);
 			holder.bufferView.setText(entry.getName());
 			holder.bufferView.setTag(groupPosition); //Used in click listener to know what item this is
+			if(entry.isOpen()) getExpandableListView().expandGroup(groupPosition);
+			else getExpandableListView().collapseGroup(groupPosition);
 			return convertView;
 		}
 

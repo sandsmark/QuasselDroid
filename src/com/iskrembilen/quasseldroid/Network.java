@@ -12,6 +12,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private Boolean isConnected;
 	private BufferCollection buffers;
 	private List<IrcUser> userList;
+	
+	private boolean open;
 
 	
 
@@ -20,6 +22,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		this.networkId = networkId;
 		userList = new ArrayList<IrcUser>();
 		buffers = new BufferCollection();
+		
+		open=true;
 	}
 	
 	
@@ -88,5 +92,15 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	@Override
 	public int compareTo(Network another) {
 		return BufferUtils.compareBuffers(this.getStatusBuffer(), another.getStatusBuffer());
+	}
+
+
+	public void setOpen(boolean open) {
+		this.open = open;
+	}
+
+
+	public boolean isOpen() {
+		return open;
 	}
 }
