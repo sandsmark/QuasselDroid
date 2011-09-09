@@ -62,6 +62,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
+import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
@@ -280,16 +281,7 @@ public class BufferActivity extends ExpandableListActivity {
 				holder.bufferView.setText("XXXX " + entry.getInfo().name);
 			}				
 
-			//Check here if there are any unread messages in the buffer, and then set this color if there is
-			if (entry.hasUnseenHighlight()){
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
-			} else if (entry.hasUnreadMessage()){
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
-			} else if (entry.hasUnreadActivity()) {
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
-			}else {
-				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
-			}
+			BufferUtils.setBufferViewStatus(BufferActivity.this, entry, holder.bufferView);
 			return convertView;
 		}
 
@@ -345,6 +337,7 @@ public class BufferActivity extends ExpandableListActivity {
 			holder.bufferView.setTag(groupPosition); //Used in click listener to know what item this is
 			if(entry.isOpen()) getExpandableListView().expandGroup(groupPosition);
 			else getExpandableListView().collapseGroup(groupPosition);
+			BufferUtils.setBufferViewStatus(BufferActivity.this, entry.getStatusBuffer(), holder.bufferView);
 			return convertView;
 		}
 
