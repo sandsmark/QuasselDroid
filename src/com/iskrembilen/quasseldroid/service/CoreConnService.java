@@ -57,6 +57,7 @@ import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
+import com.iskrembilen.quasseldroid.HighlightNotificationManager;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
@@ -100,6 +101,8 @@ public class CoreConnService extends Service {
 
 	private NetworkCollection networks;
 
+	private HighlightNotificationManager highlightNotificationManager;
+
 	/**
 	 * Class for clients to access. Because we know this service always runs in
 	 * the same process as its clients, we don't need to deal with IPC.
@@ -116,7 +119,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void cancelHighlight() {
-		notifyManager.cancel(R.id.NOTIFICATION_HIGHLIGHT);
+		highlightNotificationManager.cancelNotifications();
 	}
 
 	@Override
@@ -125,6 +128,7 @@ public class CoreConnService extends Service {
 
 		incomingHandler = new IncomingHandler();
 		notifyManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		highlightNotificationManager = new HighlightNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		statusReceivers = new ArrayList<ResultReceiver>();
 	}
@@ -595,25 +599,7 @@ public class CoreConnService extends Service {
 					parseColorCodes(message);
 					parseStyleCodes(message);
 					if (message.isHighlighted()) {
-						// Create a notification about the highlight
-						String text = buffer.getInfo().name + ": <"	+ message.getNick() + "> " + message.content;
-						Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
-						Intent launch = new Intent(CoreConnService.this, BufferActivity.class);
-						launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);
-						// Set the info for the views that show in the
-						// notification panel.
-						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name), text, contentIntent);
-						
-						if(preferences.getBoolean(getString(R.string.preference_notification_sound), false))
-							notification.defaults |= Notification.DEFAULT_SOUND;
-						if(preferences.getBoolean(getString(R.string.preference_notification_light), false))
-							notification.defaults |= Notification.DEFAULT_LIGHTS;
-						if(preferences.getBoolean(getString(R.string.preference_notification_vibrate), false))
-							notification.defaults |= Notification.DEFAULT_VIBRATE;	
-						
-						// Send the notification.
-						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT, notification);
+						highlightNotificationManager.createNotification(buffer, message);
 					}
 
 					checkForURL(message);
