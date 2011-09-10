@@ -318,9 +318,9 @@ public class BufferActivity extends ExpandableListActivity {
 			if (convertView==null) {
 				convertView = inflater.inflate(R.layout.buffer_group_item, null);
 				holder = new ViewHolderGroup();
-				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
-				holder.bufferView.setOnClickListener(new OnClickListener() {
+				holder.statusView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+				holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.statusView.getTextSize())));
+				holder.statusView.setOnClickListener(new OnClickListener() {
 					
 					@Override
 					public void onClick(View v) {
@@ -332,11 +332,11 @@ public class BufferActivity extends ExpandableListActivity {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
 			Network entry = getGroup(groupPosition);
-			holder.bufferView.setText(entry.getName());
-			holder.bufferView.setTag(groupPosition); //Used in click listener to know what item this is
+			holder.statusView.setText(entry.getName());
+			holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
 			if(entry.isOpen()) getExpandableListView().expandGroup(groupPosition);
 			else getExpandableListView().collapseGroup(groupPosition);
-			BufferUtils.setBufferViewStatus(BufferActivity.this, entry.getStatusBuffer(), holder.bufferView);
+			BufferUtils.setBufferViewStatus(BufferActivity.this, entry.getStatusBuffer(), holder.statusView);
 			return convertView;
 		}
 
@@ -472,7 +472,7 @@ public class BufferActivity extends ExpandableListActivity {
 		public TextView bufferView;
 	}
 	public static class ViewHolderGroup {
-		public TextView bufferView;
+		public TextView statusView;
 	}
 
 	/**
