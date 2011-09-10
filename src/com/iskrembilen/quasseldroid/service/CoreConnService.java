@@ -57,7 +57,7 @@ import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.HighlightNotificationManager;
+import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
@@ -100,7 +100,7 @@ public class CoreConnService extends Service {
 
 	private NetworkCollection networks;
 
-	private HighlightNotificationManager highlightNotificationManager;
+	private QuasseldroidNotificationManager notificationManager;
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -118,7 +118,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void onHighlightsRead(int bufferId) {
-		highlightNotificationManager.notifyHighlightsRead(bufferId);
+		notificationManager.notifyHighlightsRead(bufferId);
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class CoreConnService extends Service {
 		super.onCreate();
 
 		incomingHandler = new IncomingHandler();
-		highlightNotificationManager = new HighlightNotificationManager(this);
+		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		statusReceivers = new ArrayList<ResultReceiver>();
 	}
@@ -455,7 +455,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void disconnectFromCore() {
-		highlightNotificationManager.notifyDisconnected();
+		notificationManager.notifyDisconnected();
 		if (coreConn != null)
 			coreConn.disconnect();
 	}
@@ -554,7 +554,7 @@ public class CoreConnService extends Service {
 					parseColorCodes(message);
 					parseStyleCodes(message);
 					if (message.isHighlighted()) {
-						highlightNotificationManager.notifyHighlight(buffer.getInfo().id);
+						notificationManager.notifyHighlight(buffer.getInfo().id);
 					}
 
 					checkForURL(message);
@@ -593,7 +593,7 @@ public class CoreConnService extends Service {
 				if (buffer != null) {
 					buffer.setLastSeenMessage(msg.arg2);
 					if(hasHighlights)
-						highlightNotificationManager.notifyHighlightsRead(buffer.getInfo().id);
+						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
 				} else {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
@@ -614,7 +614,7 @@ public class CoreConnService extends Service {
 				/**
 				 * CoreConn has connected to a core
 				 */
-				highlightNotificationManager.notifyConnected();
+				notificationManager.notifyConnected();
 				for (ResultReceiver statusReceiver : statusReceivers) {
 					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
 				}
@@ -634,7 +634,7 @@ public class CoreConnService extends Service {
 						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
 					}
 				}
-				highlightNotificationManager.notifyDisconnected();
+				notificationManager.notifyDisconnected();
 				break;
 
 				//			case R.id.NEW_USERLIST_ADDED:
