@@ -95,6 +95,8 @@ public class CoreConnection {
 	private ReadThread readThread;
 
 	private boolean connected;
+	private boolean initComplete;
+	private int initBacklogBuffers;
 
 
 	public CoreConnection(String address, int port, String username,
@@ -423,7 +425,9 @@ public class CoreConnection {
 		sendInitRequest("BufferViewConfig", "0");
 
 		int backlogAmout = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(service).getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
+		initBacklogBuffers = 0;
 		for (Buffer buffer:buffers.values()) {
+			initBacklogBuffers += 1;
 			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
 		}
 
@@ -449,6 +453,7 @@ public class CoreConnection {
 
 		Message msg = service.getHandler().obtainMessage(R.id.CONNECTED);
 		msg.sendToTarget();
+		initComplete = false;
 	}
 
 	/**
@@ -583,6 +588,15 @@ public class CoreConnection {
 		packedFunc.add(new QVariant<String>(className, QVariantType.String));
 		packedFunc.add(new QVariant<String>(objectName, QVariantType.String));
 		sendQVariantList(packedFunc);
+	}
+	
+	private void updateInitProgress(String message) {
+		service.getHandler().obtainMessage(R.id.INIT_PROGRESS, message).sendToTarget();
+	}
+	
+	private void updateInitDone() {
+		initComplete = true;
+		service.getHandler().obtainMessage(R.id.INIT_DONE).sendToTarget();
 	}
 
 	private class ReadThread extends Thread {
@@ -725,9 +739,12 @@ public class CoreConnection {
 						Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						// Store the network name and associated nick for "our" user
 						network.setNick((String) initMap.get("myNick").getData());
-
 						network.setName((String) initMap.get("networkName").getData());
 						network.setConnected((Boolean)initMap.get("isConnected").getData());
+
+						//we got enough info to tell service we are parsing network
+						Log.i(TAG, "Started parsing network " + network.getName());
+						updateInitProgress("Reciving network: " +network.getName());
 
 						// Horribly nested maps
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
@@ -769,17 +786,13 @@ public class CoreConnection {
 								}
 							}
 
-							Message msg = service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED);
-							msg.obj = ircUsers;
-							msg.sendToTarget();
+							service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED, ircUsers).sendToTarget();
 
 						}
 						
 						Log.i(TAG, "Sending network " + network.getName() + " to service");
-						Message msg = service.getHandler().obtainMessage(R.id.ADD_NETWORK);
-						msg.obj = network;
-						msg.sendToTarget();
-
+						service.getHandler().obtainMessage(R.id.ADD_NETWORK, network).sendToTarget();
+						
 						try {
 							//sendInitRequest("BufferSyncer", "");
 							/*sendInitRequest("BufferViewManager", "");
@@ -809,6 +822,9 @@ public class CoreConnection {
 						 */
 					} else if (className.equals("BufferSyncer")) {
 						// Parse out the last seen messages
+						updateInitProgress("Reciving last seen and marker lines");
+
+						
 						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
 						for (int i=0; i<lastSeen.size(); i+=2) {
 							int bufferId = (Integer)lastSeen.get(i).getData();
@@ -877,7 +893,7 @@ public class CoreConnection {
 						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
 						List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
 						List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
-						int networkId = (Integer) map.get("networkId").getData(); // let's hope we don't need this, LAWLERZ!!1
+						updateInitProgress("Reciving buffer list information");
 						BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
 
 
@@ -918,8 +934,7 @@ public class CoreConnection {
 
 							order++;
 						}
-
-
+						updateInitProgress("Reciving backlog");
 
 						/*
 						 * There are several objects that we don't care about (at the moment).
@@ -969,11 +984,18 @@ public class CoreConnection {
 						packedFunc.remove(0); // additional messages to fetch
 						List<QVariant<?>> data = (List<QVariant<?>>)(packedFunc.remove(0).getData());
 						Collections.reverse(data); // Apparently, we receive them in the wrong order
+					
 						// Send our the backlog messages to our listeners
 						for (QVariant<?> message: data) {
 							Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
 							msg.obj = (IrcMessage) message.getData();
 							msg.sendToTarget();
+						}
+						if(!initComplete) { //We are still initializing backlog for the first time
+							initBacklogBuffers -= 1;
+							if(initBacklogBuffers<=0) {
+								updateInitDone();
+							}
 						}
 						/* 
 						 * The addIrcUser function in the Network class is called whenever a new
@@ -1069,6 +1091,10 @@ public class CoreConnection {
 				System.out.println("WARNING: Unable to close input stream (already closed?).");
 			}
 		}
+	}
+
+	public boolean isInitComplete() {
+		return initComplete;
 	}
 }
 

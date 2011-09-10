@@ -94,7 +94,6 @@ public class BufferActivity extends ExpandableListActivity {
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
 		getExpandableListView().setCacheColorHint(0xffffffff);
-		setListAdapter(bufferListAdapter);
 		//		registerForContextMenu(getListView());
 
 		statusReciver = new ResultReceiver(null) {
@@ -102,6 +101,11 @@ public class BufferActivity extends ExpandableListActivity {
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
 				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
+				else if(resultCode==CoreConnService.INIT_PROGRESS) {
+					((TextView)findViewById(R.id.buffer_list_progress_text)).setText(resultData.getString(CoreConnService.PROGRESS_KEY));
+				}else if(resultCode==CoreConnService.INIT_DONE) {
+					setListAdapter(bufferListAdapter);
+				}
 				super.onReceiveResult(resultCode, resultData);
 			}
 
@@ -238,9 +242,11 @@ public class BufferActivity extends ExpandableListActivity {
 		@Override
 		public void notifyDataSetChanged() {
 			super.notifyDataSetChanged();
-			for(int group = 0; group < getGroupCount(); group++) {
-				if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
-				else getExpandableListView().collapseGroup(group);
+			if(getExpandableListAdapter() != null) {
+				for(int group = 0; group < getGroupCount(); group++) {
+					if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
+					else getExpandableListView().collapseGroup(group);
+				}
 			}
 		}
 
@@ -397,6 +403,9 @@ public class BufferActivity extends ExpandableListActivity {
 
 			//Testing to see if i can add item to adapter in service
 			bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
+			if(boundConnService.isInitComplete()) { 
+				setListAdapter(bufferListAdapter);
+			}
 
 
 		}

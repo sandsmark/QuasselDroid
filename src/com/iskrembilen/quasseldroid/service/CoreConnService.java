@@ -84,9 +84,14 @@ public class CoreConnService extends Service {
 	public static final int CONNECTION_CONNECTED = 1;
 	public static final int NEW_CERTIFICATE = 2;
 	public static final int UNSUPPORTED_PROTOCOL = 3;
+	public static final int INIT_PROGRESS = 4;
+	public static final int INIT_DONE = 5;
 
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
+	public static final String PROGRESS_KEY = "networkname";
+
+
 
 	private Pattern URLPattern = Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
@@ -491,6 +496,12 @@ public class CoreConnService extends Service {
 		statusReceivers.remove(resultReceiver);
 	}
 
+	private void sendStatusMessage(int messageId, Bundle bundle) {
+		for (ResultReceiver statusReceiver : statusReceivers) {
+			statusReceiver.send(messageId, bundle);
+		}
+	}
+
 	/**
 	 * Handler of incoming messages from CoreConnection, since it's in another
 	 * read thread.
@@ -506,6 +517,7 @@ public class CoreConnService extends Service {
 
 			Buffer buffer;
 			IrcMessage message;
+			Bundle bundle;
 			switch (msg.what) {
 			case R.id.NEW_BACKLOGITEM_TO_SERVICE:
 				/**
@@ -615,9 +627,7 @@ public class CoreConnService extends Service {
 				 * CoreConn has connected to a core
 				 */
 				notificationManager.notifyConnected();
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
-				}
+				sendStatusMessage(CoreConnService.CONNECTION_CONNECTED, null);
 				break;
 
 			case R.id.LOST_CONNECTION:
@@ -627,7 +637,7 @@ public class CoreConnService extends Service {
 				for (ResultReceiver statusReceiver : statusReceivers) {
 					if (msg.obj != null) { // Have description of what is wrong,
 						// used only for login atm
-						Bundle bundle = new Bundle();
+						bundle = new Bundle();
 						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
 						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
 					} else {
@@ -684,11 +694,9 @@ public class CoreConnService extends Service {
 				/**
 				 * Received a new, unseen certificate
 				 */
-				Bundle bundle = new Bundle();
+				bundle = new Bundle();
 				bundle.putString(CERT_KEY, (String) msg.obj);
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.NEW_CERTIFICATE, bundle);
-				}
+				sendStatusMessage(CoreConnService.NEW_CERTIFICATE, bundle);
 				break;
 			case R.id.SET_BUFFER_ACTIVE:
 				/**
@@ -700,11 +708,22 @@ public class CoreConnService extends Service {
 				/**
 				 * The protocol version of the core is not supported so tell user it is to old
 				 */
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.UNSUPPORTED_PROTOCOL, null);
-				}
+				sendStatusMessage(CoreConnService.UNSUPPORTED_PROTOCOL, null);
+				break;
+			case R.id.INIT_PROGRESS:
+				bundle = new Bundle();
+				bundle.putString(PROGRESS_KEY, (String)msg.obj);
+				sendStatusMessage(CoreConnService.INIT_PROGRESS, bundle);
+				break;
+			case R.id.INIT_DONE:
+				sendStatusMessage(CoreConnService.INIT_DONE, null);
+				break;
 			}
 		}
+	}
+
+	public boolean isInitComplete() {
+		return coreConn.isInitComplete();
 	}
 
 }
