@@ -23,9 +23,11 @@
 
 package com.iskrembilen.quasseldroid.service;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +38,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.DatabaseUtils;
 import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.Bundle;
@@ -54,8 +57,11 @@ import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
+import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
+import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
@@ -78,9 +84,14 @@ public class CoreConnService extends Service {
 	public static final int CONNECTION_CONNECTED = 1;
 	public static final int NEW_CERTIFICATE = 2;
 	public static final int UNSUPPORTED_PROTOCOL = 3;
-	
+	public static final int INIT_PROGRESS = 4;
+	public static final int INIT_DONE = 5;
+
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
+	public static final String PROGRESS_KEY = "networkname";
+
+
 
 	private Pattern URLPattern = Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
@@ -88,13 +99,13 @@ public class CoreConnService extends Service {
 	private final IBinder binder = new LocalBinder();
 
 	Handler incomingHandler;
-	NotificationManager notifyManager;
 	ArrayList<ResultReceiver> statusReceivers;
 
 	SharedPreferences preferences;
 
-	BufferCollection bufferCollection;
-	HashMap<String, IrcUser> ircUsers = new HashMap<String, IrcUser>();
+	private NetworkCollection networks;
+
+	private QuasseldroidNotificationManager notificationManager;
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -111,8 +122,8 @@ public class CoreConnService extends Service {
 		return binder;
 	}
 
-	public void cancelHighlight() {
-		notifyManager.cancel(R.id.NOTIFICATION_HIGHLIGHT);
+	public void onHighlightsRead(int bufferId) {
+		notificationManager.notifyHighlightsRead(bufferId);
 	}
 
 	@Override
@@ -120,7 +131,7 @@ public class CoreConnService extends Service {
 		super.onCreate();
 
 		incomingHandler = new IncomingHandler();
-		notifyManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		statusReceivers = new ArrayList<ResultReceiver>();
 	}
@@ -145,49 +156,6 @@ public class CoreConnService extends Service {
 	}
 
 	/**
-	 * Show a notification while this service is running.
-	 * 
-	 * @param connected
-	 *            are we connected to a core or not
-	 */
-	private void showNotification(boolean connected) {
-		//TODO: Remove when "leaving" the application
-		CharSequence text =  "";
-		int temp_flags = 0; 
-		int icon;
-		if (connected) {
-			text = getText(R.string.notification_connected);
-			icon = R.drawable.icon;
-			temp_flags = Notification.FLAG_ONGOING_EVENT;			
-		} else {
-			text = getText(R.string.notification_disconnected);
-			icon = R.drawable.inactive;
-			temp_flags = Notification.FLAG_ONLY_ALERT_ONCE;
-		}
-		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(icon, text, System.currentTimeMillis());
-		notification.flags |= temp_flags;
-		// The PendingIntent to launch our activity if the user selects this notification
-		PendingIntent contentIntent;
-
-		// TODO: Fix so that if a chat is currently on top, launch that one,
-		// instead of the BufferActivity
-		if (connected) { // Launch the Buffer Activity.
-			Intent launch = new Intent(this, BufferActivity.class);
-			launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-		} else {
-			Intent launch = new Intent(this, LoginActivity.class);
-			contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-		}
-		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(this, getText(R.string.app_name), text,
-				contentIntent);
-		// Send the notification.
-		notifyManager.notify(R.id.NOTIFICATION, notification);
-	}
-
-	/**
 	 * Handle the data in the intent, and use it to connect with CoreConnect
 	 * 
 	 * @param intent
@@ -204,22 +172,22 @@ public class CoreConnService extends Service {
 		Boolean ssl = connectData.getBoolean("ssl");
 		Log.i(TAG, "Connecting to core: " + address + ":" + port
 				+ " with username " + username);
-		bufferCollection = new BufferCollection();
+		networks = new NetworkCollection();
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
 	}
 
-	public void newUser(IrcUser user) {
-		ircUsers.put(user.nick, user);
-	}
-
-	public IrcUser getUser(String nick) {
-		return ircUsers.get(nick);
-	}
-
-	public boolean hasUser(String nick) {
-		return ircUsers.containsKey(nick);
-	}
+	//	public void newUser(IrcUser user) {
+	//		ircUsers.put(user.nick, user);
+	//	}
+	//
+	//	public IrcUser getUser(String nick) {
+	//		return ircUsers.get(nick);
+	//	}
+	//
+	//	public boolean hasUser(String nick) {
+	//		return ircUsers.containsKey(nick);
+	//	}
 
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
@@ -231,18 +199,18 @@ public class CoreConnService extends Service {
 
 	public void setLastSeen(int bufferId, int msgId) {
 		coreConn.requestSetLastMsgRead(bufferId, msgId);
-		bufferCollection.getBuffer(bufferId).setLastSeenMessage(msgId);
+		networks.getBufferById(bufferId).setLastSeenMessage(msgId);
 	}
 
 	public void setMarkerLine(int bufferId, int msgId) {
 		coreConn.requestSetMarkerLine(bufferId, msgId);
-		bufferCollection.getBuffer(bufferId).setMarkerLineMessage(msgId);
+		networks.getBufferById(bufferId).setMarkerLineMessage(msgId);
 	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
-		bufferCollection.getBuffer(bufferId).addObserver(obs);
-		// coreConn.requestBacklog(bufferId);
-		return bufferCollection.getBuffer(bufferId);
+		Buffer buffer = networks.getBufferById(bufferId);
+		buffer.addObserver(obs);
+		return buffer;
 	}
 
 	public void getMoreBacklog(int bufferId, int amount){
@@ -250,228 +218,8 @@ public class CoreConnService extends Service {
 		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
-	public BufferCollection getBufferList(Observer obs) {
-		if (bufferCollection == null)
-			return null;
-
-		bufferCollection.addObserver(obs);
-		return bufferCollection;
-	}
-
-	/**
-	 * Handler of incoming messages from CoreConnection, since it's in another
-	 * read thread.
-	 */
-	class IncomingHandler extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			if (msg == null) {
-				Log.e(TAG, "Msg was null?");
-				return;
-			}
-
-			Buffer buffer;
-			IrcMessage message;
-			switch (msg.what) {
-			case R.id.CORECONNECTION_NEW_BACKLOGITEM_TO_SERVICE:
-				/**
-				 * New message on one buffer so update that buffer with the new
-				 * message
-				 */
-				message = (IrcMessage) msg.obj;
-				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
-				if (buffer == null) {
-					Log.e(TAG, "A messages buffer is null:" + message);
-					return;
-				}
-
-				if (!buffer.hasMessage(message)) {
-					/**
-					 * Check if we are highlighted in the message, TODO: Add
-					 * support for custom highlight masks
-					 */
-					checkMessageForHighlight(buffer, message);
-					checkForURL(message);
-					parseColorCodes(message);
-					parseStyleCodes(message);
-					buffer.addBacklogMessage(message);
-				} else {
-					Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
-				}
-				break;
-			case R.id.CORECONNECTION_NEW_MESSAGE_TO_SERVICE:
-				/**
-				 * New message on one buffer so update that buffer with the new
-				 * message
-				 */
-				message = (IrcMessage) msg.obj;
-				buffer = bufferCollection.getBuffer(message.bufferInfo.id);
-				if (buffer == null) {
-					Log.e(TAG, "A messages buffer is null: " + message);
-					return;
-				}
-
-				if (!buffer.hasMessage(message)) {
-					/**
-					 * Check if we are highlighted in the message, TODO: Add
-					 * support for custom highlight masks
-					 */
-					checkMessageForHighlight(buffer, message);
-					parseColorCodes(message);
-					parseStyleCodes(message);
-					if (message.isHighlighted()) {
-						// Create a notification about the highlight
-						String text = buffer.getInfo().name + ": <"	+ message.getNick() + "> " + message.content;
-						Notification notification = new Notification(R.drawable.highlight, text, System.currentTimeMillis());
-						Intent launch = new Intent(CoreConnService.this, BufferActivity.class);
-						launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						PendingIntent contentIntent = PendingIntent.getActivity(CoreConnService.this, 0, launch, 0);
-						// Set the info for the views that show in the
-						// notification panel.
-						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name), text, contentIntent);
-						// Send the notification.
-						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT, notification);
-					}
-
-					checkForURL(message);
-					buffer.addMessage(message);
-				} else {
-					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
-				}
-				break;
-
-			case R.id.CORECONNECTION_NEW_BUFFER_TO_SERVICE:
-				/**
-				 * New buffer received, so update out channel holder with the
-				 * new buffer
-				 */
-				buffer = (Buffer) msg.obj;
-				bufferCollection.addBuffer(buffer);
-
-				break;
-			case R.id.CORECONNECTION_ADD_MULTIPLE_BUFFERS:
-				/**
-				 * Complete list of buffers received
-				 */
-				bufferCollection.addBuffers((Collection<Buffer>) msg.obj);
-				break;
-
-			case R.id.CORECONNECTION_SET_LAST_SEEN_TO_SERVICE:
-				/**
-				 * Setting last seen message id in a buffer
-				 */
-				if (bufferCollection.hasBuffer(msg.arg1)) {
-					bufferCollection.getBuffer(msg.arg1).setLastSeenMessage(msg.arg2);
-				} else {
-					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
-				}
-				break;
-			case R.id.CORECONNECTION_SET_MARKERLINE_TO_SERVICE:
-				/**
-				 * Setting marker line message id in a buffer
-				 */
-				if (bufferCollection.hasBuffer(msg.arg1)) {
-					bufferCollection.getBuffer(msg.arg1).setMarkerLineMessage(msg.arg2);
-				} else {
-					Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
-				}
-				break;
-
-			case R.id.CORECONNECTION_CONNECTED:
-				/**
-				 * CoreConn has connected to a core
-				 */
-				showNotification(true);
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
-				}
-				break;
-
-			case R.id.CORECONNECTION_LOST_CONNECTION:
-				/**
-				 * Lost connection with core, update notification
-				 */
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					if (msg.obj != null) { // Have description of what is wrong,
-											// used only for login atm
-						Bundle bundle = new Bundle();
-						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
-						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
-					} else {
-						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
-					}
-				}
-				showNotification(false);
-				break;
-
-			case R.id.CORECONNECTION_NEW_USERLIST_ADDED:
-				/**
-				 * Initial list of users
-				 */
-				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
-				for (IrcUser user : users) {
-					newUser(user);
-				}
-				break;
-
-			case R.id.CORECONNECTION_NEW_USER_ADDED:
-				/**
-				 * New IrcUser added
-				 */
-				IrcUser user = (IrcUser) msg.obj;
-				newUser(user);
-				break;
-
-			case R.id.CORECONNECTION_SET_BUFFER_ORDER:
-				/**
-				 * Buffer order changed so set the new one
-				 */
-				bufferCollection.getBuffer(msg.arg1).setOrder(msg.arg2);
-				break;
-
-			case R.id.CORECONNECTION_SET_BUFFER_TEMP_HIDDEN:
-				/**
-				 * Buffer has been marked as temporary hidden, update buffer
-				 */
-				bufferCollection.getBuffer(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
-				break;
-
-			case R.id.CORECONNECTION_SET_BUFFER_PERM_HIDDEN:
-				/**
-				 * Buffer has been marked as permanently hidden, update buffer
-				 */
-				bufferCollection.getBuffer(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
-				break;
-
-			case R.id.CORECONNECTION_INVALID_CERTIFICATE:
-				/**
-				 * Received a mismatching certificate
-				 */
-			case R.id.CORECONNECTION_NEW_CERTIFICATE:
-				/**
-				 * Received a new, unseen certificate
-				 */
-				Bundle bundle = new Bundle();
-				bundle.putString(CERT_KEY, (String) msg.obj);
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.NEW_CERTIFICATE, bundle);
-				}
-				break;
-			case R.id.CORECONNECTION_SET_BUFFER_ACTIVE:
-				/**
-				 * Set buffer as active or parted
-				 */
-				bufferCollection.getBuffer(msg.arg1).setActive((Boolean)msg.obj);
-				break;
-			case R.id.CORECONNECTION_UNSUPPORTED_PROTOCOL:
-				/**
-				 * The protocol version of the core is not supported so tell user it is to old
-				 */
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					statusReceiver.send(CoreConnService.UNSUPPORTED_PROTOCOL, null);
-				}
-			}
-		}
+	public NetworkCollection getNetworkList(Observer obs) {
+		return networks;
 	}
 
 	/**
@@ -485,16 +233,15 @@ public class CoreConnService extends Service {
 	 */
 	public void checkMessageForHighlight(Buffer buffer, IrcMessage message) {
 		if (message.type == IrcMessage.Type.Plain) {
-			String nick = coreConn.getNick(buffer.getInfo().networkId);
+			String nick = networks.getNetworkById(buffer.getInfo().networkId).getNick();
 			if(nick == null) {
 				Log.e(TAG, "Nick is null in check message for highlight");
 				return;
 			} else if(nick.equals("")) return;
-			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + coreConn.getNick(buffer.getInfo().networkId) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
+			Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + Pattern.quote(networks.getNetworkById(buffer.getInfo().networkId).getNick()) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
 			Matcher matcher = regexHighlight.matcher(message.content);
 			if (matcher.find()) {
 				message.setFlag(IrcMessage.Flag.Highlight);
-
 				// FIXME: move to somewhere proper
 			}
 		}
@@ -522,44 +269,44 @@ public class CoreConnService extends Service {
 		final char normalIndicator = 15;
 		final char italicIndicator = 29;
 		final char underlineIndicator = 31;
-		
+
 		String content = message.content.toString();
 
 		if (content.indexOf(boldIndicator) == -1 
-			&& content.indexOf(italicIndicator) == -1
-			&& content.indexOf(underlineIndicator) == -1)
+				&& content.indexOf(italicIndicator) == -1
+				&& content.indexOf(underlineIndicator) == -1)
 			return;
-		
+
 		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
-		
+
 		while (true) {
 			content = newString.toString();
-			
+
 			int start = content.indexOf(boldIndicator);
 			int end = content.indexOf(boldIndicator, start+1);
 			int style = Typeface.BOLD;
-			
+
 			if (start == -1) {
 				start = content.indexOf(italicIndicator);
 				end = content.indexOf(italicIndicator, start+1);
 				style = Typeface.ITALIC;
 			}
-			
+
 			if (start == -1) {
 				start = content.indexOf(underlineIndicator);
 				end = content.indexOf(underlineIndicator, start+1);
 				style = -1;
 			}
-			
+
 			if (start == -1)
 				break;
-			
+
 			if (end == -1)
 				end = content.indexOf(normalIndicator, start);
-			
+
 			if (end == -1)
 				end = content.length()-1;
-			
+
 			if(start==end) {
 				newString.delete(start, start+1);
 				break;
@@ -570,18 +317,18 @@ public class CoreConnService extends Service {
 			} else {
 				newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 			}
-			
+
 			if (content.charAt(end) == boldIndicator
-				|| content.charAt(end) == italicIndicator
-				|| content.charAt(end) == normalIndicator
-				|| content.charAt(end) == underlineIndicator)
+					|| content.charAt(end) == italicIndicator
+					|| content.charAt(end) == normalIndicator
+					|| content.charAt(end) == underlineIndicator)
 				newString.delete(end, end+1);
-			
+
 			newString.delete(start, start+1);
 		}
 		message.content = newString;
 	}
-	
+
 	/**
 	 * Parse mIRC color codes in IrcMessage
 	 */
@@ -595,7 +342,7 @@ public class CoreConnService extends Service {
 		String content = message.content.toString();
 		if (content.indexOf(formattingIndicator) == -1)
 			return;
-		
+
 		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
 
 
@@ -622,7 +369,7 @@ public class CoreConnService extends Service {
 						end += 1;
 					}
 				}
-				
+
 				if (content.charAt(end) == ',') {
 					end++;
 
@@ -639,10 +386,10 @@ public class CoreConnService extends Service {
 			}
 			int length = end - start;
 			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
-			
+
 			if (endOfSpan <= 0) // check for malformed messages
 				endOfSpan = content.length() - length;
-			
+
 			newString.delete(start, end);
 			if (fg != -1) {
 				newString.setSpan(new ForegroundColorSpan(getResources()
@@ -713,7 +460,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void disconnectFromCore() {
-		notifyManager.cancel(R.id.NOTIFICATION);
+		notificationManager.notifyDisconnected();
 		if (coreConn != null)
 			coreConn.disconnect();
 	}
@@ -747,6 +494,236 @@ public class CoreConnService extends Service {
 	 */
 	public void unregisterStatusReceiver(ResultReceiver resultReceiver) {
 		statusReceivers.remove(resultReceiver);
+	}
+
+	private void sendStatusMessage(int messageId, Bundle bundle) {
+		for (ResultReceiver statusReceiver : statusReceivers) {
+			statusReceiver.send(messageId, bundle);
+		}
+	}
+
+	/**
+	 * Handler of incoming messages from CoreConnection, since it's in another
+	 * read thread.
+	 */
+	class IncomingHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			if (msg == null) {
+				Log.e(TAG, "Msg was null?");
+				return;
+			}
+
+			Buffer buffer;
+			IrcMessage message;
+			Bundle bundle;
+			switch (msg.what) {
+			case R.id.NEW_BACKLOGITEM_TO_SERVICE:
+				/**
+				 * New message on one buffer so update that buffer with the new
+				 * message
+				 */
+				message = (IrcMessage) msg.obj;
+				buffer = networks.getBufferById(message.bufferInfo.id);
+				if (buffer == null) {
+					Log.e(TAG, "A messages buffer is null:" + message);
+					return;
+				}
+
+				if (!buffer.hasMessage(message)) {
+					/**
+					 * Check if we are highlighted in the message, TODO: Add
+					 * support for custom highlight masks
+					 */
+					checkMessageForHighlight(buffer, message);
+					checkForURL(message);
+					parseColorCodes(message);
+					parseStyleCodes(message);
+					buffer.addBacklogMessage(message);
+				} else {
+					Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
+				}
+				break;
+			case R.id.NEW_MESSAGE_TO_SERVICE:
+				/**
+				 * New message on one buffer so update that buffer with the new
+				 * message
+				 */
+				message = (IrcMessage) msg.obj;
+				buffer = networks.getBufferById(message.bufferInfo.id);
+				if (buffer == null) {
+					Log.e(TAG, "A messages buffer is null: " + message);
+					return;	
+				}
+
+				if (!buffer.hasMessage(message)) {
+					/**
+					 * Check if we are highlighted in the message, TODO: Add
+					 * support for custom highlight masks
+					 */
+					checkMessageForHighlight(buffer, message);
+					parseColorCodes(message);
+					parseStyleCodes(message);
+					if (message.isHighlighted()) {
+						notificationManager.notifyHighlight(buffer.getInfo().id);
+					}
+
+					checkForURL(message);
+					buffer.addMessage(message);
+				} else {
+					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
+				}
+				break;
+
+			case R.id.NEW_BUFFER_TO_SERVICE:
+				/**
+				 * New buffer received, so update out channel holder with the
+				 * new buffer
+				 */
+				buffer = (Buffer) msg.obj;
+				networks.addBuffer(buffer);
+
+				break;
+			case R.id.ADD_MULTIPLE_BUFFERS:
+				/**
+				 * Complete list of buffers received
+				 */
+				for (Buffer tmp : (Collection<Buffer>) msg.obj) {
+					networks.addBuffer(tmp);
+				}
+				break;
+			case R.id.ADD_NETWORK:
+				networks.addNetwork((Network)msg.obj);
+				break;
+			case R.id.SET_LAST_SEEN_TO_SERVICE:
+				/**
+				 * Setting last seen message id in a buffer
+				 */
+				buffer = networks.getBufferById(msg.arg1);
+				Boolean hasHighlights = buffer.hasUnseenHighlight();
+				if (buffer != null) {
+					buffer.setLastSeenMessage(msg.arg2);
+					if(hasHighlights)
+						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
+				} else {
+					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
+				}
+				break;
+			case R.id.SET_MARKERLINE_TO_SERVICE:
+				/**
+				 * Setting marker line message id in a buffer
+				 */
+				buffer = networks.getBufferById(msg.arg1);
+				if (buffer != null) {
+					buffer.setMarkerLineMessage(msg.arg2);
+				} else {
+					Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
+				}
+				break;
+
+			case R.id.CONNECTED:
+				/**
+				 * CoreConn has connected to a core
+				 */
+				notificationManager.notifyConnected();
+				sendStatusMessage(CoreConnService.CONNECTION_CONNECTED, null);
+				break;
+
+			case R.id.LOST_CONNECTION:
+				/**
+				 * Lost connection with core, update notification
+				 */
+				for (ResultReceiver statusReceiver : statusReceivers) {
+					if (msg.obj != null) { // Have description of what is wrong,
+						// used only for login atm
+						bundle = new Bundle();
+						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
+						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
+					} else {
+						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
+					}
+				}
+				notificationManager.notifyDisconnected();
+				break;
+
+				//			case R.id.NEW_USERLIST_ADDED:
+				//				/**
+				//				 * Initial list of users
+				//				 */
+				//				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
+				//				for (IrcUser user : users) {
+				//					newUser(user);
+				//				}
+				//				break;
+
+			case R.id.NEW_USER_ADDED:
+				/**
+				 * New IrcUser added
+				 */
+				//				IrcUser user = (IrcUser) msg.obj;
+				//				newUser(user);
+				break;
+
+			case R.id.SET_BUFFER_ORDER:
+				/**
+				 * Buffer order changed so set the new one
+				 */
+				networks.getBufferById(msg.arg1).setOrder(msg.arg2);
+				break;
+
+			case R.id.SET_BUFFER_TEMP_HIDDEN:
+				/**
+				 * Buffer has been marked as temporary hidden, update buffer
+				 */
+				networks.getBufferById(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
+				break;
+
+			case R.id.SET_BUFFER_PERM_HIDDEN:
+				/**
+				 * Buffer has been marked as permanently hidden, update buffer
+				 */
+				networks.getBufferById(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
+				break;
+
+			case R.id.INVALID_CERTIFICATE:
+				/**
+				 * Received a mismatching certificate
+				 */
+			case R.id.NEW_CERTIFICATE:
+				/**
+				 * Received a new, unseen certificate
+				 */
+				bundle = new Bundle();
+				bundle.putString(CERT_KEY, (String) msg.obj);
+				sendStatusMessage(CoreConnService.NEW_CERTIFICATE, bundle);
+				break;
+			case R.id.SET_BUFFER_ACTIVE:
+				/**
+				 * Set buffer as active or parted
+				 */
+				networks.getBufferById(msg.arg1).setActive((Boolean)msg.obj);
+				break;
+			case R.id.UNSUPPORTED_PROTOCOL:
+				/**
+				 * The protocol version of the core is not supported so tell user it is to old
+				 */
+				sendStatusMessage(CoreConnService.UNSUPPORTED_PROTOCOL, null);
+				break;
+			case R.id.INIT_PROGRESS:
+				bundle = new Bundle();
+				bundle.putString(PROGRESS_KEY, (String)msg.obj);
+				sendStatusMessage(CoreConnService.INIT_PROGRESS, bundle);
+				break;
+			case R.id.INIT_DONE:
+				sendStatusMessage(CoreConnService.INIT_DONE, null);
+				break;
+			}
+		}
+	}
+
+	public boolean isInitComplete() {
+		return coreConn.isInitComplete();
 	}
 
 }

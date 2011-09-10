@@ -575,7 +575,11 @@ public class ChatActivity extends Activity{
 
 			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
-			adapter.setBuffer(boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter));
+			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
+			adapter.setBuffer(buffer);
+			if(buffer.hasUnseenHighlight()) {
+				boundConnService.onHighlightsRead(buffer.getInfo().id);
+			}
 
 			//Move list to correect position
 			if (adapter.buffer.getTopMessageShown() == 0) {

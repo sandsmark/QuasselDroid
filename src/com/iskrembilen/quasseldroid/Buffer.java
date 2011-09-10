@@ -433,31 +433,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 	@Override
 	public int compareTo(Buffer another) {
-		if (info.networkId != another.info.networkId)
-			return info.networkId - another.info.networkId;
-		else if (!(this.temporarilyHidden || this.permanentlyHidden) && (another.temporarilyHidden || another.permanentlyHidden))
-			return 1;
-		else if ((this.temporarilyHidden || this.permanentlyHidden) && !(another.temporarilyHidden || another.permanentlyHidden))
-			return -1;
-		else if (this.temporarilyHidden && !another.temporarilyHidden)
-			return -1;
-		else if (!this.temporarilyHidden && another.temporarilyHidden)
-			return 1;
-		else if (this.permanentlyHidden && !another.permanentlyHidden)
-			return -1;
-		else if (!this.permanentlyHidden && another.permanentlyHidden)
-			return 1;
-		else if ((this.permanentlyHidden&& another.permanentlyHidden)||(this.temporarilyHidden&&another.temporarilyHidden)) {
-			if (info.type != another.info.type)
-				return info.type.value - another.info.type.value;
-			else return info.name.compareToIgnoreCase(another.info.name);
-		} else if (!BufferCollection.orderAlphabetical)
-			return this.order - another.order;
-		else {
-			if (info.type != another.info.type)
-				return info.type.value - another.info.type.value;
-			else return info.name.compareToIgnoreCase(another.info.name);
-		}
+		return BufferUtils.compareBuffers(this, another);
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {
@@ -479,7 +455,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	public boolean isPermanentlyHidden() {
 		return permanentlyHidden;
 	}
-
 	public void setOrder(int order) {
 		Log.d(TAG, "Order " +this.getInfo().name + " : " + order);
 		this.order = order;

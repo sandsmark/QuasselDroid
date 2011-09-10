@@ -58,7 +58,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 
-public class LoginActivity extends Activity implements Observer {
+public class LoginActivity extends Activity implements Observer, DialogInterface.OnCancelListener {
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -300,7 +300,8 @@ public class LoginActivity extends Activity implements Observer {
 		case R.id.DIALOG_CONNECTING:
 			ProgressDialog prog = new ProgressDialog(LoginActivity.this);
 			prog.setMessage("Connecting...");
-			prog.setCancelable(false);
+			prog.setCancelable(true);
+			prog.setOnCancelListener(this);
 			dialog = prog;
 			break;
 
@@ -438,6 +439,11 @@ public class LoginActivity extends Activity implements Observer {
 			unbindService(mConnection);
 			isBound = false;
 		}
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog) {
+		boundConnService.disconnectFromCore();
 	}
 
 }
