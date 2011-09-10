@@ -15,7 +15,7 @@
 
 	<PreferenceCategory android:title="Notifications">
 		<CheckBoxPreference android:key="@string/preference_notification_vibrate"
-			android:title="Vibrate on highlight" android:summary="" />
+			android:title="Vibrate on notification" android:summary="" />
 		<CheckBoxPreference android:key="@string/preference_notification_light"
 			android:title="Use light on notification" android:summary="" />
 		<CheckBoxPreference android:key="@string/preference_notification_sound"
