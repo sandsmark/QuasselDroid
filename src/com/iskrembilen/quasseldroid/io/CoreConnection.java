@@ -744,7 +744,7 @@ public class CoreConnection {
 
 						//we got enough info to tell service we are parsing network
 						Log.i(TAG, "Started parsing network " + network.getName());
-						updateInitProgress("Reciving network: " +network.getName());
+						updateInitProgress("Receiving network: " +network.getName());
 
 						// Horribly nested maps
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
@@ -822,7 +822,7 @@ public class CoreConnection {
 						 */
 					} else if (className.equals("BufferSyncer")) {
 						// Parse out the last seen messages
-						updateInitProgress("Reciving last seen and marker lines");
+						updateInitProgress("Receiving last seen and marker lines");
 
 						
 						List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>)packedFunc.get(0).getData()).get("LastSeenMsg").getData();
@@ -893,7 +893,7 @@ public class CoreConnection {
 						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
 						List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
 						List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
-						updateInitProgress("Reciving buffer list information");
+						updateInitProgress("Receiving buffer list information");
 						BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
 
 
@@ -934,7 +934,7 @@ public class CoreConnection {
 
 							order++;
 						}
-						updateInitProgress("Reciving backlog");
+						updateInitProgress("Receiving backlog");
 
 						/*
 						 * There are several objects that we don't care about (at the moment).
