@@ -578,7 +578,7 @@ public class ChatActivity extends Activity{
 			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
 			adapter.setBuffer(buffer);
 			if(buffer.hasUnseenHighlight()) {
-				boundConnService.cancelHighlight();
+				boundConnService.onHighlightsRead(buffer.getInfo().id);
 			}
 
 			//Move list to correect position

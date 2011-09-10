@@ -94,7 +94,6 @@ public class CoreConnService extends Service {
 	private final IBinder binder = new LocalBinder();
 
 	Handler incomingHandler;
-	NotificationManager notifyManager;
 	ArrayList<ResultReceiver> statusReceivers;
 
 	SharedPreferences preferences;
@@ -118,8 +117,8 @@ public class CoreConnService extends Service {
 		return binder;
 	}
 
-	public void cancelHighlight() {
-		highlightNotificationManager.cancelNotifications();
+	public void onHighlightsRead(int bufferId) {
+		highlightNotificationManager.notifyHighlightsRead(bufferId);
 	}
 
 	@Override
@@ -127,7 +126,6 @@ public class CoreConnService extends Service {
 		super.onCreate();
 
 		incomingHandler = new IncomingHandler();
-		notifyManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		highlightNotificationManager = new HighlightNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		statusReceivers = new ArrayList<ResultReceiver>();
@@ -150,49 +148,6 @@ public class CoreConnService extends Service {
 		}
 		return START_STICKY;
 
-	}
-
-	/**
-	 * Show a notification while this service is running.
-	 * 
-	 * @param connected
-	 *            are we connected to a core or not
-	 */
-	private void showNotification(boolean connected) {
-		//TODO: Remove when "leaving" the application
-		CharSequence text =  "";
-		int temp_flags = 0; 
-		int icon;
-		if (connected) {
-			text = getText(R.string.notification_connected);
-			icon = R.drawable.icon;
-			temp_flags = Notification.FLAG_ONGOING_EVENT;			
-		} else {
-			text = getText(R.string.notification_disconnected);
-			icon = R.drawable.inactive;
-			temp_flags = Notification.FLAG_ONLY_ALERT_ONCE;
-		}
-		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(icon, text, System.currentTimeMillis());
-		notification.flags |= temp_flags;
-		// The PendingIntent to launch our activity if the user selects this notification
-		PendingIntent contentIntent;
-
-		// TODO: Fix so that if a chat is currently on top, launch that one,
-		// instead of the BufferActivity
-		if (connected) { // Launch the Buffer Activity.
-			Intent launch = new Intent(this, BufferActivity.class);
-			launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-		} else {
-			Intent launch = new Intent(this, LoginActivity.class);
-			contentIntent = PendingIntent.getActivity(this, 0, launch, 0);
-		}
-		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(this, getText(R.string.app_name), text,
-				contentIntent);
-		// Send the notification.
-		notifyManager.notify(R.id.NOTIFICATION, notification);
 	}
 
 	/**
@@ -500,7 +455,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void disconnectFromCore() {
-		notifyManager.cancel(R.id.NOTIFICATION);
+		highlightNotificationManager.notifyDisconnected();
 		if (coreConn != null)
 			coreConn.disconnect();
 	}
@@ -599,7 +554,7 @@ public class CoreConnService extends Service {
 					parseColorCodes(message);
 					parseStyleCodes(message);
 					if (message.isHighlighted()) {
-						highlightNotificationManager.createNotification(buffer, message);
+						highlightNotificationManager.notifyHighlight(buffer.getInfo().id);
 					}
 
 					checkForURL(message);
@@ -634,8 +589,11 @@ public class CoreConnService extends Service {
 				 * Setting last seen message id in a buffer
 				 */
 				buffer = networks.getBufferById(msg.arg1);
+				Boolean hasHighlights = buffer.hasUnseenHighlight();
 				if (buffer != null) {
 					buffer.setLastSeenMessage(msg.arg2);
+					if(hasHighlights)
+						highlightNotificationManager.notifyHighlightsRead(buffer.getInfo().id);
 				} else {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
@@ -656,7 +614,7 @@ public class CoreConnService extends Service {
 				/**
 				 * CoreConn has connected to a core
 				 */
-				showNotification(true);
+				highlightNotificationManager.notifyConnected();
 				for (ResultReceiver statusReceiver : statusReceivers) {
 					statusReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
 				}
@@ -676,7 +634,7 @@ public class CoreConnService extends Service {
 						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
 					}
 				}
-				showNotification(false);
+				highlightNotificationManager.notifyDisconnected();
 				break;
 
 				//			case R.id.NEW_USERLIST_ADDED:

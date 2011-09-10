@@ -125,7 +125,6 @@ public class BufferActivity extends ExpandableListActivity {
 	protected void onResume() {
 		super.onResume();
 		if (boundConnService == null) return;
-		boundConnService.cancelHighlight();
 	}
 
 	@Override
