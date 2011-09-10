@@ -405,6 +405,7 @@ public class BufferActivity extends ExpandableListActivity {
 			bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 			if(boundConnService.isInitComplete()) { 
 				setListAdapter(bufferListAdapter);
+				bufferListAdapter.notifyDataSetChanged();
 			}
 
 
