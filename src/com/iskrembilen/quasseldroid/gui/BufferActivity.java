@@ -200,24 +200,24 @@ public class BufferActivity extends ExpandableListActivity {
 		openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
 		return true;
 	}
-	
+
 	@Override
 	public void onGroupExpand(int groupPosition) {
 		bufferListAdapter.getGroup(groupPosition).setOpen(true);
 	}
-	
+
 	@Override
 	public void onGroupCollapse(int groupPosition) {
 		bufferListAdapter.getGroup(groupPosition).setOpen(false);
 	}
-	
+
 	private void openBuffer(Buffer buffer) {
 		Intent i = new Intent(BufferActivity.this, ChatActivity.class);
 		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
 		i.putExtra(BUFFER_NAME_EXTRA, buffer.getInfo().name);
 		startActivity(i);
 	}
-	
+
 	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
 		private NetworkCollection networks;
 		private LayoutInflater inflater;
@@ -233,6 +233,15 @@ public class BufferActivity extends ExpandableListActivity {
 				return;
 			networks.addObserver(this);
 			notifyDataSetChanged();
+		}
+
+		@Override
+		public void notifyDataSetChanged() {
+			super.notifyDataSetChanged();
+			for(int group = 0; group < getGroupCount(); group++) {
+				if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
+				else getExpandableListView().collapseGroup(group);
+			}
 		}
 
 		@Override
@@ -321,7 +330,7 @@ public class BufferActivity extends ExpandableListActivity {
 				holder.statusView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
 				holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.statusView.getTextSize())));
 				holder.statusView.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
 						openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
@@ -334,8 +343,6 @@ public class BufferActivity extends ExpandableListActivity {
 			Network entry = getGroup(groupPosition);
 			holder.statusView.setText(entry.getName());
 			holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
-			if(entry.isOpen()) getExpandableListView().expandGroup(groupPosition);
-			else getExpandableListView().collapseGroup(groupPosition);
 			BufferUtils.setBufferViewStatus(BufferActivity.this, entry.getStatusBuffer(), holder.statusView);
 			return convertView;
 		}
@@ -362,111 +369,6 @@ public class BufferActivity extends ExpandableListActivity {
 		}
 
 	}
-
-	//	public class BufferListAdapter1 extends BaseAdapter implements Observer {
-	//		private BufferCollection bufferCollection;
-	//		private LayoutInflater inflater;
-	//
-	//		public BufferListAdapter1(Context context) {
-	//			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	//
-	//		}
-	//
-	//		public void setBuffers(BufferCollection buffers){
-	//			this.bufferCollection = buffers;
-	//
-	//			if (buffers == null)
-	//				return;
-	//
-	//			this.bufferCollection.addObserver(this);
-	//			notifyDataSetChanged();
-	//		}
-	//
-	//		@Override
-	//		public int getCount() {
-	//			if (bufferCollection==null) {
-	//				return 0;
-	//			}else {
-	//				return bufferCollection.getBufferCount();
-	//			}
-	//		}
-	//
-	//		@Override
-	//		public Buffer getItem(int position) {
-	//			return bufferCollection.getPos(position);
-	//		}
-	//
-	//		@Override
-	//		public long getItemId(int pos) {
-	//			return bufferCollection.getPos(pos).getInfo().id;
-	//		}
-	//
-	//		@Override
-	//		public View getView(int position, View convertView, ViewGroup parent) {
-	//			ViewHolder holder = null;
-	//			if (convertView==null) {
-	//				convertView = inflater.inflate(R.layout.buffer_list_item, null);
-	//				holder = new ViewHolder();
-	//				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-	//				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
-	//				convertView.setTag(holder);
-	//			} else {
-	//				holder = (ViewHolder)convertView.getTag();
-	//			}
-	//			Buffer entry = this.getItem(position);
-	//			switch (entry.getInfo().type) {
-	//			case StatusBuffer:
-	//				holder.bufferView.setText(entry.getInfo().name);
-	//				break;
-	//			case ChannelBuffer:
-	//				holder.bufferView.setText("\t" + entry.getInfo().name);
-	//				break;
-	//			case QueryBuffer:
-	//				String nick = entry.getInfo().name;
-	////				if (boundConnService.hasUser(nick)){
-	////					nick += boundConnService.getUser(nick).away ? " (Away)": "";
-	////				}
-	//				holder.bufferView.setText("\t" + nick);
-	//				break;
-	//			case GroupBuffer:
-	//			case InvalidBuffer:
-	//				holder.bufferView.setText("XXXX " + entry.getInfo().name);
-	//			}
-	//
-	//			if(!entry.isActive()) {
-	//				holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_parted_color));
-	//			}else{
-	//				//Check here if there are any unread messages in the buffer, and then set this color if there is
-	//				if (entry.hasUnseenHighlight()){
-	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_highlight_color));
-	//				} else if (entry.hasUnreadMessage()){
-	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_unread_color));
-	//				} else if (entry.hasUnreadActivity()) {
-	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_activity_color));
-	//				}else {
-	//					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_read_color));
-	//				}
-	//			}
-	//
-	//			return convertView;
-	//		}
-	//
-	//		@Override
-	//		public void update(Observable observable, Object data) {
-	//			notifyDataSetChanged();
-	//
-	//		}
-	//
-	//		public void clearBuffers() {
-	//			bufferCollection = null;
-	//		}
-	//
-	//		public void stopObserving() {
-	//			if (bufferCollection == null) return;
-	//			bufferCollection.deleteObserver(this);
-	//
-	//		}
-	//	}
 
 	public static class ViewHolderChild {
 		public TextView bufferView;
