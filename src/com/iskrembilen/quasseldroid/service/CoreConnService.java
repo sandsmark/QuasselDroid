@@ -604,9 +604,14 @@ public class CoreConnService extends Service {
 						// Set the info for the views that show in the
 						// notification panel.
 						notification.setLatestEventInfo(CoreConnService.this, getText(R.string.app_name), text, contentIntent);
-						notification.defaults |= Notification.DEFAULT_SOUND;
-						notification.defaults |= Notification.DEFAULT_LIGHTS;
-						notification.defaults |= Notification.DEFAULT_VIBRATE;
+						
+						if(preferences.getBoolean(getString(R.string.preference_notification_sound), false))
+							notification.defaults |= Notification.DEFAULT_SOUND;
+						if(preferences.getBoolean(getString(R.string.preference_notification_light), false))
+							notification.defaults |= Notification.DEFAULT_LIGHTS;
+						if(preferences.getBoolean(getString(R.string.preference_notification_vibrate), false))
+							notification.defaults |= Notification.DEFAULT_VIBRATE;	
+						
 						// Send the notification.
 						notifyManager.notify(R.id.NOTIFICATION_HIGHLIGHT, notification);
 					}

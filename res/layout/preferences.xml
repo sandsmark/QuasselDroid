@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-  xmlns:android="http://schemas.android.com/apk/res/android">
-  <EditTextPreference android:title="Backlog Limit"
-  	android:summary="How many lines to fetch on connect"
-  	android:key="@string/preference_initial_backlog_limit"
-  	android:defaultValue="10"
-  	android:numeric="integer"
-  />
-  <EditTextPreference android:title="Additional backlog"
-  	android:summary="How many lines to fetch on scroll"
-  	android:key="@string/preference_dynamic_backlog"
-  	android:defaultValue="20"
-  	android:numeric="integer"
-  />
-  <ListPreference 
- 	android:title="Bufferlist fontsize"
-  	android:summary="The fontsize of the bufferlist"
-  	android:key="@string/preference_fontsize_channel_list"
-  	android:entries="@array/entries_fontsize_preference"
-  	android:entryValues="@array/entryvalues_fontsize_preference"
-  	android:dialogTitle="Choose fontsize for the bufferlist"
-  	android:defaultValue="20"/>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<EditTextPreference android:title="Backlog Limit"
+		android:summary="How many lines to fetch on connect" android:key="@string/preference_initial_backlog_limit"
+		android:defaultValue="10" android:numeric="integer" />
+	<EditTextPreference android:title="Additional backlog"
+		android:summary="How many lines to fetch on scroll" android:key="@string/preference_dynamic_backlog"
+		android:defaultValue="20" android:numeric="integer" />
+	<ListPreference android:title="Bufferlist fontsize"
+		android:summary="The fontsize of the bufferlist" android:key="@string/preference_fontsize_channel_list"
+		android:entries="@array/entries_fontsize_preference"
+		android:entryValues="@array/entryvalues_fontsize_preference"
+		android:dialogTitle="Choose fontsize for the bufferlist"
+		android:defaultValue="20" />
+
+	<PreferenceCategory android:title="Notifications">
+		<CheckBoxPreference android:key="@string/preference_notification_vibrate"
+			android:title="Vibrate on highlight" android:summary="" />
+		<CheckBoxPreference android:key="@string/preference_notification_light"
+			android:title="Use light on notification" android:summary="" />
+		<CheckBoxPreference android:key="@string/preference_notification_sound"
+			android:title="Play sound on notification" android:summary="" />
+		
+
+	</PreferenceCategory>
 </PreferenceScreen>
