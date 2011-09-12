@@ -224,6 +224,7 @@ public class ChatActivity extends Activity{
 	protected void onStop() {
 		super.onStop();
 		if (adapter.buffer == null) return;
+		adapter.buffer.setDisplayed(false);
 		
 		//Dont save position if list is at bottom
 		if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
@@ -577,6 +578,7 @@ public class ChatActivity extends Activity{
 			//Testing to see if i can add item to adapter in service
 			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
 			adapter.setBuffer(buffer);
+			buffer.setDisplayed(true);
 			if(buffer.hasUnseenHighlight()) {
 				boundConnService.onHighlightsRead(buffer.getInfo().id);
 			}
