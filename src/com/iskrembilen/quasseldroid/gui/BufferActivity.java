@@ -75,6 +75,10 @@ public class BufferActivity extends ExpandableListActivity {
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 
+	private static final String ITEM_POSITION_KEY = "itempos";
+
+	private static final String LIST_POSITION_KEY = "listpos";
+
 	BufferListAdapter bufferListAdapter;
 
 	ResultReceiver statusReciver;
@@ -82,11 +86,16 @@ public class BufferActivity extends ExpandableListActivity {
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener listener;
 
+	private int restoreListPosition = 0;
+	private int restoreItemPosition = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-
+		if(savedInstanceState != null) {
+			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
+			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
+		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.buffer_list);
 		//bufferList = new ArrayList<Buffer>();
@@ -105,6 +114,7 @@ public class BufferActivity extends ExpandableListActivity {
 					((TextView)findViewById(R.id.buffer_list_progress_text)).setText(resultData.getString(CoreConnService.PROGRESS_KEY));
 				}else if(resultCode==CoreConnService.INIT_DONE) {
 					setListAdapter(bufferListAdapter);
+					bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 				}
 				super.onReceiveResult(resultCode, resultData);
 			}
@@ -147,6 +157,21 @@ public class BufferActivity extends ExpandableListActivity {
 	protected void onDestroy() {
 		preferences.unregisterOnSharedPreferenceChangeListener(listener);
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+	    ExpandableListView listView = getExpandableListView();
+	    // Save position of first visible item
+	    restoreListPosition = listView.getFirstVisiblePosition();
+	    outState.putInt(LIST_POSITION_KEY, restoreListPosition);
+
+	    // Save scroll position of item
+	    View itemView = listView.getChildAt(0);
+	    restoreItemPosition = itemView == null ? 0 : itemView.getTop();
+	    outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
+
 	}
 
 
@@ -237,17 +262,18 @@ public class BufferActivity extends ExpandableListActivity {
 				return;
 			networks.addObserver(this);
 			notifyDataSetChanged();
-		}
-
-		@Override
-		public void notifyDataSetChanged() {
-			super.notifyDataSetChanged();
 			if(getExpandableListAdapter() != null) {
 				for(int group = 0; group < getGroupCount(); group++) {
 					if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
 					else getExpandableListView().collapseGroup(group);
 				}
+				getExpandableListView().setSelectionFromTop(restoreListPosition, restoreItemPosition);
 			}
+		}
+
+		@Override
+		public void notifyDataSetChanged() {
+			super.notifyDataSetChanged();
 		}
 
 		@Override
@@ -402,10 +428,9 @@ public class BufferActivity extends ExpandableListActivity {
 			boundConnService.registerStatusReceiver(statusReciver);
 
 			//Testing to see if i can add item to adapter in service
-			bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 			if(boundConnService.isInitComplete()) { 
 				setListAdapter(bufferListAdapter);
-				bufferListAdapter.notifyDataSetChanged();
+				bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 			}
 
 
@@ -445,6 +470,7 @@ public class BufferActivity extends ExpandableListActivity {
 			unbindService(mConnection);
 			isBound = false;
 			bufferListAdapter.clearBuffers();
+			setListAdapter(null);
 		}
 	}
 }

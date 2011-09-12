@@ -38,6 +38,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.DatabaseUtils;
 import android.graphics.Typeface;
 import android.os.Binder;
@@ -107,6 +108,10 @@ public class CoreConnService extends Service {
 
 	private QuasseldroidNotificationManager notificationManager;
 
+	private boolean preferenceParseColors;
+
+	private OnSharedPreferenceChangeListener preferenceListener;
+
 	/**
 	 * Class for clients to access. Because we know this service always runs in
 	 * the same process as its clients, we don't need to deal with IPC.
@@ -133,6 +138,17 @@ public class CoreConnService extends Service {
 		incomingHandler = new IncomingHandler();
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
+		preferenceListener = new OnSharedPreferenceChangeListener() {
+			
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key == getString(R.string.preference_colored_text)) {
+					preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
+				}	
+			}
+		};
+		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
 		statusReceivers = new ArrayList<ResultReceiver>();
 	}
 
@@ -265,6 +281,8 @@ public class CoreConnService extends Service {
 	 * Parse mIRC style codes in IrcMessage
 	 */
 	public void parseStyleCodes(IrcMessage message) {
+		if(!preferenceParseColors) return;
+		
 		final char boldIndicator = 2;
 		final char normalIndicator = 15;
 		final char italicIndicator = 29;
@@ -333,6 +351,8 @@ public class CoreConnService extends Service {
 	 * Parse mIRC color codes in IrcMessage
 	 */
 	public void parseColorCodes(IrcMessage message) {
+		if(!preferenceParseColors) return;
+		
 		final char formattingIndicator = 3;
 
 		/*
@@ -601,8 +621,8 @@ public class CoreConnService extends Service {
 				 * Setting last seen message id in a buffer
 				 */
 				buffer = networks.getBufferById(msg.arg1);
-				Boolean hasHighlights = buffer.hasUnseenHighlight();
 				if (buffer != null) {
+					Boolean hasHighlights = buffer.hasUnseenHighlight();
 					buffer.setLastSeenMessage(msg.arg2);
 					if(hasHighlights)
 						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
@@ -723,6 +743,7 @@ public class CoreConnService extends Service {
 	}
 
 	public boolean isInitComplete() {
+		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
 
