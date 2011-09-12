@@ -723,6 +723,7 @@ public class CoreConnService extends Service {
 	}
 
 	public boolean isInitComplete() {
+		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
 
