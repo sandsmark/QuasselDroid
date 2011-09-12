@@ -105,6 +105,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	private QuasselDbHelper dbHelper;
 	
 	private boolean isMarkerLineFiltered = false;
+	
+	private boolean isDisplayed = false;
 
 	public Buffer(BufferInfo info, QuasselDbHelper dbHelper) {
 		this.info = info;
@@ -549,5 +551,13 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		this.active = active;
 		this.setChanged();
 		notifyObservers();
+	}
+
+	public void setDisplayed(boolean isDisplayed) {
+		this.isDisplayed = isDisplayed;
+	}
+
+	public boolean isDisplayed() {
+		return isDisplayed;
 	}
 }

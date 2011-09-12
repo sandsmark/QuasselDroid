@@ -585,7 +585,7 @@ public class CoreConnService extends Service {
 					checkMessageForHighlight(buffer, message);
 					parseColorCodes(message);
 					parseStyleCodes(message);
-					if (message.isHighlighted()) {
+					if (message.isHighlighted() && !buffer.isDisplayed()) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
 					}
 
