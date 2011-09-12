@@ -601,8 +601,8 @@ public class CoreConnService extends Service {
 				 * Setting last seen message id in a buffer
 				 */
 				buffer = networks.getBufferById(msg.arg1);
-				Boolean hasHighlights = buffer.hasUnseenHighlight();
 				if (buffer != null) {
+					Boolean hasHighlights = buffer.hasUnseenHighlight();
 					buffer.setLastSeenMessage(msg.arg2);
 					if(hasHighlights)
 						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
