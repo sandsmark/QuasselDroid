@@ -12,6 +12,9 @@
 		android:entryValues="@array/entryvalues_fontsize_preference"
 		android:dialogTitle="Choose fontsize for the bufferlist"
 		android:defaultValue="20" />
+	<CheckBoxPreference android:key="@string/preference_colored_text"
+			android:title="Allow colored text" android:summary="NB: buggy feature, turning off might stop crashes" 
+			android:defaultValue="true" />
 
 	<PreferenceCategory android:title="Notifications">
 		<CheckBoxPreference android:key="@string/preference_notification_vibrate"
