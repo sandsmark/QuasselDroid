@@ -689,6 +689,8 @@ public class CoreConnService extends Service {
 				/**
 				 * Buffer order changed so set the new one
 				 */
+				if(networks == null) throw new RuntimeException("Networks are null when setting buffer order");
+				if(networks.getBufferById(msg.arg1) == null) throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2);
 				networks.getBufferById(msg.arg1).setOrder(msg.arg2);
 				break;
 
