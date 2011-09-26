@@ -184,7 +184,7 @@ public class QMetaTypeRegistry {
 		//			}
 		//		}
 		if(lookupId.containsKey(id)) return types.get(lookupId.get(id));
-		throw new IllegalArgumentException();
+		throw new IllegalArgumentException("Illegal id " + id);
 	}
 	public synchronized QMetaType getTypeForName(String name) {
 		if(lookupName.containsKey(name)) return types.get(lookupName.get(name));

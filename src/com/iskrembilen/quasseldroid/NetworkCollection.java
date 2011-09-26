@@ -30,7 +30,7 @@ public class NetworkCollection extends Observable implements Observer {
 				return network.getStatusBuffer();
 			if(network.getBuffers().hasBuffer(bufferId)) {
 				return network.getBuffers().getBuffer(bufferId);
-			}	
+			}
 		}
 		return null;
 	}
