@@ -64,6 +64,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setConnected(Boolean isConnected) {
 		this.isConnected = isConnected;
+		this.open = isConnected;
 	}
 
 
