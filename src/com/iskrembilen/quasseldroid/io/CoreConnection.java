@@ -740,8 +740,10 @@ public class CoreConnection {
 						// Store the network name and associated nick for "our" user
 						network.setNick((String) initMap.get("myNick").getData());
 						network.setName((String) initMap.get("networkName").getData());
-						network.setConnected((Boolean)initMap.get("isConnected").getData());
-
+						boolean isConnected = (Boolean)initMap.get("isConnected").getData();
+						network.setConnected(isConnected);
+						network.getStatusBuffer().setActive(isConnected);
+						
 						//we got enough info to tell service we are parsing network
 						Log.i(TAG, "Started parsing network " + network.getName());
 						updateInitProgress("Receiving network: " +network.getName());

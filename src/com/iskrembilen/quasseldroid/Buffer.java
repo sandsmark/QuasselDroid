@@ -79,9 +79,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	private String topic;
 	/**
-	 * Is this buffer joined or parted. Default is joined until we are told otherwise, else it is inconsistent with users and stuff.
+	 * Is this buffer joined or parted. 
 	 */
-	private boolean active = true;
+	private boolean active = false;
 	/**
 	 * Number of backlog entries that we have asked for but not yet recived, used to determine when we have recived all the backlog we requested
 	 * so we don't request the same backlog more then once
