@@ -48,18 +48,22 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.CoreInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
@@ -617,6 +621,14 @@ public class CoreConnection {
 		};
 
 		public void run() {
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(CoreConnection.this.service);
+			boolean doWakeLock = preferences.getBoolean(CoreConnection.this.service.getString(R.string.preference_wake_lock), true);
+			
+			PowerManager pm = (PowerManager) CoreConnection.this.service.getSystemService(Context.POWER_SERVICE);
+			WakeLock lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Heute ist mein tag");
+			if (doWakeLock)
+				 lock.acquire();
+			
 			try {
 				doRun();
 			} catch (EmptyQVariantException e) {
@@ -624,6 +636,9 @@ public class CoreConnection {
 				e.printStackTrace();
 				disconnect();
 				return;
+			} finally {
+				if (doWakeLock)
+					lock.release();
 			}
 		}
 
