@@ -365,7 +365,8 @@ public class BufferActivity extends ExpandableListActivity {
 
 					@Override
 					public void onClick(View v) {
-						openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
+						if(getGroup((Integer) v.getTag()).getStatusBuffer() != null)
+							openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
 					}
 				});
 				convertView.setTag(holder);

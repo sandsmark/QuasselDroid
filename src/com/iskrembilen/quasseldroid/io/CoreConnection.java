@@ -757,7 +757,8 @@ public class CoreConnection {
 						network.setName((String) initMap.get("networkName").getData());
 						boolean isConnected = (Boolean)initMap.get("isConnected").getData();
 						network.setConnected(isConnected);
-						network.getStatusBuffer().setActive(isConnected);
+						if(network.getStatusBuffer() != null)
+							network.getStatusBuffer().setActive(isConnected);
 						
 						//we got enough info to tell service we are parsing network
 						Log.i(TAG, "Started parsing network " + network.getName());
