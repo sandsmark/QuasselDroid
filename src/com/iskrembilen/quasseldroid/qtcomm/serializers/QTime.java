@@ -36,9 +36,9 @@ public class QTime implements QMetaTypeSerializer<Calendar> {
 	@Override
 	public void serialize(QDataOutputStream stream, Calendar data,
 			DataStreamVersion version) throws IOException {
-		long sum = data.get(Calendar.HOUR) * 3600000;
-		sum += data.get(Calendar.MINUTE) * 60000;
-		sum += data.get(Calendar.SECOND) * 1000;
+		long sum = data.get(Calendar.HOUR) * 3600000L;
+		sum += data.get(Calendar.MINUTE) * 60000L;
+		sum += data.get(Calendar.SECOND) * 1000L;
 		sum += data.get(Calendar.MILLISECOND);
 		stream.writeUInt(sum, 32);
 	}
@@ -47,10 +47,10 @@ public class QTime implements QMetaTypeSerializer<Calendar> {
 	public Calendar unserialize(QDataInputStream stream, DataStreamVersion version)
 			throws IOException {
 		long millisSinceMidnight = stream.readUInt(32);
-		int hour = (int) (millisSinceMidnight / 3600000);
-		int minute = (int)((millisSinceMidnight - (hour*3600000))/60000);
-		int second = (int)((millisSinceMidnight - (hour*3600000) - (minute*60000))/1000);
-		int millis = (int)((millisSinceMidnight - (hour*3600000) - (minute*60000) - (second * 1000)));
+		int hour = (int) (millisSinceMidnight / 3600000L);
+		int minute = (int)((millisSinceMidnight - (hour*3600000L))/60000L);
+		int second = (int)((millisSinceMidnight - (hour*3600000L) - (minute*60000L))/1000L);
+		int millis = (int)((millisSinceMidnight - (hour*3600000L) - (minute*60000L) - (second * 1000L)));
 
 		Calendar ret = new GregorianCalendar();
 		ret.set(Calendar.HOUR, hour);
