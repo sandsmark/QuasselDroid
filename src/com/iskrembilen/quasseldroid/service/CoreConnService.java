@@ -36,6 +36,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -46,7 +47,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.ResultReceiver;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -112,6 +115,10 @@ public class CoreConnService extends Service {
 
 	private OnSharedPreferenceChangeListener preferenceListener;
 
+	private boolean preferenceUseWakeLock;
+
+	private WakeLock wakeLock;
+
 	/**
 	 * Class for clients to access. Because we know this service always runs in
 	 * the same process as its clients, we don't need to deal with IPC.
@@ -139,13 +146,18 @@ public class CoreConnService extends Service {
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
+		preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
 		preferenceListener = new OnSharedPreferenceChangeListener() {
 			
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-				if(key == getString(R.string.preference_colored_text)) {
+				if(key.equals(getString(R.string.preference_colored_text))) {
 					preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-				}	
+				} else if(key.equals(getString(R.string.preference_wake_lock))) {
+					preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
+					if(!preferenceUseWakeLock) releaseWakeLockIfExists();
+					else if(preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
+				}
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
@@ -189,8 +201,27 @@ public class CoreConnService extends Service {
 		Log.i(TAG, "Connecting to core: " + address + ":" + port
 				+ " with username " + username);
 		networks = new NetworkCollection();
+		
+		acquireWakeLockIfEnabled();
+		
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
+	}
+
+	private void acquireWakeLockIfEnabled() {
+		if (preferenceUseWakeLock) {
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Heute ist mein tag");
+			wakeLock.acquire();
+			Log.i(TAG, "WakeLock acquired");
+		}
+	}
+	private void releaseWakeLockIfExists() {
+		if(wakeLock != null) {
+			wakeLock.release();
+			Log.i(TAG, "WakeLock released");
+		}
+		wakeLock = null;
 	}
 
 	//	public void newUser(IrcUser user) {
@@ -483,6 +514,7 @@ public class CoreConnService extends Service {
 		notificationManager.notifyDisconnected();
 		if (coreConn != null)
 			coreConn.disconnect();
+		releaseWakeLockIfExists();
 	}
 
 	public boolean isConnected() {
@@ -665,6 +697,7 @@ public class CoreConnService extends Service {
 					}
 				}
 				notificationManager.notifyDisconnected();
+				releaseWakeLockIfExists();
 				break;
 
 				//			case R.id.NEW_USERLIST_ADDED:
