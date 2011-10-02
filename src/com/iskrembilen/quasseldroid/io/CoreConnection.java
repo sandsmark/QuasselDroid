@@ -76,7 +76,7 @@ import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 
-public class CoreConnection {
+public final class CoreConnection {
 
 	private static final String TAG = CoreConnection.class.getSimpleName();
 
@@ -255,9 +255,12 @@ public class CoreConnection {
 
 			message = t[0].toUpperCase();
 			if (t.length > 1){
+				StringBuilder tmpMsg = new StringBuilder(message);
 				for (int i=1; i<t.length; i++) {
-					message += ' ' + t[i];
+					tmpMsg.append(' ');
+					tmpMsg.append(t[i]);
 				}
+				message = tmpMsg.toString();
 			}
 		} else {
 			message = "/SAY " + message;
@@ -764,10 +767,10 @@ public class CoreConnection {
 
 							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
 
-							for (String nick : userObjs.keySet()) {
+							for (Map.Entry<String, QVariant<?>> element: userObjs.entrySet()) {
 								IrcUser user = new IrcUser();
-								user.name = nick;
-								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) userObjs.get(nick).getData();
+								user.name = element.getKey();
+								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) element.getValue().getData();
 								user.away = (Boolean) map.get("away").getData();
 								user.awayMessage = (String) map.get("awayMessage").getData();
 								user.ircOperator = (String) map.get("ircOperator").getData();
