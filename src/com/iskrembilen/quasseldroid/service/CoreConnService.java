@@ -511,7 +511,6 @@ public class CoreConnService extends Service {
 	}
 
 	public void disconnectFromCore() {
-		notificationManager.notifyDisconnected();
 		if (coreConn != null)
 			coreConn.disconnect();
 		releaseWakeLockIfExists();
