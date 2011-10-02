@@ -53,7 +53,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setName(String networkName) {
 		this.networkName = networkName;
-		statusBuffer.getInfo().name = networkName;
+		if(statusBuffer != null) //TODO: remember to handle when adding status buffer after connect
+			statusBuffer.getInfo().name = networkName;
 	}
 
 

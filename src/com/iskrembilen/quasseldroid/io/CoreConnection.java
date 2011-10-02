@@ -48,18 +48,22 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.CoreInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
@@ -611,59 +615,55 @@ public class CoreConnection {
 			public void onFinish() {
 				Log.i(TAG, "Timer finished, disconnection from core");
 				CoreConnection.this.disconnect(); 
-				Message msg = service.getHandler().obtainMessage(R.id.LOST_CONNECTION);
-				msg.sendToTarget();
 			}
 		};
 
 		public void run() {
+			String errorMessage = null;
 			try {
-				doRun();
+				errorMessage = doRun();
 			} catch (EmptyQVariantException e) {
-				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Protocol error!").sendToTarget();
+				errorMessage = "Protocol error!";
 				e.printStackTrace();
 				disconnect();
-				return;
 			}
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, errorMessage).sendToTarget();
 		}
 
-		public void doRun() throws EmptyQVariantException {
+		public String doRun() throws EmptyQVariantException {
 			this.running = true;
 
 			try {
 				connect();
 				// ↓↓↓↓ FIXME TODO HANDLE THESE YOU DICKWEEDS! ↓↓↓↓
 			} catch (UnknownHostException e) {
-				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Unknown host!").sendToTarget();
-				return;
+				return "Unknown host!";
 			} catch (UnsupportedProtocolException e) {
 				service.getHandler().obtainMessage(R.id.UNSUPPORTED_PROTOCOL).sendToTarget();
 				Log.w(TAG, e);
 				disconnect();
-				return;
+				return null;
 			} catch (IOException e) {
 				if(e.getCause() instanceof NewCertificateException) {
 					service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
 					disconnect();
 				}else{
-					service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "IO error while connecting! " + e.getMessage()).sendToTarget();
 					e.printStackTrace();
 					disconnect();
+					return "IO error while connecting! " + e.getMessage();
 				}
-				return;
+				return null;
 			} catch (CertificateException e) {
 				service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
 				disconnect();
-				return;
+				return null;
 			} catch (GeneralSecurityException e) {
-				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Invalid username/password combination.").sendToTarget();
 				disconnect();
-				return;
+				return "Invalid username/password combination.";
 			} catch (EmptyQVariantException e) {
-				service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "IO error while connecting!").sendToTarget();
 				e.printStackTrace();
 				disconnect();
-				return;
+				return "IO error while connecting!";
 			}
 
 			List<QVariant<?>> packedFunc;
@@ -676,14 +676,12 @@ public class CoreConnection {
 				} catch (IOException e) {
 					//TODO: not sure if this is really the best way to check if we are connected, by just waiting until it fails, but will have to do for now
 					CoreConnection.this.disconnect(); 
-					Message msg = service.getHandler().obtainMessage(R.id.LOST_CONNECTION);
-					msg.sendToTarget();
 
 					System.err.println("IO error!");	
 					e.printStackTrace();
 					this.running = false;
 					CoreConnection.this.connected = false;
-					return;
+					return null;
 				}
 				//We received a package, aka we are not disconnected, restart timer
 				//Log.i(TAG, "Package reviced, reseting countdown");
@@ -742,7 +740,8 @@ public class CoreConnection {
 						network.setName((String) initMap.get("networkName").getData());
 						boolean isConnected = (Boolean)initMap.get("isConnected").getData();
 						network.setConnected(isConnected);
-						network.getStatusBuffer().setActive(isConnected);
+						if(network.getStatusBuffer() != null)
+							network.getStatusBuffer().setActive(isConnected);
 						
 						//we got enough info to tell service we are parsing network
 						Log.i(TAG, "Started parsing network " + network.getName());
@@ -1092,6 +1091,7 @@ public class CoreConnection {
 			} catch (IOException e) {
 				System.out.println("WARNING: Unable to close input stream (already closed?).");
 			}
+			return null;
 		}
 	}
 
