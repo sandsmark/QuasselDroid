@@ -121,7 +121,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 		return defaultTrustManager.getAcceptedIssuers();
 	}
 	
-	class NewCertificateException extends CertificateException {
+	static class NewCertificateException extends CertificateException {
 		private String hashedCert;
 		public NewCertificateException(String hashedCert) {
 			this.hashedCert = hashedCert;
