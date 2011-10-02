@@ -98,10 +98,12 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	private ArrayList<String> urls = new ArrayList<String>();
 
 
+	@Override
 	public int compareTo(IrcMessage other) {
 		return ((Integer)messageId).compareTo((Integer)other.messageId);
 	}
 
+	@Override
 	public String toString() {
 		return sender +": " + content;
 	}
