@@ -40,7 +40,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * Information object about this buffer, contains name, type of buffer etc
 	 */
-	private BufferInfo info;
+	private final BufferInfo info;
 	/**
 	 * List that holds all the Ircmessages we have gotten on this buffer.
 	 */

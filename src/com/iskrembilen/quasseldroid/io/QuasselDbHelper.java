@@ -23,6 +23,8 @@
 
 package com.iskrembilen.quasseldroid.io;
 
+import java.util.Arrays;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -171,7 +173,7 @@ public class QuasselDbHelper {
 		Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
 		boolean ret = false;
 		if (c != null) { // This is retarded, fuck Android.
-			if (c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)).equals(certificate)) {
+			if (Arrays.equals(c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)), certificate.getBytes())) {
 				ret = true;
 			}
 			c.close();

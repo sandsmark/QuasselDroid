@@ -157,21 +157,25 @@ public class QVariant<T extends Object>{
 		case Bool:
 			return data.toString();
 		case Map:
-			String ret = "( ";
+			StringBuilder ret = new StringBuilder("( ");
 			Map<Object, Object> map = (Map<Object, Object>)data;
-			for (Object key : map.keySet()) {
-				ret += key.toString() + " : " + map.get(key).toString() + ", ";
+			for (Map.Entry<Object, Object> element : map.entrySet()) {
+				ret.append(element.getKey().toString());
+				ret.append(" : ");
+				ret.append(element.getValue().toString());
+				ret.append(", ");
 			}
-			ret += " )";
-			return ret;
+			ret.append(" )");
+			return ret.toString();
 		case List:
-			String r = "( ";
+			StringBuilder r = new StringBuilder("( ");
 			List<Object> list = (List<Object>)data;
 			for (Object o : list) {
-				r += o.toString() + ", ";
+				r.append(o.toString());
+				r.append(", ");
 			}
-			r += " )";
-			return r;
+			r.append(" )");
+			return r.toString();
 		case UserType:
 			return userTypeName + data;
 		default:
