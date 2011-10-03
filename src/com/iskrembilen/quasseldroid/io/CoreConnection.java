@@ -50,6 +50,7 @@ import javax.net.ssl.TrustManager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
 import android.os.PowerManager;
@@ -1025,13 +1026,26 @@ public final class CoreConnection {
 
 					} 
 					//TODO: need network objects to lookup buffers in given networks
-//					else if (className.equals("IrcUser") && function.equals("partChannel")) {
-//						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
-//						String[] tmp = objectName.split("/");
-//						int networkId = Integer.parseInt(tmp[1]);
-//						String userName = tmp[1];
-//						
-//					} 
+					else if (className.equals("IrcUser") && function.equals("partChannel")) {
+						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String userName = tmp[1];
+						Bundle bundle = new Bundle();
+						bundle.putString("nick", userName);
+						bundle.putString("buffer", (String)packedFunc.remove(0).getData());
+						service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
+						
+					} 
+					else if (className.equals("IrcUser") && function.equals("quit")) {
+						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String userName = tmp[1];
+						service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
+					}
+					
+					
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();

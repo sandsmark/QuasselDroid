@@ -772,7 +772,15 @@ public class CoreConnService extends Service {
 			case R.id.INIT_DONE:
 				sendStatusMessage(CoreConnService.INIT_DONE, null);
 				break;
+			case R.id.USER_PARTED:
+				bundle = (Bundle) msg.obj;
+				networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"), bundle.getString("buffer"));
+				break;
+			case R.id.USER_QUIT:
+				networks.getNetworkById(msg.arg1).onUserQuit((String)msg.obj);
+				break;
 			}
+			
 		}
 	}
 

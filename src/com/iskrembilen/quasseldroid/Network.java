@@ -116,4 +116,25 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	public void setNick(String nick) {
 		this.nick = nick;
 	}
+
+
+	public void onUserQuit(String nick) {
+		for(IrcUser user: userList) {
+			if(user.nick.equals(nick)) {
+				userList.remove(user);
+				return;
+			}
+		}
+	}
+
+
+	public void onUserParted(String nick, String bufferName) {
+		for(IrcUser user: userList) {
+			if(user.nick.equals(nick)) {
+				user.channels.remove(bufferName);
+				return;
+			}
+			
+		}
+	}
 }
