@@ -57,7 +57,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * Quassel variable, represents the last message seen on a buffer 
 	 */
-	private int lastSeenMessage;
+	private int lastSeenMessage = -1;
 	/**
 	 * Quassel variable, the id of the message where the marker line is placed
 	 */
@@ -246,9 +246,12 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public boolean hasUnreadActivity(){
 		//Last message in the backlog has a bigger messageId than the last seen message
-		if (backlog.size() != 0 && lastSeenMessage!=0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
+		if (backlog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
 			return true;
 		}
+		if (lastSeenMessage == -1)
+			return true;
+		
 		return false;
 	}
 

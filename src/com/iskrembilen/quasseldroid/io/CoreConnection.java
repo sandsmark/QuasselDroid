@@ -940,7 +940,7 @@ public final class CoreConnection {
 						 * There are several objects that we don't care about (at the moment).
 						 */
 					} else {
-						System.out.println("Unparsed InitData: " + className + "(" + objectName + ").");
+						Log.i(TAG, "Unparsed InitData: " + className + "(" + objectName + ").");
 					}
 					break;
 					/*
@@ -988,7 +988,7 @@ public final class CoreConnection {
 						// Send our the backlog messages to our listeners
 						for (QVariant<?> message: data) {
 							Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
-							msg.obj = (IrcMessage) message.getData();
+							msg.obj = message.getData();
 							msg.sendToTarget();
 						}
 						if(!initComplete) { //We are still initializing backlog for the first time
@@ -1011,6 +1011,7 @@ public final class CoreConnection {
 
 						}
 					} else if (className.equals("Network") && function.equals("addIrcChannel")) {
+						System.out.println("FUCK SHIT PISS");
 						String bufferName = (String) packedFunc.remove(0).getData();
 						try {
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);
@@ -1079,7 +1080,7 @@ public final class CoreConnection {
 						//int buffer = (Integer) packedFunc.remove(0).getData();
 						//buffers.get(buffer).setRead();
 					} else {
-						System.out.println("Unparsed Sync request: " + className + "::" + function);
+						Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
 					}
 
 					break;
@@ -1096,16 +1097,27 @@ public final class CoreConnection {
 					 */
 					if (functionName.equals("2displayMsg(Message)")) {
 						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
+
+						if (!networks.get(message.bufferInfo.networkId).containsBuffer(message.bufferInfo.id) &&
+							message.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
+							// TODO: persist the db connections
+							Buffer buffer = new Buffer(message.bufferInfo, new QuasselDbHelper(service.getApplicationContext()));
+							buffers.put(message.bufferInfo.id, buffer);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE);
+							msg.obj = buffer;
+							msg.sendToTarget();
+						}
+						
 						Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
 						msg.obj = message;
 						msg.sendToTarget();
 
 					} else {
-						System.out.println("Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
+						Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
 					}
 					break;
 				default:
-					System.out.println("Unhandled request type: " + type.name());
+					Log.i(TAG, "Unhandled request type: " + type.name());
 				}
 				long end = System.currentTimeMillis();
 				if (end-start > 500) {

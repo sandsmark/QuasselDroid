@@ -53,6 +53,7 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
@@ -566,6 +567,7 @@ public class CoreConnService extends Service {
 				 */
 				message = (IrcMessage) msg.obj;
 				buffer = networks.getBufferById(message.bufferInfo.id);
+				
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null:" + message);
 					return;
@@ -605,9 +607,10 @@ public class CoreConnService extends Service {
 					checkMessageForHighlight(buffer, message);
 					parseColorCodes(message);
 					parseStyleCodes(message);
-					if (message.isHighlighted() && !buffer.isDisplayed()) {
+					if ((message.isHighlighted() && !buffer.isDisplayed()) || buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
 					}
+					
 
 					checkForURL(message);
 					buffer.addMessage(message);
