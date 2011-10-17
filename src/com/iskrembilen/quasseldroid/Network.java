@@ -1,7 +1,6 @@
 package com.iskrembilen.quasseldroid;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -143,7 +142,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	public void onUserJoined(String nick, String bufferName) {
 		IrcUser user = new IrcUser();
 		user.nick = nick;
-		user.channels = new LinkedList<String>();
+		user.channels = new ArrayList<String>();
 		user.channels.add(bufferName);
 		for (int i=0; i<buffers.getBufferCount(); i++) {
 			if (buffers.getPos(i).getInfo().name.equals(bufferName)) {
