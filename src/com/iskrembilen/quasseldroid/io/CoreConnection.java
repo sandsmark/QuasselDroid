@@ -48,13 +48,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -762,7 +758,6 @@ public final class CoreConnection {
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
 							List<String> users = new ArrayList<String>(userModes.keySet());
 							String topic = (String)chan.get("topic").getData();
-							// Horribly inefficient search for the right buffer, Java sucks.
 
 							Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();
 
@@ -1035,7 +1030,21 @@ public final class CoreConnection {
 						bundle.putString("nick", userName);
 						bundle.putString("buffer", (String)packedFunc.remove(0).getData());
 						service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
+					}
+					
+					// A user has joined a channel
+					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
+
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String channelName = tmp[1];
+						String nick = ((List<String>)packedFunc.remove(0).getData()).remove(0);
+
+						Bundle bundle = new Bundle();
+						bundle.putString("buffer", channelName);
+						bundle.putString("nick", nick);
 						
+						service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, 0, bundle).sendToTarget();
 					} 
 					else if (className.equals("IrcUser") && function.equals("quit")) {
 						System.out.println(packedFunc.toString()+" objectname: "+ objectName);

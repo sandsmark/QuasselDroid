@@ -46,5 +46,6 @@
 <item type="id" name="LAST_SEEN_CHANGED"></item>
 <item type="id" name="INIT_PROGRESS"></item>
 <item type="id" name="INIT_DONE"></item>
+<item name="USER_JOINED" type="id"></item>
 
 </resources>
