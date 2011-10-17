@@ -442,9 +442,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {
+		this.temporarilyHidden = temporarilyHidden;
 		this.setChanged();
 		notifyObservers(R.id.BUFFER_HIDDEN_CHANGED);
-		this.temporarilyHidden = temporarilyHidden;
 	}
 
 	public boolean isTemporarilyHidden() {

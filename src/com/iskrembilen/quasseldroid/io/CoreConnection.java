@@ -184,9 +184,25 @@ public final class CoreConnection {
 
 
 	/**
-	 * Requests all buffers.
+	 * Requests to unhide a temporarily hidden buffer
 	 */
+	public void requestUnhideTempHiddenBuffer(int bufferId) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
+		retFunc.add(new QVariant<String>("0", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestAddBuffer", QVariantType.String));
+		retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
+		retFunc.add(new QVariant<Integer>(networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount(), QVariantType.Int));
 
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+			connected = false;
+		}		
+	}
+	
 	/**
 	 * Requests the unread backlog for a given buffer.
 	 */

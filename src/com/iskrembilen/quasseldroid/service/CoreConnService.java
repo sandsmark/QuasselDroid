@@ -243,6 +243,11 @@ public class CoreConnService extends Service {
 		coreConn.requestSetMarkerLine(bufferId, msgId);
 		networks.getBufferById(bufferId).setMarkerLineMessage(msgId);
 	}
+	
+	public void unhideTempHiddenBuffer(int bufferId) {
+		coreConn.requestUnhideTempHiddenBuffer(bufferId);
+		networks.getBufferById(bufferId).setTemporarilyHidden(false);
+	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
 		Buffer buffer = networks.getBufferById(bufferId);
@@ -596,7 +601,7 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(message.bufferInfo.id);
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null: " + message);
-					return;	
+					return;
 				}
 
 				if (!buffer.hasMessage(message)) {
@@ -614,6 +619,10 @@ public class CoreConnService extends Service {
 
 					checkForURL(message);
 					buffer.addMessage(message);
+					
+					if (buffer.isTemporarilyHidden()) {
+						unhideTempHiddenBuffer(buffer.getInfo().id);
+					}
 				} else {
 					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
 				}
