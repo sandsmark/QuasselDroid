@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_hide_events" android:title="@string/menu_hide_events" android:icon="@android:drawable/ic_menu_manage"></item><item android:id="@+id/menu_preferences" android:title="@string/preferences"
+	<item android:id="@+id/menu_hide_events" android:title="@string/menu_hide_events" android:icon="@android:drawable/ic_menu_manage"></item><item android:id="@+id/menu_users_list" android:title="@string/menu_users_list"></item><item android:id="@+id/menu_preferences" android:title="@string/preferences"
 		android:icon="@android:drawable/ic_menu_preferences" ></item>
 	<item android:id="@+id/menu_disconnect" android:title="@string/menu_disconnect"
 		android:icon="@android:drawable/ic_menu_close_clear_cancel" ></item>
+	
 	
 </menu>

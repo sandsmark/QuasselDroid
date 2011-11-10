@@ -370,8 +370,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * Get the list of nicks for this buffer
 	 * @return nick list
 	 */
-	public List<String> getNicks() {
-		return new ArrayList<String>(); //TODO: returning empty list for now, fix later, will disable nick complete
+	public List<IrcUser> getNicks() {
+		return users;
 	}
 
 	/**

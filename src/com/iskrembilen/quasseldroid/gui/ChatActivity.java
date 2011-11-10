@@ -74,6 +74,8 @@ public class ChatActivity extends Activity{
 
 
 	public static final int MESSAGE_RECEIVED = 0;
+	private static final String BUFFER_ID_EXTRA = "bufferid";
+	private static final String BUFFER_NAME_EXTRA = "buffername";
 
 	private BacklogAdapter adapter;
 	private ListView backlogList;
@@ -86,6 +88,8 @@ public class ChatActivity extends Activity{
 	private ResultReceiver statusReceiver;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
+
+
 
 	/** Called when the activity is first created. */
 	@Override
@@ -162,32 +166,33 @@ public class ChatActivity extends Activity{
 	};
 
 
-	//Nick autocomplete when pressing the search-button
-	@Override
-	public boolean onSearchRequested() {
-		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
-		String inputString = inputfield.getText().toString();
-		String[] inputWords = inputString.split(" ");
-		String inputNick = inputWords[inputWords.length-1];
-		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
-
-		if ( "".equals(inputNick) ) {
-			if ( adapter.buffer.getNicks().size() > 0 ) {
-				inputfield.setText(adapter.buffer.getNicks().get(0)+ ": ");
-				inputfield.setSelection(adapter.buffer.getNicks().get(0).length() + 2);
-			}
-		} else {
-			for (String nick : adapter.buffer.getNicks()) {
-				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
-					String additional = inputWords.length > 1 ? " ": ": ";
-					inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + nick+  additional);
-					inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
-					break;
-				}
-			}
-		}
-		return false;  // don't go ahead and show the search box
-	}
+	//TODO: fix this again after changing from string to ircusers
+//	//Nick autocomplete when pressing the search-button
+//	@Override
+//	public boolean onSearchRequested() {
+//		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+//		String inputString = inputfield.getText().toString();
+//		String[] inputWords = inputString.split(" ");
+//		String inputNick = inputWords[inputWords.length-1];
+//		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
+//
+//		if ( "".equals(inputNick) ) {
+//			if ( adapter.buffer.getNicks().size() > 0 ) {
+//				inputfield.setText(adapter.buffer.getNicks().get(0)+ ": ");
+//				inputfield.setSelection(adapter.buffer.getNicks().get(0).length() + 2);
+//			}
+//		} else {
+//			for (String nick : adapter.buffer.getNicks()) {
+//				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
+//					String additional = inputWords.length > 1 ? " ": ": ";
+//					inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + nick+  additional);
+//					inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
+//					break;
+//				}
+//			}
+//		}
+//		return false;  // don't go ahead and show the search box
+//	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,6 +211,9 @@ public class ChatActivity extends Activity{
 			break;
 		case R.id.menu_hide_events:
 			showDialog(R.id.DIALOG_HIDE_EVENTS);
+			break;
+		case R.id.menu_users_list:
+			openNickList(adapter.buffer);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -244,6 +252,7 @@ public class ChatActivity extends Activity{
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
+		//TODO: wtf rewrite this dialog in code creator shit, if it is possible, mabye it is an alert builder for a reason
 		Dialog dialog;
 		switch (id) {
 		case R.id.DIALOG_HIDE_EVENTS:
@@ -279,8 +288,13 @@ public class ChatActivity extends Activity{
 		}
 		return dialog;
 	}
-
-
+	
+	private void openNickList(Buffer buffer) {
+		Intent i = new Intent(ChatActivity.this, NicksActivity.class);
+		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
+		i.putExtra(BUFFER_NAME_EXTRA, buffer.getInfo().name);
+		startActivity(i);
+	}
 
 	public class BacklogAdapter extends BaseAdapter implements Observer {
 
