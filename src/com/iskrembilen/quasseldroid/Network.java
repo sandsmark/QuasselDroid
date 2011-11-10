@@ -172,4 +172,13 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		}
 		return null;
 	}
+
+	public boolean containsBuffer(int id) {
+		return buffers.hasBuffer(id);
+	}
+
+
+	public int getBufferCount() {
+		return buffers.getBufferCount();
+	}
 }

@@ -23,24 +23,17 @@
 
 package com.iskrembilen.quasseldroid.service;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.database.DatabaseUtils;
 import android.graphics.Typeface;
 import android.os.Binder;
 import android.os.Bundle;
@@ -48,8 +41,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.ResultReceiver;
 import android.os.PowerManager.WakeLock;
+import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -60,15 +53,13 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
+import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.gui.BufferActivity;
-import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 
 /**
@@ -240,6 +231,11 @@ public class CoreConnService extends Service {
 	public void setMarkerLine(int bufferId, int msgId) {
 		coreConn.requestSetMarkerLine(bufferId, msgId);
 		networks.getBufferById(bufferId).setMarkerLineMessage(msgId);
+	}
+	
+	public void unhideTempHiddenBuffer(int bufferId) {
+		coreConn.requestUnhideTempHiddenBuffer(bufferId);
+		networks.getBufferById(bufferId).setTemporarilyHidden(false);
 	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
@@ -566,6 +562,7 @@ public class CoreConnService extends Service {
 				 */
 				message = (IrcMessage) msg.obj;
 				buffer = networks.getBufferById(message.bufferInfo.id);
+				
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null:" + message);
 					return;
@@ -594,7 +591,7 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(message.bufferInfo.id);
 				if (buffer == null) {
 					Log.e(TAG, "A messages buffer is null: " + message);
-					return;	
+					return;
 				}
 
 				if (!buffer.hasMessage(message)) {
@@ -605,12 +602,17 @@ public class CoreConnService extends Service {
 					checkMessageForHighlight(buffer, message);
 					parseColorCodes(message);
 					parseStyleCodes(message);
-					if (message.isHighlighted() && !buffer.isDisplayed()) {
+					if ((message.isHighlighted() && !buffer.isDisplayed()) || buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
 					}
+					
 
 					checkForURL(message);
 					buffer.addMessage(message);
+					
+					if (buffer.isTemporarilyHidden()) {
+						unhideTempHiddenBuffer(buffer.getInfo().id);
+					}
 				} else {
 					Log.e(TAG, "Getting message buffer already have " + buffer.toString());
 				}

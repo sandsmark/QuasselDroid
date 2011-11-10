@@ -48,13 +48,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -188,9 +184,25 @@ public final class CoreConnection {
 
 
 	/**
-	 * Requests all buffers.
+	 * Requests to unhide a temporarily hidden buffer
 	 */
+	public void requestUnhideTempHiddenBuffer(int bufferId) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
+		retFunc.add(new QVariant<String>("0", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestAddBuffer", QVariantType.String));
+		retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
+		retFunc.add(new QVariant<Integer>(networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount(), QVariantType.Int));
 
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+			connected = false;
+		}		
+	}
+	
 	/**
 	 * Requests the unread backlog for a given buffer.
 	 */
@@ -786,7 +798,7 @@ public final class CoreConnection {
 							//10-17 13:07:08.064: INFO/System.out(278): {haeric=o, sandsmark=o, freqmod=, Hammersta=o, JonT=o, Kenji=o, frecar=o, lUpht=o, tksw=o, Bruun=o, ernie`=o, Sherriff=o, trondkla=o, Alxandr=, kenneo=o, arve=o, raiom=o, pernille=o, palt=o, JuulArthu=o, Krashk=o, Klabb=o, knuterr=o, Zomg=o}
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
 							String topic = (String)chan.get("topic").getData();
-							//TODO: ken fortsett hre
+
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
 								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
@@ -948,7 +960,7 @@ public final class CoreConnection {
 						 * There are several objects that we don't care about (at the moment).
 						 */
 					} else {
-						System.out.println("Unparsed InitData: " + className + "(" + objectName + ").");
+						Log.i(TAG, "Unparsed InitData: " + className + "(" + objectName + ").");
 					}
 					break;
 					/*
@@ -996,7 +1008,7 @@ public final class CoreConnection {
 						// Send our the backlog messages to our listeners
 						for (QVariant<?> message: data) {
 							Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
-							msg.obj = (IrcMessage) message.getData();
+							msg.obj = message.getData();
 							msg.sendToTarget();
 						}
 						if(!initComplete) { //We are still initializing backlog for the first time
@@ -1023,6 +1035,7 @@ public final class CoreConnection {
 
 						}
 					} else if (className.equals("Network") && function.equals("addIrcChannel")) {
+						System.out.println("FUCK SHIT PISS");
 						String bufferName = (String) packedFunc.remove(0).getData();
 						try {
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);
@@ -1042,8 +1055,7 @@ public final class CoreConnection {
 						bundle.putString("nick", userName);
 						bundle.putString("buffer", (String)packedFunc.remove(0).getData());
 						service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
-						
-					} 
+					}
 					else if (className.equals("IrcUser") && function.equals("quit")) {
 						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
 						String[] tmp = objectName.split("/");
@@ -1099,7 +1111,7 @@ public final class CoreConnection {
 						//int buffer = (Integer) packedFunc.remove(0).getData();
 						//buffers.get(buffer).setRead();
 					} else {
-						System.out.println("Unparsed Sync request: " + className + "::" + function);
+						Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
 					}
 
 					break;
@@ -1116,16 +1128,27 @@ public final class CoreConnection {
 					 */
 					if (functionName.equals("2displayMsg(Message)")) {
 						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
+
+						if (!networks.get(message.bufferInfo.networkId).containsBuffer(message.bufferInfo.id) &&
+							message.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
+							// TODO: persist the db connections
+							Buffer buffer = new Buffer(message.bufferInfo, new QuasselDbHelper(service.getApplicationContext()));
+							buffers.put(message.bufferInfo.id, buffer);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE);
+							msg.obj = buffer;
+							msg.sendToTarget();
+						}
+						
 						Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
 						msg.obj = message;
 						msg.sendToTarget();
 
 					} else {
-						System.out.println("Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
+						Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
 					}
 					break;
 				default:
-					System.out.println("Unhandled request type: " + type.name());
+					Log.i(TAG, "Unhandled request type: " + type.name());
 				}
 				long end = System.currentTimeMillis();
 				if (end-start > 500) {

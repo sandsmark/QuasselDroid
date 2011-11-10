@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout android:layout_width="fill_parent"
+	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+	android:background="#ffffff">
+	<TextView android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:id="@+id/chatNameView"
+		android:layout_alignParentTop="true" android:gravity="center"
+		android:singleLine="true" android:ellipsize="marquee"
+		android:focusable="true" android:focusableInTouchMode="true"
+		android:marqueeRepeatLimit="marquee_forever" />
+
+	<LinearLayout
+	    android:id="@+id/chatLinearLayout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/chatNameView"
+	    android:baselineAligned="true" >
+	    <ListView android:layout_height="fill_parent" android:layout_gravity="right" 
+	    android:layout_width="wrap_content" android:layout_weight="3" android:id="@+id/userList"></ListView>
+	</LinearLayout>
+</RelativeLayout>

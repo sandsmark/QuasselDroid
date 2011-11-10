@@ -44,6 +44,7 @@ public class NetworkCollection extends Observable implements Observer {
 	}
 	
 	public void addBuffer(Buffer buffer) {
+		System.out.println(buffer);
 		int id = buffer.getInfo().networkId;
 		for(Network network : networkList) {
 			if(network.getId() == id) {
