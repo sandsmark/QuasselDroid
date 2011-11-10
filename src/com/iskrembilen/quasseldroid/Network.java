@@ -137,12 +137,13 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		for(IrcUser user: userList) {
 			if(user.nick.equals(nick)) {
 				user.channels.remove(bufferName);
-				return;
+				break;
 			}
 		}
 		for(Buffer buffer : buffers.getRawBufferList()) {
 			if(buffer.getInfo().name.equals(bufferName)) {
 				buffer.removeNick(nick);
+				break;
 			}
 		}
 	}

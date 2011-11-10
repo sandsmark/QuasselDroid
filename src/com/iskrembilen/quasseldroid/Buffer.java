@@ -380,7 +380,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void removeNick(String nick) {
 		for(IrcUser user : users) {
-			if(user.name == nick) {
+			if(user.nick.equals(nick)) {
 				users.remove(user);
 				setChanged();
 				notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
