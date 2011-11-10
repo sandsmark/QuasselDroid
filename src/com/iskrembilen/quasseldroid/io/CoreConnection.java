@@ -754,38 +754,43 @@ public final class CoreConnection {
 						// Horribly nested maps
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
 						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
+						
+						//Parse out user objects for network
+						Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();						
+						ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
+						for (Map.Entry<String, QVariant<?>> element: userObjs.entrySet()) {
+							IrcUser user = new IrcUser();
+							user.name = element.getKey();
+							Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) element.getValue().getData();
+							user.away = (Boolean) map.get("away").getData();
+							user.awayMessage = (String) map.get("awayMessage").getData();
+							user.ircOperator = (String) map.get("ircOperator").getData();
+							user.nick = (String) map.get("nick").getData();
+							user.channels = (List<String>) map.get("channels").getData();
+							//TODO: this shit has to be sooo slow? time it, and mabye improve
+							for(String channel : user.channels) {
+								for (Buffer buffer: network.getBuffers().getRawBufferList()) {
+									if (buffer.getInfo().name.equals(channel)) {
+										buffer.addUser(user);
+										break;
+									}
+								}
+							}
+							ircUsers.add(user);
+						}
+						network.setUserList(ircUsers);
 
-						// Parse out the list of nicks in all channels, and topics
+						// Parse out the topics
 						for (QVariant<?> channel:  channels.values()) {
 							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
 							String chanName = (String)chan.get("name").getData();
+							//10-17 13:07:08.064: INFO/System.out(278): {haeric=o, sandsmark=o, freqmod=, Hammersta=o, JonT=o, Kenji=o, frecar=o, lUpht=o, tksw=o, Bruun=o, ernie`=o, Sherriff=o, trondkla=o, Alxandr=, kenneo=o, arve=o, raiom=o, pernille=o, palt=o, JuulArthu=o, Krashk=o, Klabb=o, knuterr=o, Zomg=o}
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
-							List<String> users = new ArrayList<String>(userModes.keySet());
 							String topic = (String)chan.get("topic").getData();
-							// Horribly inefficient search for the right buffer, Java sucks.
-
-							Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();
-
-							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
-
-							for (Map.Entry<String, QVariant<?>> element: userObjs.entrySet()) {
-								IrcUser user = new IrcUser();
-								user.name = element.getKey();
-								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) element.getValue().getData();
-								user.away = (Boolean) map.get("away").getData();
-								user.awayMessage = (String) map.get("awayMessage").getData();
-								user.ircOperator = (String) map.get("ircOperator").getData();
-								user.nick = (String) map.get("nick").getData();
-								user.channels = (List<String>) map.get("channels").getData();
-
-								ircUsers.add(user);
-							}
-							network.setUserList(ircUsers);
-
+							//TODO: ken fortsett hre
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
 								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
-									buffer.setNicks(users);
 									buffer.setActive(true);
 									break;
 								}
@@ -1044,6 +1049,10 @@ public final class CoreConnection {
 						String userName = tmp[1];
 						service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
 					}
+					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
+						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
+					}
+					
 					
 					
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {

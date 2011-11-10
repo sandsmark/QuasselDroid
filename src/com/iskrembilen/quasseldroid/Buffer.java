@@ -73,7 +73,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * List of the nick of ppl on this buffer TODO: say something about what this is used for
 	 */
-	private List<String> nicks;
+	private List<IrcUser> users;
 	/**
 	 * The topic for this buffer
 	 */
@@ -114,6 +114,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		filteredBacklog = new ArrayList<IrcMessage>();
 		backlogStash = new ArrayList<IrcMessage>();
 		filterTypes= new ArrayList<IrcMessage.Type>();
+		users = new ArrayList<IrcUser>();
 		this.dbHelper = dbHelper;
 		
 		//Default active to true if channel is a query buffer, they are "always" active
@@ -357,20 +358,20 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		lastSeenMessage = backlog.get(backlog.size()-1).messageId;
 	}
 
-	/**
-	 * set the nick list for this buffer. Nick of ppl that is on this buffer
-	 * @param nicks list of nicks
-	 */
-	public void setNicks(List<String> nicks) {
-		this.nicks = nicks;
-	}
+//	/**
+//	 * set the nick list for this buffer. Nick of ppl that is on this buffer
+//	 * @param nicks list of nicks
+//	 */
+//	public void setNicks(List<String> nicks) {
+//		this.nicks = nicks;
+//	}
 
 	/**
 	 * Get the list of nicks for this buffer
 	 * @return nick list
 	 */
 	public List<String> getNicks() {
-		return nicks;
+		return new ArrayList<String>(); //TODO: returning empty list for now, fix later, will disable nick complete
 	}
 
 	/**
@@ -378,15 +379,20 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * @param nick the nick to remove
 	 */
 	public void removeNick(String nick) {
-		nicks.remove(nick);
+		for(IrcUser user : users) {
+			if(user.name == nick) {
+				users.remove(user);
+				break;
+			}
+		}
 	}
 
 	/**
 	 * Add a specific nick to the nick list
 	 * @param nick the nick to add
 	 */
-	public void addNick(String nick) {
-		nicks.add(nick);
+	public void addUser(IrcUser user) {
+		users.add(user);
 	}
 
 	/**
