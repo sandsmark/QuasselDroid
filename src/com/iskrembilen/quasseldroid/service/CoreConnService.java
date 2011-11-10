@@ -224,18 +224,6 @@ public class CoreConnService extends Service {
 		wakeLock = null;
 	}
 
-	//	public void newUser(IrcUser user) {
-	//		ircUsers.put(user.nick, user);
-	//	}
-	//
-	//	public IrcUser getUser(String nick) {
-	//		return ircUsers.get(nick);
-	//	}
-	//
-	//	public boolean hasUser(String nick) {
-	//		return ircUsers.containsKey(nick);
-	//	}
-
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
 	}
@@ -569,6 +557,7 @@ public class CoreConnService extends Service {
 			Buffer buffer;
 			IrcMessage message;
 			Bundle bundle;
+			IrcUser user;
 			switch (msg.what) {
 			case R.id.NEW_BACKLOGITEM_TO_SERVICE:
 				/**
@@ -713,8 +702,9 @@ public class CoreConnService extends Service {
 				/**
 				 * New IrcUser added
 				 */
-				//				IrcUser user = (IrcUser) msg.obj;
-				//				newUser(user);
+				user = (IrcUser) msg.obj;
+				System.out.println(networks.getNetworkById(msg.arg1).getName());
+				networks.getNetworkById(msg.arg1).onUserJoined(user);
 				break;
 
 			case R.id.SET_BUFFER_ORDER:
@@ -778,6 +768,10 @@ public class CoreConnService extends Service {
 				break;
 			case R.id.USER_QUIT:
 				networks.getNetworkById(msg.arg1).onUserQuit((String)msg.obj);
+				break;
+			case R.id.USER_JOINED:
+				user = networks.getNetworkById(msg.arg1).getUserByNick((String)msg.obj);
+				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).addUser(user);
 				break;
 			}
 			

@@ -116,6 +116,10 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	public void setNick(String nick) {
 		this.nick = nick;
 	}
+	
+	public void onUserJoined(IrcUser user) {
+		userList.add(user);
+	}
 
 
 	public void onUserQuit(String nick) {
@@ -135,7 +139,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void onUserParted(String nick, String bufferName) {
 		for(IrcUser user: userList) {
-			if(user.nick.equals(nick)) {
+			if(user.nick.equals(nick) && user.channels.contains(bufferName)) {
 				user.channels.remove(bufferName);
 				break;
 			}
@@ -146,5 +150,26 @@ public class Network extends Observable implements Observer, Comparable<Network>
 				break;
 			}
 		}
+	}
+
+
+	public boolean hasNick(String nick) {
+		for(IrcUser user : userList) {
+			if(user.nick.equals(nick)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	public IrcUser getUserByNick(String nick) {
+		for(IrcUser user : userList) {
+			System.out.println(user.nick);
+			if(user.nick.equals(nick)) {
+				return user;
+			}
+		}
+		return null;
 	}
 }

@@ -482,7 +482,6 @@ public final class CoreConnection {
 
 		connected = false;
 	}
-
 	/****************************
 	 * Private internal communication stuff.
 	 * Please don't look below this line.
@@ -872,18 +871,17 @@ public final class CoreConnection {
 						 * A class representing another user on a given IRC network.
 						 */
 					} else if (className.equals("IrcUser")) {
-						IrcUser user = new IrcUser();
-						user.name = className;
-						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-						user.away = (Boolean) map.get("away").getData();
-						user.awayMessage = (String) map.get("awayMessage").getData();
-						user.ircOperator = (String) map.get("ircOperator").getData();
-						user.nick = (String) map.get("nick").getData();
-						user.channels = (List<String>) map.get("channels").getData();
-
-						Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_ADDED);
-						msg.obj = (IrcUser) user;
-						msg.sendToTarget();
+//						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+//						user.away = (Boolean) map.get("away").getData();
+//						user.awayMessage = (String) map.get("awayMessage").getData();
+//						user.ircOperator = (String) map.get("ircOperator").getData();
+//						user.nick = (String) map.get("nick").getData();
+//						user.channels = (List<String>) map.get("channels").getData();
+//
+//						Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_ADDED);
+//						msg.obj = (IrcUser) user;
+//						msg.sendToTarget();
+						
 					}
 					//TODO: after making network object come back and fix this. Needs that shit
 //					else if (className.equals("IrcChannel")) {
@@ -1013,8 +1011,12 @@ public final class CoreConnection {
 						 */
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
+						System.out.println("NICK: " + nick.substring(0, nick.indexOf("!")));
+						IrcUser user = new IrcUser();
+						user.nick = nick.substring(0, nick.indexOf("!"));
+						service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
 						try {
-							sendInitRequest("IrcUser", objectName+"/" + nick);
+							sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
 						} catch (IOException e) {
 							e.printStackTrace();
 							running = false; // We have obviously lost our connection, just stop this thread.
@@ -1050,7 +1052,25 @@ public final class CoreConnection {
 						service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
 					}
 					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
-						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
+						List<String> nicks = (List<String>)packedFunc.remove(0).getData();
+						List<String> modes = (List<String>)packedFunc.remove(0).getData();
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String bufferName = tmp[1];
+						int bufferId = -1;
+						for (Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
+							if(buffer.getInfo().name.equals(bufferName)) {
+								bufferId = buffer.getInfo().id;
+								break;
+							}
+						}
+						if(bufferId == -1) {
+							throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
+						}
+						
+						for(String nick : nicks) {
+							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, bufferId, nick).sendToTarget();
+						}
 					}
 					
 					

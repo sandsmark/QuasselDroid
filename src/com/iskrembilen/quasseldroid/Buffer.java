@@ -395,6 +395,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void addUser(IrcUser user) {
 		users.add(user);
+		setChanged();
+		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
 	/**

@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class IrcUser {
@@ -31,7 +32,7 @@ public class IrcUser {
 	public String awayMessage;
 	public String ircOperator;
 	public String nick;
-	public List<String> channels;
+	public List<String> channels = new ArrayList<String>();
 	
 	
 	public String toString(){

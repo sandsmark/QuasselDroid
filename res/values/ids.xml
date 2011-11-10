@@ -23,6 +23,7 @@
 <item type="id" name="NEW_USER_ADDED"></item>
 <item type="id" name="USER_PARTED"></item>
 <item type="id" name="USER_QUIT"></item>
+<item type="id" name="USER_JOINED"></item>
 <item type="id" name="NEW_USERLIST_ADDED"></item>
 <item type="id" name="SET_BUFFER_ORDER"></item>
 <item type="id" name="SET_BUFFER_ACTIVE"></item>
@@ -30,7 +31,7 @@
 <item type="id" name="BUFFER_HIDDEN_CHANGED"></item>
 <item type="id" name="LOST_CONNECTION"></item>
 <item type="id" name="ADD_MULTIPLE_BUFFERS"></item>
-<item name="NEW_BACKLOGITEM_TO_SERVICE" type="id"></item>
+<item type="id" name="NEW_BACKLOGITEM_TO_SERVICE"></item>
 <item type="id" name="BUFFERUPDATE_BACKLOG"></item>
 <item type="id" name="BUFFERUPDATE_NEWMESSAGE"></item>
 <item type="id" name="BUFFERUPDATE_USERSCHANGED"></item>
