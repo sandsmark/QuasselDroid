@@ -59,7 +59,9 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -70,6 +72,7 @@ import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 
 public class NicksActivity extends Activity{
@@ -77,6 +80,7 @@ public class NicksActivity extends Activity{
 	private static final String TAG = NicksActivity.class.getSimpleName();
 	private ResultReceiver statusReceiver;
 	private NicksAdapter adapter;
+	private ExpandableListView list;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -86,7 +90,8 @@ public class NicksActivity extends Activity{
 		setContentView(R.layout.nick_layout);
 
 		adapter = new NicksAdapter(this);
-		((ListView)findViewById(R.id.userList)).setAdapter(adapter);
+		list = (ExpandableListView)findViewById(R.id.userList);
+		list.setAdapter(adapter);
 		statusReceiver = new ResultReceiver(null) {
 
 			@Override
@@ -97,7 +102,7 @@ public class NicksActivity extends Activity{
 
 		};
 	}
-	
+
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -110,56 +115,23 @@ public class NicksActivity extends Activity{
 		doUnbindService();
 	}
 
-	public class NicksAdapter extends BaseAdapter implements Observer{
+	public class NicksAdapter extends BaseExpandableListAdapter implements Observer{
 
 		private LayoutInflater inflater;
-		private List<IrcUser> users;
-		private Buffer buffer;
-
+		private UserCollection users;
 		public NicksAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			this.users = null;
 
 		}
 
-		public void setBuffer(Buffer buffer) {
-			this.buffer = buffer;
-			this.users = buffer.getNicks();
+		public void setUsers(UserCollection users) {
+			users.addObserver(this);
+			this.users = users;
 			notifyDataSetChanged();
-		}
-
-		@Override
-		public int getCount() {
-			if (this.users==null) return 0;
-			return users.size();
-		}
-
-		@Override
-		public IrcUser getItem(int position) {
-			//TODO: QriorityQueue is fucked, we dont want to convert to array here, so change later
-			return (IrcUser) users.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder holder = null;
-
-			if (convertView==null) {
-				convertView = inflater.inflate(R.layout.nicklist_item, null);
-				holder = new ViewHolder();
-				holder.nickView = (TextView)convertView.findViewById(R.id.nicklist_nick_view);
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolder)convertView.getTag();
+			for(int i=0; i<adapter.getGroupCount();i++) {
+				list.expandGroup(i);
 			}
-			IrcUser entry = this.getItem(position);
-			holder.nickView.setText(entry.nick);
-			return convertView;
 		}
 
 		@Override
@@ -173,16 +145,114 @@ public class NicksActivity extends Activity{
 				break;			
 			}
 		}
-		
-		public void stopObserving() {
-			buffer.deleteObserver(this);
 
+		public void stopObserving() {
+			users.deleteObserver(this);
+
+		}
+
+		@Override
+		public IrcUser getChild(int groupPosition, int childPosition) {
+			return getGroup(groupPosition).get(childPosition);
+		}
+
+		@Override
+		public long getChildId(int groupPosition, int childPosition) {
+			return groupPosition*10 + childPosition;
+		}
+
+		@Override
+		public View getChildView(int groupPosition, int childPosition,
+				boolean isLastChild, View convertView, ViewGroup parent) {
+
+			ViewHolderChild holder = null;
+
+			if (convertView==null) {
+				convertView = inflater.inflate(R.layout.nicklist_item, null);
+				holder = new ViewHolderChild();
+				holder.nickView = (TextView)convertView.findViewById(R.id.nicklist_nick_view);
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolderChild)convertView.getTag();
+			}
+			IrcUser entry = getChild(groupPosition, childPosition);
+			holder.nickView.setText(entry.nick);
+			return convertView;
+		}
+
+		@Override
+		public int getChildrenCount(int groupPosition) {
+			if (this.users==null) return 0;
+			return getGroup(groupPosition).size();
+		}
+
+		@Override
+		public List<IrcUser> getGroup(int groupPosition) {
+			switch (groupPosition) {
+			case 0:
+				return users.getOperators();
+			case 1:
+				return users.getVoiced();
+			case 2:
+				return users.getUsers();
+			}
+			return null;
+		}
+
+		@Override
+		public int getGroupCount() {
+			return 3;
+		}
+
+		@Override
+		public long getGroupId(int groupPosition) {
+			return groupPosition;
+		}
+
+		@Override
+		public View getGroupView(int groupPosition, boolean isExpanded,
+				View convertView, ViewGroup parent) {
+			ViewHolderGroup holder = null;
+
+			if (convertView==null) {
+				convertView = inflater.inflate(R.layout.nicklist_group_item, null);
+				holder = new ViewHolderGroup();
+				holder.nameView = (TextView)convertView.findViewById(R.id.nicklist_group_name_view);
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolderGroup)convertView.getTag();
+			}
+			switch (groupPosition) {
+			case 0:
+				holder.nameView.setText("Operators");
+				break;
+			case 1:
+				holder.nameView.setText("Voiced");
+				break;
+			case 2:
+				holder.nameView.setText("Users");
+				break;
+			}
+			return convertView;
+		}
+
+		@Override
+		public boolean hasStableIds() {
+			return false;
+		}
+
+		@Override
+		public boolean isChildSelectable(int groupPosition, int childPosition) {
+			return false;
 		}
 	}
 
 
-	public static class ViewHolder {
+	public static class ViewHolderChild {
 		public TextView nickView;
+	}
+	public static class ViewHolderGroup {
+		public TextView nameView;
 	}
 
 
@@ -203,9 +273,9 @@ public class NicksActivity extends Activity{
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 			Intent intent = getIntent();
-			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
-			adapter.setBuffer(buffer);
-			
+			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), null);
+			adapter.setUsers(buffer.getUsers());
+
 			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 

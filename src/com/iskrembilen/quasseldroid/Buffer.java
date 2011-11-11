@@ -73,7 +73,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * List of the nick of ppl on this buffer TODO: say something about what this is used for
 	 */
-	private List<IrcUser> users;
+	private UserCollection users;
 	/**
 	 * The topic for this buffer
 	 */
@@ -114,7 +114,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		filteredBacklog = new ArrayList<IrcMessage>();
 		backlogStash = new ArrayList<IrcMessage>();
 		filterTypes= new ArrayList<IrcMessage.Type>();
-		users = new ArrayList<IrcUser>();
+		users = new UserCollection();
 		this.dbHelper = dbHelper;
 		
 		//Default active to true if channel is a query buffer, they are "always" active
@@ -373,33 +373,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * Get the list of nicks for this buffer
 	 * @return nick list
 	 */
-	public List<IrcUser> getNicks() {
+	public UserCollection getUsers() {
 		return users;
-	}
-
-	/**
-	 * Remove a specific nick from the nick list
-	 * @param nick the nick to remove
-	 */
-	public void removeNick(String nick) {
-		for(IrcUser user : users) {
-			if(user.nick.equals(nick)) {
-				users.remove(user);
-				setChanged();
-				notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Add a specific nick to the nick list
-	 * @param nick the nick to add
-	 */
-	public void addUser(IrcUser user) {
-		users.add(user);
-		setChanged();
-		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
 	/**

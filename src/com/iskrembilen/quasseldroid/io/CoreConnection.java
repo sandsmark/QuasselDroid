@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -62,6 +63,7 @@ import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.UserCollection.UserMode;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
 import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
@@ -769,6 +771,7 @@ public final class CoreConnection {
 						//Parse out user objects for network
 						Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();						
 						ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
+						HashMap<String, IrcUser> userTempMap = new HashMap<String, IrcUser>();
 						for (Map.Entry<String, QVariant<?>> element: userObjs.entrySet()) {
 							IrcUser user = new IrcUser();
 							user.name = element.getKey();
@@ -777,17 +780,20 @@ public final class CoreConnection {
 							user.awayMessage = (String) map.get("awayMessage").getData();
 							user.ircOperator = (String) map.get("ircOperator").getData();
 							user.nick = (String) map.get("nick").getData();
+							if(user.nick.equals("Kenji")) 
+								System.out.println("NOW!!!!!! | " + element);
 							user.channels = (List<String>) map.get("channels").getData();
 							//TODO: this shit has to be sooo slow? time it, and mabye improve
-							for(String channel : user.channels) {
-								for (Buffer buffer: network.getBuffers().getRawBufferList()) {
-									if (buffer.getInfo().name.equals(channel)) {
-										buffer.addUser(user);
-										break;
-									}
-								}
-							}
+//							for(String channel : user.channels) {
+//								for (Buffer buffer: network.getBuffers().getRawBufferList()) {
+//									if (buffer.getInfo().name.equals(channel)) {
+//										buffer.getUsers().addUser(user, UserMode.USER);
+//										break;
+//									}
+//								}
+//							}
 							ircUsers.add(user);
+							userTempMap.put(user.nick, user);
 						}
 						network.setUserList(ircUsers);
 
@@ -797,18 +803,20 @@ public final class CoreConnection {
 							String chanName = (String)chan.get("name").getData();
 							//10-17 13:07:08.064: INFO/System.out(278): {haeric=o, sandsmark=o, freqmod=, Hammersta=o, JonT=o, Kenji=o, frecar=o, lUpht=o, tksw=o, Bruun=o, ernie`=o, Sherriff=o, trondkla=o, Alxandr=, kenneo=o, arve=o, raiom=o, pernille=o, palt=o, JuulArthu=o, Krashk=o, Klabb=o, knuterr=o, Zomg=o}
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
+							System.out.println("MODES! | " + userModes);
 							String topic = (String)chan.get("topic").getData();
-
+							
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
 								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
 									buffer.setActive(true);
+									for(Entry<String, QVariant<?>> nick : userModes.entrySet()) {
+										IrcUser user = userTempMap.get(nick.getKey());
+										buffer.getUsers().addUser(user, UserMode.getUserMode((String)nick.getValue().getData()));
+									}
 									break;
 								}
 							}
-
-							service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED, ircUsers).sendToTarget();
-
 						}
 						
 						Log.i(TAG, "Sending network " + network.getName() + " to service");
@@ -1079,9 +1087,11 @@ public final class CoreConnection {
 						if(bufferId == -1) {
 							throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
 						}
-						
-						for(String nick : nicks) {
-							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, bufferId, nick).sendToTarget();
+						for(int i=0; i<nicks.size();i++) {
+							Bundle bundle = new Bundle();
+							bundle.putString("nick", nicks.get(i));
+							bundle.putSerializable("mode", UserMode.getUserMode(modes.get(i)));
+							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, bufferId, bundle).sendToTarget();	
 						}
 					}
 					

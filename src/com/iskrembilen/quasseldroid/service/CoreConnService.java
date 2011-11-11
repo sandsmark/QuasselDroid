@@ -60,6 +60,7 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.UserCollection.UserMode;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 
 /**
@@ -240,7 +241,8 @@ public class CoreConnService extends Service {
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
 		Buffer buffer = networks.getBufferById(bufferId);
-		buffer.addObserver(obs);
+		if(obs != null)
+			buffer.addObserver(obs);
 		return buffer;
 	}
 
@@ -689,17 +691,6 @@ public class CoreConnService extends Service {
 				notificationManager.notifyDisconnected();
 				releaseWakeLockIfExists();
 				break;
-
-				//			case R.id.NEW_USERLIST_ADDED:
-				//				/**
-				//				 * Initial list of users
-				//				 */
-				//				ArrayList<IrcUser> users = (ArrayList<IrcUser>) msg.obj;
-				//				for (IrcUser user : users) {
-				//					newUser(user);
-				//				}
-				//				break;
-
 			case R.id.NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
@@ -772,8 +763,10 @@ public class CoreConnService extends Service {
 				networks.getNetworkById(msg.arg1).onUserQuit((String)msg.obj);
 				break;
 			case R.id.USER_JOINED:
-				user = networks.getNetworkById(msg.arg1).getUserByNick((String)msg.obj);
-				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).addUser(user);
+				bundle = (Bundle) msg.obj;
+				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+				UserMode mode = (UserMode)bundle.get("mode");
+				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, mode);
 				break;
 			}
 			
