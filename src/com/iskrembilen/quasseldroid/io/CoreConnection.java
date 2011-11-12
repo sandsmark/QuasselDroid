@@ -780,8 +780,6 @@ public final class CoreConnection {
 							user.awayMessage = (String) map.get("awayMessage").getData();
 							user.ircOperator = (String) map.get("ircOperator").getData();
 							user.nick = (String) map.get("nick").getData();
-							if(user.nick.equals("Kenji")) 
-								System.out.println("NOW!!!!!! | " + element);
 							user.channels = (List<String>) map.get("channels").getData();
 							//TODO: this shit has to be sooo slow? time it, and mabye improve
 //							for(String channel : user.channels) {
@@ -801,9 +799,7 @@ public final class CoreConnection {
 						for (QVariant<?> channel:  channels.values()) {
 							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
 							String chanName = (String)chan.get("name").getData();
-							//10-17 13:07:08.064: INFO/System.out(278): {haeric=o, sandsmark=o, freqmod=, Hammersta=o, JonT=o, Kenji=o, frecar=o, lUpht=o, tksw=o, Bruun=o, ernie`=o, Sherriff=o, trondkla=o, Alxandr=, kenneo=o, arve=o, raiom=o, pernille=o, palt=o, JuulArthu=o, Krashk=o, Klabb=o, knuterr=o, Zomg=o}
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
-							System.out.println("MODES! | " + userModes);
 							String topic = (String)chan.get("topic").getData();
 							
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
