@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
-public class IrcUser extends Observable{
+public class IrcUser extends Observable implements Comparable<IrcUser>{
 	public String name;
 	public boolean away;
 	public String awayMessage;
@@ -44,5 +44,10 @@ public class IrcUser extends Observable{
 		nick = newNick;
 		this.setChanged();
 		notifyObservers();
+	}
+
+	@Override
+	public int compareTo(IrcUser another) {
+		return this.nick.compareTo(another.nick);
 	}
 }

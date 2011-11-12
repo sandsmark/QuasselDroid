@@ -1,9 +1,12 @@
 package com.iskrembilen.quasseldroid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+
+import android.util.Log;
 
 import com.iskrembilen.quasseldroid.BufferInfo.Type;
 
@@ -50,12 +53,15 @@ public class UserCollection extends Observable implements Observer {
 		switch (mode) {
 		case USER:
 			users.add(user);
+			Collections.sort(users);
 			break;
 		case VOICED:
 			voiced.add(user);
+			Collections.sort(voiced);
 			break;
 		case OPERATOR:
 			operators.add(user);
+			Collections.sort(operators);
 			break;
 		}
 		user.addObserver(this);
@@ -87,6 +93,10 @@ public class UserCollection extends Observable implements Observer {
 			return value;
 		}
 		public static UserMode getUserMode(String value) {
+			if(value.length()>1) {
+				Log.d("UserMode", "UserMode is not 1 char, WTF is " + value);
+				value = value.substring(0,1);
+			}
 			for (UserMode t: values()) {
 				if (t.value.equals(value))
 					return t;
@@ -97,6 +107,9 @@ public class UserCollection extends Observable implements Observer {
 
 	@Override
 	public void update(Observable observable, Object data) {
+		Collections.sort(users);
+		Collections.sort(voiced);
+		Collections.sort(operators);
 		this.setChanged();
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 		

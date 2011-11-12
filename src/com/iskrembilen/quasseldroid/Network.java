@@ -165,7 +165,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public IrcUser getUserByNick(String nick) {
 		for(IrcUser user : userList) {
-			System.out.println(user.nick);
 			if(user.nick.equals(nick)) {
 				return user;
 			}

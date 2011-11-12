@@ -34,4 +34,5 @@
 		Quassel IRC client.</string>
 	<string name="menu_hide_events">Hide Events</string>
 	<string name="preference_wake_lock">wakelock</string>
+	<string name="nick_list_header">Nicks</string>
 </resources>
