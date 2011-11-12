@@ -20,10 +20,13 @@
 <item type="id" name="NEW_BUFFER_TO_SERVICE"></item>
 <item type="id" name="SET_LAST_SEEN_TO_SERVICE"></item>
 <item type="id" name="SET_MARKERLINE_TO_SERVICE"></item>
+
 <item type="id" name="NEW_USER_ADDED"></item>
 <item type="id" name="USER_PARTED"></item>
 <item type="id" name="USER_QUIT"></item>
 <item type="id" name="USER_JOINED"></item>
+<item type="id" name="USER_CHANGEDNICK"></item>
+    
 <item type="id" name="NEW_USERLIST_ADDED"></item>
 <item type="id" name="SET_BUFFER_ORDER"></item>
 <item type="id" name="SET_BUFFER_ACTIVE"></item>

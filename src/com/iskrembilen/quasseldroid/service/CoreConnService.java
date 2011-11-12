@@ -696,7 +696,6 @@ public class CoreConnService extends Service {
 				 * New IrcUser added
 				 */
 				user = (IrcUser) msg.obj;
-				System.out.println(networks.getNetworkById(msg.arg1).getName());
 				networks.getNetworkById(msg.arg1).onUserJoined(user);
 				break;
 
@@ -768,8 +767,12 @@ public class CoreConnService extends Service {
 				UserMode mode = (UserMode)bundle.get("mode");
 				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, mode);
 				break;
-			}
-			
+			case R.id.USER_CHANGEDNICK:
+				bundle = (Bundle) msg.obj;
+				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
+				user.changeNick(bundle.getString("newNick"));
+				break;
+			}			
 		}
 	}
 

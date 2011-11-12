@@ -446,7 +446,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		return permanentlyHidden;
 	}
 	public void setOrder(int order) {
-		Log.d(TAG, "Order " +this.getInfo().name + " : " + order);
 		this.order = order;
 		this.setChanged();
 		notifyObservers(R.id.BUFFER_ORDER_CHANGED);

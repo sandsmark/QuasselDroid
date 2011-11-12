@@ -3,10 +3,11 @@ package com.iskrembilen.quasseldroid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
 
 import com.iskrembilen.quasseldroid.BufferInfo.Type;
 
-public class UserCollection extends Observable {
+public class UserCollection extends Observable implements Observer {
 
 	private List<IrcUser> users;
 	private List<IrcUser> voiced;
@@ -57,6 +58,7 @@ public class UserCollection extends Observable {
 			operators.add(user);
 			break;
 		}
+		user.addObserver(this);
 		setChanged();
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
@@ -91,5 +93,12 @@ public class UserCollection extends Observable {
 			}
 			throw new IllegalArgumentException("UserMode " + value + " was not recognized");
 		}
+	}
+
+	@Override
+	public void update(Observable observable, Object data) {
+		this.setChanged();
+		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+		
 	}
 }

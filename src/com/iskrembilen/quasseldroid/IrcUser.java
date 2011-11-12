@@ -25,8 +25,9 @@ package com.iskrembilen.quasseldroid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
-public class IrcUser {
+public class IrcUser extends Observable{
 	public String name;
 	public boolean away;
 	public String awayMessage;
@@ -37,5 +38,11 @@ public class IrcUser {
 	
 	public String toString(){
 		return nick + " away: " + away + " Num chans: "+ channels.size();
+	}
+	
+	public void changeNick(String newNick) {
+		nick = newNick;
+		this.setChanged();
+		notifyObservers();
 	}
 }

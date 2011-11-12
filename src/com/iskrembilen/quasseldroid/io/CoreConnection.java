@@ -1027,7 +1027,6 @@ public final class CoreConnection {
 						 */
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
-						System.out.println("NICK: " + nick.substring(0, nick.indexOf("!")));
 						IrcUser user = new IrcUser();
 						user.nick = nick.substring(0, nick.indexOf("!"));
 						service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
@@ -1039,7 +1038,6 @@ public final class CoreConnection {
 
 						}
 					} else if (className.equals("Network") && function.equals("addIrcChannel")) {
-						System.out.println("FUCK SHIT PISS");
 						String bufferName = (String) packedFunc.remove(0).getData();
 						try {
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);
@@ -1051,7 +1049,6 @@ public final class CoreConnection {
 					} 
 					//TODO: need network objects to lookup buffers in given networks
 					else if (className.equals("IrcUser") && function.equals("partChannel")) {
-						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
 						String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String userName = tmp[1];
@@ -1061,11 +1058,15 @@ public final class CoreConnection {
 						service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
 					}
 					else if (className.equals("IrcUser") && function.equals("quit")) {
-						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
 						String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String userName = tmp[1];
 						service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
+					}
+					else if (className.equals("IrcUser") && function.equals("setNick")) {
+						/*
+						 * Does nothing, Why would we need a sync call, when we got a RPC call about renaming the user object
+						 */
 					}
 					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
 						List<String> nicks = (List<String>)packedFunc.remove(0).getData();
@@ -1148,7 +1149,19 @@ public final class CoreConnection {
 						Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
 						msg.obj = message;
 						msg.sendToTarget();
+						//11-12 21:48:02.514: I/CoreConnection(277): Unhandled RpcCall: __objectRenamed__ ([IrcUser, 1/Kenji, 1/Kenj1]).
+					} else if(functionName.equals("__objectRenamed__") && ((String)packedFunc.get(0).getData()).equals("IrcUser")) {
+						packedFunc.remove(0); //Drop the "ircUser"
+						String[] tmp = ((String)packedFunc.remove(0).getData()).split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String newNick = tmp[1];
+						tmp = ((String)packedFunc.remove(0).getData()).split("/");
+						String oldNick = tmp[1];
 
+						Bundle bundle = new Bundle();
+						bundle.putString("oldNick", oldNick);
+						bundle.putString("newNick", newNick);
+						service.getHandler().obtainMessage(R.id.USER_CHANGEDNICK, networkId, -1, bundle).sendToTarget();
 					} else {
 						Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
 					}
