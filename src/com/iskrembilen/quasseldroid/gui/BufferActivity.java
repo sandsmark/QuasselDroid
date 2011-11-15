@@ -67,6 +67,8 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.IrcUser;
+
 
 public class BufferActivity extends ExpandableListActivity {
 
@@ -314,6 +316,25 @@ public class BufferActivity extends ExpandableListActivity {
 				//				if (boundConnService.hasUser(nick)){
 				//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
 				//				}
+
+				List<IrcUser> nickList = this.networks.getNetwork(groupPosition).getUserList();
+				
+				int nick_found = 0;                     
+				         
+				for (IrcUser ircuser : nickList) {
+					if (ircuser.name.startsWith(nick)) {
+						nick_found  = 1;
+					    if (ircuser.away) {
+					    	nick += " (away)";
+					    }
+					    break;
+					}
+				
+				}
+				if (nick_found == 0){
+					nick += " (off)";
+				}
+
 				holder.bufferView.setText(nick);
 				break;
 			case GroupBuffer:
