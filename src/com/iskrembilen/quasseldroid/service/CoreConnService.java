@@ -775,15 +775,12 @@ public class CoreConnService extends Service {
 			case R.id.USER_ADD_MODE:
 				bundle = (Bundle) msg.obj;
 				bufferName = bundle.getString("channel");
-				System.out.println(bufferName);
-				System.out.println(msg.arg1);
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
 				for(Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
-					System.out.println("BUFFERNAME: " + buf.getInfo().name + " channel: " + bufferName);
-						if(buf.getInfo().name.equals(bufferName)) {
-							buf.getUsers().addUserMode(user, bundle.getString("mode"));
-							break;
-						}
+					if(buf.getInfo().name.equals(bufferName)) {
+						buf.getUsers().addUserMode(user, bundle.getString("mode"));
+						break;
+					}
 				}
 				break;
 			case R.id.USER_REMOVE_MODE:
