@@ -555,6 +555,7 @@ public class CoreConnService extends Service {
 			IrcMessage message;
 			Bundle bundle;
 			IrcUser user;
+			String bufferName;
 			switch (msg.what) {
 			case R.id.NEW_BACKLOGITEM_TO_SERVICE:
 				/**
@@ -770,6 +771,31 @@ public class CoreConnService extends Service {
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
 				user.changeNick(bundle.getString("newNick"));
+				break;
+			case R.id.USER_ADD_MODE:
+				bundle = (Bundle) msg.obj;
+				bufferName = bundle.getString("channel");
+				System.out.println(bufferName);
+				System.out.println(msg.arg1);
+				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+				for(Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+					System.out.println("BUFFERNAME: " + buf.getInfo().name + " channel: " + bufferName);
+						if(buf.getInfo().name.equals(bufferName)) {
+							buf.getUsers().addUserMode(user, bundle.getString("mode"));
+							break;
+						}
+				}
+				break;
+			case R.id.USER_REMOVE_MODE:
+				bundle = (Bundle) msg.obj;
+				bufferName = bundle.getString("channel");
+				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+				for(Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+						if(buf.getInfo().name.equals(bufferName)) {
+							buf.getUsers().removeUserMode(user, bundle.getString("mode"));
+							break;
+						}
+				}
 				break;
 			}			
 		}

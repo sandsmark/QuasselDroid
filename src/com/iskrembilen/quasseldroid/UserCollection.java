@@ -111,4 +111,54 @@ public class UserCollection extends Observable implements Observer {
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 
 	}
+
+	public void addUserMode(IrcUser user, String mode) {
+		if(mode.equals("o")) {
+			operators.add(user);
+			Collections.sort(operators);
+			if(voiced.contains(user)) {
+				addUserIfNotAlreadyIn(voicedAndOp, user);
+				voiced.remove(user);
+			}
+			this.setChanged();
+		} else if(mode.equals("v")) {
+			if(operators.contains(user)) {
+				addUserIfNotAlreadyIn(voicedAndOp, user);
+			}else {
+				addUserIfNotAlreadyIn(voiced, user);
+				Collections.sort(voiced);
+				this.setChanged();
+			}
+		} else {
+			Log.e(TAG, "Unknown user mode " + mode);
+			return;
+		}
+		users.remove(user);
+		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+	}
+
+	public void removeUserMode(IrcUser user, String mode) {
+		if(mode.equals("o")) {
+			operators.remove(user);
+			if(voicedAndOp.contains(user)) {
+				addUserIfNotAlreadyIn(voiced, user);
+				voicedAndOp.remove(user);
+			}else if(!voiced.contains(user)) {
+				addUserIfNotAlreadyIn(users, user);
+			}
+			this.setChanged();
+		}else if(mode.equals("v")) {
+			if(!voicedAndOp.remove(user)){
+				voiced.remove(user);
+				addUserIfNotAlreadyIn(users, user);
+				Collections.sort(users);
+				this.setChanged();
+			}
+		}else {
+			Log.e(TAG, "Unknown user mode " + mode);
+			return;
+		}
+		
+		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+	}
 }

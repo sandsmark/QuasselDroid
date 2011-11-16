@@ -1106,12 +1106,36 @@ public final class CoreConnection {
 						}
 					}
 					else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
-						System.out.println(packedFunc);
-						System.out.println(objectName);
+                        String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String channel = tmp[1];
+						
+						String nick = (String) packedFunc.remove(0).getData();
+						String changedMode = (String) packedFunc.remove(0).getData();
+						
+						Bundle bundle = new Bundle();
+						bundle.putString("nick", nick);
+						bundle.putString("mode", changedMode);
+						bundle.putString("channel", channel);
+						System.out.println(nick + " " + channel + " " + changedMode);
+						service.getHandler().obtainMessage(R.id.USER_ADD_MODE, networkId, 0, bundle).sendToTarget();
+						
+						
 					}
 					else if (className.equals("IrcChannel") && function.equals("removeUserMode")) {
-						System.out.println(packedFunc);
-						System.out.println(objectName);
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String channel = tmp[1];
+						
+						String nick = (String) packedFunc.remove(0).getData();
+						String changedMode = (String) packedFunc.remove(0).getData();
+						
+						Bundle bundle = new Bundle();
+						bundle.putString("nick", nick);
+						bundle.putString("mode", changedMode);
+						bundle.putString("channel", channel);
+						
+						service.getHandler().obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
 					}
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
