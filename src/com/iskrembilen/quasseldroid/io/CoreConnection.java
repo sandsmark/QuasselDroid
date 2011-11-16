@@ -966,10 +966,22 @@ public final class CoreConnection {
 								System.err.println("got buffer info for non-existant buffer id: " + bufferId.getData());
 								continue;
 							}
-							//buffers.get(bufferId.getData()).setOrder(order);
 							Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
-							msg.arg1 = (Integer) bufferId.getData();
+							msg.arg1 = (Integer)bufferId.getData();
 							msg.arg2 = order;
+							
+							//FIXME: DEBUG PISS REMOVE
+							ArrayList<Integer> keysString = new ArrayList<Integer>();
+							ArrayList<Integer> buffersString = new ArrayList<Integer>();
+							for(Entry<Integer, Buffer> b : buffers.entrySet()) {
+								keysString.add(b.getKey());
+								buffersString.add(b.getValue().getInfo().id);
+							}
+							Bundle bundle = new Bundle();
+							bundle.putIntegerArrayList("keys", keysString);
+							bundle.putIntegerArrayList("buffers", buffersString);
+							msg.obj = bundle;
+							
 							msg.sendToTarget();
 
 							order++;
