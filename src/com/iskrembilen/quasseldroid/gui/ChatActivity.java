@@ -177,7 +177,7 @@ public class ChatActivity extends Activity{
 //		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
 //
 //		if ( "".equals(inputNick) ) {
-//			if ( adapter.buffer.getNicks().size() > 0 ) {
+//			if ( adapter.buffer.getUsers().getUserCount() > 0 ) {
 //				inputfield.setText(adapter.buffer.getNicks().get(0)+ ": ");
 //				inputfield.setSelection(adapter.buffer.getNicks().get(0).length() + 2);
 //			}

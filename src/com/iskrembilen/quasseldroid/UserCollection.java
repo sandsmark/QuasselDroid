@@ -161,4 +161,8 @@ public class UserCollection extends Observable implements Observer {
 		
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
+	
+	public int getUserCount() {
+		return operators.size() + voiced.size() + users.size();
+	}
 }
