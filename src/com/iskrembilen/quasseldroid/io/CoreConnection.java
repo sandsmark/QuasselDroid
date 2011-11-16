@@ -488,6 +488,8 @@ public final class CoreConnection {
 		try {
 			if (outStream != null)
 				outStream.close();
+			if(inStream != null)
+				inStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

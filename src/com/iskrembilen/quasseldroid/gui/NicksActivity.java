@@ -62,6 +62,7 @@ import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -218,19 +219,23 @@ public class NicksActivity extends Activity{
 				convertView = inflater.inflate(R.layout.nicklist_group_item, null);
 				holder = new ViewHolderGroup();
 				holder.nameView = (TextView)convertView.findViewById(R.id.nicklist_group_name_view);
+				holder.imageView = (ImageView)convertView.findViewById(R.id.nicklist_group_image_view);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
 			switch (groupPosition) {
 			case 0:
-				holder.nameView.setText("Operators");
+				holder.nameView.setText(getGroup(groupPosition).size() + " Operator(s)");
+				holder.imageView.setImageResource(R.drawable.irc_operator);
 				break;
 			case 1:
-				holder.nameView.setText("Voiced");
+				holder.nameView.setText(getGroup(groupPosition).size() + " Voiced");
+				holder.imageView.setImageResource(R.drawable.irc_voice);
 				break;
 			case 2:
-				holder.nameView.setText("Users");
+				holder.nameView.setText(getGroup(groupPosition).size() + " User(s)");
+				holder.imageView.setImageResource(R.drawable.im_user);
 				break;
 			}
 			return convertView;
@@ -253,6 +258,7 @@ public class NicksActivity extends Activity{
 	}
 	public static class ViewHolderGroup {
 		public TextView nameView;
+		public ImageView imageView;
 	}
 
 
