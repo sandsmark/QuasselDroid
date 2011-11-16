@@ -116,4 +116,68 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	public void setNick(String nick) {
 		this.nick = nick;
 	}
+	
+	public void onUserJoined(IrcUser user) {
+		userList.add(user);
+	}
+
+
+	public void onUserQuit(String nick) {
+		for(IrcUser user: userList) {
+			if(user.nick.equals(nick)) {
+				for(Buffer buffer : buffers.getRawBufferList()) {
+					if(user.channels.contains(buffer.getInfo().name)) {
+						buffer.getUsers().removeNick(nick);
+					}
+				}
+				userList.remove(user);
+				return;
+			}
+		}
+	}
+
+
+	public void onUserParted(String nick, String bufferName) {
+		for(IrcUser user: userList) {
+			if(user.nick.equals(nick) && user.channels.contains(bufferName)) {
+				user.channels.remove(bufferName);
+				break;
+			}
+		}
+		for(Buffer buffer : buffers.getRawBufferList()) {
+			if(buffer.getInfo().name.equals(bufferName)) {
+				buffer.getUsers().removeNick(nick);
+				break;
+			}
+		}
+	}
+
+
+	public boolean hasNick(String nick) {
+		for(IrcUser user : userList) {
+			if(user.nick.equals(nick)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	public IrcUser getUserByNick(String nick) {
+		for(IrcUser user : userList) {
+			if(user.nick.equals(nick)) {
+				return user;
+			}
+		}
+		return null;
+	}
+
+	public boolean containsBuffer(int id) {
+		return buffers.hasBuffer(id);
+	}
+
+
+	public int getBufferCount() {
+		return buffers.getBufferCount();
+	}
 }

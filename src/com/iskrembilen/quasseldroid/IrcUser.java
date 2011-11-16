@@ -23,18 +23,31 @@
 
 package com.iskrembilen.quasseldroid;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
-public class IrcUser {
+public class IrcUser extends Observable implements Comparable<IrcUser>{
 	public String name;
 	public boolean away;
 	public String awayMessage;
 	public String ircOperator;
 	public String nick;
-	public List<String> channels;
+	public List<String> channels = new ArrayList<String>();
 	
 	
 	public String toString(){
 		return nick + " away: " + away + " Num chans: "+ channels.size();
+	}
+	
+	public void changeNick(String newNick) {
+		nick = newNick;
+		this.setChanged();
+		notifyObservers();
+	}
+
+	@Override
+	public int compareTo(IrcUser another) {
+		return this.nick.compareToIgnoreCase(another.nick);
 	}
 }

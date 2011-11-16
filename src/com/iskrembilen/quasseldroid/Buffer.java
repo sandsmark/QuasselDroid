@@ -57,7 +57,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * Quassel variable, represents the last message seen on a buffer 
 	 */
-	private int lastSeenMessage;
+	private int lastSeenMessage = -1;
 	/**
 	 * Quassel variable, the id of the message where the marker line is placed
 	 */
@@ -73,7 +73,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	/**
 	 * List of the nick of ppl on this buffer TODO: say something about what this is used for
 	 */
-	private List<String> nicks;
+	private UserCollection users;
 	/**
 	 * The topic for this buffer
 	 */
@@ -114,6 +114,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		filteredBacklog = new ArrayList<IrcMessage>();
 		backlogStash = new ArrayList<IrcMessage>();
 		filterTypes= new ArrayList<IrcMessage.Type>();
+		users = new UserCollection();
 		this.dbHelper = dbHelper;
 		
 		//Default active to true if channel is a query buffer, they are "always" active
@@ -246,9 +247,12 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public boolean hasUnreadActivity(){
 		//Last message in the backlog has a bigger messageId than the last seen message
-		if (backlog.size() != 0 && lastSeenMessage!=0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
+		if (backlog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < backlog.get(backlog.size()-1).messageId){
 			return true;
 		}
+		if (lastSeenMessage == -1)
+			return true;
+		
 		return false;
 	}
 
@@ -357,36 +361,20 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		lastSeenMessage = backlog.get(backlog.size()-1).messageId;
 	}
 
-	/**
-	 * set the nick list for this buffer. Nick of ppl that is on this buffer
-	 * @param nicks list of nicks
-	 */
-	public void setNicks(List<String> nicks) {
-		this.nicks = nicks;
-	}
+//	/**
+//	 * set the nick list for this buffer. Nick of ppl that is on this buffer
+//	 * @param nicks list of nicks
+//	 */
+//	public void setNicks(List<String> nicks) {
+//		this.nicks = nicks;
+//	}
 
 	/**
 	 * Get the list of nicks for this buffer
 	 * @return nick list
 	 */
-	public List<String> getNicks() {
-		return nicks;
-	}
-
-	/**
-	 * Remove a specific nick from the nick list
-	 * @param nick the nick to remove
-	 */
-	public void removeNick(String nick) {
-		nicks.remove(nick);
-	}
-
-	/**
-	 * Add a specific nick to the nick list
-	 * @param nick the nick to add
-	 */
-	public void addNick(String nick) {
-		nicks.add(nick);
+	public UserCollection getUsers() {
+		return users;
 	}
 
 	/**
@@ -439,9 +427,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	}
 
 	public void setTemporarilyHidden(boolean temporarilyHidden) {
+		this.temporarilyHidden = temporarilyHidden;
 		this.setChanged();
 		notifyObservers(R.id.BUFFER_HIDDEN_CHANGED);
-		this.temporarilyHidden = temporarilyHidden;
 	}
 
 	public boolean isTemporarilyHidden() {
@@ -458,7 +446,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		return permanentlyHidden;
 	}
 	public void setOrder(int order) {
-		Log.d(TAG, "Order " +this.getInfo().name + " : " + order);
 		this.order = order;
 		this.setChanged();
 		notifyObservers(R.id.BUFFER_ORDER_CHANGED);

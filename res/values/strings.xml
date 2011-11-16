@@ -6,6 +6,7 @@
 	<string name="menu_edit_core">Edit core</string>
 	<string name="menu_delete_core">Delete core</string>
 	<string name="menu_disconnect">Disconnect</string>
+	<string name="menu_users_list">User List</string>
 
 
 	<string name="hello">Hello World, Quasseldroid!</string>
@@ -33,4 +34,5 @@
 		Quassel IRC client.</string>
 	<string name="menu_hide_events">Hide Events</string>
 	<string name="preference_wake_lock">wakelock</string>
+	<string name="nick_list_header">Nicks</string>
 </resources>
