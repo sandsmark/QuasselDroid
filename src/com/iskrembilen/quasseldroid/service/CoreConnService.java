@@ -60,7 +60,6 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection.UserMode;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 
 /**
@@ -764,8 +763,8 @@ public class CoreConnService extends Service {
 			case R.id.USER_JOINED:
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-				UserMode mode = (UserMode)bundle.get("mode");
-				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, mode);
+				String modes = (String)bundle.get("mode");
+				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, modes);
 				break;
 			case R.id.USER_CHANGEDNICK:
 				bundle = (Bundle) msg.obj;

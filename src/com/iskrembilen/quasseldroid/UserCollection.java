@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,14 +13,18 @@ import com.iskrembilen.quasseldroid.BufferInfo.Type;
 
 public class UserCollection extends Observable implements Observer {
 
+	private static final String TAG = UserCollection.class.getSimpleName();
 	private List<IrcUser> users;
 	private List<IrcUser> voiced;
 	private List<IrcUser> operators;
-	
+
+	private List<IrcUser> voicedAndOp; //Gay list to handle that some tards have both voice and op
+
 	public UserCollection() {
 		users = new ArrayList<IrcUser>();
 		voiced = new ArrayList<IrcUser>();
 		operators = new ArrayList<IrcUser>();
+		voicedAndOp = new ArrayList<IrcUser>();
 	}
 
 	/**
@@ -27,9 +32,10 @@ public class UserCollection extends Observable implements Observer {
 	 * @param nick the nick to remove
 	 */
 	public void removeNick(String nick) {
-		if (removeNickIfExistsFromList(nick, users)) return;
-		if (removeNickIfExistsFromList(nick, voiced)) return;
-		if (removeNickIfExistsFromList(nick, operators)) return;
+		removeNickIfExistsFromList(nick, users);
+		removeNickIfExistsFromList(nick, voiced);
+		removeNickIfExistsFromList(nick, operators);
+		removeNickIfExistsFromList(nick, voicedAndOp);
 	}
 
 
@@ -49,60 +55,47 @@ public class UserCollection extends Observable implements Observer {
 	 * Add a specific nick to the nick list
 	 * @param nick the nick to add
 	 */
-	public void addUser(IrcUser user, UserMode mode) {
-		switch (mode) {
-		case USER:
+	public void addUser(IrcUser user, String modes) {
+		if(modes.equals("")) {
 			users.add(user);
 			Collections.sort(users);
-			break;
-		case VOICED:
-			voiced.add(user);
-			Collections.sort(voiced);
-			break;
-		case OPERATOR:
-			operators.add(user);
-			Collections.sort(operators);
-			break;
+			this.setChanged();
 		}
-		user.addObserver(this);
-		setChanged();
+		for(int i=0;i<modes.length();i++) {
+			String mode = Character.toString(modes.charAt(i));
+			if(mode.equals("v")) {
+				if(operators.contains(user))
+					voicedAndOp.add(user);
+				else {
+					voiced.add(user);
+					Collections.sort(voiced);
+				}
+			}else if(mode.equals("o")) {
+				if(voiced.contains(user)) {
+					voiced.remove(user);
+					voicedAndOp.add(user);
+				}
+				operators.add(user);
+				Collections.sort(operators);
+			}else {
+				Log.e(TAG, "Unknown usermode " + mode + " for user " + user.name);
+			}
+			user.addObserver(this);
+			this.setChanged();
+		}
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
 	public List<IrcUser> getUsers() {
 		return users;
 	}
-	
+
 	public List<IrcUser> getVoiced() {
 		return voiced;
 	}
-	
+
 	public List<IrcUser> getOperators() {
 		return operators;
-	}
-
-	public enum UserMode {
-		OPERATOR("o"), VOICED("v"), USER("");
-		
-		String value;
-		
-		UserMode(String mode) {
-			this.value = mode;
-		}
-		public String getValue(){
-			return value;
-		}
-		public static UserMode getUserMode(String value) {
-			if(value.length()>1) {
-				Log.d("UserMode", "UserMode is not 1 char, WTF is " + value);
-				value = value.substring(0,1);
-			}
-			for (UserMode t: values()) {
-				if (t.value.equals(value))
-					return t;
-			}
-			throw new IllegalArgumentException("UserMode " + value + " was not recognized");
-		}
 	}
 
 	@Override
@@ -112,6 +105,6 @@ public class UserCollection extends Observable implements Observer {
 		Collections.sort(operators);
 		this.setChanged();
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
-		
+
 	}
 }

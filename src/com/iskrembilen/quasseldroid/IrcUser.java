@@ -48,6 +48,6 @@ public class IrcUser extends Observable implements Comparable<IrcUser>{
 
 	@Override
 	public int compareTo(IrcUser another) {
-		return this.nick.compareTo(another.nick);
+		return this.nick.compareToIgnoreCase(another.nick);
 	}
 }

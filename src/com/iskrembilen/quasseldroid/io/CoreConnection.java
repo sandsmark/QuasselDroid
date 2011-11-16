@@ -63,7 +63,6 @@ import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection.UserMode;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
 import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
@@ -808,7 +807,22 @@ public final class CoreConnection {
 									buffer.setActive(true);
 									for(Entry<String, QVariant<?>> nick : userModes.entrySet()) {
 										IrcUser user = userTempMap.get(nick.getKey());
-										buffer.getUsers().addUser(user, UserMode.getUserMode((String)nick.getValue().getData()));
+										if(user == null) { 
+											Log.e(TAG, "Channel has nick that is does not match any user on the network: " + nick);
+											//TODO: WHY THE FUCK IS A  USER NULL HERE? HAPPENS ON MY OWN CORE, BUT NOT ON DEBUG CORE CONNECTED TO SAME CHANNEL. QUASSEL BUG? WHAT TO DO ABOUT IT
+											
+											//this sync request did not seem to do anything
+											//											try {
+//												sendInitRequest("IrcUser", network.getId()+"/" +nick.getKey());
+												continue;
+//											} catch (IOException e) {
+//												e.printStackTrace();
+//												running = false; // We have obviously lost our connection, just stop this thread.
+//												break;
+//											}
+
+										}
+										buffer.getUsers().addUser(user, (String)nick.getValue().getData());
 									}
 									break;
 								}
@@ -1087,13 +1101,18 @@ public final class CoreConnection {
 						for(int i=0; i<nicks.size();i++) {
 							Bundle bundle = new Bundle();
 							bundle.putString("nick", nicks.get(i));
-							bundle.putSerializable("mode", UserMode.getUserMode(modes.get(i)));
+							bundle.putString("mode", modes.get(i));
 							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, bufferId, bundle).sendToTarget();	
 						}
 					}
-					
-					
-					
+					else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
+						System.out.println(packedFunc);
+						System.out.println(objectName);
+					}
+					else if (className.equals("IrcChannel") && function.equals("removeUserMode")) {
+						System.out.println(packedFunc);
+						System.out.println(objectName);
+					}
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
