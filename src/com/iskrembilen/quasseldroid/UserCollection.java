@@ -38,6 +38,10 @@ public class UserCollection extends Observable implements Observer {
 		removeNickIfExistsFromList(nick, voicedAndOp);
 	}
 
+	private void addUserIfNotAlreadyIn(List<IrcUser> list, IrcUser user) {
+		if(list.contains(user)) return;
+		list.add(user);
+	}
 
 	private boolean removeNickIfExistsFromList(String nick, List<IrcUser> list) {
 		for(IrcUser user : list) {
@@ -57,7 +61,7 @@ public class UserCollection extends Observable implements Observer {
 	 */
 	public void addUser(IrcUser user, String modes) {
 		if(modes.equals("")) {
-			users.add(user);
+			addUserIfNotAlreadyIn(users, user);
 			Collections.sort(users);
 			this.setChanged();
 		}
@@ -65,17 +69,17 @@ public class UserCollection extends Observable implements Observer {
 			String mode = Character.toString(modes.charAt(i));
 			if(mode.equals("v")) {
 				if(operators.contains(user))
-					voicedAndOp.add(user);
+					addUserIfNotAlreadyIn(voicedAndOp, user);
 				else {
-					voiced.add(user);
+					addUserIfNotAlreadyIn(voiced, user);
 					Collections.sort(voiced);
 				}
 			}else if(mode.equals("o")) {
 				if(voiced.contains(user)) {
 					voiced.remove(user);
-					voicedAndOp.add(user);
+					addUserIfNotAlreadyIn(voicedAndOp, user);
 				}
-				operators.add(user);
+				addUserIfNotAlreadyIn(operators, user);
 				Collections.sort(operators);
 			}else {
 				Log.e(TAG, "Unknown usermode " + mode + " for user " + user.name);
