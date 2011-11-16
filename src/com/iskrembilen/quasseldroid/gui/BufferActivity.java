@@ -56,6 +56,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -298,6 +299,7 @@ public class BufferActivity extends ExpandableListActivity {
 				convertView = inflater.inflate(R.layout.buffer_child_item, null);
 				holder = new ViewHolderChild();
 				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
+				holder.bufferImage = (ImageView)convertView.findViewById(R.id.buffer_list_item_image);
 				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
 				convertView.setTag(holder);
 			} else {
@@ -308,6 +310,8 @@ public class BufferActivity extends ExpandableListActivity {
 			case StatusBuffer:
 			case ChannelBuffer:
 				holder.bufferView.setText(entry.getInfo().name);
+				if(entry.isActive()) holder.bufferImage.setImageResource(R.drawable.irc_channel_active);
+				else holder.bufferImage.setImageResource(R.drawable.irc_channel_inactive);
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
@@ -315,6 +319,8 @@ public class BufferActivity extends ExpandableListActivity {
 				//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
 				//				}
 				holder.bufferView.setText(nick);
+				holder.bufferImage.setImageResource(R.drawable.im_user);
+				
 				break;
 			case GroupBuffer:
 			case InvalidBuffer:
@@ -404,6 +410,7 @@ public class BufferActivity extends ExpandableListActivity {
 	}
 
 	public static class ViewHolderChild {
+		public ImageView bufferImage;
 		public TextView bufferView;
 	}
 	public static class ViewHolderGroup {
