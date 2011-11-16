@@ -40,7 +40,7 @@ public class QChar implements QMetaTypeSerializer<Character> {
 	@Override
 	public Character unserialize(QDataInputStream stream,
 			DataStreamVersion version) throws IOException {
-		return new Character((char) stream.readUInt(16));
+		return Character.valueOf((char) stream.readUInt(16));
 	}
 
 }

@@ -81,10 +81,9 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
 		int month = (int) ((m+2) % 12 + 1);
 		int day = (int) (d + 1);
 		
-		int hour = (int) (secondsSinceMidnight / 3600000);
-		int minute = (int)((secondsSinceMidnight - (hour*3600000))/60000);
-		int second = (int)((secondsSinceMidnight - (hour*3600000) - (minute*60000))/1000);
-		int millis = (int)((secondsSinceMidnight - (hour*3600000) - (minute*60000) - (second * 1000)));
+		int hour = (int) (secondsSinceMidnight / 3600000L);
+		int minute = (int)((secondsSinceMidnight - (hour*3600000L))/60000L);
+		int second = (int)((secondsSinceMidnight - (hour*3600000L) - (minute*60000L))/1000L);
 		
 		TimeZone zone;
 		if (isUTC == 1)

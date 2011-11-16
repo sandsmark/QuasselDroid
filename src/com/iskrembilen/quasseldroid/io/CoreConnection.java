@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
@@ -48,12 +49,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -76,7 +74,7 @@ import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 
-public class CoreConnection {
+public final class CoreConnection {
 
 	private static final String TAG = CoreConnection.class.getSimpleName();
 
@@ -187,9 +185,25 @@ public class CoreConnection {
 
 
 	/**
-	 * Requests all buffers.
+	 * Requests to unhide a temporarily hidden buffer
 	 */
+	public void requestUnhideTempHiddenBuffer(int bufferId) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
+		retFunc.add(new QVariant<String>("0", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestAddBuffer", QVariantType.String));
+		retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
+		retFunc.add(new QVariant<Integer>(networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount(), QVariantType.Int));
 
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			e.printStackTrace();
+			connected = false;
+		}		
+	}
+	
 	/**
 	 * Requests the unread backlog for a given buffer.
 	 */
@@ -255,9 +269,12 @@ public class CoreConnection {
 
 			message = t[0].toUpperCase();
 			if (t.length > 1){
+				StringBuilder tmpMsg = new StringBuilder(message);
 				for (int i=1; i<t.length; i++) {
-					message += ' ' + t[i];
+					tmpMsg.append(' ');
+					tmpMsg.append(t[i]);
 				}
+				message = tmpMsg.toString();
 			}
 		} else {
 			message = "/SAY " + message;
@@ -478,7 +495,6 @@ public class CoreConnection {
 
 		connected = false;
 	}
-
 	/****************************
 	 * Private internal communication stuff.
 	 * Please don't look below this line.
@@ -750,45 +766,67 @@ public class CoreConnection {
 						// Horribly nested maps
 						Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
 						Map<String, QVariant<?>> channels = (Map<String, QVariant<?>>) usersAndChans.get("channels").getData();
+						
+						//Parse out user objects for network
+						Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();						
+						ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
+						HashMap<String, IrcUser> userTempMap = new HashMap<String, IrcUser>();
+						for (Map.Entry<String, QVariant<?>> element: userObjs.entrySet()) {
+							IrcUser user = new IrcUser();
+							user.name = element.getKey();
+							Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) element.getValue().getData();
+							user.away = (Boolean) map.get("away").getData();
+							user.awayMessage = (String) map.get("awayMessage").getData();
+							user.ircOperator = (String) map.get("ircOperator").getData();
+							user.nick = (String) map.get("nick").getData();
+							user.channels = (List<String>) map.get("channels").getData();
+							//TODO: this shit has to be sooo slow? time it, and mabye improve
+//							for(String channel : user.channels) {
+//								for (Buffer buffer: network.getBuffers().getRawBufferList()) {
+//									if (buffer.getInfo().name.equals(channel)) {
+//										buffer.getUsers().addUser(user, UserMode.USER);
+//										break;
+//									}
+//								}
+//							}
+							ircUsers.add(user);
+							userTempMap.put(user.nick, user);
+						}
+						network.setUserList(ircUsers);
 
-						// Parse out the list of nicks in all channels, and topics
+						// Parse out the topics
 						for (QVariant<?> channel:  channels.values()) {
 							Map<String, QVariant<?>> chan = (Map<String, QVariant<?>>) channel.getData();
 							String chanName = (String)chan.get("name").getData();
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
-							List<String> users = new ArrayList<String>(userModes.keySet());
 							String topic = (String)chan.get("topic").getData();
-							// Horribly inefficient search for the right buffer, Java sucks.
-
-							Map<String, QVariant<?>> userObjs = (Map<String, QVariant<?>>) usersAndChans.get("users").getData();
-
-							ArrayList<IrcUser> ircUsers = new ArrayList<IrcUser>();
-
-							for (String nick : userObjs.keySet()) {
-								IrcUser user = new IrcUser();
-								user.name = nick;
-								Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) userObjs.get(nick).getData();
-								user.away = (Boolean) map.get("away").getData();
-								user.awayMessage = (String) map.get("awayMessage").getData();
-								user.ircOperator = (String) map.get("ircOperator").getData();
-								user.nick = (String) map.get("nick").getData();
-								user.channels = (List<String>) map.get("channels").getData();
-
-								ircUsers.add(user);
-							}
-							network.setUserList(ircUsers);
-
+							
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
 								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
-									buffer.setNicks(users);
 									buffer.setActive(true);
+									for(Entry<String, QVariant<?>> nick : userModes.entrySet()) {
+										IrcUser user = userTempMap.get(nick.getKey());
+										if(user == null) { 
+											Log.e(TAG, "Channel has nick that is does not match any user on the network: " + nick);
+											//TODO: WHY THE FUCK IS A  USER NULL HERE? HAPPENS ON MY OWN CORE, BUT NOT ON DEBUG CORE CONNECTED TO SAME CHANNEL. QUASSEL BUG? WHAT TO DO ABOUT IT
+											
+											//this sync request did not seem to do anything
+											//											try {
+//												sendInitRequest("IrcUser", network.getId()+"/" +nick.getKey());
+												continue;
+//											} catch (IOException e) {
+//												e.printStackTrace();
+//												running = false; // We have obviously lost our connection, just stop this thread.
+//												break;
+//											}
+
+										}
+										buffer.getUsers().addUser(user, (String)nick.getValue().getData());
+									}
 									break;
 								}
 							}
-
-							service.getHandler().obtainMessage(R.id.NEW_USERLIST_ADDED, ircUsers).sendToTarget();
-
 						}
 						
 						Log.i(TAG, "Sending network " + network.getName() + " to service");
@@ -863,18 +901,17 @@ public class CoreConnection {
 						 * A class representing another user on a given IRC network.
 						 */
 					} else if (className.equals("IrcUser")) {
-						IrcUser user = new IrcUser();
-						user.name = className;
-						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-						user.away = (Boolean) map.get("away").getData();
-						user.awayMessage = (String) map.get("awayMessage").getData();
-						user.ircOperator = (String) map.get("ircOperator").getData();
-						user.nick = (String) map.get("nick").getData();
-						user.channels = (List<String>) map.get("channels").getData();
-
-						Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_ADDED);
-						msg.obj = (IrcUser) user;
-						msg.sendToTarget();
+//						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+//						user.away = (Boolean) map.get("away").getData();
+//						user.awayMessage = (String) map.get("awayMessage").getData();
+//						user.ircOperator = (String) map.get("ircOperator").getData();
+//						user.nick = (String) map.get("nick").getData();
+//						user.channels = (List<String>) map.get("channels").getData();
+//
+//						Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_ADDED);
+//						msg.obj = (IrcUser) user;
+//						msg.sendToTarget();
+						
 					}
 					//TODO: after making network object come back and fix this. Needs that shit
 //					else if (className.equals("IrcChannel")) {
@@ -941,7 +978,7 @@ public class CoreConnection {
 						 * There are several objects that we don't care about (at the moment).
 						 */
 					} else {
-						System.out.println("Unparsed InitData: " + className + "(" + objectName + ").");
+						Log.i(TAG, "Unparsed InitData: " + className + "(" + objectName + ").");
 					}
 					break;
 					/*
@@ -989,7 +1026,7 @@ public class CoreConnection {
 						// Send our the backlog messages to our listeners
 						for (QVariant<?> message: data) {
 							Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
-							msg.obj = (IrcMessage) message.getData();
+							msg.obj = message.getData();
 							msg.sendToTarget();
 						}
 						if(!initComplete) { //We are still initializing backlog for the first time
@@ -1004,8 +1041,11 @@ public class CoreConnection {
 						 */
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
 						String nick = (String) packedFunc.remove(0).getData();
+						IrcUser user = new IrcUser();
+						user.nick = nick.substring(0, nick.indexOf("!"));
+						service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
 						try {
-							sendInitRequest("IrcUser", objectName+"/" + nick);
+							sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
 						} catch (IOException e) {
 							e.printStackTrace();
 							running = false; // We have obviously lost our connection, just stop this thread.
@@ -1022,13 +1062,81 @@ public class CoreConnection {
 
 					} 
 					//TODO: need network objects to lookup buffers in given networks
-//					else if (className.equals("IrcUser") && function.equals("partChannel")) {
-//						System.out.println(packedFunc.toString()+" objectname: "+ objectName);
-//						String[] tmp = objectName.split("/");
-//						int networkId = Integer.parseInt(tmp[1]);
-//						String userName = tmp[1];
-//						
-//					} 
+					else if (className.equals("IrcUser") && function.equals("partChannel")) {
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String userName = tmp[1];
+						Bundle bundle = new Bundle();
+						bundle.putString("nick", userName);
+						bundle.putString("buffer", (String)packedFunc.remove(0).getData());
+						service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
+					}
+					else if (className.equals("IrcUser") && function.equals("quit")) {
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String userName = tmp[1];
+						service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
+					}
+					else if (className.equals("IrcUser") && function.equals("setNick")) {
+						/*
+						 * Does nothing, Why would we need a sync call, when we got a RPC call about renaming the user object
+						 */
+					}
+					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
+						List<String> nicks = (List<String>)packedFunc.remove(0).getData();
+						List<String> modes = (List<String>)packedFunc.remove(0).getData();
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String bufferName = tmp[1];
+						int bufferId = -1;
+						for (Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
+							if(buffer.getInfo().name.equals(bufferName)) {
+								bufferId = buffer.getInfo().id;
+								break;
+							}
+						}
+						if(bufferId == -1) {
+							throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
+						}
+						for(int i=0; i<nicks.size();i++) {
+							Bundle bundle = new Bundle();
+							bundle.putString("nick", nicks.get(i));
+							bundle.putString("mode", modes.get(i));
+							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, bufferId, bundle).sendToTarget();	
+						}
+					}
+					else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
+                        String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String channel = tmp[1];
+						
+						String nick = (String) packedFunc.remove(0).getData();
+						String changedMode = (String) packedFunc.remove(0).getData();
+						
+						Bundle bundle = new Bundle();
+						bundle.putString("nick", nick);
+						bundle.putString("mode", changedMode);
+						bundle.putString("channel", channel);
+						System.out.println(nick + " " + channel + " " + changedMode);
+						service.getHandler().obtainMessage(R.id.USER_ADD_MODE, networkId, 0, bundle).sendToTarget();
+						
+						
+					}
+					else if (className.equals("IrcChannel") && function.equals("removeUserMode")) {
+						String[] tmp = objectName.split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String channel = tmp[1];
+						
+						String nick = (String) packedFunc.remove(0).getData();
+						String changedMode = (String) packedFunc.remove(0).getData();
+						
+						Bundle bundle = new Bundle();
+						bundle.putString("nick", nick);
+						bundle.putString("mode", changedMode);
+						bundle.putString("channel", channel);
+						
+						service.getHandler().obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
+					}
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
@@ -1053,7 +1161,7 @@ public class CoreConnection {
 						//int buffer = (Integer) packedFunc.remove(0).getData();
 						//buffers.get(buffer).setRead();
 					} else {
-						System.out.println("Unparsed Sync request: " + className + "::" + function);
+						Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
 					}
 
 					break;
@@ -1070,16 +1178,39 @@ public class CoreConnection {
 					 */
 					if (functionName.equals("2displayMsg(Message)")) {
 						IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
+
+						if (!networks.get(message.bufferInfo.networkId).containsBuffer(message.bufferInfo.id) &&
+							message.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
+							// TODO: persist the db connections
+							Buffer buffer = new Buffer(message.bufferInfo, new QuasselDbHelper(service.getApplicationContext()));
+							buffers.put(message.bufferInfo.id, buffer);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE);
+							msg.obj = buffer;
+							msg.sendToTarget();
+						}
+						
 						Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
 						msg.obj = message;
 						msg.sendToTarget();
+						//11-12 21:48:02.514: I/CoreConnection(277): Unhandled RpcCall: __objectRenamed__ ([IrcUser, 1/Kenji, 1/Kenj1]).
+					} else if(functionName.equals("__objectRenamed__") && ((String)packedFunc.get(0).getData()).equals("IrcUser")) {
+						packedFunc.remove(0); //Drop the "ircUser"
+						String[] tmp = ((String)packedFunc.remove(0).getData()).split("/");
+						int networkId = Integer.parseInt(tmp[0]);
+						String newNick = tmp[1];
+						tmp = ((String)packedFunc.remove(0).getData()).split("/");
+						String oldNick = tmp[1];
 
+						Bundle bundle = new Bundle();
+						bundle.putString("oldNick", oldNick);
+						bundle.putString("newNick", newNick);
+						service.getHandler().obtainMessage(R.id.USER_CHANGEDNICK, networkId, -1, bundle).sendToTarget();
 					} else {
-						System.out.println("Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
+						Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
 					}
 					break;
 				default:
-					System.out.println("Unhandled request type: " + type.name());
+					Log.i(TAG, "Unhandled request type: " + type.name());
 				}
 				long end = System.currentTimeMillis();
 				if (end-start > 500) {
