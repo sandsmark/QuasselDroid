@@ -803,6 +803,7 @@ public final class CoreConnection {
 							Map<String, QVariant<?>> userModes = (Map<String, QVariant<?>>) chan.get("UserModes").getData();
 							String topic = (String)chan.get("topic").getData();
 							
+							boolean foundChannel = false;
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
 								if (buffer.getInfo().name.equals(chanName)) {
 									buffer.setTopic(topic);
@@ -826,9 +827,12 @@ public final class CoreConnection {
 										}
 										buffer.getUsers().addUser(user, (String)nick.getValue().getData());
 									}
+									foundChannel = true;
 									break;
 								}
 							}
+							if(!foundChannel) 
+								throw new RuntimeException("A channel in a network has no coresponding buffer object " + chanName);
 						}
 						
 						Log.i(TAG, "Sending network " + network.getName() + " to service");
