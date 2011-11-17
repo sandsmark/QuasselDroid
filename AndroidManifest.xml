@@ -17,7 +17,7 @@
 		<activity android:name=".gui.PreferenceView"
 			android:screenOrientation="sensor" android:label="@string/app_name" android:theme="@android:style/Theme">
 		</activity>
-		<activity android:name=".gui.ChatActivity"></activity>
+		<activity android:name=".gui.ChatActivity" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".gui.BufferActivity" android:launchMode="singleTop"></activity>
 		<service android:name=".service.CoreConnService"></service>
 		<activity android:name=".gui.NicksActivity"></activity>
