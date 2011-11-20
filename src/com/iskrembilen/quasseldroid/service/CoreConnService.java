@@ -61,6 +61,7 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 
 /**
@@ -605,7 +606,7 @@ public class CoreConnService extends Service {
 					checkMessageForHighlight(buffer, message);
 					parseColorCodes(message);
 					parseStyleCodes(message);
-					if ((message.isHighlighted() && !buffer.isDisplayed()) || buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+					if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
 					}
 					

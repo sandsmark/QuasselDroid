@@ -906,7 +906,7 @@ public final class CoreConnection {
 						/*
 						 * A class representing another user on a given IRC network.
 						 */
-					} else if (className.equals("IrcUser")) {
+					} //else if (className.equals("IrcUser")) {
 //						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 //						user.away = (Boolean) map.get("away").getData();
 //						user.awayMessage = (String) map.get("awayMessage").getData();
@@ -918,20 +918,20 @@ public final class CoreConnection {
 //						msg.obj = (IrcUser) user;
 //						msg.sendToTarget();
 						
-					}
+					//}
 					//TODO: after making network object come back and fix this. Needs that shit
-//					else if (className.equals("IrcChannel")) {
-//						System.out.println(packedFunc.toString() + " Object: "+objectName);
-//						// topic, UserModes, password, ChanModes, name
-//						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-////						String bufferName = map.get("name");
-//						Buffer buffer;
-////						if(buffers.containsKey(bufferName) {
-////							buffer = buffers.get(bufferName);
-////						}
-//						
-//						
-//					} 
+					else if (className.equals("IrcChannel")) {
+						System.out.println(packedFunc.toString() + " Object: "+objectName);
+						// topic, UserModes, password, ChanModes, name
+						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+//						String bufferName = map.get("name");
+						Buffer buffer;
+//						if(buffers.containsKey(bufferName) {
+//							buffer = buffers.get(bufferName);
+//						}
+						
+						
+					} 
 					else if (className.equals("BufferViewConfig")) {
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
@@ -1058,6 +1058,7 @@ public final class CoreConnection {
 						 * IRC user appears on a given network. 
 						 */
 					} else if (className.equals("Network") && function.equals("addIrcUser")) {
+						Log.d(TAG, "Sync: Network -> addIrcUser");
 						String nick = (String) packedFunc.remove(0).getData();
 						IrcUser user = new IrcUser();
 						user.nick = nick.substring(0, nick.indexOf("!"));
@@ -1070,6 +1071,7 @@ public final class CoreConnection {
 
 						}
 					} else if (className.equals("Network") && function.equals("addIrcChannel")) {
+						Log.d(TAG, "Sync: Network -> addIrcChannel");
 						String bufferName = (String) packedFunc.remove(0).getData();
 						try {
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);
@@ -1081,6 +1083,7 @@ public final class CoreConnection {
 					} 
 					//TODO: need network objects to lookup buffers in given networks
 					else if (className.equals("IrcUser") && function.equals("partChannel")) {
+						Log.d(TAG, "Sync: IrcUser -> partChannel");
 						String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String userName = tmp[1];
@@ -1090,6 +1093,7 @@ public final class CoreConnection {
 						service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
 					}
 					else if (className.equals("IrcUser") && function.equals("quit")) {
+						Log.d(TAG, "Sync: IrcUser -> quit");
 						String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String userName = tmp[1];
