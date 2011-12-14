@@ -184,18 +184,18 @@ public class ChatActivity extends Activity{
 				inputfield.setSelection(userColl.getOperators().get(0).getNick().length() + 2);
 			}
 		} else {
-			if (matchAndSetNick(inputNick, userColl.getOperators())){}
-			else if (matchAndSetNick(inputNick, userColl.getVoiced())) {}
-			else if (matchAndSetNick(inputNick, userColl.getUsers())) {}
+			if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getOperators())){}
+			else if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getVoiced())) {}
+			else if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getUsers())) {}
 		}
 		return false;  // don't go ahead and show the search box
 	}
 
-	private boolean matchAndSetNick(String input, List<IrcUser> userList) {
+	private boolean matchAndSetNick(String inputNick, String[] inputWords, String inputString, int inputLength, EditText inputfield, List<IrcUser> userList) {
 		for (IrcUser user : userList) {
-			if ( user.getNick().matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
+			if ( user.nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
 				String additional = inputWords.length > 1 ? " ": ": ";
-				inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + nick+  additional);
+				inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + user.nick+  additional);
 				inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
 				return true;
 			}
