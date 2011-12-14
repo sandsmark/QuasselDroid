@@ -66,6 +66,7 @@ import android.widget.TextView;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
@@ -167,33 +168,40 @@ public class ChatActivity extends Activity{
 
 
 	//TODO: fix this again after changing from string to ircusers
-//	//Nick autocomplete when pressing the search-button
-//	@Override
-//	public boolean onSearchRequested() {
-//		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
-//		String inputString = inputfield.getText().toString();
-//		String[] inputWords = inputString.split(" ");
-//		String inputNick = inputWords[inputWords.length-1];
-//		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
-//
-//		if ( "".equals(inputNick) ) {
-//			if ( adapter.buffer.getUsers().getUserCount() > 0 ) {
-//				inputfield.setText(adapter.buffer.getNicks().get(0)+ ": ");
-//				inputfield.setSelection(adapter.buffer.getNicks().get(0).length() + 2);
-//			}
-//		} else {
-//			for (String nick : adapter.buffer.getNicks()) {
-//				if ( nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
-//					String additional = inputWords.length > 1 ? " ": ": ";
-//					inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + nick+  additional);
-//					inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
-//					break;
-//				}
-//			}
-//		}
-//		return false;  // don't go ahead and show the search box
-//	}
+	//Nick autocomplete when pressing the search-button
+	@Override
+	public boolean onSearchRequested() {
+		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+		String inputString = inputfield.getText().toString();
+		String[] inputWords = inputString.split(" ");
+		String inputNick = inputWords[inputWords.length-1];
+		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
+		UserCollection userColl = adapter.buffer.getUsers();
+		
+		if ( "".equals(inputNick) ) {
+			if ( userColl.getOperators().size() > 0 ) {
+				inputfield.setText(userColl.getOperators().get(0).getNick()+ ": ");
+				inputfield.setSelection(userColl.getOperators().get(0).getNick().length() + 2);
+			}
+		} else {
+			if (matchAndSetNick(inputNick, userColl.getOperators())){}
+			else if (matchAndSetNick(inputNick, userColl.getVoiced())) {}
+			else if (matchAndSetNick(inputNick, userColl.getUsers())) {}
+		}
+		return false;  // don't go ahead and show the search box
+	}
 
+	private boolean matchAndSetNick(String input, List<IrcUser> userList) {
+		for (IrcUser user : userList) {
+			if ( user.getNick().matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
+				String additional = inputWords.length > 1 ? " ": ": ";
+				inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + nick+  additional);
+				inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
+				return true;
+			}
+		}
+		return false;
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.chat_menu, menu);
