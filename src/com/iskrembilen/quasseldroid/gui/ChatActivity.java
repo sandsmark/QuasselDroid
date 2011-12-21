@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.gui;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -66,6 +67,7 @@ import android.widget.TextView;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
@@ -180,8 +182,8 @@ public class ChatActivity extends Activity{
 		
 		if ( "".equals(inputNick) ) {
 			if ( userColl.getOperators().size() > 0 ) {
-				inputfield.setText(userColl.getOperators().get(0).getNick()+ ": ");
-				inputfield.setSelection(userColl.getOperators().get(0).getNick().length() + 2);
+				inputfield.setText(userColl.getOperators().get(0).nick+ ": ");
+				inputfield.setSelection(userColl.getOperators().get(0).nick.length() + 2);
 			}
 		} else {
 			if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getOperators())){}
@@ -196,7 +198,7 @@ public class ChatActivity extends Activity{
 			if ( user.nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
 				String additional = inputWords.length > 1 ? " ": ": ";
 				inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + user.nick+  additional);
-				inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + nick.length() + additional.length());
+				inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + user.nick.length() + additional.length());
 				return true;
 			}
 		}
