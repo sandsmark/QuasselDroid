@@ -14,5 +14,7 @@
 		android:layout_below="@+id/chatNameView" android:layout_above="@+id/ChatInputView" android:transcriptMode="normal"/>
 	<EditText android:layout_width="fill_parent" android:id="@+id/ChatInputView"
 		android:layout_alignParentBottom="true" android:layout_height="wrap_content"
-		android:inputType="textMultiLine" />
+		android:inputType="textMultiLine"> 
+		<requestFocus />
+	</EditText>
 </RelativeLayout>
