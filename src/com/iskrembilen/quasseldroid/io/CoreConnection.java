@@ -805,7 +805,7 @@ public final class CoreConnection {
 							
 							boolean foundChannel = false;
 							for (Buffer buffer: network.getBuffers().getRawBufferList()) {
-								if (buffer.getInfo().name.equals(chanName)) {
+								if (buffer.getInfo().name.equalsIgnoreCase(chanName)) {
 									buffer.setTopic(topic);
 									buffer.setActive(true);
 									for(Entry<String, QVariant<?>> nick : userModes.entrySet()) {
