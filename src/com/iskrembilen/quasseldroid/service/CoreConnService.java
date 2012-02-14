@@ -305,47 +305,101 @@ public class CoreConnService extends Service {
 		final char normalIndicator = 15;
 		final char italicIndicator = 29;
 		final char underlineIndicator = 31;
+		final char colorIndicator = 3;
 
 		String content = message.content.toString();
 
 		if (content.indexOf(boldIndicator) == -1 
 				&& content.indexOf(italicIndicator) == -1
-				&& content.indexOf(underlineIndicator) == -1)
+				&& content.indexOf(underlineIndicator) == -1
+				&& content.indexOf(colorIndicator) == -1)
 			return;
 
 		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
-
+		
+		int start, end, endSearchOffset, startIndicatorLength, style, fg, bg;
 		while (true) {
 			content = newString.toString();
-
-			int start = content.indexOf(boldIndicator);
-			int end = content.indexOf(boldIndicator, start+1);
-			int style = Typeface.BOLD;
+			end = -1;
+			startIndicatorLength = 1;
+			style = 0;
+			fg = -1;
+			bg = -1;
+			
+			start = content.indexOf(boldIndicator);
+			if (start != -1) {
+				end = content.indexOf(boldIndicator, start+1);
+				style = Typeface.BOLD;
+			}
 
 			if (start == -1) {
 				start = content.indexOf(italicIndicator);
-				end = content.indexOf(italicIndicator, start+1);
-				style = Typeface.ITALIC;
+				if (start != -1) {
+					end = content.indexOf(italicIndicator, start+1);
+					style = Typeface.ITALIC;
+				}
 			}
 
 			if (start == -1) {
 				start = content.indexOf(underlineIndicator);
-				end = content.indexOf(underlineIndicator, start+1);
-				style = -1;
+				if (start != -1) {
+					end = content.indexOf(underlineIndicator, start+1);
+					style = -1;
+				}
+			}
+			
+			endSearchOffset = start + 1;
+			
+			// Colors?
+			if (start == -1) {
+				start = content.indexOf(colorIndicator);
+				
+				if (start != -1) {
+					// Note that specifying colour codes here is optional, as the same indicator will cancel existing colours
+					endSearchOffset = start + 1;
+					if (endSearchOffset < content.length()) {
+						if (Character.isDigit(content.charAt(endSearchOffset))) {
+							if (endSearchOffset+1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+								fg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 2));
+								endSearchOffset += 2;
+							} else {
+								fg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset+1));
+								endSearchOffset += 1;
+							}
+							
+							if (endSearchOffset < content.length() && content.charAt(endSearchOffset) == ',') {
+								if (endSearchOffset+1 < content.length() && Character.isDigit(content.charAt(endSearchOffset+1))) {
+									endSearchOffset++;
+									if (endSearchOffset+1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+										bg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 2));
+										endSearchOffset += 2;
+									} else {
+										bg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 1));
+										endSearchOffset += 1;
+									}
+								}
+							}
+						}
+					}
+					startIndicatorLength = endSearchOffset - start;
+					
+					end = content.indexOf(colorIndicator, endSearchOffset);
+				}
 			}
 
 			if (start == -1)
 				break;
 
-			if (end == -1)
-				end = content.indexOf(normalIndicator, start);
+			int norm = content.indexOf(normalIndicator, start+1);
+			if (norm != -1 && (end == -1 || norm < end))
+				end = norm;
 
 			if (end == -1)
-				end = content.length()-1;
+				end = content.length();
 
-			if(start==end) {
-				newString.delete(start, start+1);
-				break;
+			if (start == end - startIndicatorLength) {
+				newString.delete(start, start + startIndicatorLength);
+				continue;
 			}
 
 			if (style == -1) {
@@ -353,94 +407,43 @@ public class CoreConnService extends Service {
 			} else {
 				newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 			}
-
-			if (content.charAt(end) == boldIndicator
-					|| content.charAt(end) == italicIndicator
-					|| content.charAt(end) == normalIndicator
-					|| content.charAt(end) == underlineIndicator)
-				newString.delete(end, end+1);
-
-			newString.delete(start, start+1);
-		}
-		message.content = newString;
-	}
-
-	/**
-	 * Parse mIRC color codes in IrcMessage
-	 */
-	public void parseColorCodes(IrcMessage message) {
-		if(!preferenceParseColors) return;
-		
-		final char formattingIndicator = 3;
-
-		/*
-		 * if (message.content.toString().indexOf(formattingIndicator) == -1)
-		 * return;
-		 */
-		String content = message.content.toString();
-		if (content.indexOf(formattingIndicator) == -1)
-			return;
-
-		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
-
-
-
-		while (true) {
-			content = newString.toString();
-			// ^C5,12colored text and background^C
-			int start = content.indexOf(formattingIndicator);
-
-			if (start == -1) {
-				break;
-			}
-
-			int end = start + 1;
-			int fg = -1;
-			int bg = -1;
-			if (end < content.length()) {
-				if (Character.isDigit(content.charAt(end))) {
-					if (Character.isDigit(content.charAt(end + 1))) {
-						fg = Integer.parseInt(content.substring(end, end + 2));
-						end += 2;
-					} else {
-						fg = Integer.parseInt(content.substring(end, end+1));
-						end += 1;
-					}
-				}
-
-				if (content.charAt(end) == ',') {
-					end++;
-
-					if (Character.isDigit(content.charAt(end))) {
-						if (Character.isDigit(content.charAt(end + 1))) {
-							bg = Integer.parseInt(content.substring(end, end + 2));
-							end += 2;
-						} else {
-							bg = Integer.parseInt(content.substring(end, end + 1));
-							end += 1;
-						}
-					}
-				}
-			}
-			int length = end - start;
-			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
-
-			if (endOfSpan <= 0) // check for malformed messages
-				endOfSpan = content.length() - length;
-
-			newString.delete(start, end);
+			
 			if (fg != -1) {
 				newString.setSpan(new ForegroundColorSpan(getResources()
-						.getColor(mircCodeToColor(fg))), start, endOfSpan,
+						.getColor(mircCodeToColor(fg))), start, end,
 						Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 			}
 			if (bg != -1) {
 				newString.setSpan(new BackgroundColorSpan(getResources()
-						.getColor(mircCodeToColor(bg))), start, endOfSpan,
+						.getColor(mircCodeToColor(bg))), start, end,
 						Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 			}
+
+			// Intentionally don't remove "normal" indicators or color here, as they are multi-purpose
+			if (end < content.length() && (content.charAt(end) == boldIndicator
+					|| content.charAt(end) == italicIndicator
+					|| content.charAt(end) == underlineIndicator))
+				newString.delete(end, end+1);
+
+			newString.delete(start, start + startIndicatorLength);
 		}
-		message.content = newString; // BURN IN HELL JAVA
+		
+		// NOW we remove the "normal" and color indicator
+		while (true) {
+			content = newString.toString();
+			int normPos = content.indexOf(normalIndicator);
+			if (normPos != -1)
+				newString.delete(normPos, normPos+1);
+			
+			int colorPos = content.indexOf(colorIndicator);
+			if (colorPos != -1)
+				newString.delete(colorPos, colorPos+1);
+			
+			if (normPos == -1 && colorPos == -1)
+				break;
+		}
+		
+		message.content = newString;
 	}
 
 	private int mircCodeToColor(int code) {
@@ -579,7 +582,6 @@ public class CoreConnService extends Service {
 					 */
 					checkMessageForHighlight(buffer, message);
 					checkForURL(message);
-					parseColorCodes(message);
 					parseStyleCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
@@ -604,7 +606,6 @@ public class CoreConnService extends Service {
 					 * support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
-					parseColorCodes(message);
 					parseStyleCodes(message);
 					if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
