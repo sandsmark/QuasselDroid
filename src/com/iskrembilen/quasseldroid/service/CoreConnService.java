@@ -397,26 +397,24 @@ public class CoreConnService extends Service {
 			if (end == -1)
 				end = content.length();
 
-			if (start == end - startIndicatorLength) {
-				newString.delete(start, start + startIndicatorLength);
-				continue;
-			}
-
-			if (style == -1) {
-				newString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			} else {
-				newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			}
-			
-			if (fg != -1) {
-				newString.setSpan(new ForegroundColorSpan(getResources()
-						.getColor(mircCodeToColor(fg))), start, end,
-						Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			}
-			if (bg != -1) {
-				newString.setSpan(new BackgroundColorSpan(getResources()
-						.getColor(mircCodeToColor(bg))), start, end,
-						Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+			if (end - (start + startIndicatorLength) > 0) {
+				// Only set spans if there's any text between start & end
+				if (style == -1) {
+					newString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				} else {
+					newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				}
+				
+				if (fg != -1) {
+					newString.setSpan(new ForegroundColorSpan(getResources()
+							.getColor(mircCodeToColor(fg))), start, end,
+							Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				}
+				if (bg != -1) {
+					newString.setSpan(new BackgroundColorSpan(getResources()
+							.getColor(mircCodeToColor(bg))), start, end,
+							Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				}
 			}
 
 			// Intentionally don't remove "normal" indicators or color here, as they are multi-purpose
