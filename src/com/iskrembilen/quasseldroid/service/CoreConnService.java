@@ -109,9 +109,6 @@ public class CoreConnService extends Service {
 
 	private OnSharedPreferenceChangeListener preferenceListener;
 
-	private boolean preferenceUseWakeLock;
-
-	private WakeLock wakeLock;
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -129,8 +126,8 @@ public class CoreConnService extends Service {
 	}
 
     public void onHighlightsRead(int bufferId) {
-    	notificationManager.notifyHighlightsRead(bufferId);
-    }
+           notificationManager.notifyHighlightsRead(bufferId);
+     }
 
 	
 	@Override
@@ -141,17 +138,12 @@ public class CoreConnService extends Service {
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-		preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
 		preferenceListener = new OnSharedPreferenceChangeListener() {
 			
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if(key.equals(getString(R.string.preference_colored_text))) {
 					preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-				} else if(key.equals(getString(R.string.preference_wake_lock))) {
-					preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
-					if(!preferenceUseWakeLock) releaseWakeLockIfExists();
-					else if(preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
 				}
 			}
 		};
@@ -197,27 +189,11 @@ public class CoreConnService extends Service {
 				+ " with username " + username);
 		networks = new NetworkCollection();
 		
-		acquireWakeLockIfEnabled();
 		
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
 	}
 
-	private void acquireWakeLockIfEnabled() {
-		if (preferenceUseWakeLock) {
-			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Heute ist mein tag");
-			wakeLock.acquire();
-			Log.i(TAG, "WakeLock acquired");
-		}
-	}
-	private void releaseWakeLockIfExists() {
-		if(wakeLock != null) {
-			wakeLock.release();
-			Log.i(TAG, "WakeLock released");
-		}
-		wakeLock = null;
-	}
 
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
@@ -503,7 +479,6 @@ public class CoreConnService extends Service {
 	public void disconnectFromCore() {
 		if (coreConn != null)
 			coreConn.disconnect();
-		releaseWakeLockIfExists();
 	}
 
 	public boolean isConnected() {
@@ -697,7 +672,6 @@ public class CoreConnService extends Service {
 					}
 				}
 				notificationManager.notifyDisconnected();
-				releaseWakeLockIfExists();
 				break;
 			case R.id.NEW_USER_ADDED:
 				/**

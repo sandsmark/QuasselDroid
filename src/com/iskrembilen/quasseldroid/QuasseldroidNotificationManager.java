@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 
 public class QuasseldroidNotificationManager {
 
@@ -48,6 +47,12 @@ public class QuasseldroidNotificationManager {
 		// Set the icon, scrolling text and timestamp
 		Notification notification = new Notification(icon, text, System.currentTimeMillis());
 		notification.flags |= temp_flags;
+		
+		
+		/*if (preferences.getBoolean(getString(R.string.preference_vibrate_connect), true)) {
+			notification.flags |= Notification.DEFAULT_VIBRATE;
+		}*/
+		
 		// The PendingIntent to launch our activity if the user selects this notification
 		PendingIntent contentIntent;
 
@@ -58,6 +63,9 @@ public class QuasseldroidNotificationManager {
 		// Set the info for the views that show in the notification panel.
 		notification.setLatestEventInfo(context, context.getText(R.string.app_name), text,
 				contentIntent);
+		
+	
+
 
 		// Send the notification.
 		notifyManager.notify(R.id.NOTIFICATION, notification);
