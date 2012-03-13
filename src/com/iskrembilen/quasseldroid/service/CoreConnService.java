@@ -628,9 +628,9 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(msg.arg1);
 				if (buffer != null) {
 					buffer.setLastSeenMessage(msg.arg2);
-					if(buffer.hasUnseenHighlight()) {
+					//if(buffer.hasUnseenHighlight()) {FIXME
 						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
-					}
+					//}
 				} else {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
