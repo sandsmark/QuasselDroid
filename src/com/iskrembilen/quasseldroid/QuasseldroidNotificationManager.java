@@ -180,42 +180,4 @@ public class QuasseldroidNotificationManager {
 		// Send the notification.
 		notifyManager.notify(R.id.NOTIFICATION, notification);
 	}
-
-	private void showNotification(boolean connected) {
-		//TODO: Remove when "leaving" the application
-		CharSequence text =  "";
-		int temp_flags = 0; 
-		int icon;
-		if (connected) {
-			text = context.getText(R.string.notification_connected);
-			icon = R.drawable.icon;
-			temp_flags = Notification.FLAG_ONGOING_EVENT;			
-		} else {
-			text = context.getText(R.string.notification_disconnected);
-			icon = R.drawable.inactive;
-			temp_flags = Notification.FLAG_ONLY_ALERT_ONCE;
-		}
-		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(icon, text, System.currentTimeMillis());
-		notification.flags |= temp_flags;
-		// The PendingIntent to launch our activity if the user selects this notification
-		PendingIntent contentIntent;
-
-		// TODO: Fix so that if a chat is currently on top, launch that one,
-		// instead of the BufferActivity
-		if (connected) { // Launch the Buffer Activity.
-			Intent launch = new Intent(context, BufferActivity.class);
-			launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
-		} else {
-			Intent launch = new Intent(context, LoginActivity.class);
-			contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
-		}
-		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(context, context.getText(R.string.app_name), text,
-				contentIntent);
-		// Send the notification.
-		notifyManager.notify(R.id.NOTIFICATION, notification);
-	}
-
 }
