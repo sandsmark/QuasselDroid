@@ -8,9 +8,13 @@
 		<LinearLayout android:layout_height="wrap_content"
 			android:layout_width="wrap_content" android:id="@+id/logo_layout"
 			android:layout_centerHorizontal="true" android:layout_marginTop="10dip" android:layout_marginBottom="20dip">
-			<ImageView android:layout_height="wrap_content"
-				android:layout_width="wrap_content" android:id="@+id/logo_img"
-				android:src="@drawable/icon"/>
+
+			<ImageView
+			    android:id="@+id/logo_img"
+			    android:layout_width="70dp"
+			    android:layout_height="70dp"
+			    android:src="@drawable/icon" />
+
 			<TextView android:layout_width="wrap_content" android:id="@+id/introText"
 				android:textSize="40dip" android:text="uasseldroid"
 				android:textColor="@color/logo_text_color" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="10dp"/>

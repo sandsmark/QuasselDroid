@@ -306,7 +306,7 @@ public final class CoreConnection {
 		connecting = true;
 		
 		// Notify the UI we have an open socket
-		Message msg = service.getHandler().obtainMessage(R.id.CONNECTED);
+		Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
 		msg.sendToTarget();
 		
 
@@ -353,7 +353,7 @@ public final class CoreConnection {
 			version = Integer.parseInt(matcher.group(1));
 			release = Integer.parseInt(matcher.group(2));
 		} else {
-			throw new IOException("Can't match core version, illegal version?");
+			throw new UnsupportedProtocolException("Can't match core version: " + coreInfo.getCoreVersion());
 		}
 		
 		//Check that the protocol version is atleast 10 and the version is above 0.6.0

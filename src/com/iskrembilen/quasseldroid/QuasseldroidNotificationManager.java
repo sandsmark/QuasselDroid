@@ -62,6 +62,29 @@ public class QuasseldroidNotificationManager {
 		// Send the notification.
 		notifyManager.notify(R.id.NOTIFICATION, notification);
 	}
+	
+	public void notifyConnecting() {
+		CharSequence text = context.getText(R.string.notification_connecting);
+		int icon = R.drawable.connecting;
+		int temp_flags = Notification.FLAG_ONGOING_EVENT;			
+
+		// Set the icon, scrolling text and timestamp
+		Notification notification = new Notification(icon, text, System.currentTimeMillis());
+		notification.flags |= temp_flags;
+		// The PendingIntent to launch our activity if the user selects this notification
+		PendingIntent contentIntent;
+
+		Intent launch = new Intent(context, BufferActivity.class);
+		launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
+
+		// Set the info for the views that show in the notification panel.
+		notification.setLatestEventInfo(context, context.getText(R.string.app_name), text,
+				contentIntent);
+
+		// Send the notification.
+		notifyManager.notify(R.id.NOTIFICATION, notification);
+	}	
 
 	public void notifyHighlight(Integer bufferId) {
 		if(bufferId != null && !highlightedBuffers.contains(bufferId)) {
