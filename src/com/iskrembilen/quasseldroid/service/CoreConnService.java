@@ -128,10 +128,11 @@ public class CoreConnService extends Service {
 		return binder;
 	}
 
-	public void onHighlightsRead(int bufferId) {
-		notificationManager.notifyHighlightsRead(bufferId);
-	}
+    public void onHighlightsRead(int bufferId) {
+    	notificationManager.notifyHighlightsRead(bufferId);
+    }
 
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -227,6 +228,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void setLastSeen(int bufferId, int msgId) {
+		notificationManager.notifyHighlightsRead(bufferId);
 		coreConn.requestSetLastMsgRead(bufferId, msgId);
 		networks.getBufferById(bufferId).setLastSeenMessage(msgId);
 	}
@@ -609,6 +611,7 @@ public class CoreConnService extends Service {
 					parseStyleCodes(message);
 					if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
+						
 					}
 					
 
@@ -650,8 +653,9 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(msg.arg1);
 				if (buffer != null) {
 					buffer.setLastSeenMessage(msg.arg2);
-					if(buffer.hasUnseenHighlight())
+					if(buffer.hasUnseenHighlight()) {
 						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
+					}
 				} else {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
@@ -700,6 +704,7 @@ public class CoreConnService extends Service {
 				 * New IrcUser added
 				 */
 				user = (IrcUser) msg.obj;
+				if (networks.getNetworkById(msg.arg1) == null) return; //FIXME
 				networks.getNetworkById(msg.arg1).onUserJoined(user);
 				break;
 

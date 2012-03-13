@@ -603,9 +603,8 @@ public class ChatActivity extends Activity{
 			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
 			adapter.setBuffer(buffer);
 			buffer.setDisplayed(true);
-			if(buffer.hasUnseenHighlight()) {
-				boundConnService.onHighlightsRead(buffer.getInfo().id);
-			}
+			
+			boundConnService.onHighlightsRead(buffer.getInfo().id);
 
 			//Move list to correect position
 			if (adapter.buffer.getTopMessageShown() == 0) {
