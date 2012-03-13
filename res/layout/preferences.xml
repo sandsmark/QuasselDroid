@@ -27,7 +27,14 @@
 			android:title="Use light on notification" android:summary="" />
 		<CheckBoxPreference android:key="@string/preference_notification_sound"
 			android:title="Play sound on notification" android:summary="" />
-		
+	  	<RingtonePreference android:showDefault="true"
+	     android:key="@string/preference_notification_sound_file" android:title="Notification sound"
+	     android:ringtoneType="notification" android:showSilent="true" >
+	  	</RingtonePreference>
+ 		<RingtonePreference android:showDefault="true"
+	     android:key="@string/preference_notification_connect_sound_file" android:title="Connection sound"
+	     android:ringtoneType="notification" android:showSilent="true" >
+	  	</RingtonePreference>
 
 	</PreferenceCategory>
 </PreferenceScreen>

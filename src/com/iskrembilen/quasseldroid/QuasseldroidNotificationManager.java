@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
@@ -33,7 +34,27 @@ public class QuasseldroidNotificationManager {
 	public void notifyHighlightsRead(int bufferId) {
 		highlightedBuffers.remove((Integer)bufferId);
 		if(highlightedBuffers.size() == 0) {
-			notifyConnected();
+			CharSequence text = context.getText(R.string.notification_connected);
+			int icon = R.drawable.icon;
+			int temp_flags = Notification.FLAG_ONGOING_EVENT;			
+
+			// Set the icon, scrolling text and timestamp
+			Notification notification = new Notification(icon, text, System.currentTimeMillis());
+			notification.flags |= temp_flags;
+
+			// The PendingIntent to launch our activity if the user selects this notification
+			PendingIntent contentIntent;
+
+			Intent launch = new Intent(context, BufferActivity.class);
+			launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
+
+			// Set the info for the views that show in the notification panel.
+			notification.setLatestEventInfo(context, context.getText(R.string.app_name), text,
+					contentIntent);
+
+			// Send the notification.
+			notifyManager.notify(R.id.NOTIFICATION, notification);
 		}else{
 			notifyHighlight(null);
 		}
@@ -49,13 +70,15 @@ public class QuasseldroidNotificationManager {
 		notification.flags |= temp_flags;
 		
 		
-		if (preferences.getBoolean(context.getString(R.string.preference_notify_connect), true)) {
+		if (preferences.getBoolean(context.getString(R.string.preference_notify_connect), false)) {
 			if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), true)) {
 				notification.defaults |= Notification.DEFAULT_VIBRATE;
 			}
 		
 			if (preferences.getBoolean(context.getString(R.string.preference_notification_sound), true)) {
-				notification.defaults |= Notification.DEFAULT_SOUND;
+				notification.sound = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
+				if (notification.sound.equals(Uri.EMPTY))
+					notification.defaults |= Notification.DEFAULT_SOUND;
 			}
 		}
 		
@@ -123,8 +146,11 @@ public class QuasseldroidNotificationManager {
 		notification.setLatestEventInfo(context, context.getText(R.string.app_name), text,
 				contentIntent);
 		if(bufferId != null) {
-			if(preferences.getBoolean(context.getString(R.string.preference_notification_sound), false))
-				notification.defaults |= Notification.DEFAULT_SOUND;
+			if(preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+				notification.sound = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
+				if (notification.sound.equals(Uri.EMPTY))
+					notification.defaults |= Notification.DEFAULT_SOUND;
+			}
 			if(preferences.getBoolean(context.getString(R.string.preference_notification_light), false))
 				notification.defaults |= Notification.DEFAULT_LIGHTS;
 			if(preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), false))
