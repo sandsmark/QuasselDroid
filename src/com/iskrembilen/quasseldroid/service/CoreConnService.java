@@ -828,5 +828,18 @@ public class CoreConnService extends Service {
 		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
-
+	
+	public boolean isUserAway(String nick, int networkId) {
+		Network network = networks.getNetworkById(networkId);
+		if (network == null) return false;
+		IrcUser user = network.getUserByNick(nick);
+		if (user == null) return false;
+		return user.away;
+	}
+	
+	public boolean isUserOnline(String nick, int networkId) {
+		Network network = networks.getNetworkById(networkId);
+		if (network == null) return true;
+		return !network.hasNick(nick);
+	}
 }

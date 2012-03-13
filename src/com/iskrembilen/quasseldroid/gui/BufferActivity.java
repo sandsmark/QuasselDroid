@@ -315,11 +315,17 @@ public class BufferActivity extends ExpandableListActivity {
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
-				//				if (boundConnService.hasUser(nick)){
-				//					nick += boundConnService.getUser(nick).away ? " (Away)": "";
-				//				}
+				
+				if (boundConnService.isUserAway(nick, entry.getInfo().networkId)) {
+					holder.bufferImage.setImageResource(R.drawable.im_user_away);
+				} else if (boundConnService.isUserOnline(nick, entry.getInfo().networkId)) {
+					holder.bufferImage.setImageResource(R.drawable.im_user_offline);
+					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_offline_color));//FIXME
+				} else {
+					holder.bufferImage.setImageResource(R.drawable.im_user);
+				}
+				
 				holder.bufferView.setText(nick);
-				holder.bufferImage.setImageResource(R.drawable.im_user);
 				
 				break;
 			case GroupBuffer:
