@@ -242,7 +242,7 @@ public class CoreConnService extends Service {
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
 		Buffer buffer = networks.getBufferById(bufferId);
-		if(obs != null)
+		if(obs != null && buffer != null)
 			buffer.addObserver(obs);
 		return buffer;
 	}
@@ -720,7 +720,9 @@ public class CoreConnService extends Service {
 				Collections.sort(c);
 				
 				if(networks == null) throw new RuntimeException("Networks are null when setting buffer order");
-				if(networks.getBufferById(msg.arg1) == null) throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
+				if(networks.getBufferById(msg.arg1) == null)
+					return;
+					//throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
 				networks.getBufferById(msg.arg1).setOrder(msg.arg2);
 				break;
 
@@ -772,23 +774,43 @@ public class CoreConnService extends Service {
 				break;
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
+				if (networks.getNetworkById(msg.arg1) == null) { // sure why not
+					System.err.println("Unable to find network for message");
+					return;
+				}
 				networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"), bundle.getString("buffer"));
 				break;
 			case R.id.USER_QUIT:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				networks.getNetworkById(msg.arg1).onUserQuit((String)msg.obj);
 				break;
 			case R.id.USER_JOINED:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
 				String modes = (String)bundle.get("mode");
 				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, modes);
 				break;
 			case R.id.USER_CHANGEDNICK:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
 				user.changeNick(bundle.getString("newNick"));
 				break;
 			case R.id.USER_ADD_MODE:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				bufferName = bundle.getString("channel");
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
@@ -800,6 +822,10 @@ public class CoreConnService extends Service {
 				}
 				break;
 			case R.id.USER_REMOVE_MODE:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				bufferName = bundle.getString("channel");
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
