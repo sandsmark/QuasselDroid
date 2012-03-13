@@ -35,5 +35,5 @@
 	<string name="menu_hide_events">Hide Events</string>
 	<string name="nick_list_header">Nicks</string>
 	<string name="notification_connecting">Connecting to core</string>
-	<string name="preference_vibrate_connect">vibrateconnect</string>
+	<string name="preference_notify_connect">notifyconnect</string>
 </resources>

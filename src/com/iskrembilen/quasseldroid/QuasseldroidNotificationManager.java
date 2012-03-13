@@ -49,9 +49,15 @@ public class QuasseldroidNotificationManager {
 		notification.flags |= temp_flags;
 		
 		
-		/*if (preferences.getBoolean(getString(R.string.preference_vibrate_connect), true)) {
-			notification.flags |= Notification.DEFAULT_VIBRATE;
-		}*/
+		if (preferences.getBoolean(context.getString(R.string.preference_notify_connect), true)) {
+			if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), true)) {
+				notification.defaults |= Notification.DEFAULT_VIBRATE;
+			}
+		
+			if (preferences.getBoolean(context.getString(R.string.preference_notification_sound), true)) {
+				notification.defaults |= Notification.DEFAULT_SOUND;
+			}
+		}
 		
 		// The PendingIntent to launch our activity if the user selects this notification
 		PendingIntent contentIntent;
