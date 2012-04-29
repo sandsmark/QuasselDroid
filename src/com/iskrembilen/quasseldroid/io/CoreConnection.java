@@ -96,8 +96,6 @@ public final class CoreConnection {
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
 
-	private boolean connected;
-	private boolean connecting;
 	private boolean initComplete;
 	private int initBacklogBuffers;
 
@@ -110,8 +108,6 @@ public final class CoreConnection {
 		this.password = password;
 		this.ssl = ssl;
 		this.service = parent;
-
-		this.connected = false;
 
 		readThread = new ReadThread();
 		readThread.start();
@@ -140,7 +136,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -157,7 +154,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -174,7 +172,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -195,7 +194,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}		
 	}
 	
@@ -249,7 +249,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -283,8 +284,9 @@ public final class CoreConnection {
 		try {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
 			e.printStackTrace();
-			connected = false;
+			disconnect();
 		}
 	}
 
@@ -301,9 +303,6 @@ public final class CoreConnection {
 		socket.setKeepAlive(true);
 		outStream = new QDataOutputStream(socket.getOutputStream());
 		// END CREATE SOCKETS
-		
-
-		connecting = true;
 		
 		// Notify the UI we have an open socket
 		Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
@@ -466,6 +465,7 @@ public final class CoreConnection {
 				try {
 					sendQVariantList(packedFunc);
 				} catch (IOException e) {
+					service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
 					e.printStackTrace();
 					disconnect();
 				}
@@ -478,8 +478,6 @@ public final class CoreConnection {
 		Log.i(TAG, "Connected!");
 
 		initComplete = false;
-		connected = true;
-		connecting = false;
 	}
 
 	/**
@@ -503,14 +501,7 @@ public final class CoreConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		connected = false;
 	}
-	/****************************
-	 * Private internal communication stuff.
-	 * Please don't look below this line.
-	 * @author sandsmark
-	 */
 
 	/**
 	 * Type of a given request (should be pretty self-explanatory).
@@ -707,7 +698,7 @@ public final class CoreConnection {
 					System.err.println("IO error!");	
 					e.printStackTrace();
 					this.running = false;
-					CoreConnection.this.connected = false;
+					CoreConnection.this.disconnect();
 					return null;
 				}
 				//We received a package, aka we are not disconnected, restart timer

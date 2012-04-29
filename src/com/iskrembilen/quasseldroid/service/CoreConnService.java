@@ -778,7 +778,7 @@ public class CoreConnService extends Service {
 				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-				String modes = (String)bundle.get("mode");
+				String modes = (String)bundle.get("mode"); 
 				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, modes);
 				break;
 			case R.id.USER_CHANGEDNICK:
@@ -788,6 +788,10 @@ public class CoreConnService extends Service {
 				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
+				if (user == null) {
+					System.err.println("Unable to find user " + bundle.getString("oldNick"));
+					return;
+				}
 				user.changeNick(bundle.getString("newNick"));
 				break;
 			case R.id.USER_ADD_MODE:
