@@ -28,4 +28,5 @@
 	<color name="ircmessage_light_blue">#4169E1</color>
 	<color name="ircmessage_pink">#F984EF</color>
 	<color name="ircmessage_gray">#888</color>
+	<color name="buffer_offline_color">#666</color>
 </resources>

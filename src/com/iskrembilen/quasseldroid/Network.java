@@ -1,6 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -12,6 +13,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private Boolean isConnected;
 	private BufferCollection buffers;
 	private List<IrcUser> userList;
+	private HashMap<String, IrcUser> nickUserMap;
 	private String nick;
 	
 	private boolean open;
@@ -23,6 +25,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		this.networkId = networkId;
 		userList = new ArrayList<IrcUser>();
 		buffers = new BufferCollection();
+		nickUserMap = new HashMap<String, IrcUser>();
 		
 		open=true;
 	}
@@ -76,6 +79,10 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setUserList(List<IrcUser> userList) {
 		this.userList = userList;
+		nickUserMap.clear();
+		for(IrcUser user: userList) {
+			nickUserMap.put(user.nick, user);
+		}
 	}
 
 
@@ -119,10 +126,12 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	
 	public void onUserJoined(IrcUser user) {
 		userList.add(user);
+		nickUserMap.put(user.nick, user);
 	}
 
 
 	public void onUserQuit(String nick) {
+		nickUserMap.remove(nick);
 		for(IrcUser user: userList) {
 			if(user.nick.equals(nick)) {
 				for(Buffer buffer : buffers.getRawBufferList()) {
@@ -154,22 +163,12 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 
 	public boolean hasNick(String nick) {
-		for(IrcUser user : userList) {
-			if(user.nick.equals(nick)) {
-				return true;
-			}
-		}
-		return false;
+		return nickUserMap.containsKey(nick);
 	}
 
 
 	public IrcUser getUserByNick(String nick) {
-		for(IrcUser user : userList) {
-			if(user.nick.equals(nick)) {
-				return user;
-			}
-		}
-		return null;
+		return nickUserMap.get(nick);
 	}
 
 	public boolean containsBuffer(int id) {

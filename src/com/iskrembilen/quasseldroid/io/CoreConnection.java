@@ -96,7 +96,6 @@ public final class CoreConnection {
 	private Timer heartbeatTimer;
 	private ReadThread readThread;
 
-	private boolean connected;
 	private boolean initComplete;
 	private int initBacklogBuffers;
 
@@ -110,8 +109,6 @@ public final class CoreConnection {
 		this.ssl = ssl;
 		this.service = parent;
 
-		this.connected = false;
-
 		readThread = new ReadThread();
 		readThread.start();
 	}
@@ -120,13 +117,7 @@ public final class CoreConnection {
 	 * Checks whether the core is available. 
 	 */	
 	public boolean isConnected() {
-		if (connected && 
-				socket != null && socket.isConnected() &&
-				readThread != null && readThread.isAlive())
-			return true;
-		else {
-			return false;
-		}
+		return (socket != null && !socket.isClosed());
 	}
 
 	/**
@@ -145,7 +136,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -162,7 +154,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -179,7 +172,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}
 	}
 
@@ -200,7 +194,8 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
-			connected = false;
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
+			disconnect();
 		}		
 	}
 	
@@ -254,6 +249,7 @@ public final class CoreConnection {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
 			e.printStackTrace();
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
 			disconnect();
 		}
 	}
@@ -288,8 +284,9 @@ public final class CoreConnection {
 		try {
 			sendQVariantList(retFunc);
 		} catch (IOException e) {
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
 			e.printStackTrace();
-			connected = false;
+			disconnect();
 		}
 	}
 
@@ -305,10 +302,15 @@ public final class CoreConnection {
 		socket = (Socket)factory.createSocket(address, port);
 		socket.setKeepAlive(true);
 		outStream = new QDataOutputStream(socket.getOutputStream());
-		// END CREATE SOCKETS 
-
+		// END CREATE SOCKETS
+		
+		// Notify the UI we have an open socket
+		Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
+		msg.sendToTarget();
+		
 
 		// START CLIENT INFO
+		updateInitProgress("Sending client info...");
 		Map<String, QVariant<?>> initial = new HashMap<String, QVariant<?>>();
 
 		DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
@@ -324,6 +326,7 @@ public final class CoreConnection {
 		// END CLIENT INFO
 
 		// START CORE INFO
+		updateInitProgress("Getting core info...");
 		inStream = new QDataInputStream(socket.getInputStream());
 		Map<String, QVariant<?>> reply = readQVariantMap();
 		System.out.println("CORE INFO: ");
@@ -349,7 +352,7 @@ public final class CoreConnection {
 			version = Integer.parseInt(matcher.group(1));
 			release = Integer.parseInt(matcher.group(2));
 		} else {
-			throw new IOException("Can't match core version, illegal version?");
+			throw new UnsupportedProtocolException("Can't match core version: " + coreInfo.getCoreVersion());
 		}
 		
 		//Check that the protocol version is atleast 10 and the version is above 0.6.0
@@ -381,6 +384,7 @@ public final class CoreConnection {
 
 
 		// START LOGIN
+		updateInitProgress("Logging in...");
 		Map<String, QVariant<?>> login = new HashMap<String, QVariant<?>>();
 		login.put("MsgType", new QVariant<String>("ClientLogin", QVariantType.String));
 		login.put("User", new QVariant<String>(username, QVariantType.String));
@@ -397,6 +401,7 @@ public final class CoreConnection {
 
 
 		// START SESSION INIT
+		updateInitProgress("Receiving session state...");
 		reply = readQVariantMap();
 		/*System.out.println("SESSION INIT: ");
 		for (String key : reply.keySet()) {
@@ -460,6 +465,7 @@ public final class CoreConnection {
 				try {
 					sendQVariantList(packedFunc);
 				} catch (IOException e) {
+					service.getHandler().obtainMessage(R.id.LOST_CONNECTION, "Lost connection").sendToTarget();
 					e.printStackTrace();
 					disconnect();
 				}
@@ -470,10 +476,7 @@ public final class CoreConnection {
 
 		// END SIGNAL PROXY
 		Log.i(TAG, "Connected!");
-		connected = true;
 
-		Message msg = service.getHandler().obtainMessage(R.id.CONNECTED);
-		msg.sendToTarget();
 		initComplete = false;
 	}
 
@@ -485,23 +488,20 @@ public final class CoreConnection {
 		if (heartbeatTimer!=null) {
 			heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
 		}
+		readThread.running = false; //tell it to quit
 		try {
-			if (outStream != null)
+			if (outStream != null) {
+				outStream.flush();
 				outStream.close();
+			}
 			if(inStream != null)
 				inStream.close();
+			if (socket != null)
+				socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		readThread.running = false;
-
-		connected = false;
 	}
-	/****************************
-	 * Private internal communication stuff.
-	 * Please don't look below this line.
-	 * @author sandsmark
-	 */
 
 	/**
 	 * Type of a given request (should be pretty self-explanatory).
@@ -698,7 +698,7 @@ public final class CoreConnection {
 					System.err.println("IO error!");	
 					e.printStackTrace();
 					this.running = false;
-					CoreConnection.this.connected = false;
+					CoreConnection.this.disconnect();
 					return null;
 				}
 				//We received a package, aka we are not disconnected, restart timer
@@ -921,7 +921,7 @@ public final class CoreConnection {
 					//}
 					//TODO: after making network object come back and fix this. Needs that shit
 					else if (className.equals("IrcChannel")) {
-						System.out.println(packedFunc.toString() + " Object: "+objectName);
+						//System.out.println(packedFunc.toString() + " Object: "+objectName);
 						// topic, UserModes, password, ChanModes, name
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 //						String bufferName = map.get("name");
@@ -1118,7 +1118,8 @@ public final class CoreConnection {
 							}
 						}
 						if(bufferId == -1) {
-							throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
+							System.err.println("joinIrcUser: Did not find buffer with name " + bufferName);
+							//throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
 						}
 						for(int i=0; i<nicks.size();i++) {
 							Bundle bundle = new Bundle();

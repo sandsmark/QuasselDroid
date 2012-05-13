@@ -83,6 +83,7 @@ public class CoreConnService extends Service {
 	public static final int UNSUPPORTED_PROTOCOL = 3;
 	public static final int INIT_PROGRESS = 4;
 	public static final int INIT_DONE = 5;
+	public static final int CONNECTION_CONNECTING = 6;
 
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
@@ -108,9 +109,6 @@ public class CoreConnService extends Service {
 
 	private OnSharedPreferenceChangeListener preferenceListener;
 
-	private boolean preferenceUseWakeLock;
-
-	private WakeLock wakeLock;
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -127,10 +125,11 @@ public class CoreConnService extends Service {
 		return binder;
 	}
 
-	public void onHighlightsRead(int bufferId) {
-		notificationManager.notifyHighlightsRead(bufferId);
-	}
+    public void onHighlightsRead(int bufferId) {
+           notificationManager.notifyHighlightsRead(bufferId);
+     }
 
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -139,17 +138,12 @@ public class CoreConnService extends Service {
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-		preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
 		preferenceListener = new OnSharedPreferenceChangeListener() {
 			
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if(key.equals(getString(R.string.preference_colored_text))) {
 					preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-				} else if(key.equals(getString(R.string.preference_wake_lock))) {
-					preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
-					if(!preferenceUseWakeLock) releaseWakeLockIfExists();
-					else if(preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
 				}
 			}
 		};
@@ -195,27 +189,11 @@ public class CoreConnService extends Service {
 				+ " with username " + username);
 		networks = new NetworkCollection();
 		
-		acquireWakeLockIfEnabled();
 		
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
 	}
 
-	private void acquireWakeLockIfEnabled() {
-		if (preferenceUseWakeLock) {
-			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Heute ist mein tag");
-			wakeLock.acquire();
-			Log.i(TAG, "WakeLock acquired");
-		}
-	}
-	private void releaseWakeLockIfExists() {
-		if(wakeLock != null) {
-			wakeLock.release();
-			Log.i(TAG, "WakeLock released");
-		}
-		wakeLock = null;
-	}
 
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
@@ -226,6 +204,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void setLastSeen(int bufferId, int msgId) {
+		notificationManager.notifyHighlightsRead(bufferId);
 		coreConn.requestSetLastMsgRead(bufferId, msgId);
 		networks.getBufferById(bufferId).setLastSeenMessage(msgId);
 	}
@@ -242,7 +221,7 @@ public class CoreConnService extends Service {
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
 		Buffer buffer = networks.getBufferById(bufferId);
-		if(obs != null)
+		if(obs != null && buffer != null)
 			buffer.addObserver(obs);
 		return buffer;
 	}
@@ -305,142 +284,143 @@ public class CoreConnService extends Service {
 		final char normalIndicator = 15;
 		final char italicIndicator = 29;
 		final char underlineIndicator = 31;
+		final char colorIndicator = 3;
 
 		String content = message.content.toString();
 
 		if (content.indexOf(boldIndicator) == -1 
 				&& content.indexOf(italicIndicator) == -1
-				&& content.indexOf(underlineIndicator) == -1)
+				&& content.indexOf(underlineIndicator) == -1
+				&& content.indexOf(colorIndicator) == -1)
 			return;
 
 		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
-
+		
+		int start, end, endSearchOffset, startIndicatorLength, style, fg, bg;
 		while (true) {
 			content = newString.toString();
-
-			int start = content.indexOf(boldIndicator);
-			int end = content.indexOf(boldIndicator, start+1);
-			int style = Typeface.BOLD;
+			end = -1;
+			startIndicatorLength = 1;
+			style = 0;
+			fg = -1;
+			bg = -1;
+			
+			start = content.indexOf(boldIndicator);
+			if (start != -1) {
+				end = content.indexOf(boldIndicator, start+1);
+				style = Typeface.BOLD;
+			}
 
 			if (start == -1) {
 				start = content.indexOf(italicIndicator);
-				end = content.indexOf(italicIndicator, start+1);
-				style = Typeface.ITALIC;
+				if (start != -1) {
+					end = content.indexOf(italicIndicator, start+1);
+					style = Typeface.ITALIC;
+				}
 			}
 
 			if (start == -1) {
 				start = content.indexOf(underlineIndicator);
-				end = content.indexOf(underlineIndicator, start+1);
-				style = -1;
+				if (start != -1) {
+					end = content.indexOf(underlineIndicator, start+1);
+					style = -1;
+				}
+			}
+			
+			endSearchOffset = start + 1;
+			
+			// Colors?
+			if (start == -1) {
+				start = content.indexOf(colorIndicator);
+				
+				if (start != -1) {
+					// Note that specifying colour codes here is optional, as the same indicator will cancel existing colours
+					endSearchOffset = start + 1;
+					if (endSearchOffset < content.length()) {
+						if (Character.isDigit(content.charAt(endSearchOffset))) {
+							if (endSearchOffset+1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+								fg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 2));
+								endSearchOffset += 2;
+							} else {
+								fg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset+1));
+								endSearchOffset += 1;
+							}
+							
+							if (endSearchOffset < content.length() && content.charAt(endSearchOffset) == ',') {
+								if (endSearchOffset+1 < content.length() && Character.isDigit(content.charAt(endSearchOffset+1))) {
+									endSearchOffset++;
+									if (endSearchOffset+1 < content.length() && Character.isDigit(content.charAt(endSearchOffset + 1))) {
+										bg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 2));
+										endSearchOffset += 2;
+									} else {
+										bg = Integer.parseInt(content.substring(endSearchOffset, endSearchOffset + 1));
+										endSearchOffset += 1;
+									}
+								}
+							}
+						}
+					}
+					startIndicatorLength = endSearchOffset - start;
+					
+					end = content.indexOf(colorIndicator, endSearchOffset);
+				}
 			}
 
 			if (start == -1)
 				break;
 
-			if (end == -1)
-				end = content.indexOf(normalIndicator, start);
+			int norm = content.indexOf(normalIndicator, start+1);
+			if (norm != -1 && (end == -1 || norm < end))
+				end = norm;
 
 			if (end == -1)
-				end = content.length()-1;
+				end = content.length();
 
-			if(start==end) {
-				newString.delete(start, start+1);
-				break;
+			if (end - (start + startIndicatorLength) > 0) {
+				// Only set spans if there's any text between start & end
+				if (style == -1) {
+					newString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				} else {
+					newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				}
+				
+				if (fg != -1) {
+					newString.setSpan(new ForegroundColorSpan(getResources()
+							.getColor(mircCodeToColor(fg))), start, end,
+							Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				}
+				if (bg != -1) {
+					newString.setSpan(new BackgroundColorSpan(getResources()
+							.getColor(mircCodeToColor(bg))), start, end,
+							Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+				}
 			}
 
-			if (style == -1) {
-				newString.setSpan(new UnderlineSpan(), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			} else {
-				newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			}
-
-			if (content.charAt(end) == boldIndicator
+			// Intentionally don't remove "normal" indicators or color here, as they are multi-purpose
+			if (end < content.length() && (content.charAt(end) == boldIndicator
 					|| content.charAt(end) == italicIndicator
-					|| content.charAt(end) == normalIndicator
-					|| content.charAt(end) == underlineIndicator)
+					|| content.charAt(end) == underlineIndicator))
 				newString.delete(end, end+1);
 
-			newString.delete(start, start+1);
+			newString.delete(start, start + startIndicatorLength);
 		}
-		message.content = newString;
-	}
-
-	/**
-	 * Parse mIRC color codes in IrcMessage
-	 */
-	public void parseColorCodes(IrcMessage message) {
-		if(!preferenceParseColors) return;
 		
-		final char formattingIndicator = 3;
-
-		/*
-		 * if (message.content.toString().indexOf(formattingIndicator) == -1)
-		 * return;
-		 */
-		String content = message.content.toString();
-		if (content.indexOf(formattingIndicator) == -1)
-			return;
-
-		SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
-
-
-
+		// NOW we remove the "normal" and color indicator
 		while (true) {
 			content = newString.toString();
-			// ^C5,12colored text and background^C
-			int start = content.indexOf(formattingIndicator);
-
-			if (start == -1) {
+			int normPos = content.indexOf(normalIndicator);
+			if (normPos != -1)
+				newString.delete(normPos, normPos+1);
+			
+			int colorPos = content.indexOf(colorIndicator);
+			if (colorPos != -1)
+				newString.delete(colorPos, colorPos+1);
+			
+			if (normPos == -1 && colorPos == -1)
 				break;
-			}
-
-			int end = start + 1;
-			int fg = -1;
-			int bg = -1;
-			if (end < content.length()) {
-				if (Character.isDigit(content.charAt(end))) {
-					if (Character.isDigit(content.charAt(end + 1))) {
-						fg = Integer.parseInt(content.substring(end, end + 2));
-						end += 2;
-					} else {
-						fg = Integer.parseInt(content.substring(end, end+1));
-						end += 1;
-					}
-				}
-
-				if (content.charAt(end) == ',') {
-					end++;
-
-					if (Character.isDigit(content.charAt(end))) {
-						if (Character.isDigit(content.charAt(end + 1))) {
-							bg = Integer.parseInt(content.substring(end, end + 2));
-							end += 2;
-						} else {
-							bg = Integer.parseInt(content.substring(end, end + 1));
-							end += 1;
-						}
-					}
-				}
-			}
-			int length = end - start;
-			int endOfSpan = content.indexOf(formattingIndicator, end) - length;
-
-			if (endOfSpan <= 0) // check for malformed messages
-				endOfSpan = content.length() - length;
-
-			newString.delete(start, end);
-			if (fg != -1) {
-				newString.setSpan(new ForegroundColorSpan(getResources()
-						.getColor(mircCodeToColor(fg))), start, endOfSpan,
-						Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			}
-			if (bg != -1) {
-				newString.setSpan(new BackgroundColorSpan(getResources()
-						.getColor(mircCodeToColor(bg))), start, endOfSpan,
-						Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-			}
 		}
-		message.content = newString; // BURN IN HELL JAVA
+		
+		message.content = newString;
 	}
 
 	private int mircCodeToColor(int code) {
@@ -500,7 +480,6 @@ public class CoreConnService extends Service {
 	public void disconnectFromCore() {
 		if (coreConn != null)
 			coreConn.disconnect();
-		releaseWakeLockIfExists();
 	}
 
 	public boolean isConnected() {
@@ -579,7 +558,6 @@ public class CoreConnService extends Service {
 					 */
 					checkMessageForHighlight(buffer, message);
 					checkForURL(message);
-					parseColorCodes(message);
 					parseStyleCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
@@ -604,10 +582,10 @@ public class CoreConnService extends Service {
 					 * support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
-					parseColorCodes(message);
 					parseStyleCodes(message);
 					if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
+						
 					}
 					
 
@@ -648,10 +626,10 @@ public class CoreConnService extends Service {
 				 */
 				buffer = networks.getBufferById(msg.arg1);
 				if (buffer != null) {
-					Boolean hasHighlights = buffer.hasUnseenHighlight();
 					buffer.setLastSeenMessage(msg.arg2);
-					if(hasHighlights)
+					//if(buffer.hasUnseenHighlight()) {FIXME
 						notificationManager.notifyHighlightsRead(buffer.getInfo().id);
+					//}
 				} else {
 					Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
 				}
@@ -668,14 +646,16 @@ public class CoreConnService extends Service {
 				}
 				break;
 
-			case R.id.CONNECTED:
+
+			case R.id.CONNECTING:
 				/**
 				 * CoreConn has connected to a core
 				 */
-				notificationManager.notifyConnected();
-				sendStatusMessage(CoreConnService.CONNECTION_CONNECTED, null);
+				notificationManager.notifyConnecting();
+				sendStatusMessage(CoreConnService.CONNECTION_CONNECTING, null);
 				break;
 
+				
 			case R.id.LOST_CONNECTION:
 				/**
 				 * Lost connection with core, update notification
@@ -691,13 +671,13 @@ public class CoreConnService extends Service {
 					}
 				}
 				notificationManager.notifyDisconnected();
-				releaseWakeLockIfExists();
 				break;
 			case R.id.NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
 				 */
 				user = (IrcUser) msg.obj;
+				if (networks.getNetworkById(msg.arg1) == null) return; //FIXME
 				networks.getNetworkById(msg.arg1).onUserJoined(user);
 				break;
 
@@ -720,7 +700,9 @@ public class CoreConnService extends Service {
 				Collections.sort(c);
 				
 				if(networks == null) throw new RuntimeException("Networks are null when setting buffer order");
-				if(networks.getBufferById(msg.arg1) == null) throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
+				if(networks.getBufferById(msg.arg1) == null)
+					return;
+					//throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
 				networks.getBufferById(msg.arg1).setOrder(msg.arg2);
 				break;
 
@@ -768,27 +750,55 @@ public class CoreConnService extends Service {
 				sendStatusMessage(CoreConnService.INIT_PROGRESS, bundle);
 				break;
 			case R.id.INIT_DONE:
+				/**
+				 * CoreConn has connected to a core
+				 */
+				notificationManager.notifyConnected();
 				sendStatusMessage(CoreConnService.INIT_DONE, null);
 				break;
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
+				if (networks.getNetworkById(msg.arg1) == null) { // sure why not
+					System.err.println("Unable to find network for message");
+					return;
+				}
 				networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"), bundle.getString("buffer"));
 				break;
 			case R.id.USER_QUIT:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				networks.getNetworkById(msg.arg1).onUserQuit((String)msg.obj);
 				break;
 			case R.id.USER_JOINED:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-				String modes = (String)bundle.get("mode");
+				String modes = (String)bundle.get("mode"); 
 				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, modes);
 				break;
 			case R.id.USER_CHANGEDNICK:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
+				if (user == null) {
+					System.err.println("Unable to find user " + bundle.getString("oldNick"));
+					return;
+				}
 				user.changeNick(bundle.getString("newNick"));
 				break;
 			case R.id.USER_ADD_MODE:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				bufferName = bundle.getString("channel");
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
@@ -800,6 +810,10 @@ public class CoreConnService extends Service {
 				}
 				break;
 			case R.id.USER_REMOVE_MODE:
+				if (networks.getNetworkById(msg.arg1) == null) {
+					System.err.println("Unable to find buffer for message");
+					return;
+				}
 				bundle = (Bundle) msg.obj;
 				bufferName = bundle.getString("channel");
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
@@ -818,5 +832,18 @@ public class CoreConnService extends Service {
 		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
-
+	
+	public boolean isUserAway(String nick, int networkId) {
+		Network network = networks.getNetworkById(networkId);
+		if (network == null) return false;
+		IrcUser user = network.getUserByNick(nick);
+		if (user == null) return false;
+		return user.away;
+	}
+	
+	public boolean isUserOnline(String nick, int networkId) {
+		Network network = networks.getNetworkById(networkId);
+		if (network == null) return true;
+		return !network.hasNick(nick);
+	}
 }

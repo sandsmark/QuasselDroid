@@ -41,7 +41,6 @@
 <item type="id" name="BUFFERUPDATE_NEWMESSAGE"></item>
 <item type="id" name="BUFFERUPDATE_USERSCHANGED"></item>
 <item type="id" name="DISCONNECTED"></item>
-<item type="id" name="CONNECTED"></item>
 <item type="id" name="SET_BUFFER_PERM_HIDDEN"></item>
 <item type="id" name="SET_BUFFER_TEMP_HIDDEN"></item>
 <item name="INVALID_CERTIFICATE" type="id"></item>
@@ -53,5 +52,6 @@
 <item type="id" name="LAST_SEEN_CHANGED"></item>
 <item type="id" name="INIT_PROGRESS"></item>
 <item type="id" name="INIT_DONE"></item>
+<item type="id" name="CONNECTING"/>
 
 </resources>
