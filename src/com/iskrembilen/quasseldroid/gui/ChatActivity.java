@@ -438,7 +438,7 @@ public class ChatActivity extends Activity{
 				if(entry.isSelf()) {
 					holder.nickView.setTextColor(Color.BLACK); //TODO: probably move to color file, or somewhere else it needs to be, so user can select color them self
 				}else{
-					int hashcode = entry.getNick().hashCode() & 0x00FFFFFF;
+					int hashcode = entry.getNick().hashCode();
 					holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 				}
 				holder.msgView.setTextColor(0xff000000);
@@ -603,9 +603,8 @@ public class ChatActivity extends Activity{
 			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
 			adapter.setBuffer(buffer);
 			buffer.setDisplayed(true);
-			if(buffer.hasUnseenHighlight()) {
-				boundConnService.onHighlightsRead(buffer.getInfo().id);
-			}
+			
+			boundConnService.onHighlightsRead(buffer.getInfo().id);
 
 			//Move list to correect position
 			if (adapter.buffer.getTopMessageShown() == 0) {

@@ -11,8 +11,10 @@ import java.util.Observer;
 public class NetworkCollection extends Observable implements Observer {
 	private static final String TAG = NetworkCollection.class.getSimpleName();
 	List<Network> networkList = new ArrayList<Network>();
+	HashMap<Integer, Network> networkMap = new HashMap<Integer, Network>();
 	
 	public void addNetwork(Network network) {
+		networkMap.put(network.getId(), network);
 		networkList.add(network);
 		network.addObserver(this);
 		Collections.sort(networkList);
@@ -36,11 +38,7 @@ public class NetworkCollection extends Observable implements Observer {
 	}
 	
 	public Network getNetworkById(int networkId) {
-		for(Network network : networkList) {
-			if(network.getId() == networkId)
-				return network;
-		}
-		return null;
+		return networkMap.get(networkId);
 	}
 	
 	public void addBuffer(Buffer buffer) {

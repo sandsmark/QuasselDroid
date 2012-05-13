@@ -15,18 +15,26 @@
 	<CheckBoxPreference android:key="@string/preference_colored_text"
 			android:title="Allow colored text" android:summary="NB: buggy feature, turning off might stop crashes" 
 			android:defaultValue="true" />
-	<CheckBoxPreference android:key="@string/preference_wake_lock"
-			android:title="Use a wake-lock to inhibit sleep" android:summary="Use more battery when you turn off the screen, to keep connections alive" 
-			android:defaultValue="true" />
+
 
 	<PreferenceCategory android:title="Notifications">
+	    <CheckBoxPreference android:key="@string/preference_notify_connect"
+			android:title="Notify on connect" android:summary="" 
+			android:defaultValue="false" />
 		<CheckBoxPreference android:key="@string/preference_notification_vibrate"
 			android:title="Vibrate on notification" android:summary="" />
 		<CheckBoxPreference android:key="@string/preference_notification_light"
 			android:title="Use light on notification" android:summary="" />
 		<CheckBoxPreference android:key="@string/preference_notification_sound"
 			android:title="Play sound on notification" android:summary="" />
-		
+	  	<RingtonePreference android:showDefault="true"
+	     android:key="@string/preference_notification_sound_file" android:title="Notification sound"
+	     android:ringtoneType="notification" android:showSilent="true" >
+	  	</RingtonePreference>
+ 		<RingtonePreference android:showDefault="true"
+	     android:key="@string/preference_notification_connect_sound_file" android:title="Connection sound"
+	     android:ringtoneType="notification" android:showSilent="true" >
+	  	</RingtonePreference>
 
 	</PreferenceCategory>
 </PreferenceScreen>
