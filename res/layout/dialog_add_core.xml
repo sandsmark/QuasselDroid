@@ -3,7 +3,7 @@
 	android:layout_height="fill_parent" android:layout_width="290dip"
 	android:padding="5dip">
 	<LinearLayout android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:scrollbars="vertical"
+		android:layout_height="wrap_content" android:scrollbars="vertical"
 		android:orientation="vertical"
 		android:scrollbarAlwaysDrawVerticalTrack="true">
 		<TableLayout android:orientation="vertical"
@@ -16,7 +16,7 @@
 					android:text="Name" />
 				<EditText android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:id="@+id/dialog_name_field"
-					android:singleLine="true" />
+					android:singleLine="true" android:inputType="text"/>
 			</TableRow>
 			<TableRow>
 				<TextView android:text="Server address"
