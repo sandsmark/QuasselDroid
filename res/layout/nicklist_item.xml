@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" android:paddingBottom="2dp" android:paddingLeft="25dp" android:paddingRight="2dp" android:paddingTop="2dp">
+    android:orientation="horizontal"
+    android:paddingBottom="2dp"
+    android:paddingLeft="25dp"
+    android:paddingRight="2dp"
+    android:paddingTop="2dp"
+    tools:ignore="UseCompoundDrawables" >
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:src="@drawable/im_user" />
-
+
     <TextView
         android:id="@+id/nicklist_nick_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

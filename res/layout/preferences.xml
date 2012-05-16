@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" >
+
 	<EditTextPreference android:title="Backlog Limit"
 		android:summary="How many lines to fetch on connect" android:key="@string/preference_initial_backlog_limit"
 		android:defaultValue="10" android:numeric="integer" />
