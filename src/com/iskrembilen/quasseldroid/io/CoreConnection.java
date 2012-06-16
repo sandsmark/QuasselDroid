@@ -1112,7 +1112,7 @@ public final class CoreConnection {
 						String bufferName = tmp[1];
 						int bufferId = -1;
 						for (Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
-							if(buffer.getInfo().name.equals(bufferName)) {
+							if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
 								bufferId = buffer.getInfo().id;
 								break;
 							}
