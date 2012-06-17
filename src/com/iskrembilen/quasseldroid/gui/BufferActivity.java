@@ -59,6 +59,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -110,7 +111,13 @@ public class BufferActivity extends ExpandableListActivity {
 
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
+				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
+					if (resultData!=null){
+						removeDialog(R.id.DIALOG_CONNECTING);
+						Toast.makeText(BufferActivity.this.getApplicationContext(), resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
+					}
+					finish();
+				}
 				else if(resultCode==CoreConnService.INIT_PROGRESS) {
 					((TextView)findViewById(R.id.buffer_list_progress_text)).setText(resultData.getString(CoreConnService.PROGRESS_KEY));
 				}else if(resultCode==CoreConnService.INIT_DONE) {

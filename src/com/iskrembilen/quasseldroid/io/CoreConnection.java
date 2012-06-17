@@ -677,6 +677,7 @@ public final class CoreConnection {
 				return null;
 			} catch (GeneralSecurityException e) {
 				disconnect();
+				Log.w(TAG, "Invalid username/password combination");
 				return "Invalid username/password combination.";
 			} catch (EmptyQVariantException e) {
 				e.printStackTrace();

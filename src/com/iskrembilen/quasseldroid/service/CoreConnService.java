@@ -52,6 +52,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
@@ -665,6 +666,7 @@ public class CoreConnService extends Service {
 						// used only for login atm
 						bundle = new Bundle();
 						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
+//						Toast.makeText(getApplicationContext(), (String)msg.obj, Toast.LENGTH_LONG).show();
 						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
 					} else {
 						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
