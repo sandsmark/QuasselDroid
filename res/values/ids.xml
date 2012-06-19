@@ -28,6 +28,7 @@
 <item type="id" name="USER_CHANGEDNICK"></item>
 <item type="id" name="USER_ADD_MODE"></item>
 <item type="id" name="USER_REMOVE_MODE"></item>
+<item type="id" name="CHANNEL_TOPIC_CHANGED"></item>
     
 <item type="id" name="NEW_USERLIST_ADDED"></item>
 <item type="id" name="SET_BUFFER_ORDER"></item>

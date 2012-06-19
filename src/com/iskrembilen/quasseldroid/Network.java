@@ -15,18 +15,13 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private List<IrcUser> userList;
 	private HashMap<String, IrcUser> nickUserMap;
 	private String nick;
-	
 	private boolean open;
-
-	
-
 
 	public Network(int networkId) {
 		this.networkId = networkId;
 		userList = new ArrayList<IrcUser>();
 		buffers = new BufferCollection();
 		nickUserMap = new HashMap<String, IrcUser>();
-		
 		open=true;
 	}
 	
@@ -154,9 +149,10 @@ public class Network extends Observable implements Observer, Comparable<Network>
 			}
 		}
 		for(Buffer buffer : buffers.getRawBufferList()) {
-			if(buffer.getInfo().name.equals(bufferName)) {
+			if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
 				buffer.getUsers().removeNick(nick);
-				if(nick.equals(getNick())) {
+				System.out.println(nick + " : " + getNick());
+				if(nick.equalsIgnoreCase(getNick())) {
 					buffer.setActive(false);
 				}
 				break;

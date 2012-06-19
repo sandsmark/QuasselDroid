@@ -51,7 +51,7 @@ public class BufferCollection extends Observable implements Observer {
 			Log.e(TAG, "Getting buffer already have: " + buffer.getInfo().name);
 			return;
 		}
-
+		
 		buffers.put(buffer.getInfo().id, buffer);
 		bufferList.add(buffer);
 //		if(!isBufferFiltered(buffer)) {

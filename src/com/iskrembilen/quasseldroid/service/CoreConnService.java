@@ -549,7 +549,7 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(message.bufferInfo.id);
 				
 				if (buffer == null) {
-					Log.e(TAG, "A messages buffer is null:" + message);
+					Log.e(TAG, "A message buffer is null:" + message);
 					return;
 				}
 
@@ -607,9 +607,7 @@ public class CoreConnService extends Service {
 				 * New buffer received, so update out channel holder with the
 				 * new buffer
 				 */
-				buffer = (Buffer) msg.obj;
-				networks.addBuffer(buffer);
-
+				networks.addBuffer((Buffer) msg.obj);
 				break;
 			case R.id.ADD_MULTIPLE_BUFFERS:
 				/**
@@ -783,8 +781,16 @@ public class CoreConnService extends Service {
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
 				String modes = (String)bundle.get("mode"); 
-				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, modes);
-				break;
+				bufferName = (String)bundle.get("buffername");
+				for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+					if(buf.getInfo().name.equalsIgnoreCase(bufferName)) {
+						buf.getUsers().addUser(user, modes);
+						return;
+					}
+				}
+				//Did not find buffer in the network, something is wrong
+				Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
+				throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
 			case R.id.USER_CHANGEDNICK:
 				if (networks.getNetworkById(msg.arg1) == null) {
 					System.err.println("Unable to find buffer for message");
@@ -827,6 +833,9 @@ public class CoreConnService extends Service {
 							break;
 						}
 				}
+				break;
+			case R.id.CHANNEL_TOPIC_CHANGED:
+				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).setTopic((String)msg.obj);
 				break;
 			}			
 		}

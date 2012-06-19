@@ -51,9 +51,11 @@ import javax.net.ssl.TrustManager;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.TextView.BufferType;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
@@ -98,6 +100,9 @@ public final class CoreConnection {
 
 	private boolean initComplete;
 	private int initBacklogBuffers;
+	
+	//Used to create the ID of new channels we join
+	private int maxBufferId = 0;
 
 
 	public CoreConnection(String address, int port, String username,
@@ -784,15 +789,7 @@ public final class CoreConnection {
 							user.ircOperator = (String) map.get("ircOperator").getData();
 							user.nick = (String) map.get("nick").getData();
 							user.channels = (List<String>) map.get("channels").getData();
-							//TODO: this shit has to be sooo slow? time it, and mabye improve
-//							for(String channel : user.channels) {
-//								for (Buffer buffer: network.getBuffers().getRawBufferList()) {
-//									if (buffer.getInfo().name.equals(channel)) {
-//										buffer.getUsers().addUser(user, UserMode.USER);
-//										break;
-//									}
-//								}
-//							}
+
 							ircUsers.add(user);
 							userTempMap.put(user.nick, user);
 						}
@@ -925,14 +922,23 @@ public final class CoreConnection {
 					//TODO: after making network object come back and fix this. Needs that shit
 					else if (className.equals("IrcChannel")) {
 						Log.d(TAG, "InitData: IrcChannel");
-						//System.out.println(packedFunc.toString() + " Object: "+objectName);
-						// topic, UserModes, password, ChanModes, name
+//						System.out.println(packedFunc.toString() + " Object: "+objectName);
+//						topic, UserModes, password, ChanModes, name
+						//For now only topic seems useful here, rest is added other places
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-//						String bufferName = map.get("name");
-						Buffer buffer;
-//						if(buffers.containsKey(bufferName) {
-//							buffer = buffers.get(bufferName);
-//						}
+						
+						String bufferName = (String)map.get("name").getData();
+						String topic = (String)map.get("topic").getData();
+						for(Buffer buffer : buffers.values()) {
+							if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
+								Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, buffer.getInfo().networkId, buffer.getInfo().id, topic);
+								msg.sendToTarget();
+								msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ACTIVE,buffer.getInfo().id, 0, true);
+								msg.sendToTarget();
+								break;
+							}
+						}
+						
 						
 						
 					} 
@@ -971,12 +977,16 @@ public final class CoreConnection {
 
 						int order = 0;
 						for (QVariant bufferId: orderList) {
-							if (!buffers.containsKey(bufferId.getData())) {
-								System.err.println("got buffer info for non-existant buffer id: " + bufferId.getData());
+							int id = (Integer)bufferId.getData();
+							if(id > maxBufferId) {
+								maxBufferId = id;
+							}
+							if (!buffers.containsKey(id)) {
+								System.err.println("got buffer info for non-existant buffer id: " + id);
 								continue;
 							}
 							Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
-							msg.arg1 = (Integer)bufferId.getData();
+							msg.arg1 = id;
 							msg.arg2 = order;
 							
 							//FIXME: DEBUG PISS REMOVE
@@ -1067,7 +1077,7 @@ public final class CoreConnection {
 						Log.d(TAG, "Sync: Network -> addIrcUser");
 						String nick = (String) packedFunc.remove(0).getData();
 						IrcUser user = new IrcUser();
-						user.nick = nick.substring(0, nick.indexOf("!"));
+						user.nick = nick.split("!")[0];
 						service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
 						try {
 							sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
@@ -1079,6 +1089,26 @@ public final class CoreConnection {
 					} else if (className.equals("Network") && function.equals("addIrcChannel")) {
 						Log.d(TAG, "Sync: Network -> addIrcChannel");
 						String bufferName = (String) packedFunc.remove(0).getData();
+						boolean hasBuffer = false;
+						for(Buffer buffer : buffers.values()) {
+							if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
+								hasBuffer = true;
+							}
+						}
+						if(!hasBuffer) {
+							//Create the new buffer object
+							QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
+							BufferInfo info = new BufferInfo();
+							info.name = bufferName;
+							maxBufferId += 1;
+							info.id = maxBufferId;
+							info.networkId = Integer.parseInt(objectName);
+							info.type = BufferInfo.Type.ChannelBuffer;
+							Buffer buffer = new Buffer(info, dbHelper);
+							buffers.put(info.id, buffer);
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
+							msg.sendToTarget();
+						}
 						try {
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);
 						} catch (IOException e) {
@@ -1112,28 +1142,19 @@ public final class CoreConnection {
 						 */
 					}
 					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
-						Log.d(TAG, "Sync: IrcChannel -> joinIrcUser");
+						Log.d(TAG, "Sync: IrcChannel -> joinIrcUsers");
 						List<String> nicks = (List<String>)packedFunc.remove(0).getData();
 						List<String> modes = (List<String>)packedFunc.remove(0).getData();
 						String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String bufferName = tmp[1];
-						int bufferId = -1;
-						for (Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
-							if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
-								bufferId = buffer.getInfo().id;
-								break;
-							}
-						}
-						if(bufferId == -1) {
-							System.err.println("joinIrcUser: Did not find buffer with name " + bufferName);
-							//throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
-						}
+						
 						for(int i=0; i<nicks.size();i++) {
 							Bundle bundle = new Bundle();
 							bundle.putString("nick", nicks.get(i));
 							bundle.putString("mode", modes.get(i));
-							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, bufferId, bundle).sendToTarget();	
+							bundle.putString("buffername", bufferName);
+							service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, 0, bundle).sendToTarget();	
 						}
 					}
 					else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
@@ -1196,6 +1217,10 @@ public final class CoreConnection {
 						//TODO: this basicly does shit. So find out if it effects anything and what it should do
 						//int buffer = (Integer) packedFunc.remove(0).getData();
 						//buffers.get(buffer).setRead();
+					} else if (className.equals("BufferViewConfig") && function.equals("addBuffer")) {
+						Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
+						System.out.println(packedFunc + " : " + objectName);
+						
 					} else {
 						Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
 					}
