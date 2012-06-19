@@ -156,6 +156,9 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		for(Buffer buffer : buffers.getRawBufferList()) {
 			if(buffer.getInfo().name.equals(bufferName)) {
 				buffer.getUsers().removeNick(nick);
+				if(nick.equals(getNick())) {
+					buffer.setActive(false);
+				}
 				break;
 			}
 		}

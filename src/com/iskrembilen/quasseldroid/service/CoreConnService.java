@@ -763,7 +763,7 @@ public class CoreConnService extends Service {
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
 				if (networks.getNetworkById(msg.arg1) == null) { // sure why not
-					System.err.println("Unable to find network for message");
+					Log.w(TAG, "Unable to find network for user that parted");
 					return;
 				}
 				networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"), bundle.getString("buffer"));
