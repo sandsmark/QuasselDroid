@@ -722,7 +722,7 @@ public final class CoreConnection {
 				 * TODO: We should use this, and disconnect automatically when the core has gone away.
 				 */
 				case HeartBeat:
-					Log.i(TAG, "Got heartbeat");
+					Log.d(TAG, "Got heartbeat");
 					List<QVariant<?>> packet = new LinkedList<QVariant<?>>();
 					packet.add(new QVariant<Integer>(RequestType.HeartBeatReply.getValue(), QVariantType.Int));
 					packet.add(new QVariant<Calendar>(Calendar.getInstance(), QVariantType.Time));
@@ -734,7 +734,7 @@ public final class CoreConnection {
 					}
 					break;
 				case HeartBeatReply:
-					Log.i(TAG, "Got heartbeat reply");
+					Log.d(TAG, "Got heartbeat reply");
 					break;
 					/*
 					 * This is when the core send us a new object to create.
@@ -750,6 +750,7 @@ public final class CoreConnection {
 					 * An object representing an IRC network, containing users and channels ("buffers"). 
 					 */
 					if (className.equals("Network")) {
+						Log.d(TAG, "InitData: Network");
 						int networkId = Integer.parseInt(objectName);
 						Network network = networks.get(networkId);
 
@@ -867,6 +868,7 @@ public final class CoreConnection {
 						 * like the last seen message, marker lines, etc.
 						 */
 					} else if (className.equals("BufferSyncer")) {
+						Log.d(TAG, "InitData: BufferSyncer");
 						// Parse out the last seen messages
 						updateInitProgress("Receiving last seen and marker lines");
 
@@ -922,6 +924,7 @@ public final class CoreConnection {
 					//}
 					//TODO: after making network object come back and fix this. Needs that shit
 					else if (className.equals("IrcChannel")) {
+						Log.d(TAG, "InitData: IrcChannel");
 						//System.out.println(packedFunc.toString() + " Object: "+objectName);
 						// topic, UserModes, password, ChanModes, name
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
@@ -934,6 +937,7 @@ public final class CoreConnection {
 						
 					} 
 					else if (className.equals("BufferViewConfig")) {
+						Log.d(TAG, "InitData: BufferViewConfig");
 						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
 						List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
 						List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
@@ -1030,6 +1034,7 @@ public final class CoreConnection {
 					 * amount of messages.
 					 */
 					if (className.equals("BacklogManager") && function.equals("receiveBacklog")) {
+						Log.d(TAG, "Sync: BacklogManager -> receiveBacklog");
 						/* Here we first just dump some unused data;
 						 * the buffer id is embedded in the message itself (in a bufferinfo object),
 						 * the rest of the arguments aren't used at all, apparently.
@@ -1101,11 +1106,13 @@ public final class CoreConnection {
 						service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
 					}
 					else if (className.equals("IrcUser") && function.equals("setNick")) {
+						Log.d(TAG, "Sync: IrcUser -> setNick");
 						/*
 						 * Does nothing, Why would we need a sync call, when we got a RPC call about renaming the user object
 						 */
 					}
 					else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
+						Log.d(TAG, "Sync: IrcChannel -> joinIrcUser");
 						List<String> nicks = (List<String>)packedFunc.remove(0).getData();
 						List<String> modes = (List<String>)packedFunc.remove(0).getData();
 						String[] tmp = objectName.split("/");
@@ -1130,6 +1137,7 @@ public final class CoreConnection {
 						}
 					}
 					else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
+						Log.d(TAG, "Sync: IrcChannel -> addUserMode");
                         String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String channel = tmp[1];
@@ -1141,12 +1149,13 @@ public final class CoreConnection {
 						bundle.putString("nick", nick);
 						bundle.putString("mode", changedMode);
 						bundle.putString("channel", channel);
-						System.out.println(nick + " " + channel + " " + changedMode);
+						Log.d(TAG, nick + " " + channel + " " + changedMode);
 						service.getHandler().obtainMessage(R.id.USER_ADD_MODE, networkId, 0, bundle).sendToTarget();
 						
 						
 					}
 					else if (className.equals("IrcChannel") && function.equals("removeUserMode")) {
+						Log.d(TAG, "Sync: IrcChannel -> removeUserMode");
 						String[] tmp = objectName.split("/");
 						int networkId = Integer.parseInt(tmp[0]);
 						String channel = tmp[1];
@@ -1162,6 +1171,7 @@ public final class CoreConnection {
 						service.getHandler().obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
 					}
 					else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
+						Log.d(TAG, "Sync: BufferSyncer -> setLastSeenMsg");
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
 						Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
@@ -1170,6 +1180,7 @@ public final class CoreConnection {
 						msg.sendToTarget();
 
 					} else if (className.equals("BufferSyncer") && function.equals("setMarkerLine")) {
+						Log.d(TAG, "Sync: BufferSyncer -> setMarkerLine");
 						int bufferId = (Integer) packedFunc.remove(0).getData();
 						int msgId = (Integer) packedFunc.remove(0).getData();
 						Message msg = service.getHandler().obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
@@ -1181,6 +1192,7 @@ public final class CoreConnection {
 						 * markBufferAsRead is called whenever a given buffer is set as read by the core. 
 						 */
 					} else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
+						Log.d(TAG, "Sync: BufferSyncer -> markBufferAsRead");
 						//TODO: this basicly does shit. So find out if it effects anything and what it should do
 						//int buffer = (Integer) packedFunc.remove(0).getData();
 						//buffers.get(buffer).setRead();
