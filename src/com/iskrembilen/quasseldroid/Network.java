@@ -101,7 +101,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	@Override
 	public int compareTo(Network another) {
-		return getId() - another.getId();
+		return getName().compareTo(another.getName());
 	}
 
 

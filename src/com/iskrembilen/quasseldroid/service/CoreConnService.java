@@ -30,6 +30,7 @@ import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.R.string;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -687,19 +688,20 @@ public class CoreConnService extends Service {
 				/**
 				 * Buffer order changed so set the new one
 				 */
+				//---- start debug stuff
 				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
 				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
 				ArrayList<Integer> c = new ArrayList<Integer>();
 				for(Network net : networks.getNetworkList()) {
 					c.add(net.getStatusBuffer().getInfo().id);
 					for(Buffer buf : net.getBuffers().getRawBufferList()) {
-						if(buf.getInfo().id == 4) System.out.println(buf.getInfo().name);
 						c.add(buf.getInfo().id);
 					}
 				}
 				Collections.sort(a);
 				Collections.sort(b);
 				Collections.sort(c);
+				//---- end debug stuff
 				
 				if(networks == null) throw new RuntimeException("Networks are null when setting buffer order");
 				if(networks.getBufferById(msg.arg1) == null)
