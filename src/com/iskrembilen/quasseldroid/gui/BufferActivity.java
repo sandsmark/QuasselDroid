@@ -23,18 +23,24 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.Picture;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -53,9 +59,13 @@ import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -68,6 +78,7 @@ import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.R;
 
@@ -186,7 +197,7 @@ public class BufferActivity extends ExpandableListActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.standard_menu, menu);
+		getMenuInflater().inflate(R.menu.buffer_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
@@ -199,6 +210,8 @@ public class BufferActivity extends ExpandableListActivity {
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
 			break;
+		case R.id.menu_join_channel:
+			showDialog(R.id.DIALOG_JOIN_CHANNEL);
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -229,6 +242,76 @@ public class BufferActivity extends ExpandableListActivity {
 		default:
 			return super.onContextItemSelected(item);
 		}
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		final Dialog dialog;
+		switch (id) {
+		case R.id.DIALOG_JOIN_CHANNEL:
+			dialog = new Dialog(this);
+			dialog.setContentView(R.layout.dialog_join_channel);
+			dialog.setTitle("Join Channel");
+			
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(BufferActivity.this, android.R.layout.simple_spinner_item);
+			((Spinner)dialog.findViewById(R.id.dialog_join_channel_network_spinner)).setAdapter(adapter);
+
+			OnClickListener buttonListener = new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Spinner networkSpinner = (Spinner)dialog.findViewById(R.id.dialog_join_channel_network_spinner);
+					EditText channelNameField = (EditText)dialog.findViewById(R.id.dialog_join_channel_channel_name_field);
+					if (v.getId()==R.id.dialog_join_channel_cancel_button) {
+						channelNameField.setText("");
+						((ArrayAdapter<String>)networkSpinner.getAdapter()).clear();
+						dialog.dismiss();
+
+
+					}else if (v.getId()==R.id.dialog_join_channel_join_button && !channelNameField.getText().toString().equals("")) {
+						String channelName = channelNameField.getText().toString().trim();
+						String networkSelected = (String) networkSpinner.getSelectedItem();
+						int networkId = -1;
+						for(Network network : BufferActivity.this.bufferListAdapter.networks.getNetworkList()) {
+							if(network.getName().equals(networkSelected)) {
+								networkId = network.getId();
+								break;
+							}
+						}
+						if(networkId != -1) {
+							boundConnService.sendMessage(networkId, "/join "+ channelName);
+							channelNameField.setText("");
+							((ArrayAdapter<String>)networkSpinner.getAdapter()).clear();
+							dialog.dismiss();
+							Toast.makeText(BufferActivity.this, "Joining channel " + channelName, Toast.LENGTH_LONG).show();
+						} else {
+							Toast.makeText(BufferActivity.this, "Error joining channel", Toast.LENGTH_LONG).show();
+						}
+					}
+				}
+			};
+			dialog.findViewById(R.id.dialog_join_channel_join_button).setOnClickListener(buttonListener);
+			dialog.findViewById(R.id.dialog_join_channel_cancel_button).setOnClickListener(buttonListener);	
+			break;			
+		default:
+			dialog = null;
+			break;
+		}
+		return dialog;  
+	}
+	
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		switch(id) {
+		case R.id.DIALOG_JOIN_CHANNEL:
+			ArrayAdapter<String> adapter = (ArrayAdapter<String>)((Spinner)dialog.findViewById(R.id.dialog_join_channel_network_spinner)).getAdapter();
+			for(Network network : BufferActivity.this.bufferListAdapter.networks.getNetworkList()) {
+				adapter.add(network.getName());
+			}
+			break;
+		}
+
+		super.onPrepareDialog(id, dialog);
 	}
 
 
