@@ -56,6 +56,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -105,7 +106,7 @@ public class BufferActivity extends ExpandableListActivity {
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
 		getExpandableListView().setCacheColorHint(0xffffffff);
-		//		registerForContextMenu(getListView());
+		registerForContextMenu(getExpandableListView());
 
 		statusReciver = new ResultReceiver(null) {
 
@@ -205,7 +206,7 @@ public class BufferActivity extends ExpandableListActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		int bufferId = (int) ((AdapterView.AdapterContextMenuInfo)menuInfo).id;
+		int bufferId = (int) ((ExpandableListContextMenuInfo)menuInfo).id;
 		if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
 			menu.add(Menu.NONE, R.id.CONTEXT_MENU_PART, Menu.NONE, "Part");			
 		}else{
@@ -217,7 +218,7 @@ public class BufferActivity extends ExpandableListActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
 		switch (item.getItemId()) {
 		case R.id.CONTEXT_MENU_JOIN:
 			boundConnService.sendMessage((int)info.id, "/join "+bufferListAdapter.networks.getBufferById((int)info.id).getInfo().name);
