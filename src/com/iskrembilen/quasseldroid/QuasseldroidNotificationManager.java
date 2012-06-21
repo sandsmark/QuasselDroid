@@ -180,4 +180,9 @@ public class QuasseldroidNotificationManager {
 		// Send the notification.
 		notifyManager.notify(R.id.NOTIFICATION, notification);
 	}
+
+	public void remove() {
+		notifyManager.cancelAll();
+		
+	}
 }

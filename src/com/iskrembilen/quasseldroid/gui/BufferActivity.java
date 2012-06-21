@@ -209,6 +209,7 @@ public class BufferActivity extends ExpandableListActivity {
 			break;
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
+			finish();
 			break;
 		case R.id.menu_join_channel:
 			showDialog(R.id.DIALOG_JOIN_CHANNEL);

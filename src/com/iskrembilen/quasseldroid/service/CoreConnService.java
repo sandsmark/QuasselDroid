@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.service;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -481,7 +482,8 @@ public class CoreConnService extends Service {
 
 	public void disconnectFromCore() {
 		if (coreConn != null)
-			coreConn.disconnect();
+			coreConn.closeConnection();
+		notificationManager.remove();
 	}
 
 	public boolean isConnected() {

@@ -218,6 +218,7 @@ public class ChatActivity extends Activity{
 			break;
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
+			finish();
 			break;
 		case R.id.menu_hide_events:
 			showDialog(R.id.DIALOG_HIDE_EVENTS);
@@ -241,19 +242,20 @@ public class ChatActivity extends Activity{
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (adapter.buffer == null) return;
-		adapter.buffer.setDisplayed(false);
-		
-		//Dont save position if list is at bottom
-		if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
-			adapter.buffer.setTopMessageShown(0);
-		}else{
-			adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
-		}
-		if (adapter.buffer.getUnfilteredSize()!= 0){
-			boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
-			boundConnService.markBufferAsRead(adapter.getBufferId());
-			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
+		if (adapter.buffer != null && boundConnService.isConnected()) {
+			adapter.buffer.setDisplayed(false);
+			
+			//Dont save position if list is at bottom
+			if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
+				adapter.buffer.setTopMessageShown(0);
+			}else{
+				adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+			}
+			if (adapter.buffer.getUnfilteredSize()!= 0){
+				boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
+				boundConnService.markBufferAsRead(adapter.getBufferId());
+				boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
+			}
 		}
 		doUnbindService();
 	}
