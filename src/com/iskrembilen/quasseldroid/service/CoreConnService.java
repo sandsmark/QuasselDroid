@@ -662,16 +662,13 @@ public class CoreConnService extends Service {
 				/**
 				 * Lost connection with core, update notification
 				 */
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					if (msg.obj != null) { // Have description of what is wrong,
-						// used only for login atm
-						bundle = new Bundle();
-						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
-//						Toast.makeText(getApplicationContext(), (String)msg.obj, Toast.LENGTH_LONG).show();
-						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
-					} else {
-						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
-					}
+				if (msg.obj != null) { // Have description of what is wrong,
+					// used only for login atm
+					bundle = new Bundle();
+					bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
+					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, bundle);
+				} else {
+					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, null);
 				}
 				notificationManager.notifyDisconnected();
 				break;

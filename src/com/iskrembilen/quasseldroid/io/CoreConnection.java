@@ -302,12 +302,7 @@ public final class CoreConnection {
 		socket = (Socket)factory.createSocket(address, port);
 		socket.setKeepAlive(true);
 		outStream = new QDataOutputStream(socket.getOutputStream());
-		// END CREATE SOCKETS
-		
-		// Notify the UI we have an open socket
-		Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
-		msg.sendToTarget();
-		
+		// END CREATE SOCKETS		
 
 		// START CLIENT INFO
 		updateInitProgress("Sending client info...");
@@ -329,7 +324,6 @@ public final class CoreConnection {
 		updateInitProgress("Getting core info...");
 		inStream = new QDataInputStream(socket.getInputStream());
 		Map<String, QVariant<?>> reply = readQVariantMap();
-		System.out.println("CORE INFO: ");
 		coreInfo = new CoreInfo();
 		coreInfo.setCoreFeatures((Integer)reply.get("CoreFeatures").getData());
 		coreInfo.setCoreInfo((String)reply.get("CoreInfo").getData());
@@ -346,7 +340,7 @@ public final class CoreConnection {
 		coreInfo.setSupportsCompression((Boolean)reply.get("SupportsCompression").getData());
 		
 		Matcher matcher = Pattern.compile("(\\d+)\\W(\\d+)\\W", Pattern.CASE_INSENSITIVE).matcher(coreInfo.getCoreVersion());
-		System.out.println(coreInfo.getCoreVersion());
+		Log.i(TAG, "Core version: " + coreInfo.getCoreVersion());
 		int version, release;
 		if (matcher.find()) {
 			version = Integer.parseInt(matcher.group(1));
@@ -365,6 +359,7 @@ public final class CoreConnection {
 
 		// START SSL CONNECTION
 		if (ssl) {
+			Log.d(TAG, "Using ssl");
 			SSLContext sslContext = SSLContext.getInstance("TLS");
 			TrustManager[] trustManagers = new TrustManager [] { new CustomTrustManager(this) };
 			sslContext.init(null, trustManagers, null);
@@ -373,12 +368,14 @@ public final class CoreConnection {
 			sslSocket.setEnabledProtocols(new String[] {"SSLv3"});
 
 			sslSocket.setUseClientMode(true);
+			updateInitProgress("Starting ssl handshake");
 			sslSocket.startHandshake();
+			Log.d(TAG, "Ssl handshake complete");
 			inStream = new QDataInputStream(sslSocket.getInputStream());
 			outStream = new QDataOutputStream(sslSocket.getOutputStream());
 			socket = sslSocket;
 		} else {
-			System.err.println("SSL DISABLED!");
+			Log.w(TAG, "SSL DISABLED!");
 		}
 		// FINISHED SSL CONNECTION
 
@@ -398,8 +395,7 @@ public final class CoreConnection {
 		if (!reply.get("MsgType").toString().equals("ClientLoginAck"))
 			throw new GeneralSecurityException("Invalid password?");
 		// END LOGIN ACK
-
-
+		
 		// START SESSION INIT
 		updateInitProgress("Receiving session state...");
 		reply = readQVariantMap();
@@ -475,7 +471,11 @@ public final class CoreConnection {
 
 		// END SIGNAL PROXY
 		Log.i(TAG, "Connected!");
-
+		
+		// Notify the UI we have an open socket
+		Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
+		msg.sendToTarget();
+		
 		initComplete = false;
 	}
 	
@@ -509,8 +509,9 @@ public final class CoreConnection {
 	 * 
 	 */
 	public void onDisconnected(String informationMessage) {
-		if(readThread.running)
+		if(readThread.running) {
 			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, informationMessage).sendToTarget();
+		}
 		closeConnection();
 	}
 
@@ -624,6 +625,7 @@ public final class CoreConnection {
 	}
 	
 	private void updateInitProgress(String message) {
+		Log.i(TAG, message);
 		service.getHandler().obtainMessage(R.id.INIT_PROGRESS, message).sendToTarget();
 	}
 	
@@ -677,7 +679,6 @@ public final class CoreConnection {
 					closeConnection();
 				}else{
 					e.printStackTrace();
-					closeConnection();
 					return "IO error while connecting! " + e.getMessage();
 				}
 				return null;
@@ -686,12 +687,9 @@ public final class CoreConnection {
 				closeConnection();
 				return null;
 			} catch (GeneralSecurityException e) {
-				closeConnection();
 				Log.w(TAG, "Invalid username/password combination");
 				return "Invalid username/password combination.";
 			} catch (EmptyQVariantException e) {
-				e.printStackTrace();
-				closeConnection();
 				return "IO error while connecting!";
 			}
 
