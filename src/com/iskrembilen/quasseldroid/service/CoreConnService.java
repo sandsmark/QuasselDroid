@@ -92,10 +92,6 @@ public class CoreConnService extends Service {
 	public static final String CERT_KEY = "certificate";
 	public static final String PROGRESS_KEY = "networkname";
 
-
-
-	private Pattern URLPattern = Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
-
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
 
@@ -260,20 +256,6 @@ public class CoreConnService extends Service {
 				message.setFlag(IrcMessage.Flag.Highlight);
 				// FIXME: move to somewhere proper
 			}
-		}
-	}
-
-	/**
-	 * Check if a message contains a URL that we need to support to open in a
-	 * browser Set the url fields in the message so we can get it later
-	 * 
-	 * @param message
-	 *            ircmessage to check
-	 */
-	public void checkForURL(IrcMessage message) {
-		Matcher matcher = URLPattern.matcher(message.content);
-		if (matcher.find()) {
-			message.addURL(this, matcher.group(0));
 		}
 	}
 
@@ -561,7 +543,6 @@ public class CoreConnService extends Service {
 					 * support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
-					checkForURL(message);
 					parseStyleCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
@@ -591,9 +572,6 @@ public class CoreConnService extends Service {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
 						
 					}
-					
-
-					checkForURL(message);
 					buffer.addMessage(message);
 					
 					if (buffer.isTemporarilyHidden()) {

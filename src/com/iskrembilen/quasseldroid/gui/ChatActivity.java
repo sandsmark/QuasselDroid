@@ -114,7 +114,6 @@ public class ChatActivity extends Activity{
 		backlogList.setSelection(backlogList.getChildCount());
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-		backlogList.setOnItemLongClickListener(itemLongClickListener);
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
 
 		statusReceiver = new ResultReceiver(null) {
@@ -127,26 +126,6 @@ public class ChatActivity extends Activity{
 
 		};
 	}
-
-
-	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
-
-		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-			IrcMessage message = adapter.getItem(position);
-			if (message.hasURLs()) {
-				ArrayList<String> urls = (ArrayList<String>) message.getURLs();
-
-				if (urls.size() == 1 ){ //Open the URL
-					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
-					startActivity(browserIntent);
-				} else if (urls.size() > 1 ){
-					//Show list of urls, and make it possible to choose one
-				}
-			}
-			return false;
-		}
-	};
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
