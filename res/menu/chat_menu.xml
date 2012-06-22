@@ -7,6 +7,4 @@
 		android:icon="@android:drawable/ic_menu_preferences" ></item>
 	<item android:id="@+id/menu_disconnect" android:title="@string/menu_disconnect"
 		android:icon="@android:drawable/ic_menu_close_clear_cancel" ></item>
-	
-	
 </menu>

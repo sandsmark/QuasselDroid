@@ -114,7 +114,6 @@ public class ChatActivity extends Activity{
 		backlogList.setSelection(backlogList.getChildCount());
 
 		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-		backlogList.setOnItemLongClickListener(itemLongClickListener);
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
 
 		statusReceiver = new ResultReceiver(null) {
@@ -127,26 +126,6 @@ public class ChatActivity extends Activity{
 
 		};
 	}
-
-
-	OnItemLongClickListener itemLongClickListener = new OnItemLongClickListener() {
-
-		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-			IrcMessage message = adapter.getItem(position);
-			if (message.hasURLs()) {
-				ArrayList<String> urls = (ArrayList<String>) message.getURLs();
-
-				if (urls.size() == 1 ){ //Open the URL
-					Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(0)));
-					startActivity(browserIntent);
-				} else if (urls.size() > 1 ){
-					//Show list of urls, and make it possible to choose one
-				}
-			}
-			return false;
-		}
-	};
 
 	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
 		public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -218,6 +197,7 @@ public class ChatActivity extends Activity{
 			break;
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
+			finish();
 			break;
 		case R.id.menu_hide_events:
 			showDialog(R.id.DIALOG_HIDE_EVENTS);
@@ -241,19 +221,20 @@ public class ChatActivity extends Activity{
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if (adapter.buffer == null) return;
-		adapter.buffer.setDisplayed(false);
-		
-		//Dont save position if list is at bottom
-		if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
-			adapter.buffer.setTopMessageShown(0);
-		}else{
-			adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
-		}
-		if (adapter.buffer.getUnfilteredSize()!= 0){
-			boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
-			boundConnService.markBufferAsRead(adapter.getBufferId());
-			boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
+		if (adapter.buffer != null && boundConnService.isConnected()) {
+			adapter.buffer.setDisplayed(false);
+			
+			//Dont save position if list is at bottom
+			if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
+				adapter.buffer.setTopMessageShown(0);
+			}else{
+				adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+			}
+			if (adapter.buffer.getUnfilteredSize()!= 0){
+				boundConnService.setLastSeen(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
+				boundConnService.markBufferAsRead(adapter.getBufferId());
+				boundConnService.setMarkerLine(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId);
+			}
 		}
 		doUnbindService();
 	}

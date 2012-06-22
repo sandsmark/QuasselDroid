@@ -7,6 +7,7 @@
 <item type="id" name="DIALOG_DELETE_CORE"></item>
 <item type="id" name="DIALOG_CONNECTING"></item>
 <item type="id" name="DIALOG_HIDE_EVENTS"></item>
+<item type="id" name="DIALOG_JOIN_CHANNEL"></item>
 
 <item type="id" name="CONTEXT_MENU_JOIN"></item>
 <item type="id" name="CONTEXT_MENU_PART"></item>
@@ -28,6 +29,7 @@
 <item type="id" name="USER_CHANGEDNICK"></item>
 <item type="id" name="USER_ADD_MODE"></item>
 <item type="id" name="USER_REMOVE_MODE"></item>
+<item type="id" name="CHANNEL_TOPIC_CHANGED"></item>
     
 <item type="id" name="NEW_USERLIST_ADDED"></item>
 <item type="id" name="SET_BUFFER_ORDER"></item>

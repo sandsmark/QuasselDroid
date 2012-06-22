@@ -134,6 +134,7 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 				if (resultCode==CoreConnService.CONNECTION_CONNECTING) {
 					removeDialog(R.id.DIALOG_CONNECTING);
 					LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+					finish();
 				}else if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
 					if (resultData!=null){
 						removeDialog(R.id.DIALOG_CONNECTING);
@@ -413,6 +414,10 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 			// cast its IBinder to a concrete class and directly access it.
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
+			if(boundConnService.isConnected()) {
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+				finish();
+			}
 			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 

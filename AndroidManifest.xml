@@ -1,24 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.iskrembilen.quasseldroid" android:versionName="0.5.11" android:versionCode="37">
-  	<uses-sdk android:minSdkVersion="7" />
-	<application android:icon="@drawable/icon" android:label="@string/app_name" android:description="@string/description" android:debuggable="false" android:theme="@android:style/Theme.Light">
-		<activity android:name=".gui.LoginActivity" android:label="@string/app_name" android:windowSoftInputMode="stateHidden">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.iskrembilen.quasseldroid"
+    android:versionCode="37"
+    android:versionName="0.5.11" >
 
-		<activity android:name=".gui.PreferenceView"
-			android:screenOrientation="sensor" android:label="@string/app_name" android:theme="@android:style/Theme">
-		</activity>
-		<activity android:name=".gui.ChatActivity" android:configChanges="keyboardHidden|orientation"></activity>
-		<activity android:name=".gui.BufferActivity" android:launchMode="singleTop"></activity>
-		<service android:name=".service.CoreConnService"></service>
-		<activity android:name=".gui.NicksActivity"></activity>
-	</application>
-	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
-  	<uses-permission android:name="android.permission.VIBRATE"></uses-permission>
-  	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-</manifest> 
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7"/>
+
+    <uses-permission android:name="android.permission.VIBRATE" ></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" ></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" ></uses-permission>
+
+    <application
+        android:description="@string/description"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Light" >
+        <activity
+            android:name=".gui.LoginActivity"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name=".gui.PreferenceView"
+            android:label="@string/app_name"
+            android:screenOrientation="sensor"
+            android:theme="@android:style/Theme" >
+        </activity>
+        <activity
+            android:name=".gui.ChatActivity"
+            android:configChanges="keyboardHidden|orientation" >
+        </activity>
+        <activity
+            android:name=".gui.BufferActivity"
+            android:launchMode="singleTop" >
+        </activity>
+
+        <service android:name=".service.CoreConnService" >
+        </service>
+
+        <activity android:name=".gui.NicksActivity" >
+        </activity>
+        <activity android:name=".gui.SplashActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+
+</manifest>

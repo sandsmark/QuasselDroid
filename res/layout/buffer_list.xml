@@ -5,7 +5,7 @@
         android:layout_height="fill_parent">
     <ExpandableListView android:id="@id/android:list"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
+              android:layout_height="0dip"
               android:background="#ffffff"
               android:layout_weight="1"
               android:drawSelectorOnTop="false"/>

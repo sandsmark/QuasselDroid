@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.service;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import java.util.Observer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.R.string;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +54,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
@@ -88,10 +91,6 @@ public class CoreConnService extends Service {
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
 	public static final String PROGRESS_KEY = "networkname";
-
-
-
-	private Pattern URLPattern = Pattern.compile("((mailto\\:|(news|(ht|f)tp(s?))\\://){1}\\S+)", Pattern.CASE_INSENSITIVE);
 
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
@@ -257,20 +256,6 @@ public class CoreConnService extends Service {
 				message.setFlag(IrcMessage.Flag.Highlight);
 				// FIXME: move to somewhere proper
 			}
-		}
-	}
-
-	/**
-	 * Check if a message contains a URL that we need to support to open in a
-	 * browser Set the url fields in the message so we can get it later
-	 * 
-	 * @param message
-	 *            ircmessage to check
-	 */
-	public void checkForURL(IrcMessage message) {
-		Matcher matcher = URLPattern.matcher(message.content);
-		if (matcher.find()) {
-			message.addURL(this, matcher.group(0));
 		}
 	}
 
@@ -479,11 +464,12 @@ public class CoreConnService extends Service {
 
 	public void disconnectFromCore() {
 		if (coreConn != null)
-			coreConn.disconnect();
+			coreConn.closeConnection();
+		notificationManager.remove();
 	}
 
 	public boolean isConnected() {
-		return coreConn.isConnected();
+		return  coreConn != null && coreConn.isConnected();
 	}
 
 	/**
@@ -547,7 +533,7 @@ public class CoreConnService extends Service {
 				buffer = networks.getBufferById(message.bufferInfo.id);
 				
 				if (buffer == null) {
-					Log.e(TAG, "A messages buffer is null:" + message);
+					Log.e(TAG, "A message buffer is null:" + message);
 					return;
 				}
 
@@ -557,7 +543,6 @@ public class CoreConnService extends Service {
 					 * support for custom highlight masks
 					 */
 					checkMessageForHighlight(buffer, message);
-					checkForURL(message);
 					parseStyleCodes(message);
 					buffer.addBacklogMessage(message);
 				} else {
@@ -587,9 +572,6 @@ public class CoreConnService extends Service {
 						notificationManager.notifyHighlight(buffer.getInfo().id);
 						
 					}
-					
-
-					checkForURL(message);
 					buffer.addMessage(message);
 					
 					if (buffer.isTemporarilyHidden()) {
@@ -605,9 +587,7 @@ public class CoreConnService extends Service {
 				 * New buffer received, so update out channel holder with the
 				 * new buffer
 				 */
-				buffer = (Buffer) msg.obj;
-				networks.addBuffer(buffer);
-
+				networks.addBuffer((Buffer) msg.obj);
 				break;
 			case R.id.ADD_MULTIPLE_BUFFERS:
 				/**
@@ -660,15 +640,13 @@ public class CoreConnService extends Service {
 				/**
 				 * Lost connection with core, update notification
 				 */
-				for (ResultReceiver statusReceiver : statusReceivers) {
-					if (msg.obj != null) { // Have description of what is wrong,
-						// used only for login atm
-						bundle = new Bundle();
-						bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
-						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, bundle);
-					} else {
-						statusReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
-					}
+				if (msg.obj != null) { // Have description of what is wrong,
+					// used only for login atm
+					bundle = new Bundle();
+					bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
+					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, bundle);
+				} else {
+					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, null);
 				}
 				notificationManager.notifyDisconnected();
 				break;
@@ -685,19 +663,20 @@ public class CoreConnService extends Service {
 				/**
 				 * Buffer order changed so set the new one
 				 */
+				//---- start debug stuff
 				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
 				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
 				ArrayList<Integer> c = new ArrayList<Integer>();
 				for(Network net : networks.getNetworkList()) {
 					c.add(net.getStatusBuffer().getInfo().id);
 					for(Buffer buf : net.getBuffers().getRawBufferList()) {
-						if(buf.getInfo().id == 4) System.out.println(buf.getInfo().name);
 						c.add(buf.getInfo().id);
 					}
 				}
 				Collections.sort(a);
 				Collections.sort(b);
 				Collections.sort(c);
+				//---- end debug stuff
 				
 				if(networks == null) throw new RuntimeException("Networks are null when setting buffer order");
 				if(networks.getBufferById(msg.arg1) == null)
@@ -759,7 +738,7 @@ public class CoreConnService extends Service {
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
 				if (networks.getNetworkById(msg.arg1) == null) { // sure why not
-					System.err.println("Unable to find network for message");
+					Log.w(TAG, "Unable to find network for user that parted");
 					return;
 				}
 				networks.getNetworkById(msg.arg1).onUserParted(bundle.getString("nick"), bundle.getString("buffer"));
@@ -779,8 +758,16 @@ public class CoreConnService extends Service {
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
 				String modes = (String)bundle.get("mode"); 
-				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).getUsers().addUser(user, modes);
-				break;
+				bufferName = (String)bundle.get("buffername");
+				for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+					if(buf.getInfo().name.equalsIgnoreCase(bufferName)) {
+						buf.getUsers().addUser(user, modes);
+						return;
+					}
+				}
+				//Did not find buffer in the network, something is wrong
+				Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
+				throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
 			case R.id.USER_CHANGEDNICK:
 				if (networks.getNetworkById(msg.arg1) == null) {
 					System.err.println("Unable to find buffer for message");
@@ -823,6 +810,9 @@ public class CoreConnService extends Service {
 							break;
 						}
 				}
+				break;
+			case R.id.CHANNEL_TOPIC_CHANGED:
+				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).setTopic((String)msg.obj);
 				break;
 			}			
 		}

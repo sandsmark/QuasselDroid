@@ -11,45 +11,32 @@
 			android:layout_height="wrap_content">
 			<TableRow android:id="@+id/TableRow01" android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
-				<TextView android:id="@+id/TextView01"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:text="Name" />
-				<EditText android:layout_width="wrap_content"
-					android:layout_height="wrap_content" android:id="@+id/dialog_name_field"
-					android:singleLine="true" android:inputType="text"/>
+				<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:text="Network" />
+				<Spinner android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:id="@+id/dialog_join_channel_network_spinner"
+					/>
 			</TableRow>
 			<TableRow>
-				<TextView android:text="Server address"
+				<TextView android:text="Channel"
 					android:layout_width="wrap_content" android:layout_height="wrap_content"
 					android:singleLine="true" />
 				<EditText android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:layout_weight="1"
 					android:inputType="textUri" android:layout_column="1"
-					android:id="@+id/dialog_address_field" android:singleLine="true" />
-			</TableRow>
-			<TableRow>
-				<TextView android:layout_width="wrap_content"
-					android:layout_height="wrap_content" android:layout_weight="0"
-					android:singleLine="true" android:text="Server port" />
-				<EditText android:layout_width="wrap_content"
-					android:layout_height="wrap_content" android:layout_weight="0"
-					android:inputType="number" android:id="@+id/dialog_port_field"
-					android:singleLine="true" android:text="4242" android:maxLength="5" />
+					android:id="@+id/dialog_join_channel_channel_name_field" android:singleLine="true" />
 			</TableRow>
 		</TableLayout>
-		<CheckBox android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/dialog_usessl_checkbox"
-			android:text="Use SSL?"></CheckBox>
 		<LinearLayout android:id="@+id/LinearLayout01"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_marginTop="5dp" android:layout_gravity="center_horizontal">
+			android:layout_marginTop="4dp" android:layout_gravity="center_horizontal">
 			<Button android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Cancel"
-				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/cancel_button"
+				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/dialog_join_channel_cancel_button"
 				android:layout_gravity="right" android:layout_weight="1" />
 			<Button android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:text="Save"
-				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/save_button"
+				android:layout_height="wrap_content" android:text="Join"
+				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/dialog_join_channel_join_button"
 				android:layout_weight="1" android:layout_gravity="right" />
 		</LinearLayout>
 	</LinearLayout>
