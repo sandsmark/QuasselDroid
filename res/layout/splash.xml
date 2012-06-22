@@ -13,14 +13,13 @@
             android:id="@+id/logo_img"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_marginTop="15dp"
             android:src="@drawable/icon" />
 
         <TextView
             android:id="@+id/introText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="17dp"
             android:text="uasseldroid"
             android:textColor="@color/logo_text_color"
             android:textSize="40dip" />
