@@ -16,7 +16,7 @@
 					android:text="Name" />
 				<EditText android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:id="@+id/dialog_name_field"
-					android:singleLine="true" />
+					android:singleLine="true" android:inputType="text"/>
 			</TableRow>
 			<TableRow>
 				<TextView android:text="Server address"
@@ -42,14 +42,14 @@
 			android:text="Use SSL?"></CheckBox>
 		<LinearLayout android:id="@+id/LinearLayout01"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_marginTop="5px" android:layout_gravity="center_horizontal">
+			android:layout_marginTop="5dp" android:layout_gravity="center_horizontal">
 			<Button android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Cancel"
-				android:minWidth="100px" android:minHeight="50px" android:id="@+id/cancel_button"
+				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/cancel_button"
 				android:layout_gravity="right" android:layout_weight="1" />
 			<Button android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Save"
-				android:minWidth="100px" android:minHeight="50px" android:id="@+id/save_button"
+				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/save_button"
 				android:layout_weight="1" android:layout_gravity="right" />
 		</LinearLayout>
 	</LinearLayout>

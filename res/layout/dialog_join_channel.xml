@@ -26,19 +26,17 @@
 					android:inputType="textUri" android:layout_column="1"
 					android:id="@+id/dialog_join_channel_channel_name_field" android:singleLine="true" />
 			</TableRow>
-			<TableRow>
-			</TableRow>
 		</TableLayout>
 		<LinearLayout android:id="@+id/LinearLayout01"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_marginTop="5px" android:layout_gravity="center_horizontal">
+			android:layout_marginTop="4dp" android:layout_gravity="center_horizontal">
 			<Button android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Cancel"
-				android:minWidth="100px" android:minHeight="50px" android:id="@+id/dialog_join_channel_cancel_button"
+				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/dialog_join_channel_cancel_button"
 				android:layout_gravity="right" android:layout_weight="1" />
 			<Button android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:text="Join"
-				android:minWidth="100px" android:minHeight="50px" android:id="@+id/dialog_join_channel_join_button"
+				android:minWidth="80dp" android:minHeight="45dp" android:id="@+id/dialog_join_channel_join_button"
 				android:layout_weight="1" android:layout_gravity="right" />
 		</LinearLayout>
 	</LinearLayout>
