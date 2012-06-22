@@ -487,7 +487,7 @@ public class CoreConnService extends Service {
 	}
 
 	public boolean isConnected() {
-		return coreConn.isConnected();
+		return  coreConn != null && coreConn.isConnected();
 	}
 
 	/**

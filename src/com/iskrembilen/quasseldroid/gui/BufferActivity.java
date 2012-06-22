@@ -44,9 +44,11 @@ import android.graphics.Picture;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
+import android.provider.Settings.System;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
@@ -103,6 +105,8 @@ public class BufferActivity extends ExpandableListActivity {
 	private int restoreListPosition = 0;
 	private int restoreItemPosition = 0;
 
+	private long backedTimestamp = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -129,6 +133,7 @@ public class BufferActivity extends ExpandableListActivity {
 						Toast.makeText(BufferActivity.this.getApplicationContext(), resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
 					}
 					finish();
+					startActivity(new Intent(BufferActivity.this, LoginActivity.class));
 				}
 				else if(resultCode==CoreConnService.INIT_PROGRESS) {
 					((TextView)findViewById(R.id.buffer_list_progress_text)).setText(resultData.getString(CoreConnService.PROGRESS_KEY));
@@ -194,7 +199,6 @@ public class BufferActivity extends ExpandableListActivity {
 
 	}
 
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.buffer_menu, menu);
@@ -209,6 +213,7 @@ public class BufferActivity extends ExpandableListActivity {
 			break;
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
+			startActivity(new Intent(this, LoginActivity.class));
 			finish();
 			break;
 		case R.id.menu_join_channel:
