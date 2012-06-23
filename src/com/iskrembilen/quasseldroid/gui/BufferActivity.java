@@ -277,15 +277,15 @@ public class BufferActivity extends ExpandableListActivity {
 					}else if (v.getId()==R.id.dialog_join_channel_join_button && !channelNameField.getText().toString().equals("")) {
 						String channelName = channelNameField.getText().toString().trim();
 						String networkSelected = (String) networkSpinner.getSelectedItem();
-						int networkId = -1;
+						int networksStatusBufferId = -1;
 						for(Network network : BufferActivity.this.bufferListAdapter.networks.getNetworkList()) {
 							if(network.getName().equals(networkSelected)) {
-								networkId = network.getId();
+								networksStatusBufferId = network.getStatusBuffer().getInfo().id;
 								break;
 							}
 						}
-						if(networkId != -1) {
-							boundConnService.sendMessage(networkId, "/join "+ channelName);
+						if(networksStatusBufferId != -1) {
+							boundConnService.sendMessage(networksStatusBufferId, "/join "+ channelName);
 							channelNameField.setText("");
 							((ArrayAdapter<String>)networkSpinner.getAdapter()).clear();
 							dialog.dismiss();
