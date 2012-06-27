@@ -3,6 +3,7 @@ package com.iskrembilen.quasseldroid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -73,10 +74,16 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 
 	public void setUserList(List<IrcUser> userList) {
+		if(userList != null && userList.size() > 0) {
+			for(IrcUser user: userList) {
+				user.deleteObserver(this);
+			}
+		}
 		this.userList = userList;
 		nickUserMap.clear();
 		for(IrcUser user: userList) {
 			nickUserMap.put(user.nick, user);
+			user.addObserver(this);
 		}
 	}
 
@@ -88,6 +95,16 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	@Override
 	public void update(Observable observable, Object data) {
+		if(data != null && ((Integer)data == R.id.USER_CHANGEDNICK)) {
+			IrcUser changedUser = (IrcUser)observable; 
+			for(Map.Entry<String,IrcUser> entry : nickUserMap.entrySet()) {
+				if(entry.getValue().nick.equals(changedUser.nick)) {
+					nickUserMap.remove(entry.getKey());
+					nickUserMap.put(entry.getValue().nick, entry.getValue());
+					break;
+				}
+			}
+		}
 		setChanged();
 		notifyObservers();
 		
@@ -122,6 +139,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	public void onUserJoined(IrcUser user) {
 		userList.add(user);
 		nickUserMap.put(user.nick, user);
+		user.addObserver(this);
 	}
 
 
@@ -135,6 +153,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 					}
 				}
 				userList.remove(user);
+				user.deleteObserver(this);
 				return;
 			}
 		}

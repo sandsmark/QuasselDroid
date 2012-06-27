@@ -770,13 +770,13 @@ public class CoreConnService extends Service {
 				throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
 			case R.id.USER_CHANGEDNICK:
 				if (networks.getNetworkById(msg.arg1) == null) {
-					System.err.println("Unable to find buffer for message");
+					Log.e(TAG, "Could not find network with id " + msg.arg1 + " for changing a user nick");
 					return;
 				}
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
 				if (user == null) {
-					System.err.println("Unable to find user " + bundle.getString("oldNick"));
+					Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick");
 					return;
 				}
 				user.changeNick(bundle.getString("newNick"));

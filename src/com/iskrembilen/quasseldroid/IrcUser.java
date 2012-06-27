@@ -43,7 +43,7 @@ public class IrcUser extends Observable implements Comparable<IrcUser>{
 	public void changeNick(String newNick) {
 		nick = newNick;
 		this.setChanged();
-		notifyObservers();
+		notifyObservers(R.id.USER_CHANGEDNICK);
 	}
 
 	@Override
