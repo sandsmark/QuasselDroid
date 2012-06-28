@@ -453,6 +453,8 @@ public class ChatActivity extends Activity{
 				notifyDataSetChanged();
 				setListTopMessage(topId);
 				break;
+			default:
+				notifyDataSetChanged();
 			}
 
 		}

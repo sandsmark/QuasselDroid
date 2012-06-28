@@ -82,7 +82,7 @@ public class UserCollection extends Observable implements Observer {
 				addUserIfNotAlreadyIn(operators, user);
 				Collections.sort(operators);
 			}else {
-				Log.e(TAG, "Unknown usermode " + mode + " for user " + user.name);
+				Log.e(TAG, "Unknown usermode " + mode + " for user " + user.nick);
 			}
 			user.addObserver(this);
 			this.setChanged();

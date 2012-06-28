@@ -132,13 +132,6 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		return ((flags & Flag.Self.value) != 0);
 	}
 
-	public void addURL(Context context, String url) {
-		urls.add(url);
-		int start = content.toString().indexOf(url);
-		content.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.ircmessage_url_color)), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-		content.setSpan(new UnderlineSpan(), start, start+url.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-	}
-
 	public ArrayList<String> getURLs() {
 		return urls;
 	}

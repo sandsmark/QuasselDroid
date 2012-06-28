@@ -655,10 +655,21 @@ public class CoreConnService extends Service {
 				 * New IrcUser added
 				 */
 				user = (IrcUser) msg.obj;
-				if (networks.getNetworkById(msg.arg1) == null) return; //FIXME
+				if (networks.getNetworkById(msg.arg1) == null) {
+					Log.e(TAG, "Network is null when adding user");
+					return; //FIXME
+				}
 				networks.getNetworkById(msg.arg1).onUserJoined(user);
 				break;
-
+			case R.id.NEW_USER_INFO:
+				bundle = (Bundle) msg.obj;
+				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
+				user.away = bundle.getBoolean("away");
+				user.awayMessage = bundle.getString("awayMessage");
+				user.ircOperator = bundle.getString("ircOperator");
+				user.channels = (ArrayList<String>) bundle.getSerializable("channels");
+				user.notifyObservers();
+				break;
 			case R.id.SET_BUFFER_ORDER:
 				/**
 				 * Buffer order changed so set the new one

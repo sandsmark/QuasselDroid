@@ -405,7 +405,6 @@ public final class CoreConnection {
 		}*/
 
 		Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
-		System.out.println(sessionState);
 		List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
 		networks = new HashMap<Integer, Network>(networkIds.size());
 		for (QVariant<?> networkId: networkIds) {
@@ -889,20 +888,23 @@ public final class CoreConnection {
 							/*
 							 * A class representing another user on a given IRC network.
 							 */
-						} //else if (className.equals("IrcUser")) {
-	//						Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-	//						user.away = (Boolean) map.get("away").getData();
-	//						user.awayMessage = (String) map.get("awayMessage").getData();
-	//						user.ircOperator = (String) map.get("ircOperator").getData();
-	//						user.nick = (String) map.get("nick").getData();
-	//						user.channels = (List<String>) map.get("channels").getData();
-	//
-	//						Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_ADDED);
-	//						msg.obj = (IrcUser) user;
-	//						msg.sendToTarget();
+						} else if (className.equals("IrcUser")) {
+							Log.d(TAG, "InitData: IrcUser");
+							Map<String, QVariant<?>> userMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+							Bundle bundle = new Bundle();
+							bundle.putString("awayMessage", (String)userMap.get("awayMessage").getData());
+							bundle.putSerializable("channels", (ArrayList<String>) userMap.get("channels").getData());
+							bundle.putBoolean("away", (Boolean)userMap.get("away").getData());
+							bundle.putString("ircOperator", (String) userMap.get("ircOperator").getData());
+							bundle.putString("nick", (String) userMap.get("nick").getData());
+							Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_INFO);
+							int networkId = Integer.parseInt(objectName.split("/")[0]);
+							msg.obj = bundle;
+							msg.arg1 = networkId;
+							msg.sendToTarget();
 							
-						//}
-						//TODO: after making network object come back and fix this. Needs that shit
+						}
+						
 						else if (className.equals("IrcChannel")) {
 							Log.d(TAG, "InitData: IrcChannel");
 	//						System.out.println(packedFunc.toString() + " Object: "+objectName);
@@ -990,10 +992,11 @@ public final class CoreConnection {
 							}
 							updateInitProgress("Receiving backlog");
 	
-							/*
-							 * There are several objects that we don't care about (at the moment).
-							 */
-						} else {
+						}
+						/*
+						 * There are several objects that we don't care about (at the moment).
+						 */
+						else {
 							Log.i(TAG, "Unparsed InitData: " + className + "(" + objectName + ").");
 						}
 						break;
