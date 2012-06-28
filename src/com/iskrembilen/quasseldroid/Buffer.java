@@ -138,12 +138,12 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 * Also updates the buffer if the message contains highlights etc
 	 * @param message message to place in the buffer list
 	 */
-	private void newBufferEntry(IrcMessage message) {		
+	private void newBufferEntry(IrcMessage message) {
 		if (message.isHighlighted() && message.messageId > lastHighlightMessageId){
 			lastHighlightMessageId = message.messageId;
 			this.setChanged();
 		}
-		if (message.type==IrcMessage.Type.Plain && message.messageId > lastPlainMessageId) {
+		if ((message.type==IrcMessage.Type.Plain || message.type==IrcMessage.Type.Action) && message.messageId > lastPlainMessageId) {
 			lastPlainMessageId = message.messageId;
 			this.setChanged();
 		}
