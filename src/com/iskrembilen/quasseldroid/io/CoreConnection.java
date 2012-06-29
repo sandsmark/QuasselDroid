@@ -131,7 +131,7 @@ public final class CoreConnection {
 	 * Checks whether the core is available. 
 	 */	
 	public boolean isConnected() {
-		return (socket != null && !socket.isClosed());
+		return (socket != null && !socket.isClosed() && readThread.running);
 	}
 
 	/**
@@ -445,6 +445,7 @@ public final class CoreConnection {
 
 		// START SIGNAL PROXY INIT
 
+		updateInitProgress("Requesting network and buffer information...");
 		// We must do this here, to get network names early enough
 		for(Network network: networks.values()) {
 			sendInitRequest("Network", Integer.toString(network.getId()));
@@ -477,7 +478,7 @@ public final class CoreConnection {
 		heartbeatTimer.schedule(sendPingAction, 30000, 30000); // Send heartbeats every 30 seconds
 
 		// END SIGNAL PROXY
-		Log.i(TAG, "Connected!");
+		updateInitProgress("Connection established...");
 		
 		// Notify the UI we have an open socket
 		Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
@@ -488,27 +489,6 @@ public final class CoreConnection {
 	
 	public void closeConnection() {
 		readThread.running = false; //tell the while loop to quit
-		if (heartbeatTimer!=null) {
-			heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
-		}
-		try {
-			if (outStream != null) {
-				outStream.flush();
-				outStream.close();
-			}
-		} catch (IOException e) {
-			Log.w(TAG, "IOException while closing outStream", e);
-		} try {
-			if(inStream != null)
-				inStream.close();
-		} catch (IOException e) {
-			Log.w(TAG, "IOException while closing inStream", e);
-		} try {
-			if (socket != null)
-				socket.close();
-		} catch (IOException e) {
-			Log.w(TAG, "IOException while closing socket", e);
-		}
 	}
 
 	/**
@@ -585,6 +565,8 @@ public final class CoreConnection {
 	
 				// Send data 
 				QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
+				bos.close();
+				baos.close();
 			} catch (IOException e) {
 				onDisconnected("Lost connection while sending information");
 			}
@@ -1282,6 +1264,29 @@ public final class CoreConnection {
 					CoreConnection.this.onDisconnected("Lost connection");
 					Log.w(TAG, "IO error, lost connection?", e);
 				}
+			}
+			if (heartbeatTimer!=null) {
+				heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+			}
+			
+			//Close streams and socket
+			try {
+				if (outStream != null) {
+					outStream.flush();
+					outStream.close();
+				}
+			} catch (IOException e) {
+				Log.w(TAG, "IOException while closing outStream", e);
+			} try {
+				if(inStream != null)
+					inStream.close();
+			} catch (IOException e) {
+				Log.w(TAG, "IOException while closing inStream", e);
+			} try {
+				if (socket != null)
+					socket.close();
+			} catch (IOException e) {
+				Log.w(TAG, "IOException while closing socket", e);
 			}
 			return null;
 		}
