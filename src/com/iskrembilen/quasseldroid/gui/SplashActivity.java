@@ -8,11 +8,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Window;
+import com.crittercism.app.Crittercism;
 
 public class SplashActivity extends Activity {
 	// Set the display time, in milliseconds (or extract it out as a configurable parameter)
@@ -24,6 +26,11 @@ public class SplashActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		//Init crittercism
+		boolean isDebugbuild =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+		if(!isDebugbuild) {
+			Crittercism.init(getApplicationContext(), "4fede439067e7c0ec8000006");
+		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splash);
 		canBeFinished = false;

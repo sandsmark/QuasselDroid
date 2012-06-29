@@ -170,7 +170,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		for(Buffer buffer : buffers.getRawBufferList()) {
 			if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
 				buffer.getUsers().removeNick(nick);
-				System.out.println(nick + " : " + getNick());
 				if(nick.equalsIgnoreCase(getNick())) {
 					buffer.setActive(false);
 				}

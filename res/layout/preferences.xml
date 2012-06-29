@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?><PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Quassel">
 	<EditTextPreference android:title="Backlog Limit"
 		android:summary="How many lines to fetch on connect" android:key="@string/preference_initial_backlog_limit"
 		android:defaultValue="10" android:numeric="integer" />
@@ -15,7 +15,7 @@
 	<CheckBoxPreference android:key="@string/preference_colored_text"
 			android:title="Allow colored text" android:summary="NB: buggy feature, turning off might stop crashes" 
 			android:defaultValue="true" />
-
+	</PreferenceCategory>
 
 	<PreferenceCategory android:title="Notifications">
 	    <CheckBoxPreference android:key="@string/preference_notify_connect"
@@ -37,4 +37,5 @@
 	  	</RingtonePreference>
 
 	</PreferenceCategory>
+
 </PreferenceScreen>
