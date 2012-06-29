@@ -40,6 +40,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,6 +108,9 @@ public final class CoreConnection {
 	//Used to create the ID of new channels we join
 	private int maxBufferId = 0;
 
+	private ExecutorService outputExecutor;
+
+
 
 	public CoreConnection(String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
@@ -114,6 +120,8 @@ public final class CoreConnection {
 		this.password = password;
 		this.ssl = ssl;
 		this.service = parent;
+		
+		outputExecutor = Executors.newSingleThreadExecutor();
 
 		readThread = new ReadThread();
 		readThread.start();
@@ -507,7 +515,8 @@ public final class CoreConnection {
 	 * Disconnect from the core, as best as we can.
 	 * 
 	 */
-	public void onDisconnected(String informationMessage) {
+	public synchronized void onDisconnected(String informationMessage) {
+		Log.d(TAG, "Disconnected so closing connection");
 		if(readThread.running) {
 			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, informationMessage).sendToTarget();
 		}
@@ -549,20 +558,37 @@ public final class CoreConnection {
 	 * @param data QVariant to send.
 	 */
 	private synchronized void sendQVariant(QVariant<?> data) throws IOException {
-		// See how much data we're going to send
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		QDataOutputStream bos = new QDataOutputStream(baos);
-		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, bos, data);
+		outputExecutor.execute(new OutputRunnable(data));
+	}
+	
+	private class OutputRunnable implements Runnable {
+		private QVariant<?> data;
+		public OutputRunnable(QVariant<?> data) {
+			this.data = data;
+		}
 
-		// Tell the other end how much data to expect
-		outStream.writeUInt(bos.size(), 32);
-
-		// Sanity check, check that we can decode our own stuff before sending it off
-		//QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
-		//QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
-
-		// Send data 
-		QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
+		@Override
+		public void run() {
+			try {
+				// See how much data we're going to send
+				//TODO sandsmark: there must be a better way to to this then create new streams each time....
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				QDataOutputStream bos = new QDataOutputStream(baos);
+				
+				QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, bos, data);
+				// Tell the other end how much data to expect
+				outStream.writeUInt(bos.size(), 32);
+				
+				// Sanity check, check that we can decode our own stuff before sending it off
+				//QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
+				//QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
+	
+				// Send data 
+				QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
+			} catch (IOException e) {
+				onDisconnected("Lost connection while sending information");
+			}
+		}
 	}
 
 	/**
@@ -647,6 +673,7 @@ public final class CoreConnection {
 				CoreConnection.this.onDisconnected("Timed out"); 
 			}
 		};
+
 
 		public void run() {
 			String errorMessage = null;
