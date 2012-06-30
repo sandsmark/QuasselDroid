@@ -51,6 +51,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -58,11 +59,15 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
@@ -112,9 +117,35 @@ public class ChatActivity extends Activity{
 		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
 		//View v = backlogList.getChildAt(backlogList.getChildCount());
 		backlogList.setSelection(backlogList.getChildCount());
+		
+		((ImageButton)findViewById(R.id.chat_auto_complete_button)).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				onSearchRequested();
+			}
+		});
 
-		findViewById(R.id.ChatInputView).setOnKeyListener(inputfieldKeyListener);
-		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff);
+		((TextView)findViewById(R.id.ChatInputView)).setOnEditorActionListener(new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+					EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+					String inputText = inputfield.getText().toString();
+
+					if (!"".equals(inputText)) {
+						boundConnService.sendMessage(adapter.buffer.getInfo().id, inputText);
+						inputfield.setText("");
+					}
+
+					return true;
+				}
+				return false;
+			}
+		});
+		
+		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff); //FIXME: why?
 
 		statusReceiver = new ResultReceiver(null) {
 
@@ -126,28 +157,7 @@ public class ChatActivity extends Activity{
 
 		};
 	}
-
-	private OnKeyListener inputfieldKeyListener =  new View.OnKeyListener() {
-		public boolean onKey(View v, int keyCode, KeyEvent event) {
-			if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction()==KeyEvent.ACTION_DOWN ) { //On key down as well
-				EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
-				String inputText = inputfield.getText().toString();
-
-				if ( ! "".equals(inputText) ) {
-					boundConnService.sendMessage(adapter.buffer.getInfo().id, inputText);
-					inputfield.setText("");
-				}
-
-				return true;
-			} else if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN) {
-				onSearchRequested(); // lawl
-				return true;
-			}
-			return false;
-		}
-	};
-
-
+	
 	//TODO: fix this again after changing from string to ircusers
 	//Nick autocomplete when pressing the search-button
 	@Override

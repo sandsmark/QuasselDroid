@@ -1,19 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-<RelativeLayout android:layout_width="fill_parent"
-	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
-	<com.iskrembilen.quasseldroid.util.AlwaysScrollingTextView android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:id="@+id/chatNameView"
-		android:layout_alignParentTop="true" android:gravity="center"
-		android:singleLine="true" android:ellipsize="marquee"
-		android:focusable="true" android:focusableInTouchMode="true"
-		android:marqueeRepeatLimit="marquee_forever" />
-	<ListView android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:id="@+id/chatBacklogList"
-		android:layout_below="@+id/chatNameView" android:layout_above="@+id/ChatInputView" android:transcriptMode="normal"/>
-	<EditText android:layout_width="fill_parent" android:id="@+id/ChatInputView"
-		android:layout_alignParentBottom="true" android:layout_height="wrap_content"
-		android:inputType="textMultiLine"> 
-		<requestFocus />
-	</EditText>
+    <com.iskrembilen.quasseldroid.util.AlwaysScrollingTextView
+        android:id="@+id/chatNameView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true" />
+
+    <ListView
+        android:id="@+id/chatBacklogList"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/R.id.chat_input_frame"
+        android:layout_below="@+id/chatNameView"
+        android:transcriptMode="normal" />
+
+    <FrameLayout
+        android:id="@+id/R.id.chat_input_frame"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <EditText
+            android:id="@+id/ChatInputView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSend"
+            android:inputType="textMultiLine"
+            android:paddingLeft="30dp" >
+
+            <requestFocus />
+        </EditText>
+
+        <ImageButton
+            android:id="@+id/chat_auto_complete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="5dp"
+            android:background="@android:color/transparent"
+            android:cacheColorHint="@android:color/transparent"
+            android:contentDescription="Autocomplete button"
+            android:src="@drawable/icon_search" />
+
+    </FrameLayout>
+
 </RelativeLayout>

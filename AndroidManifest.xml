@@ -30,7 +30,8 @@
         </activity>
         <activity
             android:name=".gui.ChatActivity"
-            android:configChanges="keyboardHidden|orientation" >
+            android:configChanges="keyboardHidden|orientation" 
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:name=".gui.BufferActivity"
