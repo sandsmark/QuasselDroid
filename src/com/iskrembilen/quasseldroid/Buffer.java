@@ -150,7 +150,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
 		insertMessageInBufferList(backlog, message);
 		if(filterTypes.size()!=0 && !isMessageFiltered(message)){
+			if(isMarkerLineFiltered && getMarkerLineMessage()==message.messageId) isMarkerLineFiltered = false;
 			insertMessageInBufferList(filteredBacklog, message);
+		} else {
+			if(getMarkerLineMessage()==message.messageId) isMarkerLineFiltered = true;
 		}
 	}
 	
@@ -272,6 +275,15 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void setMarkerLineMessage(int markerLineMessage) {
 		this.markerLineMessage = markerLineMessage;
+		for(IrcMessage msg : backlog) {
+			if(msg.messageId == markerLineMessage) {
+				if(isMessageFiltered(msg)) {
+					isMarkerLineFiltered = true;
+				} else {
+					isMarkerLineFiltered = false;
+				}
+			}
+		}
 		this.setChanged();
 		notifyObservers();
 	}
@@ -508,13 +520,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 		filteredBacklog.clear();
 		for (IrcMessage msg : backlog) {
 			if(!isMessageFiltered(msg)) {
-				if(getMarkerLineMessage()==msg.messageId){
-					isMarkerLineFiltered = false;
-				}
+				if(getMarkerLineMessage()==msg.messageId) isMarkerLineFiltered = false;
 				filteredBacklog.add(msg);
-			}else if(getMarkerLineMessage()==msg.messageId){
-				isMarkerLineFiltered = true;
 			}
+			else if(getMarkerLineMessage()==msg.messageId) isMarkerLineFiltered = true;
 		}
 	}
 	
