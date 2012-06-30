@@ -28,7 +28,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
-
+
         <EditText
             android:id="@+id/ChatInputView"
             android:layout_width="fill_parent"
@@ -39,15 +39,17 @@
 
             <requestFocus />
         </EditText>
-
+
         <ImageButton
             android:id="@+id/chat_auto_complete_button"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginLeft="5dp"
             android:background="@android:color/transparent"
             android:cacheColorHint="@android:color/transparent"
             android:contentDescription="Autocomplete button"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:scaleType="center"
             android:src="@drawable/icon_search" />
 
     </FrameLayout>

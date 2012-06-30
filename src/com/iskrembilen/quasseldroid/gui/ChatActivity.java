@@ -120,9 +120,9 @@ public class ChatActivity extends Activity{
 		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
 		//View v = backlogList.getChildAt(backlogList.getChildCount());
 		backlogList.setSelection(backlogList.getChildCount());
-		
+
 		((ImageButton)findViewById(R.id.chat_auto_complete_button)).setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
@@ -130,8 +130,8 @@ public class ChatActivity extends Activity{
 			}
 		});
 
-		((TextView)findViewById(R.id.ChatInputView)).setOnEditorActionListener(new OnEditorActionListener() {
-			
+		((EditText)findViewById(R.id.ChatInputView)).setOnEditorActionListener(new OnEditorActionListener() {
+
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
@@ -148,7 +148,17 @@ public class ChatActivity extends Activity{
 				return false;
 			}
 		});
-		
+
+		((EditText)findViewById(R.id.ChatInputView)).setOnKeyListener(new View.OnKeyListener() {
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN) {
+					onSearchRequested();
+					return true;
+				}
+				return false;
+			}
+		});
+
 		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff); //FIXME: why?
 
 		statusReceiver = new ResultReceiver(null) {
@@ -161,7 +171,14 @@ public class ChatActivity extends Activity{
 
 		};
 	}
-	
+
+	@Override
+	public boolean onSearchRequested() {
+		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+		nickCompletionHelper.completeNick(inputfield);
+		return false; //Activity ate the request
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.chat_menu, menu);
@@ -204,7 +221,7 @@ public class ChatActivity extends Activity{
 		super.onStop();
 		if (adapter.buffer != null && boundConnService.isConnected()) {
 			adapter.buffer.setDisplayed(false);
-			
+
 			//Dont save position if list is at bottom
 			if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
 				adapter.buffer.setTopMessageShown(0);
@@ -253,14 +270,14 @@ public class ChatActivity extends Activity{
 			});
 			dialog = builder.create();
 			break;
-		
+
 		default:
 			dialog = null;
 			break;
 		}
 		return dialog;
 	}
-	
+
 	private void openNickList(Buffer buffer) {
 		Intent i = new Intent(ChatActivity.this, NicksActivity.class);
 		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
@@ -486,12 +503,12 @@ public class ChatActivity extends Activity{
 
 		public void removeFilter(Type type) {
 			buffer.removeFilterType(type);
-			
+
 		}
 
 		public void addFilter(Type type) {
 			buffer.addFilterType(type);
-			
+
 		}
 	}	
 
@@ -525,7 +542,7 @@ public class ChatActivity extends Activity{
 					loading = false;
 				}
 			}
-//			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
+			//			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
 			if (!loading && (firstVisibleItem <= visibleThreshold)) {
 				if (adapter.buffer!=null) {
 					loading = true;
@@ -569,9 +586,9 @@ public class ChatActivity extends Activity{
 			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getOperators(), buffer.getUsers().getVoiced(), buffer.getUsers().getUsers());
 			findViewById(R.id.chat_auto_complete_button).setEnabled(true);
 			findViewById(R.id.ChatInputView).setEnabled(true);
-			
+
 			buffer.setDisplayed(true);
-			
+
 			boundConnService.onHighlightsRead(buffer.getInfo().id);
 
 			//Move list to correect position
