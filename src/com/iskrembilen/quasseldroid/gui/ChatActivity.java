@@ -62,6 +62,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -77,6 +78,7 @@ import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 
 public class ChatActivity extends Activity{
 
@@ -94,6 +96,7 @@ public class ChatActivity extends Activity{
 	SharedPreferences preferences;
 
 	private ResultReceiver statusReceiver;
+	private NickCompletionHelper nickCompletionHelper;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -122,7 +125,8 @@ public class ChatActivity extends Activity{
 			
 			@Override
 			public void onClick(View v) {
-				onSearchRequested();
+				EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
+				nickCompletionHelper.completeNick(inputfield);
 			}
 		});
 
@@ -158,41 +162,6 @@ public class ChatActivity extends Activity{
 		};
 	}
 	
-	//TODO: fix this again after changing from string to ircusers
-	//Nick autocomplete when pressing the search-button
-	@Override
-	public boolean onSearchRequested() {
-		EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
-		String inputString = inputfield.getText().toString();
-		String[] inputWords = inputString.split(" ");
-		String inputNick = inputWords[inputWords.length-1];
-		int inputLength = inputString.lastIndexOf(" ") == -1 ? 0: inputString.substring(0, inputString.lastIndexOf(" ")).length();
-		UserCollection userColl = adapter.buffer.getUsers();
-		
-		if ( "".equals(inputNick) ) {
-			if ( userColl.getOperators().size() > 0 ) {
-				inputfield.setText(userColl.getOperators().get(0).nick+ ": ");
-				inputfield.setSelection(userColl.getOperators().get(0).nick.length() + 2);
-			}
-		} else {
-			if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getOperators())){}
-			else if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getVoiced())) {}
-			else if (matchAndSetNick(inputNick, inputWords, inputString, inputLength, inputfield, userColl.getUsers())) {}
-		}
-		return false;  // don't go ahead and show the search box
-	}
-
-	private boolean matchAndSetNick(String inputNick, String[] inputWords, String inputString, int inputLength, EditText inputfield, List<IrcUser> userList) {
-		for (IrcUser user : userList) {
-			if ( user.nick.matches("(?i)"+inputNick+".*")  ) { //Matches the start of the string
-				String additional = inputWords.length > 1 ? " ": ": ";
-				inputfield.setText(inputString.substring(0, inputLength) + (inputLength >0 ? " ":"") + user.nick+  additional);
-				inputfield.setSelection(inputLength + (inputLength >0 ? 1:0) + user.nick.length() + additional.length());
-				return true;
-			}
-		}
-		return false;
-	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.chat_menu, menu);
@@ -225,6 +194,8 @@ public class ChatActivity extends Activity{
 	protected void onStart() {
 		super.onStart();
 		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
+		findViewById(R.id.chat_auto_complete_button).setEnabled(false);
+		findViewById(R.id.ChatInputView).setEnabled(false);
 		doBindService();
 	}
 
@@ -595,6 +566,10 @@ public class ChatActivity extends Activity{
 			//Testing to see if i can add item to adapter in service
 			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
 			adapter.setBuffer(buffer);
+			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getOperators(), buffer.getUsers().getVoiced(), buffer.getUsers().getUsers());
+			findViewById(R.id.chat_auto_complete_button).setEnabled(true);
+			findViewById(R.id.ChatInputView).setEnabled(true);
+			
 			buffer.setDisplayed(true);
 			
 			boundConnService.onHighlightsRead(buffer.getInfo().id);
