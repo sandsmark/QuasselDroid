@@ -33,12 +33,11 @@ public class SplashActivity extends Activity {
 		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splash);
-		canBeFinished = false;
 	}
 
 	@Override
 	protected void onStart() {
-
+		canBeFinished = false;
 		super.onResume();
 		new Handler().postDelayed(new Runnable(){
 
@@ -58,6 +57,10 @@ public class SplashActivity extends Activity {
 	protected void onStop() {
 		super.onStop();
 		doUnbindService();
+	}
+	@Override
+	public void onBackPressed() {
+		//Eat back press not allowed here
 	}
 
 	private void startActivity(Class<?> activity) {
