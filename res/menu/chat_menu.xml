@@ -16,13 +16,11 @@
     <item
         android:id="@+id/menu_preferences"
         android:icon="@drawable/action_settings"
-        android:showAsAction="ifRoom|withText"
         android:title="@string/preferences">
     </item>
     <item
         android:id="@+id/menu_disconnect"
         android:icon="@drawable/av_stop"
-        android:showAsAction="ifRoom|withText"
         android:title="@string/menu_disconnect">
     </item>
 

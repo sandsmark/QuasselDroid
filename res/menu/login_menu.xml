@@ -15,7 +15,7 @@
 		</menu>
 	</item>
 	<item android:id="@+id/menu_preferences" android:title="@string/preferences"
-		android:icon="@drawable/action_settings" android:showAsAction="ifRoom|withText"/>
+		android:icon="@drawable/action_settings"/>
 		
 		
 </menu>
