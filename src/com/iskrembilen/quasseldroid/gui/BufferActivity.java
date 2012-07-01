@@ -144,7 +144,7 @@ public class BufferActivity extends ExpandableListActivity {
 
 		};
 
-		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());''
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		
 		listener =new OnSharedPreferenceChangeListener() {
 
