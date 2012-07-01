@@ -73,6 +73,7 @@ public class NickCompletionHelper extends Filter {
 	}
 	
 	private void setNewContent(EditText input, String nick) {
+		if(inputField == null) return;
 		String newContent = input.getText().toString().substring(0, nickStart) + (nickStart == 0 ? "" : " ") + nick + ((nickStart == 0 ? ": " : " "));
 		lastStringResult = newContent;
 		input.setText(newContent);
