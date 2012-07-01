@@ -92,7 +92,6 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 		super.onCreate(savedInstanceState);
 		Log.i(TAG, "Create");
 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.login);
 
 		settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);

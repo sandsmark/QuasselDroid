@@ -114,7 +114,6 @@ public class BufferActivity extends ExpandableListActivity {
 			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
 			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
 		}
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.buffer_list);
 		//bufferList = new ArrayList<Buffer>();
 
