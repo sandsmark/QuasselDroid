@@ -29,6 +29,7 @@ public class SplashActivity extends Activity {
 		//Init crittercism
 		boolean isDebugbuild =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
 		if(!isDebugbuild && getResources().getBoolean(R.bool.use_crittercism)) {
+			Log.i(TAG, "Enabeling Crittercism");
 			Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
 		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);

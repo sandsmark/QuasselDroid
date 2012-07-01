@@ -16,7 +16,7 @@
         android:description="@string/description"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/ThemeBase" >
+        android:theme="@style/ThemeBase" android:name="Quasseldroid">
         <activity
             android:name=".gui.LoginActivity"
             android:label="@string/app_name"

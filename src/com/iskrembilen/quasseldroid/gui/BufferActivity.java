@@ -48,7 +48,6 @@ import android.os.SystemClock;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
-import android.provider.Settings.System;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
@@ -145,7 +144,8 @@ public class BufferActivity extends ExpandableListActivity {
 
 		};
 
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());''
+		
 		listener =new OnSharedPreferenceChangeListener() {
 
 			@Override
@@ -469,7 +469,7 @@ public class BufferActivity extends ExpandableListActivity {
 				convertView = inflater.inflate(R.layout.buffer_group_item, null);
 				holder = new ViewHolderGroup();
 				holder.statusView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.statusView.getTextSize())));
+				holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), "20")));
 				holder.statusView.setOnClickListener(new OnClickListener() {
 
 					@Override
