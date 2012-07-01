@@ -502,7 +502,7 @@ public class ChatActivity extends Activity{
 		}
 
 		public void stopObserving() {
-			buffer.deleteObserver(this);
+			if(buffer != null) buffer.deleteObserver(this);
 
 		}
 
