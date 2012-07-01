@@ -28,8 +28,8 @@ public class SplashActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		//Init crittercism
 		boolean isDebugbuild =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
-		if(!isDebugbuild) {
-			Crittercism.init(getApplicationContext(), "4fede439067e7c0ec8000006");
+		if(!isDebugbuild && getResources().getBoolean(R.bool.use_crittercism)) {
+			Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
 		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splash);
