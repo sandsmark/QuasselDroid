@@ -216,7 +216,8 @@ public class BufferActivity extends ExpandableListActivity {
 			finish();
 			break;
 		case R.id.menu_join_channel:
-			showDialog(R.id.DIALOG_JOIN_CHANNEL);
+			if(bufferListAdapter.networks == null) Toast.makeText(this, "Not available now", Toast.LENGTH_SHORT).show();
+			else showDialog(R.id.DIALOG_JOIN_CHANNEL);
 		}
 		return super.onOptionsItemSelected(item);
 	}

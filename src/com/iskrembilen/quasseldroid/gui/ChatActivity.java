@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -41,6 +43,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -68,6 +71,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -107,6 +111,8 @@ public class ChatActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat_layout);
+		
+		initActionBar();
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -170,6 +176,14 @@ public class ChatActivity extends Activity{
 
 		};
 	}
+	
+	@TargetApi(14)
+	private void initActionBar() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+	        ActionBar actionBar = getActionBar();
+	        actionBar.setDisplayHomeAsUpEnabled(true);
+	    }
+	}
 
 	@Override
 	public boolean onSearchRequested() {
@@ -186,6 +200,11 @@ public class ChatActivity extends Activity{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			Intent intent = new Intent(this, BufferActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            return true;
 		case R.id.menu_preferences:
 			Intent i = new Intent(ChatActivity.this, PreferenceView.class);
 			startActivity(i);
@@ -244,6 +263,7 @@ public class ChatActivity extends Activity{
 		Dialog dialog;
 		switch (id) {
 		case R.id.DIALOG_HIDE_EVENTS:
+			if(adapter.buffer == null) return null;
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Hide Events");
 			String[] filterList = IrcMessage.Type.getFilterList();

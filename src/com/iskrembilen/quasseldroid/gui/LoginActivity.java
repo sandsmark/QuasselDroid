@@ -26,6 +26,7 @@ package com.iskrembilen.quasseldroid.gui;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -38,6 +39,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -91,7 +93,6 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.i(TAG, "Create");
-
 		setContentView(R.layout.login);
 
 		settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);
