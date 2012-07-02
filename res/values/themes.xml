@@ -3,4 +3,6 @@
 
     <style name="ThemeBase" parent="@android:style/Theme.Light" />
 
+    <style name="QuasseldroidTheme" parent="@style/ThemeBase" />
+
 </resources>

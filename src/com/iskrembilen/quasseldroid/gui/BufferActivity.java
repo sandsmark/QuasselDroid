@@ -28,6 +28,10 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import junit.framework.Test;
+
+import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
@@ -41,6 +45,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Picture;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -50,16 +55,21 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
@@ -106,6 +116,9 @@ public class BufferActivity extends ExpandableListActivity {
 
 	private long backedTimestamp = 0;
 
+	private ActionMode actionMode;
+	private ActionMode.Callback actionModeCallback;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -119,7 +132,7 @@ public class BufferActivity extends ExpandableListActivity {
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
 		getExpandableListView().setCacheColorHint(0xffffffff);
-		registerForContextMenu(getExpandableListView());
+		initContextualMenu();
 
 		statusReciver = new ResultReceiver(null) {
 
@@ -145,7 +158,7 @@ public class BufferActivity extends ExpandableListActivity {
 		};
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		
+
 		listener =new OnSharedPreferenceChangeListener() {
 
 			@Override
@@ -157,6 +170,68 @@ public class BufferActivity extends ExpandableListActivity {
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
+	}
+
+	private void initContextualMenu() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			actionModeCallback = new ActionMode.Callback() {
+
+				@Override
+				public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+					MenuInflater inflater = mode.getMenuInflater();
+					inflater.inflate(R.menu.buffer_contextual_menu, menu);
+					return true;
+				}
+
+				@Override
+				public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+					return false; // Return false if nothing is done
+				}
+
+				@Override
+				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+					int bufferId = (Integer) mode.getTag();
+					switch (item.getItemId()) {
+					case R.id.context_menu_join:
+						joinChannel(bufferId);
+						mode.finish();
+						return true;
+					case R.id.context_menu_part:
+						partChannel(bufferId);
+						mode.finish();
+						return true;
+					default:
+						return false;
+					}
+				}
+
+				// Called when the user exits the action mode
+				@Override
+				public void onDestroyActionMode(ActionMode mode) {
+					actionMode = null;
+				}
+			};
+			getExpandableListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+					// Start the CAB using the ActionMode.Callback defined above
+					actionMode = startActionMode(actionModeCallback);
+					actionMode.setTag((int)id);
+					if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
+						actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
+						actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
+					}else{
+						actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+						actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
+					}
+					view.setSelected(true);
+					return true;
+				}
+			});
+		} else {
+			registerForContextMenu(getExpandableListView());	    	
+		}
 	}
 
 	@Override
@@ -182,19 +257,19 @@ public class BufferActivity extends ExpandableListActivity {
 		preferences.unregisterOnSharedPreferenceChangeListener(listener);
 		super.onDestroy();
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-	    ExpandableListView listView = getExpandableListView();
-	    // Save position of first visible item
-	    restoreListPosition = listView.getFirstVisiblePosition();
-	    outState.putInt(LIST_POSITION_KEY, restoreListPosition);
+		ExpandableListView listView = getExpandableListView();
+		// Save position of first visible item
+		restoreListPosition = listView.getFirstVisiblePosition();
+		outState.putInt(LIST_POSITION_KEY, restoreListPosition);
 
-	    // Save scroll position of item
-	    View itemView = listView.getChildAt(0);
-	    restoreItemPosition = itemView == null ? 0 : itemView.getTop();
-	    outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
+		// Save scroll position of item
+		View itemView = listView.getChildAt(0);
+		restoreItemPosition = itemView == null ? 0 : itemView.getTop();
+		outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
 
 	}
 
@@ -225,31 +300,32 @@ public class BufferActivity extends ExpandableListActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+		getMenuInflater().inflate(R.menu.buffer_contextual_menu, menu);
 		int bufferId = (int) ((ExpandableListContextMenuInfo)menuInfo).id;
 		if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
-			menu.add(Menu.NONE, R.id.CONTEXT_MENU_PART, Menu.NONE, "Part");			
+			menu.findItem(R.id.context_menu_join).setVisible(false);
+			menu.findItem(R.id.context_menu_part).setVisible(true);	
 		}else{
-			menu.add(Menu.NONE, R.id.CONTEXT_MENU_JOIN, Menu.NONE, "Join");
+			menu.findItem(R.id.context_menu_join).setVisible(true);
+			menu.findItem(R.id.context_menu_part).setVisible(false);	
 		}
 	}
-
-
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
 		switch (item.getItemId()) {
-		case R.id.CONTEXT_MENU_JOIN:
-			boundConnService.sendMessage((int)info.id, "/join "+bufferListAdapter.networks.getBufferById((int)info.id).getInfo().name);
+		case R.id.context_menu_join:
+			joinChannel((int)info.id);
 			return true;
-		case R.id.CONTEXT_MENU_PART:
-			boundConnService.sendMessage((int)info.id, "/part "+bufferListAdapter.networks.getBufferById((int)info.id).getInfo().name);
+		case R.id.context_menu_part:
+			partChannel((int)info.id);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
 	}
-	
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		final Dialog dialog;
@@ -258,7 +334,7 @@ public class BufferActivity extends ExpandableListActivity {
 			dialog = new Dialog(this);
 			dialog.setContentView(R.layout.dialog_join_channel);
 			dialog.setTitle("Join Channel");
-			
+
 			ArrayAdapter<String> adapter = new ArrayAdapter<String>(BufferActivity.this, android.R.layout.simple_spinner_item);
 			((Spinner)dialog.findViewById(R.id.dialog_join_channel_network_spinner)).setAdapter(adapter);
 
@@ -305,7 +381,7 @@ public class BufferActivity extends ExpandableListActivity {
 		}
 		return dialog;  
 	}
-	
+
 	@Override
 	protected void onPrepareDialog(int id, Dialog dialog) {
 		switch(id) {
@@ -336,6 +412,14 @@ public class BufferActivity extends ExpandableListActivity {
 	@Override
 	public void onGroupCollapse(int groupPosition) {
 		bufferListAdapter.getGroup(groupPosition).setOpen(false);
+	}
+
+	private void joinChannel(int bufferId) {
+		boundConnService.sendMessage(bufferId, "/join "+bufferListAdapter.networks.getBufferById(bufferId).getInfo().name);
+	}
+
+	private void partChannel(int bufferId) {
+		boundConnService.sendMessage(bufferId, "/part "+bufferListAdapter.networks.getBufferById(bufferId).getInfo().name);
 	}
 
 	private void openBuffer(Buffer buffer) {
@@ -412,7 +496,7 @@ public class BufferActivity extends ExpandableListActivity {
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
-				
+
 				if (boundConnService.isUserAway(nick, entry.getInfo().networkId)) {
 					holder.bufferImage.setImageResource(R.drawable.im_user_away);
 				} else if (boundConnService.isUserOnline(nick, entry.getInfo().networkId)) {
@@ -421,9 +505,9 @@ public class BufferActivity extends ExpandableListActivity {
 				} else {
 					holder.bufferImage.setImageResource(R.drawable.im_user);
 				}
-				
+
 				holder.bufferView.setText(nick);
-				
+
 				break;
 			case GroupBuffer:
 			case InvalidBuffer:
