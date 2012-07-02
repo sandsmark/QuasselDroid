@@ -190,14 +190,14 @@ public class BufferActivity extends ExpandableListActivity {
 
 				@Override
 				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-					int bufferId = (Integer) mode.getTag();
+					MenuTag tag = (MenuTag) mode.getTag();
 					switch (item.getItemId()) {
 					case R.id.context_menu_join:
-						joinChannel(bufferId);
+						joinChannel(tag.bufferId);
 						mode.finish();
 						return true;
 					case R.id.context_menu_part:
-						partChannel(bufferId);
+						partChannel(tag.bufferId);
 						mode.finish();
 						return true;
 					default:
@@ -208,6 +208,8 @@ public class BufferActivity extends ExpandableListActivity {
 				// Called when the user exits the action mode
 				@Override
 				public void onDestroyActionMode(ActionMode mode) {
+					MenuTag tag = (MenuTag) mode.getTag();
+					tag.listItem.setActivated(false);
 					actionMode = null;
 				}
 			};
@@ -217,7 +219,10 @@ public class BufferActivity extends ExpandableListActivity {
 				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 					// Start the CAB using the ActionMode.Callback defined above
 					actionMode = startActionMode(actionModeCallback);
-					actionMode.setTag((int)id);
+					MenuTag tag = new MenuTag();
+					tag.bufferId = (int)id;
+					tag.listItem = view;
+					actionMode.setTag(tag);
 					if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
 						actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
 						actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
@@ -225,7 +230,7 @@ public class BufferActivity extends ExpandableListActivity {
 						actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
 						actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
 					}
-					view.setSelected(true);
+					view.setActivated(true);
 					return true;
 				}
 			});
@@ -667,5 +672,10 @@ public class BufferActivity extends ExpandableListActivity {
 			bufferListAdapter.clearBuffers();
 			setListAdapter(null);
 		}
+	}
+	
+	class MenuTag {
+		public int bufferId;
+		public View listItem;
 	}
 }
