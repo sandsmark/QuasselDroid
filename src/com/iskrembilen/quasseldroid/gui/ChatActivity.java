@@ -88,8 +88,8 @@ public class ChatActivity extends Activity{
 
 
 	public static final int MESSAGE_RECEIVED = 0;
-	private static final String BUFFER_ID_EXTRA = "bufferid";
-	private static final String BUFFER_NAME_EXTRA = "buffername";
+	public static final String BUFFER_ID = "bufferid";
+	private static final String BUFFER_NAME = "buffername";
 
 	private BacklogAdapter adapter;
 	private ListView backlogList;
@@ -101,6 +101,8 @@ public class ChatActivity extends Activity{
 
 	private ResultReceiver statusReceiver;
 	private NickCompletionHelper nickCompletionHelper;
+	
+	private int bufferId;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -111,6 +113,12 @@ public class ChatActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chat_layout);
+		
+		Intent intent = getIntent();
+		if(intent.hasExtra(BUFFER_ID)) {
+			bufferId = intent.getIntExtra(BUFFER_ID, 0);
+			Log.d(TAG, "Intent has bufferid" + bufferId);
+		}
 		
 		initActionBar();
 
@@ -170,7 +178,10 @@ public class ChatActivity extends Activity{
 
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
+				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
+					Log.d(TAG, "Getting result disconnected");
+					finish();
+				}
 				super.onReceiveResult(resultCode, resultData);
 			}
 
@@ -223,8 +234,6 @@ public class ChatActivity extends Activity{
 		return super.onOptionsItemSelected(item);
 	}
 
-
-
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -254,8 +263,18 @@ public class ChatActivity extends Activity{
 		}
 		doUnbindService();
 	}
-
-
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putInt(BUFFER_ID, bufferId);
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		bufferId = savedInstanceState.getInt(BUFFER_ID);
+		super.onRestoreInstanceState(savedInstanceState);
+	}
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -299,8 +318,8 @@ public class ChatActivity extends Activity{
 
 	private void openNickList(Buffer buffer) {
 		Intent i = new Intent(ChatActivity.this, NicksActivity.class);
-		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
-		i.putExtra(BUFFER_NAME_EXTRA, buffer.getInfo().name);
+		i.putExtra(BUFFER_ID, buffer.getInfo().id);
+		i.putExtra(BUFFER_NAME, buffer.getInfo().name);
 		startActivity(i);
 	}
 
@@ -598,9 +617,8 @@ public class ChatActivity extends Activity{
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
-			Intent intent = getIntent();
 			//Testing to see if i can add item to adapter in service
-			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), adapter);
+			Buffer buffer = boundConnService.getBuffer(bufferId, adapter);
 			adapter.setBuffer(buffer);
 			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getOperators(), buffer.getUsers().getVoiced(), buffer.getUsers().getUsers());
 			findViewById(R.id.chat_auto_complete_button).setEnabled(true);

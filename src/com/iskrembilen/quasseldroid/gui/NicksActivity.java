@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -41,6 +43,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -82,12 +85,21 @@ public class NicksActivity extends Activity{
 	private ResultReceiver statusReceiver;
 	private NicksAdapter adapter;
 	private ExpandableListView list;
+	private int bufferId;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.nick_layout);
+
+		initActionBar();
+		
+		Intent intent = getIntent();
+		if(intent.hasExtra(ChatActivity.BUFFER_ID)) {
+			bufferId = intent.getIntExtra(ChatActivity.BUFFER_ID, 0);
+			Log.d(TAG, "Intent has bufferid" + bufferId);
+		}
 
 		adapter = new NicksAdapter(this);
 		list = (ExpandableListView)findViewById(R.id.userList);
@@ -103,6 +115,14 @@ public class NicksActivity extends Activity{
 		};
 	}
 
+	@TargetApi(14)
+	private void initActionBar() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			ActionBar actionBar = getActionBar();
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
+	}
+
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -113,6 +133,19 @@ public class NicksActivity extends Activity{
 	protected void onStop() {
 		super.onStop();
 		doUnbindService();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			Intent intent = new Intent(this, ChatActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(ChatActivity.BUFFER_ID, bufferId);
+			startActivity(intent);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	public class NicksAdapter extends BaseExpandableListAdapter implements Observer{
@@ -277,8 +310,7 @@ public class NicksActivity extends Activity{
 			Log.d(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
-			Intent intent = getIntent();
-			Buffer buffer = boundConnService.getBuffer(intent.getIntExtra(BufferActivity.BUFFER_ID_EXTRA, 0), null);
+			Buffer buffer = boundConnService.getBuffer(bufferId, null);
 			adapter.setUsers(buffer.getUsers());
 
 			boundConnService.registerStatusReceiver(statusReceiver);
