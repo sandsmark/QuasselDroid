@@ -14,13 +14,15 @@
         android:gravity="center"
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true" />
-
+
     <ListView
         android:id="@+id/chatBacklogList"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/R.id.chat_input_frame"
         android:layout_below="@+id/chatNameView"
+        android:divider="@null"
+        android:dividerHeight="0px"
         android:transcriptMode="normal" />
 
     <FrameLayout
@@ -36,8 +38,6 @@
             android:imeOptions="actionSend"
             android:inputType="textMultiLine"
             android:paddingLeft="30dp" >
-
-            <requestFocus />
         </EditText>
 
         <ImageButton
@@ -45,7 +45,6 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:background="@android:color/transparent"
-            android:cacheColorHint="@android:color/transparent"
             android:contentDescription="Autocomplete button"
             android:paddingBottom="4dp"
             android:paddingLeft="5dp"

@@ -131,7 +131,6 @@ public class BufferActivity extends ExpandableListActivity {
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
-		getExpandableListView().setCacheColorHint(0xffffffff);
 		initContextualMenu();
 
 		statusReciver = new ResultReceiver(null) {

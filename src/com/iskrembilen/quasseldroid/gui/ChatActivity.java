@@ -126,12 +126,8 @@ public class ChatActivity extends Activity{
 
 		adapter = new BacklogAdapter(this, null);
 		backlogList = ((ListView)findViewById(R.id.chatBacklogList));
-		backlogList.setCacheColorHint(0xffffff);
 		backlogList.setAdapter(adapter);
 		backlogList.setOnScrollListener(new BacklogScrollListener(5));
-		backlogList.setDividerHeight(0);
-		backlogList.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-		//View v = backlogList.getChildAt(backlogList.getChildCount());
 		backlogList.setSelection(backlogList.getChildCount());
 
 		((ImageButton)findViewById(R.id.chat_auto_complete_button)).setOnClickListener(new OnClickListener() {
@@ -171,8 +167,6 @@ public class ChatActivity extends Activity{
 				return false;
 			}
 		});
-
-		((ListView) findViewById(R.id.chatBacklogList)).setCacheColorHint(0xffffff); //FIXME: why?
 
 		statusReceiver = new ResultReceiver(null) {
 
@@ -468,7 +462,7 @@ public class ChatActivity extends Activity{
 			if (entry.isHighlighted()) {
 				holder.item_layout.setBackgroundResource(R.color.ircmessage_highlight_color);
 			}else {
-				holder.item_layout.setBackgroundResource(R.color.ircmessage_normal_color);
+				holder.item_layout.setBackgroundResource(0);
 			}
 			//Log.i(TAG, "CONTENT:" + entry.content);
 			return convertView;
