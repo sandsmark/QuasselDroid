@@ -40,5 +40,10 @@
 	<string name="preference_notification_connect_sound_file">notificationconnectsoundfile</string>
 	<string name="context_part">Part</string>
 	<string name="context_join">Join</string>
+	<string name="notification_you_have_been_highlighted">You have been highlighted</string>
+	<plurals name="notification_highlighted_on_x_buffers">
+        <item quantity="one">You have highlights on %1$d buffer</item>
+        <item quantity="other">You have highlights on %1$d buffers</item>
+    </plurals>
 	
 </resources>
