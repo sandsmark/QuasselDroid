@@ -14,12 +14,14 @@
 
     <View
         android:layout_width="fill_parent"
-        android:layout_height="1dip" android:background="#000000" android:layout_marginBottom="2dip"/>
+        android:layout_height="1dip"
+        android:layout_marginBottom="2dip"
+        android:background="#000000" />
 
     <ExpandableListView
         android:id="@+id/userList"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent" >
     </ExpandableListView>
 
 </LinearLayout>

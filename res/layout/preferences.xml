@@ -1,41 +1,76 @@
-<?xml version="1.0" encoding="utf-8"?><PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="Quassel">
-	<EditTextPreference android:title="Backlog Limit"
-		android:summary="How many lines to fetch on connect" android:key="@string/preference_initial_backlog_limit"
-		android:defaultValue="10" android:numeric="integer" />
-	<EditTextPreference android:title="Additional backlog"
-		android:summary="How many lines to fetch on scroll" android:key="@string/preference_dynamic_backlog"
-		android:defaultValue="20" android:numeric="integer" />
-	<ListPreference android:title="Bufferlist fontsize"
-		android:summary="The fontsize of the bufferlist" android:key="@string/preference_fontsize_channel_list"
-		android:entries="@array/entries_fontsize_preference"
-		android:entryValues="@array/entryvalues_fontsize_preference"
-		android:dialogTitle="Choose fontsize for the bufferlist"
-		android:defaultValue="20" />
-	<CheckBoxPreference android:key="@string/preference_colored_text"
-			android:title="Allow colored text" android:summary="NB: buggy feature, turning off might stop crashes" 
-			android:defaultValue="true" />
-	</PreferenceCategory>
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-	<PreferenceCategory android:title="Notifications">
-	    <CheckBoxPreference android:key="@string/preference_notify_connect"
-			android:title="Notify on connect" android:summary="" 
-			android:defaultValue="false" />
-		<CheckBoxPreference android:key="@string/preference_notification_vibrate"
-			android:title="Vibrate on notification" android:summary="" />
-		<CheckBoxPreference android:key="@string/preference_notification_light"
-			android:title="Use light on notification" android:summary="" />
-		<CheckBoxPreference android:key="@string/preference_notification_sound"
-			android:title="Play sound on notification" android:summary="" />
-	  	<RingtonePreference android:showDefault="true"
-	     android:key="@string/preference_notification_sound_file" android:title="Notification sound"
-	     android:ringtoneType="notification" android:showSilent="true" >
-	  	</RingtonePreference>
- 		<RingtonePreference android:showDefault="true"
-	     android:key="@string/preference_notification_connect_sound_file" android:title="Connection sound"
-	     android:ringtoneType="notification" android:showSilent="true" >
-	  	</RingtonePreference>
+    <PreferenceCategory android:title="Quassel" >
 
-	</PreferenceCategory>
+        <EditTextPreference
+            android:defaultValue="10"
+            android:key="@string/preference_initial_backlog_limit"
+            android:numeric="integer"
+            android:summary="How many lines to fetch on connect"
+            android:title="Backlog Limit" />
+
+        <EditTextPreference
+            android:defaultValue="20"
+            android:key="@string/preference_dynamic_backlog"
+            android:numeric="integer"
+            android:summary="How many lines to fetch on scroll"
+            android:title="Additional backlog" />
+
+        <ListPreference
+            android:defaultValue="20"
+            android:dialogTitle="Choose fontsize for the bufferlist"
+            android:entries="@array/entries_fontsize_preference"
+            android:entryValues="@array/entryvalues_fontsize_preference"
+            android:key="@string/preference_fontsize_channel_list"
+            android:summary="The fontsize of the bufferlist"
+            android:title="Bufferlist fontsize" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/preference_colored_text"
+            android:summary="NB: buggy feature, turning off might stop crashes"
+            android:title="Allow colored text" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Notifications" >
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_notify_connect"
+            android:summary=""
+            android:title="Notify on connect" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_notification_vibrate"
+            android:summary=""
+            android:title="Vibrate on notification" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_notification_light"
+            android:summary=""
+            android:title="Use light on notification" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_notification_sound"
+            android:summary=""
+            android:title="Play sound on notification" />
+
+        <RingtonePreference
+            android:key="@string/preference_notification_sound_file"
+            android:ringtoneType="notification"
+            android:showDefault="true"
+            android:showSilent="true"
+            android:title="Notification sound" >
+        </RingtonePreference>
+
+        <RingtonePreference
+            android:key="@string/preference_notification_connect_sound_file"
+            android:ringtoneType="notification"
+            android:showDefault="true"
+            android:showSilent="true"
+            android:title="Connection sound" >
+        </RingtonePreference>
+    </PreferenceCategory>
 
 </PreferenceScreen>
