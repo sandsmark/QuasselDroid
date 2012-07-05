@@ -15,6 +15,7 @@ public enum IrcMode {
      * return the different modes based on rank
      */
     //TODO: Move static strings to strings.xml
+    //TODO: Add icon paths to the objects
     OWNER ("owner","q"),
     ADMIN ("admin","a"),
     OPERATOR ("operator","o"),
