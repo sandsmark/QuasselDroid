@@ -10,20 +10,23 @@ import java.util.Map;
  * Time: 20:14
  */
 public enum IrcMode {
-    OWNER ("owner","q", 1),
-    ADMIN ("admin","a", 2),
-    OPERATOR ("operator","o", 3),
-    HALF_OPERATOR ("half operator","h", 4),
-    VOICE ("voice","v", 5),
-    USER ("user","u", 6);
+    /*
+     * Declare in order of rank, this way values() will naturally
+     * return the different modes based on rank
+     */
+    OWNER ("owner","q"),
+    ADMIN ("admin","a"),
+    OPERATOR ("operator","o"),
+    HALF_OPERATOR ("half operator","h"),
+    VOICE ("voice","v"),
+    USER ("user",""); //This will work as a catch-all for unknown modes
 
-    public final String name;
-    public final String shortName;
-    public final int rank;
+    public final String modeName;
+    public final String shortModeName;
 
-    IrcMode(String name, String shortName, int rank) {
-        this.name = name;
-        this.shortName = shortName;
-        this.rank = rank;
+    IrcMode(String modeName, String shortModeName) {
+        this.modeName = modeName;
+        this.shortModeName = shortModeName;
     }
+
 }
