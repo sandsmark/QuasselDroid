@@ -7,17 +7,13 @@ import java.util.*;
 public class UserCollection extends Observable implements Observer {
 
 	private static final String TAG = UserCollection.class.getSimpleName();
-	private List<IrcUser> users;
-	private List<IrcUser> voiced;
-	private List<IrcUser> operators;
-
-	private List<IrcUser> voicedAndOp; //Gay list to handle that some tards have both voice and op
+	private Map<IrcMode, ArrayList<IrcUser>> users;
 
 	public UserCollection() {
-		users = new ArrayList<IrcUser>();
-		voiced = new ArrayList<IrcUser>();
-		operators = new ArrayList<IrcUser>();
-		voicedAndOp = new ArrayList<IrcUser>();
+		users = new HashMap<IrcMode, ArrayList<IrcUser>>();
+        for(IrcMode mode: IrcMode.values()){
+            users.put(mode, new ArrayList<IrcUser>());
+        }
 	}
 
 	/**
@@ -25,10 +21,9 @@ public class UserCollection extends Observable implements Observer {
 	 * @param nick the nick to remove
 	 */
 	public void removeNick(String nick) {
-		removeNickIfExistsFromList(nick, users);
-		removeNickIfExistsFromList(nick, voiced);
-		removeNickIfExistsFromList(nick, operators);
-		removeNickIfExistsFromList(nick, voicedAndOp);
+        for(ArrayList<IrcUser> list: users.values()){
+            removeNickIfExistsFromList(nick, list);
+        }
 	}
 
 	private void addUserIfNotAlreadyIn(List<IrcUser> list, IrcUser user) {
@@ -50,112 +45,107 @@ public class UserCollection extends Observable implements Observer {
 
 	/**
 	 * Add a specific nick to the nick list
-	 * @param nick the nick to add
+	 * @param user the user to add
+     * @param modes the modes of the user
 	 */
 	public void addUser(IrcUser user, String modes) {
-		if(modes.equals("")) {
-			addUserIfNotAlreadyIn(users, user);
-			Collections.sort(users);
-			this.setChanged();
-		}
-		for(int i=0;i<modes.length();i++) {
-			String mode = Character.toString(modes.charAt(i));
-			if(mode.equals("v")) {
-				if(operators.contains(user))
-					addUserIfNotAlreadyIn(voicedAndOp, user);
-				else {
-					addUserIfNotAlreadyIn(voiced, user);
-					Collections.sort(voiced);
-				}
-			}else if(mode.equals("o")) {
-				if(voiced.contains(user)) {
-					voiced.remove(user);
-					addUserIfNotAlreadyIn(voicedAndOp, user);
-				}
-				addUserIfNotAlreadyIn(operators, user);
-				Collections.sort(operators);
-			}else {
-				Log.e(TAG, "Unknown usermode " + mode + " for user " + user.nick);
-			}
-			user.addObserver(this);
-			this.setChanged();
-		}
-		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+        for(IrcMode mode: IrcMode.values()){
+            if(modes.contains(mode.shortModeName)){
+                addUserIfNotAlreadyIn(users.get(mode), user);
+                Collections.sort(users.get(mode));
+                this.setChanged();
+                Log.e(TAG, "User added with user mode " + mode.modeName + " for user " + user.nick);
+            }
+        }
+        user.addObserver(this);
+        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
-	public List<IrcUser> getUsers() {
+	public Map<IrcMode,ArrayList<IrcUser>> getUsers() {
 		return users;
 	}
 
-	public List<IrcUser> getVoiced() {
-		return voiced;
-	}
+    public ArrayList<IrcUser> getUsersWithMode(IrcMode mode){
+        return users.get(mode);
+    }
 
-	public List<IrcUser> getOperators() {
-		return operators;
-	}
+    public Map<IrcMode, ArrayList<IrcUser>> getUniqueUsers(){
+        Map<IrcMode, ArrayList<IrcUser>> uniqueUsers = new HashMap<IrcMode, ArrayList<IrcUser>>();
+        for(IrcMode mode: IrcMode.values()){
+            uniqueUsers.put(mode,new ArrayList<IrcUser>());
+            for(IrcUser user: users.get(mode)){
+                if(!isIrcUserAlreadyAdded(uniqueUsers, user)){
+                    uniqueUsers.get(mode).add(user);
+                }
+            }
+        }
+        return uniqueUsers;
+    }
 
-	@Override
+    private boolean isIrcUserAlreadyAdded(Map<IrcMode, ArrayList<IrcUser>> uniqueUsers, IrcUser user) {
+        boolean found = false;
+        for(ArrayList<IrcUser> listOfAlreadyAddedUsers: uniqueUsers.values()){
+            found = isIrcUserInList(user, listOfAlreadyAddedUsers);
+        }
+        return found;
+    }
+
+    private boolean isIrcUserInList(IrcUser user, ArrayList<IrcUser> listOfAlreadyAddedUsers) {
+        for(IrcUser alreadyAddedUser: listOfAlreadyAddedUsers){
+            if (alreadyAddedUser == user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
 	public void update(Observable observable, Object data) {
-		Collections.sort(users);
-		Collections.sort(voiced);
-		Collections.sort(operators);
-		this.setChanged();
-		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+        System.err.println(observable.toString());
+        for(IrcMode mode: IrcMode.values()){
+            if(users.get(mode).contains(observable)){
+                System.err.println("Found the nick "+((IrcUser)observable).nick+" in the list of "+mode.modeName+".");
+                Collections.sort(users.get(mode));
+            }
+        }
+        this.setChanged();
+        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 
 	}
 
 	public void addUserMode(IrcUser user, String mode) {
-		if(mode.equals("o")) {
-			operators.add(user);
-			Collections.sort(operators);
-			if(voiced.contains(user)) {
-				addUserIfNotAlreadyIn(voicedAndOp, user);
-				voiced.remove(user);
-			}
-			this.setChanged();
-		} else if(mode.equals("v")) {
-			if(operators.contains(user)) {
-				addUserIfNotAlreadyIn(voicedAndOp, user);
-			}else {
-				addUserIfNotAlreadyIn(voiced, user);
-				Collections.sort(voiced);
-				this.setChanged();
-			}
-		} else {
-			Log.e(TAG, "Unknown user mode " + mode);
-			return;
-		}
-		users.remove(user);
+		for(IrcMode ircMode: IrcMode.values()){
+            if(mode.equals(ircMode.shortModeName)){
+                addUserIfNotAlreadyIn(users.get(mode), user);
+                Collections.sort(users.get(mode));
+                this.setChanged();
+                Log.e(TAG, "User added with user mode " + ircMode.modeName + " for user " + user.nick);
+                break;
+            }
+        }
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
 	public void removeUserMode(IrcUser user, String mode) {
-		if(mode.equals("o")) {
-			operators.remove(user);
-			if(voicedAndOp.contains(user)) {
-				addUserIfNotAlreadyIn(voiced, user);
-				voicedAndOp.remove(user);
-			}else if(!voiced.contains(user)) {
-				addUserIfNotAlreadyIn(users, user);
-			}
-			this.setChanged();
-		}else if(mode.equals("v")) {
-			if(!voicedAndOp.remove(user)){
-				voiced.remove(user);
-				addUserIfNotAlreadyIn(users, user);
-				Collections.sort(users);
-				this.setChanged();
-			}
-		}else {
-			Log.e(TAG, "Unknown user mode " + mode);
-			return;
-		}
+        if(mode.equals("")){
+            Log.e(TAG, "Cannot remove mode from user since mode is empty");
+            return;
+        }
+        for(IrcMode ircMode: IrcMode.values()){
+            if(mode.equals(ircMode.shortModeName)){
+                if(users.get(ircMode).contains(user)){
+                    users.get(ircMode).remove(user);
+                }
+                this.setChanged();
+                Log.e(TAG, "User removed with user mode " + ircMode.modeName + " for user " + user.nick);
+                break;
+            }
+        }
 		
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 	
 	public int getUserCount() {
-		return operators.size() + voiced.size() + users.size();
+		return users.get(IrcMode.USER).size();
 	}
 }
