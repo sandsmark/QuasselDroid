@@ -93,7 +93,7 @@ public class UserCollection extends Observable implements Observer {
         return users.get(mode);
     }
 
-    public Map<IrcMode, ArrayList<IrcUser>> getUniqueUsers(){
+    public Map<IrcMode, ArrayList<IrcUser>> getUniqueUsersSortedByMode(){
         /*
         * Because IrcMode.values() starts at the first declaration and moves down,
         * we can be sure that users get added to the list with the highest ranking mode first.
@@ -125,6 +125,21 @@ public class UserCollection extends Observable implements Observer {
             }
         }
         return false;
+    }
+    public ArrayList<IrcUser> getUniqueUsers(){
+        /*
+        * Because IrcMode.values() starts at the first declaration and moves down,
+        * we can be sure that users get added to the list with the highest ranking mode first.
+        */
+        ArrayList<IrcUser> uniqueUsers = new ArrayList<IrcUser>();
+        for(IrcMode mode: IrcMode.values()){
+            for(IrcUser user: users.get(mode)){
+                if(!uniqueUsers.contains(user)){
+                    uniqueUsers.add(user);
+                }
+            }
+        }
+        return uniqueUsers;
     }
 
     public int getUserCount() {
