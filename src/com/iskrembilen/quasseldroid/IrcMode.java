@@ -14,6 +14,7 @@ public enum IrcMode {
      * Declare in order of rank, this way values() will naturally
      * return the different modes based on rank
      */
+    //TODO: Move static strings to strings.xml
     OWNER ("owner","q"),
     ADMIN ("admin","a"),
     OPERATOR ("operator","o"),
