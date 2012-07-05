@@ -2,6 +2,7 @@ package com.iskrembilen.quasseldroid.gui;
 
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -32,6 +33,7 @@ public class SplashActivity extends Activity {
 			Log.i(TAG, "Enabeling Crittercism");
 			Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
 		}
+		setTheme(ThemeUtil.theme);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splash);
 	}

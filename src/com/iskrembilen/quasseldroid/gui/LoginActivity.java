@@ -59,6 +59,7 @@ import android.widget.Toast;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class LoginActivity extends Activity implements Observer, DialogInterface.OnCancelListener {
 
@@ -92,7 +93,7 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i(TAG, "Create");
+		setTheme(ThemeUtil.theme);
 		setContentView(R.layout.login);
 
 		settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);

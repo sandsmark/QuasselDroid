@@ -83,6 +83,7 @@ import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class ChatActivity extends Activity{
 
@@ -112,6 +113,7 @@ public class ChatActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setTheme(ThemeUtil.theme);
 		setContentView(R.layout.chat_layout);
 		
 		Intent intent = getIntent();

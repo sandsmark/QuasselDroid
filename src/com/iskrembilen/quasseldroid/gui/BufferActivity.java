@@ -91,6 +91,7 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.iskrembilen.quasseldroid.R;
 
 public class BufferActivity extends ExpandableListActivity {
@@ -126,8 +127,10 @@ public class BufferActivity extends ExpandableListActivity {
 			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
 			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
 		}
+		setTheme(ThemeUtil.theme);
 		setContentView(R.layout.buffer_list);
-		//bufferList = new ArrayList<Buffer>();
+
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
@@ -156,7 +159,6 @@ public class BufferActivity extends ExpandableListActivity {
 
 		};
 
-		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 		listener =new OnSharedPreferenceChangeListener() {
 

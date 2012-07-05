@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ThemeBase" parent="@android:style/Theme.Light" />
+    <style name="ThemeBase.Light" parent="@android:style/Theme.Light" />
+    <style name="ThemeBase.Dark" parent="@android:style/Theme" />
 
-    <style name="QuasseldroidTheme" parent="@style/ThemeBase" />
+    <style name="QuasseldroidThemeLight" parent="@style/ThemeBase.Light" />
+    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark" />
 
 </resources>

@@ -28,6 +28,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class PreferenceView extends PreferenceActivity {
 	

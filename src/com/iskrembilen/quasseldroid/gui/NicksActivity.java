@@ -78,6 +78,7 @@ import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class NicksActivity extends Activity{
 
@@ -91,6 +92,7 @@ public class NicksActivity extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setTheme(ThemeUtil.theme);
 		setContentView(R.layout.nick_layout);
 
 		initActionBar();
