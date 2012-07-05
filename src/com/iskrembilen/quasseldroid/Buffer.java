@@ -23,14 +23,13 @@
 
 package com.iskrembilen.quasseldroid;
 
+import android.util.Log;
+import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
-
-import android.util.Log;
-
-import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 
 /**
  * Class holds all the data for a Quassel buffer, this includes all the messages in the buffer, as well as the different states for the buffer.

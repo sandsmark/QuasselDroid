@@ -20,6 +20,23 @@
  */
 
 package com.iskrembilen.quasseldroid.io;
+
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Message;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
+import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
+import com.iskrembilen.quasseldroid.qtcomm.*;
+import com.iskrembilen.quasseldroid.service.CoreConnService;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -28,57 +45,12 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-
-import android.graphics.YuvImage;
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.IBinder;
-import android.os.Message;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.widget.TextView.BufferType;
-
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.CoreInfo;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
-import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
-import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
-import com.iskrembilen.quasseldroid.qtcomm.QVariant;
-import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 
 public final class CoreConnection {
 

@@ -1,15 +1,8 @@
 package com.iskrembilen.quasseldroid;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
 import android.util.Log;
 
-import com.iskrembilen.quasseldroid.BufferInfo.Type;
+import java.util.*;
 
 public class UserCollection extends Observable implements Observer {
 

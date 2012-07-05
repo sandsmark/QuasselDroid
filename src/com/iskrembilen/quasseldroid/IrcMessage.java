@@ -23,13 +23,10 @@
 
 package com.iskrembilen.quasseldroid;
 
+import android.text.Spannable;
+
 import java.util.ArrayList;
 import java.util.Date;
-
-import android.content.Context;
-import android.text.Spannable;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.UnderlineSpan;
 
 public class IrcMessage implements Comparable<IrcMessage>{
 	public enum Type {

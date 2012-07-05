@@ -21,17 +21,11 @@
 
 package com.iskrembilen.quasseldroid.qtcomm.serializers.quassel;
 
+import com.iskrembilen.quasseldroid.NetworkServer;
+import com.iskrembilen.quasseldroid.qtcomm.*;
+
 import java.io.IOException;
 import java.util.Map;
-
-import com.iskrembilen.quasseldroid.NetworkServer;
-import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
-import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
-import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 
 public class NetworkServerSerializer implements QMetaTypeSerializer<NetworkServer> {
 

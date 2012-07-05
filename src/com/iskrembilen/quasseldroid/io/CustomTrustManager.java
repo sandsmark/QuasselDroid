@@ -1,20 +1,19 @@
 package com.iskrembilen.quasseldroid.io;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 
 /**
  * A custom trust manager for the SSL socket so we can

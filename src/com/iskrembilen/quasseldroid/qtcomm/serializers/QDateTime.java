@@ -21,14 +21,14 @@
 
 package com.iskrembilen.quasseldroid.qtcomm.serializers;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
+
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class QDateTime implements QMetaTypeSerializer<Calendar> {
 

@@ -22,30 +22,17 @@
  */
 package com.iskrembilen.quasseldroid.qtcomm;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.NetworkServer;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaType.Type;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.Bool;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QByteArray;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QChar;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QDateTime;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QInteger;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QList;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QMap;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QString;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.QTime;
-import com.iskrembilen.quasseldroid.qtcomm.serializers.UnsignedInteger;
+import com.iskrembilen.quasseldroid.qtcomm.serializers.*;
 import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.BufferInfoSerializer;
 import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.MessageSerializer;
 import com.iskrembilen.quasseldroid.qtcomm.serializers.quassel.NetworkServerSerializer;
+
+import java.io.IOException;
+import java.util.*;
 
 
 public class QMetaTypeRegistry {

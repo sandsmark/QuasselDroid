@@ -1,11 +1,8 @@
 package com.iskrembilen.quasseldroid;
 
-import com.iskrembilen.quasseldroid.events.ThemeChangedEvent;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class Quasseldroid extends Application{
 

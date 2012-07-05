@@ -1,9 +1,5 @@
 package com.iskrembilen.quasseldroid.gui;
 
-import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,6 +12,9 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Window;
 import com.crittercism.app.Crittercism;
+import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class SplashActivity extends Activity {
 	// Set the display time, in milliseconds (or extract it out as a configurable parameter)
