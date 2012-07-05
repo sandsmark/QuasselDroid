@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,13 +44,11 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection;
+import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -169,7 +168,7 @@ public class NicksActivity extends Activity{
 
 		@Override
 		public IrcUser getChild(int groupPosition, int childPosition) {
-			return getGroup(groupPosition).get(childPosition);
+			return getGroup(groupPosition).second.get(childPosition);
 		}
 
 		@Override
@@ -199,25 +198,25 @@ public class NicksActivity extends Activity{
 		@Override
 		public int getChildrenCount(int groupPosition) {
 			if (this.users==null) return 0;
-			return getGroup(groupPosition).size();
+			return getGroup(groupPosition).second.size();
 		}
 
 		@Override
-		public List<IrcUser> getGroup(int groupPosition) {
-			switch (groupPosition) {
-			case 0:
-				return users.getOperators();
-			case 1:
-				return users.getVoiced();
-			case 2:
-				return users.getUsers();
-			}
-			return null;
+		public Pair<IrcMode,List<IrcUser>> getGroup(int groupPosition) {
+            int counter = 0;
+			for(IrcMode mode: users.getUniqueUsersSortedByMode().keySet()){
+                if (counter == groupPosition){
+                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersSortedByMode().get(mode));
+                } else {
+                    counter++;
+                }
+            }
+            return null;
 		}
 
 		@Override
 		public int getGroupCount() {
-			return 3;
+			return users.getUsers().keySet().size();
 		}
 
 		@Override
@@ -239,21 +238,14 @@ public class NicksActivity extends Activity{
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
-			switch (groupPosition) {
-			case 0:
-				holder.nameView.setText(getGroup(groupPosition).size() + " Operator(s)");
-				holder.imageView.setImageResource(R.drawable.irc_operator);
-				break;
-			case 1:
-				holder.nameView.setText(getGroup(groupPosition).size() + " Voiced");
-				holder.imageView.setImageResource(R.drawable.irc_voice);
-				break;
-			case 2:
-				holder.nameView.setText(getGroup(groupPosition).size() + " User(s)");
-				holder.imageView.setImageResource(R.drawable.im_user);
-				break;
-			}
-			return convertView;
+            if(getGroup(groupPosition).second.size()>0){
+                holder.nameView.setText(getGroup(groupPosition).second.size() + " "+getGroup(groupPosition).first.modeName);
+                //TODO: Fix this when the enum has icon added to them
+                holder.imageView.setImageResource(R.drawable.im_user);
+                return convertView;
+            } else {
+                return null;
+            }
 		}
 
 		@Override
