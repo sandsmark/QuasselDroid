@@ -4,18 +4,30 @@
     android:versionCode="50"
     android:versionName="0.6.7" >
 
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="15"/>
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="15" />
 
-    <uses-permission android:name="android.permission.VIBRATE" ></uses-permission>
-    <uses-permission android:name="android.permission.INTERNET" ></uses-permission>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" ></uses-permission>
-    <supports-screens android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true" android:resizeable="true"/>
+    <uses-permission android:name="android.permission.VIBRATE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
+    </uses-permission>
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
 
     <application
+        android:name="Quasseldroid"
         android:description="@string/description"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/QuasseldroidTheme" android:name="Quasseldroid">
+        android:theme="@style/QuasseldroidTheme" >
         <activity
             android:name=".gui.LoginActivity"
             android:label="@string/app_name"
@@ -23,13 +35,12 @@
         </activity>
         <activity
             android:name=".gui.PreferenceView"
-            android:label="@string/app_name"
-            android:screenOrientation="sensor" >
+            android:label="@string/app_name" >
         </activity>
         <activity
             android:name=".gui.ChatActivity"
-            android:configChanges="keyboardHidden|orientation" 
-            android:windowSoftInputMode="stateHidden">
+            android:configChanges="keyboardHidden|orientation"
+            android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name=".gui.BufferActivity"
@@ -49,9 +60,8 @@
             </intent-filter>
         </activity>
         <!-- Start of Crittercism.com Code -->
-			<activity android:name="com.crittercism.NotificationActivity"/>
-		<!-- End of Crittercism.com Code -->
+        <activity android:name="com.crittercism.NotificationActivity" />
+        <!-- End of Crittercism.com Code -->
     </application>
-
 
 </manifest>
