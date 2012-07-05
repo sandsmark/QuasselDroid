@@ -23,29 +23,12 @@
 
 package com.iskrembilen.quasseldroid.service;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Observer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import android.R.string;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Typeface;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
-import android.os.ResultReceiver;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -54,18 +37,17 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
-import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Observer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This Service holds the connection to the core from the phone, it handles all

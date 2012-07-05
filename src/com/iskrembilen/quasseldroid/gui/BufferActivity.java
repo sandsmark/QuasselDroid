@@ -23,78 +23,29 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
-import junit.framework.Test;
-
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
-import android.app.ListActivity;
-import android.app.ProgressDialog;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources.Theme;
-import android.graphics.Picture;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
-import android.os.SystemClock;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ActionMode;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
-import android.widget.AbsListView.MultiChoiceModeListener;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.ExpandableListView;
-import android.widget.Spinner;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.BufferUtils;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
-import com.iskrembilen.quasseldroid.events.ThemeChangedEvent;
-import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
+import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.iskrembilen.quasseldroid.R;
+
+import java.util.Observable;
+import java.util.Observer;
 
 public class BufferActivity extends ExpandableListActivity {
 

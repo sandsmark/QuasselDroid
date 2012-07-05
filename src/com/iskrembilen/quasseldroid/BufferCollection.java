@@ -23,18 +23,9 @@
 
 package com.iskrembilen.quasseldroid;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
-import com.iskrembilen.quasseldroid.R;
-
 import android.util.Log;
+
+import java.util.*;
 
 public class BufferCollection extends Observable implements Observer {
 

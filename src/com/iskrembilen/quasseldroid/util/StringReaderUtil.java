@@ -21,13 +21,13 @@
 
 package com.iskrembilen.quasseldroid.util;
 
+import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-
-import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 
 /**
  * Utility class for reading a String from the QDataInputStream. 

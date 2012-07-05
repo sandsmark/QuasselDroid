@@ -1,9 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
 import android.content.Context;
-import android.view.View;
 import android.widget.TextView;
-import android.widget.TextView.BufferType;
 
 public class BufferUtils {
 	public static int compareBuffers(Buffer buffer1, Buffer buffer2) {

@@ -1,11 +1,9 @@
 package com.iskrembilen.quasseldroid.util;
 
-import com.iskrembilen.quasseldroid.R;
-
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
+import com.iskrembilen.quasseldroid.R;
 
 public class ThemeUtil {
 	

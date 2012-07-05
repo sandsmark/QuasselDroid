@@ -1,14 +1,11 @@
 package com.iskrembilen.quasseldroid.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.widget.EditText;
 import android.widget.Filter;
-
 import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NickCompletionHelper extends Filter {
 

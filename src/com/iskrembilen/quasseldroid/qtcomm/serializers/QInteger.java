@@ -22,12 +22,12 @@
 
 package com.iskrembilen.quasseldroid.qtcomm.serializers;
 
-import java.io.IOException;
-
 import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
+
+import java.io.IOException;
 
 public class QInteger implements QMetaTypeSerializer<Integer> {
 	@Override
