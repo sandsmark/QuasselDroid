@@ -104,6 +104,7 @@ public class ChatActivity extends Activity{
 	private NickCompletionHelper nickCompletionHelper;
 	
 	private int bufferId;
+	private int currentTheme;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
@@ -114,6 +115,7 @@ public class ChatActivity extends Activity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTheme(ThemeUtil.theme);
+		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.chat_layout);
 		
 		Intent intent = getIntent();
@@ -233,6 +235,11 @@ public class ChatActivity extends Activity{
 	@Override
 	protected void onStart() {
 		super.onStart();
+		if(ThemeUtil.theme != currentTheme) {
+			Intent intent = new Intent(this, ChatActivity.class);
+	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        startActivity(intent);
+		}
 		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
 		findViewById(R.id.chat_auto_complete_button).setEnabled(false);
 		findViewById(R.id.ChatInputView).setEnabled(false);

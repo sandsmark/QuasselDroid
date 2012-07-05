@@ -44,6 +44,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.Resources.Theme;
 import android.graphics.Picture;
 import android.os.Build;
 import android.os.Bundle;
@@ -89,6 +90,7 @@ import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.events.ThemeChangedEvent;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -120,6 +122,8 @@ public class BufferActivity extends ExpandableListActivity {
 	private ActionMode actionMode;
 	private ActionMode.Callback actionModeCallback;
 
+	private int currentTheme;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -128,14 +132,13 @@ public class BufferActivity extends ExpandableListActivity {
 			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
 		}
 		setTheme(ThemeUtil.theme);
+		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.buffer_list);
-
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
 		initContextualMenu();
-
 		statusReciver = new ResultReceiver(null) {
 
 			@Override
@@ -243,11 +246,25 @@ public class BufferActivity extends ExpandableListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (boundConnService == null) return;
+		if(ThemeUtil.theme != currentTheme) {
+			Intent intent = new Intent(this, BufferActivity.class);
+	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        startActivity(intent);
+		}
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
 	}
 
 	@Override
 	protected void onStart() {
+		if(ThemeUtil.theme != currentTheme) {
+			Intent intent = new Intent(this, BufferActivity.class);
+	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        startActivity(intent);
+		}
 		doBindService();
 		super.onStart();
 	}

@@ -3,24 +3,24 @@
 
     <item
         android:id="@+id/menu_hide_events"
-        android:icon="@drawable/content_edit"
+        android:icon="?actionEditIcon"
         android:showAsAction="ifRoom|withText"
         android:title="@string/menu_hide_events">
     </item>
     <item
         android:id="@+id/menu_users_list"
-        android:icon="@drawable/social_group"
+        android:icon="?actionUserListIcon"
         android:showAsAction="ifRoom|withText"
         android:title="@string/menu_users_list">
     </item>
     <item
         android:id="@+id/menu_preferences"
-        android:icon="@drawable/action_settings"
+        android:icon="?actionSettingsIcon"
         android:title="@string/preferences">
     </item>
     <item
         android:id="@+id/menu_disconnect"
-        android:icon="@drawable/av_stop"
+        android:icon="?actionDisconnectIcon"
         android:title="@string/menu_disconnect">
     </item>
 

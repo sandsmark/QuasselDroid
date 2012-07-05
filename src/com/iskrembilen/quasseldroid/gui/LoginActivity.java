@@ -82,6 +82,7 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	Button connect;
 	
 	private String hashedCert;//ugly
+	private int currentTheme;
 
 	/* EXample of how to get a preference
 	 * SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -94,6 +95,7 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTheme(ThemeUtil.theme);
+		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.login);
 
 		settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);
@@ -166,6 +168,11 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	@Override
 	protected void onStart() {
 		super.onStart();
+		if(ThemeUtil.theme != currentTheme) {
+			Intent intent = new Intent(this, BufferActivity.class);
+	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        startActivity(intent);
+		}
 		doBindService();
 	}
 	

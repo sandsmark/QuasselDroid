@@ -87,12 +87,14 @@ public class NicksActivity extends Activity{
 	private NicksAdapter adapter;
 	private ExpandableListView list;
 	private int bufferId;
+	private int currentTheme;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTheme(ThemeUtil.theme);
+		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.nick_layout);
 
 		initActionBar();
@@ -128,6 +130,11 @@ public class NicksActivity extends Activity{
 	@Override
 	protected void onStart() {
 		super.onStart();
+		if(ThemeUtil.theme != currentTheme) {
+			Intent intent = new Intent(this, BufferActivity.class);
+	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        startActivity(intent);
+		}
 		doBindService();
 	}
 

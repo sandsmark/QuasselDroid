@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_join_channel" android:title="@string/menu_join_channel" android:icon="@drawable/content_new" android:showAsAction="ifRoom|withText"></item>
+	<item android:id="@+id/menu_join_channel" android:title="@string/menu_join_channel" android:icon="?actionJoinChannelIcon" android:showAsAction="ifRoom|withText"></item>
 	<item android:id="@+id/menu_preferences" android:title="@string/preferences"
-		android:icon="@drawable/action_settings"></item>
+		android:icon="?actionSettingsIcon"></item>
 	<item android:id="@+id/menu_disconnect" android:title="@string/menu_disconnect"
-		android:icon="@drawable/av_stop"></item>
+		android:icon="?actionDisconnectIcon"></item>
 </menu>

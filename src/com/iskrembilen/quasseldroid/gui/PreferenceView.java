@@ -23,22 +23,40 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.ThemeChangedEvent;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class PreferenceView extends PreferenceActivity {
 	
 	Preference backlogLimit;
 	Preference backlogAdditional;
+	private OnSharedPreferenceChangeListener listener;
 	
 	/**	 Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	addPreferencesFromResource(R.layout.preferences);
+    	
+    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		listener =new OnSharedPreferenceChangeListener() {
+
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals(getResources().getString(R.string.preference_theme))){
+					ThemeUtil.setTheme(sharedPreferences.getString(key, ""));
+				}
+
+			}
+		};
+		preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
     }
 }

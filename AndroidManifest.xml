@@ -43,8 +43,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".gui.BufferActivity"
-            android:launchMode="singleTop" >
+            android:name=".gui.BufferActivity">
         </activity>
 
         <service android:name=".service.CoreConnService" >
