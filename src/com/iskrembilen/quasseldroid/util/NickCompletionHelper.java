@@ -2,10 +2,12 @@ package com.iskrembilen.quasseldroid.util;
 
 import android.widget.EditText;
 import android.widget.Filter;
+import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.IrcUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class NickCompletionHelper extends Filter {
 
@@ -17,8 +19,8 @@ public class NickCompletionHelper extends Filter {
 	private FilterResults lastFilteredResults = null;
 	private int lastFilteredIndex = 0;
 
-	public NickCompletionHelper(List<IrcUser>... userLists) {
-		for(List<IrcUser> userList : userLists) {
+	public NickCompletionHelper(Map<IrcMode, ArrayList<IrcUser>> userLists) {
+		for(List<IrcUser> userList : userLists.values()) {
 			users.addAll(userList);
 		}
 	}
