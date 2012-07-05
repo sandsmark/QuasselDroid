@@ -27,6 +27,10 @@ import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -406,10 +410,18 @@ public class BufferActivity extends ExpandableListActivity {
 	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
 		private NetworkCollection networks;
 		private LayoutInflater inflater;
+		private Bitmap channelActiveBitmap, channelInactiveBitmap, userAwayBitmap, userOfflineBitmap, userBitmap;
 
 		public BufferListAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
+			channelActiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_active);
+			channelInactiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_inactive);
+			userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
+			userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
+			userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
+			userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
+			
+			
 		}
 
 		public void setNetworks(NetworkCollection networks){
@@ -465,19 +477,19 @@ public class BufferActivity extends ExpandableListActivity {
 			case StatusBuffer:
 			case ChannelBuffer:
 				holder.bufferView.setText(entry.getInfo().name);
-				if(entry.isActive()) holder.bufferImage.setImageResource(R.drawable.irc_channel_active);
-				else holder.bufferImage.setImageResource(R.drawable.irc_channel_inactive);
+				if(entry.isActive()) holder.bufferImage.setImageBitmap(channelActiveBitmap);
+				else holder.bufferImage.setImageBitmap(channelActiveBitmap);
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
 
 				if (boundConnService.isUserAway(nick, entry.getInfo().networkId)) {
-					holder.bufferImage.setImageResource(R.drawable.im_user_away);
+					holder.bufferImage.setImageBitmap(userAwayBitmap);
 				} else if (boundConnService.isUserOnline(nick, entry.getInfo().networkId)) {
-					holder.bufferImage.setImageResource(R.drawable.im_user_offline);
+					holder.bufferImage.setImageBitmap(userOfflineBitmap);
 					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_offline_color));//FIXME
 				} else {
-					holder.bufferImage.setImageResource(R.drawable.im_user);
+					holder.bufferImage.setImageBitmap(userBitmap);
 				}
 
 				holder.bufferView.setText(nick);
