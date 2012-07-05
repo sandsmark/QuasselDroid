@@ -84,9 +84,9 @@ public class UserCollection extends Observable implements Observer {
 			}else {
 				Log.e(TAG, "Unknown usermode " + mode + " for user " + user.nick);
 			}
-			user.addObserver(this);
 			this.setChanged();
 		}
+		user.addObserver(this);
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
