@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.*;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -40,15 +41,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.*;
 import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -61,6 +59,8 @@ public class NicksActivity extends Activity{
 	private ExpandableListView list;
 	private int bufferId;
 	private int currentTheme;
+    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
+    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
 
 	/** Called when the activity is first created. */
 	@Override
@@ -134,6 +134,8 @@ public class NicksActivity extends Activity{
 
 		private LayoutInflater inflater;
 		private UserCollection users;
+
+
 		public NicksAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			this.users = null;
@@ -234,19 +236,32 @@ public class NicksActivity extends Activity{
 				holder = new ViewHolderGroup();
 				holder.nameView = (TextView)convertView.findViewById(R.id.nicklist_group_name_view);
 				holder.imageView = (ImageView)convertView.findViewById(R.id.nicklist_group_image_view);
+                holder.expanderView = (ImageView)convertView.findViewById(R.id.nicklist_expander_image_view);
+                holder.groupHolderView = (LinearLayout)convertView.findViewById(R.id.nicklist_holder_view);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
             Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
-            if(group.second.size()>2){
-                holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
-            } else {
-                holder.nameView.setText(group.second.size() + " "+group.first.modeName);
-            }
-            holder.imageView.setImageResource(group.first.iconResource);
             if(group.second.size()<1){
-                //TODO: Make group invisible if it does not have any children
+                holder.nameView.setVisibility(View.GONE);
+                holder.imageView.setVisibility(View.GONE);
+                holder.expanderView.setVisibility(View.GONE);
+                holder.groupHolderView.setPadding(0,0,0,0);
+
+
+            }else{
+                if(group.second.size()>2){
+                    holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
+                } else {
+                    holder.nameView.setText(group.second.size() + " "+group.first.modeName);
+                }
+                holder.nameView.setVisibility(View.VISIBLE);
+                holder.imageView.setVisibility(View.VISIBLE);
+                holder.expanderView.setVisibility(View.VISIBLE);
+                holder.imageView.setImageResource(group.first.iconResource);
+                holder.groupHolderView.setPadding(5,2,2,2);
+                holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition)? EXPANDED_STATE : NOT_EXPANDED_STATE);
             }
             return convertView;
         }
@@ -269,6 +284,8 @@ public class NicksActivity extends Activity{
 	public static class ViewHolderGroup {
 		public TextView nameView;
 		public ImageView imageView;
+        public ImageView expanderView;
+        public LinearLayout groupHolderView;
 	}
 
 
