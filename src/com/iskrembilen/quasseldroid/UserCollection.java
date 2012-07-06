@@ -29,13 +29,20 @@ public class UserCollection extends Observable implements Observer {
 	}
 
     private void removeUserWithNickFromModeList(IrcMode mode, String nick) {
+        boolean found = false;
+        IrcUser userToRemove = null;
         for(IrcUser user : users.get(mode)) {
             if(user.nick.equals(nick) && users.get(mode).contains(user)) {
-                users.get(mode).remove(user);
-                this.setChanged();
-            }else{
-                throw new IllegalArgumentException("User with nick "+nick+" was not found in list for mode "+mode.modeName+".");
+                found = true;
+                userToRemove = user;
+                break;
             }
+        }
+        if(found) {
+            users.get(mode).remove(userToRemove);
+            this.setChanged();
+        } else{
+            throw new IllegalArgumentException("User with nick "+nick+" was not found in list for mode "+mode.modeName+".");
         }
     }
 
