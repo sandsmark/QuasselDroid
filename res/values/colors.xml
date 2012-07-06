@@ -2,17 +2,27 @@
 <resources>
 	<color name="logo_text_color">#0686fd</color>
 	
-	<color name="buffer_unread_color">#0000F5</color>
-	<color name="buffer_highlight_color">#FF8Cff</color>
-	<color name="buffer_read_color">#000000</color>
-	<color name="buffer_parted_color">#C0C0C0</color>
+	<color name="buffer_unread_color_light">#0000F5</color>
+	<color name="buffer_highlight_color_light">#FF8Cff</color>
+	<color name="buffer_read_color_light">#000000</color>
+	<color name="buffer_parted_color_light">#C0C0C0</color>
+	<color name="buffer_activity_color_light">#008000</color>
+	
+	<color name="buffer_unread_color_dark">#0000F5</color>
+	<color name="buffer_highlight_color_dark">#FF8Cff</color>
+	<color name="buffer_read_color_dark">#FFFFFF</color>
+	<color name="buffer_parted_color_dark">#C0C0C0</color>
+	<color name="buffer_activity_color_dark">#008000</color>
+		
+	<color name="buffer_offline_color">#666</color>
 	<color name="ircmessage_highlight_color">#FF8C00</color>
-	<color name="ircmessage_normal_color">#ffffff</color>
-	<color name="buffer_activity_color">#008000</color>
-	<color name="ircmessage_url_color">#0000FF</color>
+	<color name="ircmessage_normal_color_light">#000000</color>
+	<color name="ircmessage_normal_color_dark">#ffffff</color>
 	<color name="ircmessage_commandmessages_color">#960096</color>
 	<color name="ircmessage_servermessage_color">#916409</color>
 	<color name="ircmessage_actionmessage_color">#0000F5</color>
+	<color name="ircmessage_self_color_dark">#000000</color>
+	<color name="ircmessage_self_color_light">#FFFFFF</color>
 	<color name="ircmessage_white">#fff</color>
 	<color name="ircmessage_black">#000</color>
 	<color name="ircmessage_blue">#0A0A85</color>
@@ -28,5 +38,4 @@
 	<color name="ircmessage_light_blue">#4169E1</color>
 	<color name="ircmessage_pink">#F984EF</color>
 	<color name="ircmessage_gray">#888</color>
-	<color name="buffer_offline_color">#666</color>
 </resources>

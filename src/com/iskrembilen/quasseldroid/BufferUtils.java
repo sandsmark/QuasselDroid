@@ -1,5 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
+
 import android.content.Context;
 import android.widget.TextView;
 
@@ -14,7 +16,7 @@ public class BufferUtils {
 				return buffer1.getInfo().type.value - buffer2.getInfo().type.value;
 		}
 		if(buffer1.isPermanentlyHidden() && !buffer2.isPermanentlyHidden()) 
-				return 1;
+			return 1;
 		if(!buffer1.isPermanentlyHidden() && buffer2.isPermanentlyHidden())
 			return -1;
 		if (buffer1.isTemporarilyHidden() && !buffer2.isTemporarilyHidden())
@@ -37,15 +39,15 @@ public class BufferUtils {
 	public static void setBufferViewStatus(Context context, Buffer entry, TextView bufferView) {
 		//Check here if there are any unread messages in the buffer, and then set this color if there is
 		if(entry == null || !entry.isActive()) {
-			bufferView.setTextColor(context.getResources().getColor(R.color.buffer_parted_color));
+			bufferView.setTextColor(ThemeUtil.bufferPartedColor);
 		} else if(entry.hasUnseenHighlight()){
-			bufferView.setTextColor(context.getResources().getColor(R.color.buffer_highlight_color));
+			bufferView.setTextColor(ThemeUtil.bufferHighlightColor);
 		} else if (entry.hasUnreadMessage()){
-			bufferView.setTextColor(context.getResources().getColor(R.color.buffer_unread_color));
+			bufferView.setTextColor(ThemeUtil.bufferUnreadColor);
 		} else if (entry.hasUnreadActivity()) {
-			bufferView.setTextColor(context.getResources().getColor(R.color.buffer_activity_color));
+			bufferView.setTextColor(ThemeUtil.bufferActivityColor);
 		}else {
-			bufferView.setTextColor(context.getResources().getColor(R.color.buffer_read_color));
+			bufferView.setTextColor(ThemeUtil.bufferReadColor);
 		}
 	}
 

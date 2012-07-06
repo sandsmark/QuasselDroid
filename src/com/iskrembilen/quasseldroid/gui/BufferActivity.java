@@ -478,7 +478,7 @@ public class BufferActivity extends ExpandableListActivity {
 			case ChannelBuffer:
 				holder.bufferView.setText(entry.getInfo().name);
 				if(entry.isActive()) holder.bufferImage.setImageBitmap(channelActiveBitmap);
-				else holder.bufferImage.setImageBitmap(channelActiveBitmap);
+				else holder.bufferImage.setImageBitmap(channelInactiveBitmap);
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;

@@ -373,33 +373,33 @@ public class ChatActivity extends Activity{
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("-*-");
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_actionmessage_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_actionmessage_color));
+				holder.msgView.setTextColor(ThemeUtil.messageActionColor);
+				holder.nickView.setTextColor(ThemeUtil.messageActionColor);
 				holder.msgView.setText(entry.getNick()+" "+entry.content);
 				break;
 			case Server:
 				holder.nickView.setText("*");
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_servermessage_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_servermessage_color));
+				holder.msgView.setTextColor(ThemeUtil.messageServerColor);
+				holder.nickView.setTextColor(ThemeUtil.messageServerColor);
 				holder.msgView.setText(entry.content);
 				break;
 			case Join:
 				holder.nickView.setText("-->");
 				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
 				break;
 			case Part:
 				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
 				break;
 			case Quit:				
 				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
 				break;
 				//TODO: implement the rest
 			case Kick:
@@ -408,31 +408,31 @@ public class ChatActivity extends Activity{
 				String nick = entry.content.toString().substring(0, nickEnd);
 				String reason = entry.content.toString().substring(nickEnd+1);
 				holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
 				break;
 
 			case Mode:
 				holder.nickView.setText("***");
 				holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
 				break;
 			case Nick:
 				holder.nickView.setText("<->");
 				holder.msgView.setText(entry.getNick()+" is now known as " + entry.content.toString());
-				holder.msgView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
-				holder.nickView.setTextColor(getResources().getColor(R.color.ircmessage_commandmessages_color));
+				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
 				break;
 			case Plain:
 			default:
 				if(entry.isSelf()) {
-					holder.nickView.setTextColor(Color.BLACK); //TODO: probably move to color file, or somewhere else it needs to be, so user can select color them self
+					holder.nickView.setTextColor(ThemeUtil.messageSelfColor);
 				}else{
 					int hashcode = entry.getNick().hashCode();
 					holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 				}
-				holder.msgView.setTextColor(0xff000000);
+				holder.msgView.setTextColor(ThemeUtil.messageNormalColor);
 				holder.msgView.setTypeface(Typeface.DEFAULT);
 
 				holder.nickView.setText("<" + entry.getNick() + ">");
@@ -440,7 +440,7 @@ public class ChatActivity extends Activity{
 				break;
 			}
 			if (entry.isHighlighted()) {
-				holder.item_layout.setBackgroundResource(R.color.ircmessage_highlight_color);
+				holder.item_layout.setBackgroundColor(ThemeUtil.messageHighlightColor);
 			}else {
 				holder.item_layout.setBackgroundResource(0);
 			}

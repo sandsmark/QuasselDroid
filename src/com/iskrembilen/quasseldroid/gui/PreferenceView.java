@@ -50,7 +50,7 @@ public class PreferenceView extends PreferenceActivity {
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if(key.equals(getResources().getString(R.string.preference_theme))){
-					ThemeUtil.setTheme(sharedPreferences.getString(key, ""));
+					ThemeUtil.setTheme(PreferenceView.this, sharedPreferences.getString(key, ""));
 				}
 
 			}

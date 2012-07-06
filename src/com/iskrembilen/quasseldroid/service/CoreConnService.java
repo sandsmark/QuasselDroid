@@ -41,6 +41,7 @@ import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -439,7 +440,7 @@ public class CoreConnService extends Service {
 			color = R.color.ircmessage_gray;
 			break;
 		default:
-			color = R.color.ircmessage_normal_color;
+			color = ThemeUtil.messageNormalColor;
 		}
 		return color;
 	}

@@ -4,8 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingLeft="20dp"
-    android:textColor="#000000" >
+    android:paddingLeft="20dp" >
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -42,7 +41,6 @@
         android:layout_height="wrap_content"
         android:duplicateParentState="false"
         android:text="# quasseldroid"
-        android:textColor="#000000"
         android:textSize="21sp"
         android:textStyle="bold" />
 

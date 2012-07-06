@@ -3,14 +3,12 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="36dp"
-    android:textColor="#000000" >
+    android:paddingLeft="36dp" >
 
     <TextView
         android:id="@+id/buffer_list_item_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000000"
         android:textSize="21sp"
         android:textStyle="bold" />
 
