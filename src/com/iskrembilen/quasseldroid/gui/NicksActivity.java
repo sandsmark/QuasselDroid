@@ -137,14 +137,13 @@ public class NicksActivity extends Activity{
 		public NicksAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			this.users = null;
-
 		}
 
 		public void setUsers(UserCollection users) {
 			users.addObserver(this);
 			this.users = users;
 			notifyDataSetChanged();
-			for(int i=0; i<adapter.getGroupCount();i++) {
+			for(int i=0; i<getGroupCount();i++) {
 				list.expandGroup(i);
 			}
 		}
@@ -173,7 +172,8 @@ public class NicksActivity extends Activity{
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			return groupPosition*10 + childPosition;
+            //TODO: This will cause bugs when you have more than 99 children in a group
+			return groupPosition*100 + childPosition;
 		}
 
 		@Override
@@ -204,7 +204,7 @@ public class NicksActivity extends Activity{
 		@Override
 		public Pair<IrcMode,List<IrcUser>> getGroup(int groupPosition) {
             int counter = 0;
-			for(IrcMode mode: users.getUniqueUsersSortedByMode().keySet()){
+			for(IrcMode mode: IrcMode.values()){
                 if (counter == groupPosition){
                     return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersSortedByMode().get(mode));
                 } else {
@@ -216,7 +216,7 @@ public class NicksActivity extends Activity{
 
 		@Override
 		public int getGroupCount() {
-			return users.getUsers().keySet().size();
+			return IrcMode.values().length;
 		}
 
 		@Override
@@ -238,15 +238,18 @@ public class NicksActivity extends Activity{
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
-            if(getGroup(groupPosition).second.size()>0){
-                holder.nameView.setText(getGroup(groupPosition).second.size() + " "+getGroup(groupPosition).first.modeName);
-                //TODO: Fix this when the enum has icon added to them
-                holder.imageView.setImageResource(R.drawable.im_user);
-                return convertView;
+            Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
+            if(group.second.size()>2){
+                holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
             } else {
-                return null;
+                holder.nameView.setText(group.second.size() + " "+group.first.modeName);
             }
-		}
+            holder.imageView.setImageResource(group.first.iconResource);
+            if(group.second.size()<1){
+                //TODO: Make group invisible if it does not have any children
+            }
+            return convertView;
+        }
 
 		@Override
 		public boolean hasStableIds() {
