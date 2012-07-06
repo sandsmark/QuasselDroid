@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="ThemeBase.Light" parent="@android:style/Theme.Light">
         <item name="actionJoinChannelIcon">@drawable/menu_new</item>
@@ -19,6 +19,8 @@
 
     <style name="QuasseldroidThemeLight" parent="@style/ThemeBase.Light"></style>
 
-    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark"></style>
+    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark">
+        <item name="android:textColor">#debc85</item>
+    </style>
 
 </resources>

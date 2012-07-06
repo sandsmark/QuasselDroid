@@ -349,6 +349,7 @@ public class ChatActivity extends Activity{
 				convertView = inflater.inflate(R.layout.backlog_item, null);
 				holder = new ViewHolder();
 				holder.timeView = (TextView)convertView.findViewById(R.id.backlog_time_view);
+				holder.timeView.setTextColor(ThemeUtil.chatTimestampColor);
 				holder.nickView = (TextView)convertView.findViewById(R.id.backlog_nick_view);
 				holder.msgView = (TextView)convertView.findViewById(R.id.backlog_msg_view);
 				holder.separatorView = (TextView)convertView.findViewById(R.id.backlog_list_separator);
@@ -373,66 +374,75 @@ public class ChatActivity extends Activity{
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("-*-");
-				holder.msgView.setTextColor(ThemeUtil.messageActionColor);
-				holder.nickView.setTextColor(ThemeUtil.messageActionColor);
+				holder.msgView.setTextColor(ThemeUtil.chatActionColor);
+				holder.nickView.setTextColor(ThemeUtil.chatActionColor);
 				holder.msgView.setText(entry.getNick()+" "+entry.content);
 				break;
 			case Server:
 				holder.nickView.setText("*");
-				holder.msgView.setTextColor(ThemeUtil.messageServerColor);
-				holder.nickView.setTextColor(ThemeUtil.messageServerColor);
+				holder.msgView.setTextColor(ThemeUtil.chatServerColor);
+				holder.nickView.setTextColor(ThemeUtil.chatServerColor);
 				holder.msgView.setText(entry.content);
 				break;
 			case Join:
 				holder.nickView.setText("-->");
 				holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
-				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
-				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
+				holder.nickView.setTextColor(ThemeUtil.chatJoinColor);
 				break;
 			case Part:
 				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
-				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
-				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.msgView.setTextColor(ThemeUtil.chatPartColor);
+				holder.nickView.setTextColor(ThemeUtil.chatPartColor);
 				break;
 			case Quit:				
 				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
-				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
-				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
+				holder.nickView.setTextColor(ThemeUtil.chatPartColor);
 				break;
-				//TODO: implement the rest
+			case Kill:
+				holder.nickView.setText("<--");
+				holder.msgView.setText(entry.getNick() + " was killed (" + entry.content + ")");
+				holder.msgView.setTextColor(ThemeUtil.chatKillColor);
+				holder.nickView.setTextColor(ThemeUtil.chatKillColor);
+				break;
 			case Kick:
 				holder.nickView.setText("<-*");
 				int nickEnd = entry.content.toString().indexOf(" ");
 				String nick = entry.content.toString().substring(0, nickEnd);
 				String reason = entry.content.toString().substring(nickEnd+1);
 				holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
-				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
-				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.msgView.setTextColor(ThemeUtil.chatKickColor);
+				holder.nickView.setTextColor(ThemeUtil.chatKickColor);
 				break;
-
 			case Mode:
 				holder.nickView.setText("***");
 				holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
-				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
-				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.msgView.setTextColor(ThemeUtil.chatModeColor);
+				holder.nickView.setTextColor(ThemeUtil.chatModeColor);
 				break;
 			case Nick:
 				holder.nickView.setText("<->");
 				holder.msgView.setText(entry.getNick()+" is now known as " + entry.content.toString());
-				holder.msgView.setTextColor(ThemeUtil.messageCommandColor);
-				holder.nickView.setTextColor(ThemeUtil.messageCommandColor);
+				holder.msgView.setTextColor(ThemeUtil.chatNickColor);
+				holder.nickView.setTextColor(ThemeUtil.chatNickColor);
 				break;
+			case DayChange:
+				holder.nickView.setText("-");
+				holder.msgView.setText("{Day changed to " + entry.content.toString() + "}");
+				holder.msgView.setTextColor(ThemeUtil.chatDayChangeColor);
+				holder.nickView.setTextColor(ThemeUtil.chatDayChangeColor);
 			case Plain:
 			default:
 				if(entry.isSelf()) {
-					holder.nickView.setTextColor(ThemeUtil.messageSelfColor);
+					holder.nickView.setTextColor(ThemeUtil.chatSelfColor);
 				}else{
 					int hashcode = entry.getNick().hashCode();
 					holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
 				}
-				holder.msgView.setTextColor(ThemeUtil.messageNormalColor);
+				holder.msgView.setTextColor(ThemeUtil.chatPlainColor);
 				holder.msgView.setTypeface(Typeface.DEFAULT);
 
 				holder.nickView.setText("<" + entry.getNick() + ">");
@@ -440,7 +450,7 @@ public class ChatActivity extends Activity{
 				break;
 			}
 			if (entry.isHighlighted()) {
-				holder.item_layout.setBackgroundColor(ThemeUtil.messageHighlightColor);
+				holder.item_layout.setBackgroundColor(ThemeUtil.chatHighlightColor);
 			}else {
 				holder.item_layout.setBackgroundResource(0);
 			}

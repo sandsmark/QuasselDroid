@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid.util;
 
+import android.R.color;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -10,7 +11,7 @@ public class ThemeUtil {
 
 	public static int theme;
 	public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
-	public static int messageHighlightColor, messageNormalColor, messageCommandColor, messageServerColor, messageActionColor, messageSelfColor;
+	public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor, chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor, chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatHighlightColor, chatSelfColor, chatTimestampColor;
 
 	public static void initTheme(Context context) {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -29,12 +30,23 @@ public class ThemeUtil {
 			bufferActivityColor = resources.getColor(R.color.buffer_activity_color_light);
 			bufferReadColor = resources.getColor(R.color.buffer_read_color_light);
 
-			messageHighlightColor = resources.getColor(R.color.ircmessage_highlight_color);
-			messageNormalColor = resources.getColor(R.color.ircmessage_normal_color_light);
-			messageCommandColor = resources.getColor(R.color.ircmessage_commandmessages_color);
-			messageServerColor = resources.getColor(R.color.ircmessage_servermessage_color);
-			messageActionColor = resources.getColor(R.color.ircmessage_actionmessage_color);
-			messageSelfColor = resources.getColor(R.color.ircmessage_self_color_light);
+			chatSelfColor = resources.getColor(R.color.chat_line_self_light);
+			chatPlainColor = resources.getColor(R.color.chat_line_plain_light);
+			chatNoticeColor = resources.getColor(R.color.chat_line_notice_light);
+			chatActionColor = resources.getColor(R.color.chat_line_action_light);
+			chatNickColor = resources.getColor(R.color.chat_line_nick_light);
+			chatModeColor = resources.getColor(R.color.chat_line_mode_light);
+			chatJoinColor = resources.getColor(R.color.chat_line_join_light);
+			chatPartColor = resources.getColor(R.color.chat_line_part_light);
+			chatQuitColor = resources.getColor(R.color.chat_line_quit_light);
+			chatKickColor = resources.getColor(R.color.chat_line_kick_light);
+			chatKillColor = resources.getColor(R.color.chat_line_kill_light);
+			chatServerColor = resources.getColor(R.color.chat_line_server_light);
+			chatInfoColor = resources.getColor(R.color.chat_line_info_light);
+			chatErrorColor = resources.getColor(R.color.chat_line_error_light);
+			chatDayChangeColor = resources.getColor(R.color.chat_line_daychange_light);
+			chatHighlightColor = resources.getColor(R.color.chat_line_highlight_light);
+			chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_light);
 
 		}
 		else if(themeName.equals("dark")) {
@@ -46,12 +58,23 @@ public class ThemeUtil {
 			bufferActivityColor = resources.getColor(R.color.buffer_activity_color_dark);
 			bufferReadColor = resources.getColor(R.color.buffer_read_color_dark);
 
-			messageHighlightColor = resources.getColor(R.color.ircmessage_highlight_color);
-			messageNormalColor = resources.getColor(R.color.ircmessage_normal_color_dark);
-			messageCommandColor = resources.getColor(R.color.ircmessage_commandmessages_color);
-			messageServerColor = resources.getColor(R.color.ircmessage_servermessage_color);
-			messageActionColor = resources.getColor(R.color.ircmessage_actionmessage_color);
-			messageSelfColor = resources.getColor(R.color.ircmessage_self_color_dark);
+			chatSelfColor = resources.getColor(R.color.chat_line_self_dark);
+			chatPlainColor = resources.getColor(R.color.chat_line_plain_dark);
+			chatNoticeColor = resources.getColor(R.color.chat_line_notice_dark);
+			chatActionColor = resources.getColor(R.color.chat_line_action_dark);
+			chatNickColor = resources.getColor(R.color.chat_line_nick_dark);
+			chatModeColor = resources.getColor(R.color.chat_line_mode_dark);
+			chatJoinColor = resources.getColor(R.color.chat_line_join_dark);
+			chatPartColor = resources.getColor(R.color.chat_line_part_dark);
+			chatQuitColor = resources.getColor(R.color.chat_line_quit_dark);
+			chatKickColor = resources.getColor(R.color.chat_line_kick_dark);
+			chatKillColor = resources.getColor(R.color.chat_line_kill_dark);
+			chatServerColor = resources.getColor(R.color.chat_line_server_dark);
+			chatInfoColor = resources.getColor(R.color.chat_line_info_dark);
+			chatErrorColor = resources.getColor(R.color.chat_line_error_dark);
+			chatDayChangeColor = resources.getColor(R.color.chat_line_daychange_dark);
+			chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
+			chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
 		}
 	}
 }
