@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.*;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -35,18 +36,14 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.TextView;
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.IrcUser;
+import android.widget.*;
+import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
@@ -62,6 +59,8 @@ public class NicksActivity extends Activity{
 	private ExpandableListView list;
 	private int bufferId;
 	private int currentTheme;
+    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
+    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
 
 	/** Called when the activity is first created. */
 	@Override
@@ -135,17 +134,18 @@ public class NicksActivity extends Activity{
 
 		private LayoutInflater inflater;
 		private UserCollection users;
+
+
 		public NicksAdapter(Context context) {
 			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			this.users = null;
-
 		}
 
 		public void setUsers(UserCollection users) {
 			users.addObserver(this);
 			this.users = users;
 			notifyDataSetChanged();
-			for(int i=0; i<adapter.getGroupCount();i++) {
+			for(int i=0; i<getGroupCount();i++) {
 				list.expandGroup(i);
 			}
 		}
@@ -169,12 +169,13 @@ public class NicksActivity extends Activity{
 
 		@Override
 		public IrcUser getChild(int groupPosition, int childPosition) {
-			return getGroup(groupPosition).get(childPosition);
+			return getGroup(groupPosition).second.get(childPosition);
 		}
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-			return groupPosition*10 + childPosition;
+            //TODO: This will cause bugs when you have more than 99 children in a group
+			return groupPosition*100 + childPosition;
 		}
 
 		@Override
@@ -199,25 +200,25 @@ public class NicksActivity extends Activity{
 		@Override
 		public int getChildrenCount(int groupPosition) {
 			if (this.users==null) return 0;
-			return getGroup(groupPosition).size();
+			return getGroup(groupPosition).second.size();
 		}
 
 		@Override
-		public List<IrcUser> getGroup(int groupPosition) {
-			switch (groupPosition) {
-			case 0:
-				return users.getOperators();
-			case 1:
-				return users.getVoiced();
-			case 2:
-				return users.getUsers();
-			}
-			return null;
+		public Pair<IrcMode,List<IrcUser>> getGroup(int groupPosition) {
+            int counter = 0;
+			for(IrcMode mode: IrcMode.values()){
+                if (counter == groupPosition){
+                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersSortedByMode().get(mode));
+                } else {
+                    counter++;
+                }
+            }
+            return null;
 		}
 
 		@Override
 		public int getGroupCount() {
-			return 3;
+			return IrcMode.values().length;
 		}
 
 		@Override
@@ -235,26 +236,35 @@ public class NicksActivity extends Activity{
 				holder = new ViewHolderGroup();
 				holder.nameView = (TextView)convertView.findViewById(R.id.nicklist_group_name_view);
 				holder.imageView = (ImageView)convertView.findViewById(R.id.nicklist_group_image_view);
+                holder.expanderView = (ImageView)convertView.findViewById(R.id.nicklist_expander_image_view);
+                holder.groupHolderView = (LinearLayout)convertView.findViewById(R.id.nicklist_holder_view);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
-			switch (groupPosition) {
-			case 0:
-				holder.nameView.setText(getGroup(groupPosition).size() + " Operator(s)");
-				holder.imageView.setImageResource(R.drawable.irc_operator);
-				break;
-			case 1:
-				holder.nameView.setText(getGroup(groupPosition).size() + " Voiced");
-				holder.imageView.setImageResource(R.drawable.irc_voice);
-				break;
-			case 2:
-				holder.nameView.setText(getGroup(groupPosition).size() + " User(s)");
-				holder.imageView.setImageResource(R.drawable.im_user);
-				break;
-			}
-			return convertView;
-		}
+            Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
+            if(group.second.size()<1){
+                holder.nameView.setVisibility(View.GONE);
+                holder.imageView.setVisibility(View.GONE);
+                holder.expanderView.setVisibility(View.GONE);
+                holder.groupHolderView.setPadding(0,0,0,0);
+
+
+            }else{
+                if(group.second.size()>2){
+                    holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
+                } else {
+                    holder.nameView.setText(group.second.size() + " "+group.first.modeName);
+                }
+                holder.nameView.setVisibility(View.VISIBLE);
+                holder.imageView.setVisibility(View.VISIBLE);
+                holder.expanderView.setVisibility(View.VISIBLE);
+                holder.imageView.setImageResource(group.first.iconResource);
+                holder.groupHolderView.setPadding(5,2,2,2);
+                holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition)? EXPANDED_STATE : NOT_EXPANDED_STATE);
+            }
+            return convertView;
+        }
 
 		@Override
 		public boolean hasStableIds() {
@@ -274,6 +284,8 @@ public class NicksActivity extends Activity{
 	public static class ViewHolderGroup {
 		public TextView nameView;
 		public ImageView imageView;
+        public ImageView expanderView;
+        public LinearLayout groupHolderView;
 	}
 
 

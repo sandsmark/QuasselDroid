@@ -800,7 +800,7 @@ public class CoreConnService extends Service {
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
 				for(Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
 						if(buf.getInfo().name.equals(bufferName)) {
-							buf.getUsers().removeUserMode(user, bundle.getString("mode"));
+							buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
 							break;
 						}
 				}
