@@ -113,7 +113,9 @@ public class UserCollection extends Observable implements Observer {
     private boolean isIrcUserAlreadyAdded(Map<IrcMode, ArrayList<IrcUser>> uniqueUsers, IrcUser user) {
         boolean found = false;
         for(ArrayList<IrcUser> listOfAlreadyAddedUsers: uniqueUsers.values()){
-            found = isIrcUserInList(user, listOfAlreadyAddedUsers);
+            if(isIrcUserInList(user, listOfAlreadyAddedUsers)){
+                found = true;
+            }
         }
         return found;
     }
@@ -149,11 +151,8 @@ public class UserCollection extends Observable implements Observer {
 
     @Override
 	public void update(Observable observable, Object data) {
-        //TODO: Remove debug prints
-        System.err.println(observable.toString());
         for(IrcMode mode: IrcMode.values()){
             if(users.get(mode).contains(observable)){
-                System.err.println("Found the nick "+((IrcUser)observable).nick+" in the list of "+mode.modeName+".");
                 Collections.sort(users.get(mode));
                 this.setChanged();
             }
@@ -166,8 +165,8 @@ public class UserCollection extends Observable implements Observer {
 		for(IrcMode ircMode: IrcMode.values()){
             if(mode.equals(ircMode.shortModeName)){
                 try{
-                    addUserToModeList(users.get(mode), user);
-                    Log.e(TAG, "User added with user mode " + ircMode.modeName + " for user " + user.nick);
+                    addUserToModeList(users.get(ircMode), user);
+                    Log.e(TAG, "Mode " + ircMode.modeName + " added to user " + user.nick);
                     break;
                 } catch (IllegalArgumentException e){
                     Log.e(TAG, e.getMessage());
