@@ -1216,7 +1216,7 @@ public final class CoreConnection {
 						 * This is called by the core when a new message should be displayed.
 						 */
 						if (functionName.equals("2displayMsg(Message)")) {
-							Log.d(TAG, "RpcCall: " + "2displayMsg(Message)");
+							//Log.d(TAG, "RpcCall: " + "2displayMsg(Message)");
 							IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
 	
 							if (!networks.get(message.bufferInfo.networkId).containsBuffer(message.bufferInfo.id) &&

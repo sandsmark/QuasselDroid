@@ -2,6 +2,8 @@ package com.iskrembilen.quasseldroid;
 
 import java.util.*;
 
+import com.iskrembilen.quasseldroid.gui.BufferActivity.BufferListAdapter;
+
 public class Network extends Observable implements Observer, Comparable<Network> {
 	public enum ConnectionState {
 		Disconnected(0),
@@ -222,6 +224,9 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		if(state == ConnectionState.Disconnected) {
 			setOpen(false);
 			if(statusBuffer != null) statusBuffer.setActive(false);
+			for(Buffer buffer : buffers.getRawBufferList()) {
+				buffer.setActive(false);
+			}
 		} else if(state == ConnectionState.Initialized) {
 			setOpen(true);
 			if(statusBuffer != null) statusBuffer.setActive(true);

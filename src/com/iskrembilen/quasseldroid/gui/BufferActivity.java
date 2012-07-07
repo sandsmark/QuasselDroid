@@ -447,6 +447,10 @@ public class BufferActivity extends ExpandableListActivity {
 		@Override
 		public void update(Observable observable, Object data) {
 			notifyDataSetChanged();
+			for(int group = 0; group < getGroupCount(); group++) {
+				if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
+				else getExpandableListView().collapseGroup(group);
+			}
 		}
 
 		@Override
