@@ -3,37 +3,67 @@ package com.iskrembilen.quasseldroid;
 import java.util.*;
 
 public class Network extends Observable implements Observer, Comparable<Network> {
+	public enum ConnectionState {
+		Disconnected(0),
+		Connecting(1),
+		Initializing(2),
+		Initialized(3),
+		Reconnecting(4),
+		Disconnecting(5);
+		int value;
+		static final Map<Integer, ConnectionState> intToStateMap = new HashMap<Integer, ConnectionState>();
+		static {
+			for (ConnectionState type : ConnectionState.values()) {
+				intToStateMap.put(type.value, type);
+			}
+		}
+		public static ConnectionState getForValue(int value) {
+			return intToStateMap.get(value);
+		}
+		ConnectionState(int value){
+			this.value = value;
+		}
+		public int getValue(){
+			return value;
+		}
+
+	}
+
 	private int networkId;
 	private Buffer statusBuffer;
 	private String networkName;
-	private Boolean isConnected;
 	private BufferCollection buffers;
 	private List<IrcUser> userList;
 	private HashMap<String, IrcUser> nickUserMap;
 	private String nick;
 	private boolean open;
+	private ConnectionState connectionState;
 
 	public Network(int networkId) {
 		this.networkId = networkId;
 		userList = new ArrayList<IrcUser>();
 		buffers = new BufferCollection();
 		nickUserMap = new HashMap<String, IrcUser>();
-		open=true;
+		open=false;
+		connectionState = ConnectionState.Disconnected;
 	}
-	
-	
+
+
 	public Buffer getStatusBuffer() {
 		return statusBuffer;
 	}
 
 	public void setStatusBuffer(Buffer statusBuffer) {
 		this.statusBuffer = statusBuffer;
+		statusBuffer.getInfo().name = networkName;
+		this.setChanged();
+		notifyObservers();
 	}
 
 	public int getId() {
 		return networkId;
 	}
-	
+
 	public BufferCollection getBuffers() {
 		return buffers;
 	}
@@ -56,15 +86,9 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		return networkName;
 	}
 
-
-	public void setConnected(Boolean isConnected) {
-		this.isConnected = isConnected;
-		this.open = isConnected;
-	}
-
-
 	public Boolean isConnected() {
-		return isConnected;
+		if(connectionState == ConnectionState.Disconnected) return false;
+		else return true;
 	}
 
 
@@ -102,7 +126,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		}
 		setChanged();
 		notifyObservers();
-		
+
 	}
 
 
@@ -130,7 +154,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	public void setNick(String nick) {
 		this.nick = nick;
 	}
-	
+
 	public void onUserJoined(IrcUser user) {
 		userList.add(user);
 		nickUserMap.put(user.nick, user);
@@ -190,5 +214,19 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public int getBufferCount() {
 		return buffers.getBufferCount();
+	}
+
+
+	public void setConnectionState(ConnectionState state) {
+		this.connectionState = state;
+		if(state == ConnectionState.Disconnected) {
+			setOpen(false);
+			if(statusBuffer != null) statusBuffer.setActive(false);
+		} else if(state == ConnectionState.Initialized) {
+			setOpen(true);
+			if(statusBuffer != null) statusBuffer.setActive(true);
+		}
+		this.setChanged();
+		notifyObservers();
 	}
 }

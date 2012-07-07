@@ -544,8 +544,11 @@ public class BufferActivity extends ExpandableListActivity {
 
 					@Override
 					public void onClick(View v) {
-						if(getGroup((Integer) v.getTag()).getStatusBuffer() != null)
+						if(getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
 							openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
+						} else { //TODO: mabye show the chatActivity but have it be empty, logo or something
+							Toast.makeText(BufferActivity.this, "Not Available", Toast.LENGTH_SHORT).show(); 
+						}
 					}
 				});
 				convertView.setTag(holder);

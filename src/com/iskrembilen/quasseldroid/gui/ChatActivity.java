@@ -370,7 +370,6 @@ public class ChatActivity extends Activity{
 			holder.messageID = entry.messageId;
 			holder.timeView.setText(entry.getTime());
 
-
 			switch (entry.type) {
 			case Action:
 				holder.nickView.setText("-*-");
@@ -378,10 +377,22 @@ public class ChatActivity extends Activity{
 				holder.nickView.setTextColor(ThemeUtil.chatActionColor);
 				holder.msgView.setText(entry.getNick()+" "+entry.content);
 				break;
+			case Error:
+				holder.nickView.setText("*");
+				holder.msgView.setTextColor(ThemeUtil.chatErrorColor);
+				holder.nickView.setTextColor(ThemeUtil.chatErrorColor);
+				holder.msgView.setText(entry.content);
+				break;
 			case Server:
 				holder.nickView.setText("*");
 				holder.msgView.setTextColor(ThemeUtil.chatServerColor);
 				holder.nickView.setTextColor(ThemeUtil.chatServerColor);
+				holder.msgView.setText(entry.content);
+				break;
+			case Notice:
+				holder.nickView.setText(entry.getNick());
+				holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
+				holder.nickView.setTextColor(ThemeUtil.chatNoticeColor);
 				holder.msgView.setText(entry.content);
 				break;
 			case Join:

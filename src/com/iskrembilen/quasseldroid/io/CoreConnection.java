@@ -27,6 +27,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
 import com.iskrembilen.quasseldroid.qtcomm.*;
@@ -737,7 +738,8 @@ public final class CoreConnection {
 							network.setNick((String) initMap.get("myNick").getData());
 							network.setName((String) initMap.get("networkName").getData());
 							boolean isConnected = (Boolean)initMap.get("isConnected").getData();
-							network.setConnected(isConnected);
+							if(isConnected) network.setConnectionState(ConnectionState.Initialized);
+							else network.setConnectionState(ConnectionState.Disconnected);
 							if(network.getStatusBuffer() != null)
 								network.getStatusBuffer().setActive(isConnected);
 							
@@ -1047,7 +1049,26 @@ public final class CoreConnection {
 							user.nick = nick.split("!")[0];
 							service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
 							sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
-						} else if (className.equals("Network") && function.equals("addIrcChannel")) {
+						}  else if (className.equals("Network") && function.equals("setConnectionState")) {
+							Log.d(TAG, "Sync: Network -> setConnectionState");
+							int networkId = Integer.parseInt(objectName);
+							Network.ConnectionState state = ConnectionState.getForValue((Integer)packedFunc.remove(0).getData());
+							//If network has no status buffer it is the first time we are connecting to it
+							if(state == ConnectionState.Connecting && networks.get(networkId).getStatusBuffer() == null) { 
+								//Create the new buffer object for status buffer
+								QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
+								BufferInfo info = new BufferInfo();
+								maxBufferId += 1;
+								info.id = maxBufferId;
+								info.networkId = networkId;
+								info.type = BufferInfo.Type.StatusBuffer;
+								Buffer buffer = new Buffer(info, dbHelper);
+								buffers.put(info.id, buffer);
+								service.getHandler().obtainMessage(R.id.SET_STATUS_BUFFER, networkId, 0, buffer).sendToTarget();
+							}
+							service.getHandler().obtainMessage(R.id.SET_CONNECTION_STATE, networkId, 0, state).sendToTarget();
+						} 
+						else if (className.equals("Network") && function.equals("addIrcChannel")) {
 							Log.d(TAG, "Sync: Network -> addIrcChannel");
 							String bufferName = (String) packedFunc.remove(0).getData();
 							boolean hasBuffer = false;
@@ -1072,7 +1093,6 @@ public final class CoreConnection {
 							}
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);	
 						} 
-						//TODO: need network objects to lookup buffers in given networks
 						else if (className.equals("IrcUser") && function.equals("partChannel")) {
 							Log.d(TAG, "Sync: IrcUser -> partChannel");
 							String[] tmp = objectName.split("/");
@@ -1172,6 +1192,9 @@ public final class CoreConnection {
 							//TODO: this basicly does shit. So find out if it effects anything and what it should do
 							//int buffer = (Integer) packedFunc.remove(0).getData();
 							//buffers.get(buffer).setRead();
+						} else if (className.equals("BufferSyncer") && function.equals("removeBuffer")) {
+							Log.d(TAG, "Sync: BufferSyncer -> removeBuffer");
+							System.out.println(packedFunc + " : "+ objectName);
 						} else if (className.equals("BufferViewConfig") && function.equals("addBuffer")) {
 							Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
 							System.out.println(packedFunc + " : " + objectName);
@@ -1193,6 +1216,7 @@ public final class CoreConnection {
 						 * This is called by the core when a new message should be displayed.
 						 */
 						if (functionName.equals("2displayMsg(Message)")) {
+							Log.d(TAG, "RpcCall: " + "2displayMsg(Message)");
 							IrcMessage message = (IrcMessage) packedFunc.remove(0).getData();
 	
 							if (!networks.get(message.bufferInfo.networkId).containsBuffer(message.bufferInfo.id) &&
@@ -1221,6 +1245,17 @@ public final class CoreConnection {
 							bundle.putString("oldNick", oldNick);
 							bundle.putString("newNick", newNick);
 							service.getHandler().obtainMessage(R.id.USER_CHANGEDNICK, networkId, -1, bundle).sendToTarget();
+						} else if(functionName.equals("2networkCreated(NetworkId)")) {
+							Log.d(TAG, "RpcCall: " + "2networkCreated(NetworkId)");
+							int networkId = ((Integer)packedFunc.remove(0).getData());
+							Network network = new Network(networkId);
+							networks.put(networkId, network);
+							sendInitRequest("Network", Integer.toString(networkId));
+						} else if(functionName.equals("2networkRemoved(NetworkId)")) {
+							Log.d(TAG, "RpcCall: " + "2networkRemoved(NetworkId)");
+							int networkId = ((Integer)packedFunc.remove(0).getData());
+							networks.remove(networkId);
+							service.getHandler().obtainMessage(R.id.NETWORK_REMOVED, networkId, 0).sendToTarget();
 						} else {
 							Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
 						}

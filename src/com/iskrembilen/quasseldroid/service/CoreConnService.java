@@ -39,6 +39,7 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
+import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -583,6 +584,14 @@ public class CoreConnService extends Service {
 			case R.id.ADD_NETWORK:
 				networks.addNetwork((Network)msg.obj);
 				break;
+			case R.id.NETWORK_REMOVED:
+				networks.removeNetwork(msg.arg1);
+				break;
+			case R.id.SET_CONNECTION_STATE:
+				networks.getNetworkById(msg.arg1).setConnectionState((ConnectionState)msg.obj);
+				break;
+			case R.id.SET_STATUS_BUFFER:
+				networks.getNetworkById(msg.arg1).setStatusBuffer((Buffer) msg.obj);
 			case R.id.SET_LAST_SEEN_TO_SERVICE:
 				/**
 				 * Setting last seen message id in a buffer
@@ -658,18 +667,18 @@ public class CoreConnService extends Service {
 				 * Buffer order changed so set the new one
 				 */
 				//---- start debug stuff
-				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
-				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
-				ArrayList<Integer> c = new ArrayList<Integer>();
-				for(Network net : networks.getNetworkList()) {
-					c.add(net.getStatusBuffer().getInfo().id);
-					for(Buffer buf : net.getBuffers().getRawBufferList()) {
-						c.add(buf.getInfo().id);
-					}
-				}
-				Collections.sort(a);
-				Collections.sort(b);
-				Collections.sort(c);
+//				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
+//				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
+//				ArrayList<Integer> c = new ArrayList<Integer>();
+//				for(Network net : networks.getNetworkList()) {
+//					c.add(net.getStatusBuffer().getInfo().id);
+//					for(Buffer buf : net.getBuffers().getRawBufferList()) {
+//						c.add(buf.getInfo().id);
+//					}
+//				}
+//				Collections.sort(a);
+//				Collections.sort(b);
+//				Collections.sort(c);
 				//---- end debug stuff
 				
 				if(networks == null) throw new RuntimeException("Networks are null when setting buffer order");

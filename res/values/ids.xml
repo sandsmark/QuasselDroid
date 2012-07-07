@@ -53,5 +53,8 @@
 <item type="id" name="INIT_PROGRESS"></item>
 <item type="id" name="INIT_DONE"></item>
 <item type="id" name="CONNECTING"/>
+<item type="id" name="NETWORK_REMOVED"/>
+<item type="id" name="SET_CONNECTION_STATE"></item>
+<item type="id" name="SET_STATUS_BUFFER"></item>
 
 </resources>

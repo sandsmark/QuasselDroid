@@ -56,7 +56,7 @@ public class IrcMessage implements Comparable<IrcMessage>{
 		public int getValue(){
 			return value;
 		}
-		public static Type getForValue(int value) {
+		public static Type getForValue(int value) { //TODO: optimize hashmap
 			for (Type type: Type.values()) {
 				if (type.value == value)
 					return type;

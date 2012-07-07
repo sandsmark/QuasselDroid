@@ -22,7 +22,7 @@ public class NetworkCollection extends Observable implements Observer {
 	
 	public Buffer getBufferById(int bufferId) {
 		for (Network network : networkList) {
-			if(network.getStatusBuffer().getInfo().id == bufferId)
+			if(network.getStatusBuffer() != null && network.getStatusBuffer().getInfo().id == bufferId)
 				return network.getStatusBuffer();
 			if(network.getBuffers().hasBuffer(bufferId)) {
 				return network.getBuffers().getBuffer(bufferId);
@@ -59,5 +59,14 @@ public class NetworkCollection extends Observable implements Observer {
 		setChanged();
 		notifyObservers();
 		
+	}
+
+	public void removeNetwork(int networkId) {
+		Network network = networkMap.remove(networkId);
+		networkList.remove(network);
+		network.deleteObservers();
+		Collections.sort(networkList);
+		setChanged();
+		notifyObservers();
 	}
 }
