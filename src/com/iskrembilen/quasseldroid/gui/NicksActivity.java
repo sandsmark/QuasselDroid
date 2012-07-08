@@ -251,7 +251,7 @@ public class NicksActivity extends Activity{
 
 
             }else{
-                if(group.second.size()>2){
+                if(group.second.size()>1){
                     holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
                 } else {
                     holder.nameView.setText(group.second.size() + " "+group.first.modeName);
