@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.content.*;
@@ -45,6 +46,7 @@ import android.widget.*;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.gui.BufferActivity.ActionModeData;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
@@ -73,9 +75,8 @@ public class BufferActivity extends ExpandableListActivity {
 	private int restoreItemPosition = 0;
 
 	private long backedTimestamp = 0;
-
-	private ActionMode actionMode;
-	private ActionMode.Callback actionModeCallback;
+	
+	private ActionModeData actionModeData = new ActionModeData();
 
 	private int currentTheme;
 
@@ -93,7 +94,11 @@ public class BufferActivity extends ExpandableListActivity {
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
-		initContextualMenu();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			initActionMenu();
+		} else {
+			registerForContextMenu(getExpandableListView());	    	
+		}
 		statusReciver = new ResultReceiver(null) {
 
 			@Override
@@ -131,71 +136,64 @@ public class BufferActivity extends ExpandableListActivity {
 		preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
 	}
 
-	private void initContextualMenu() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			actionModeCallback = new ActionMode.Callback() {
+	@TargetApi(11)
+	private void initActionMenu() {
+		actionModeData.actionModeCallback = new ActionMode.Callback() {
 
-				@Override
-				public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-					MenuInflater inflater = mode.getMenuInflater();
-					inflater.inflate(R.menu.buffer_contextual_menu, menu);
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+				MenuInflater inflater = mode.getMenuInflater();
+				inflater.inflate(R.menu.buffer_contextual_menu, menu);
+				return true;
+			}
+
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+				return false; // Return false if nothing is done
+			}
+
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				switch (item.getItemId()) {
+				case R.id.context_menu_join:
+					joinChannel(actionModeData.bufferId);
+					mode.finish();
 					return true;
-				}
-
-				@Override
-				public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-					return false; // Return false if nothing is done
-				}
-
-				@Override
-				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-					MenuTag tag = (MenuTag) mode.getTag();
-					switch (item.getItemId()) {
-					case R.id.context_menu_join:
-						joinChannel(tag.bufferId);
-						mode.finish();
-						return true;
-					case R.id.context_menu_part:
-						partChannel(tag.bufferId);
-						mode.finish();
-						return true;
-					default:
-						return false;
-					}
-				}
-
-				// Called when the user exits the action mode
-				@Override
-				public void onDestroyActionMode(ActionMode mode) {
-					MenuTag tag = (MenuTag) mode.getTag();
-					tag.listItem.setActivated(false);
-					actionMode = null;
-				}
-			};
-			getExpandableListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-
-				@Override
-				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-					// Start the CAB using the ActionMode.Callback defined above
-					actionMode = startActionMode(actionModeCallback);
-					MenuTag tag = new MenuTag();
-					tag.bufferId = (int)id;
-					tag.listItem = view;
-					actionMode.setTag(tag);
-					if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
-						actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
-						actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
-					}else{
-						actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-						actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
-					}
-					view.setActivated(true);
+				case R.id.context_menu_part:
+					partChannel(actionModeData.bufferId);
+					mode.finish();
 					return true;
+				default:
+					return false;
 				}
-			});
-		} else {
-			registerForContextMenu(getExpandableListView());	    	
-		}
+			}
+
+			// Called when the user exits the action mode
+			@Override
+			public void onDestroyActionMode(ActionMode mode) {
+				actionModeData.listItem.setActivated(false);
+				actionModeData.actionMode = null;
+			}
+		};
+		getExpandableListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				// Start the CAB using the ActionMode.Callback defined above
+				actionModeData.actionMode = startActionMode(actionModeData.actionModeCallback);
+				actionModeData.bufferId = (int)id;
+				actionModeData.listItem = view;
+				if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
+				}else{
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
+				}
+				view.setActivated(true);
+				return true;
+			}
+		});
 	}
 
 	@Override
@@ -662,8 +660,10 @@ public class BufferActivity extends ExpandableListActivity {
 		}
 	}
 	
-	class MenuTag {
+	class ActionModeData {
 		public int bufferId;
 		public View listItem;
+		public ActionMode actionMode;
+		public ActionMode.Callback actionModeCallback;
 	}
 }
