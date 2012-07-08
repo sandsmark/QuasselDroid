@@ -411,6 +411,8 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 			if(boundConnService.isConnected()) {
 				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
 				finish();
+			} else {
+				boundConnService.disconnectFromCore();
 			}
 			boundConnService.registerStatusReceiver(statusReceiver);
 		}
