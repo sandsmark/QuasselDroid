@@ -738,7 +738,7 @@ public final class CoreConnection {
 							network.setNick((String) initMap.get("myNick").getData());
 							network.setName((String) initMap.get("networkName").getData());
 							boolean isConnected = (Boolean)initMap.get("isConnected").getData();
-							if(isConnected) network.setConnectionState(ConnectionState.Initialized);
+							if(isConnected) network.setConnected(true);
 							else network.setConnectionState(ConnectionState.Disconnected);
 							if(network.getStatusBuffer() != null)
 								network.getStatusBuffer().setActive(isConnected);
@@ -1093,6 +1093,18 @@ public final class CoreConnection {
 							}
 							sendInitRequest("IrcChannel", objectName+"/" + bufferName);	
 						} 
+						else if (className.equals("Network") && function.equals("setConnected")) {
+							Log.d(TAG, "Sync: Network -> setConnected");
+							boolean connected = (Boolean) packedFunc.remove(0).getData();
+							int networkId = Integer.parseInt(objectName);
+							service.getHandler().obtainMessage(R.id.SET_CONNECTED, networkId, 0, connected).sendToTarget();
+						}
+						else if (className.equals("Network") && function.equals("setMyNick")) {
+							Log.d(TAG, "Sync: Network -> setMyNick");
+							String nick = (String) packedFunc.remove(0).getData();
+							int networkId = Integer.parseInt(objectName);
+							service.getHandler().obtainMessage(R.id.SET_MY_NICK, networkId, 0, nick).sendToTarget();
+						}
 						else if (className.equals("IrcUser") && function.equals("partChannel")) {
 							Log.d(TAG, "Sync: IrcUser -> partChannel");
 							String[] tmp = objectName.split("/");
@@ -1145,7 +1157,6 @@ public final class CoreConnection {
 							bundle.putString("nick", nick);
 							bundle.putString("mode", changedMode);
 							bundle.putString("channel", channel);
-							Log.d(TAG, nick + " " + channel + " " + changedMode);
 							service.getHandler().obtainMessage(R.id.USER_ADD_MODE, networkId, 0, bundle).sendToTarget();
 							
 							

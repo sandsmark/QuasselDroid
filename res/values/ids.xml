@@ -56,5 +56,8 @@
 <item type="id" name="NETWORK_REMOVED"/>
 <item type="id" name="SET_CONNECTION_STATE"></item>
 <item type="id" name="SET_STATUS_BUFFER"></item>
+<item type="id" name="SET_CONNECTED"></item>
+<item type="id" name="SET_MY_NICK"></item>
+
 
 </resources>

@@ -41,8 +41,6 @@ public class UserCollection extends Observable implements Observer {
         if(found) {
             users.get(mode).remove(userToRemove);
             this.setChanged();
-        } else{
-            throw new IllegalArgumentException("User with nick "+nick+" was not found in list for mode "+mode.modeName+".");
         }
     }
 
@@ -72,7 +70,7 @@ public class UserCollection extends Observable implements Observer {
             if(modes.contains(mode.shortModeName)){
                 try{
                     addUserToModeList(users.get(mode), user);
-                    Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.nick+".");
+                    //Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.nick+".");
                 } catch (IllegalArgumentException e){
                     Log.e(TAG, e.getMessage());
                 }
@@ -173,7 +171,7 @@ public class UserCollection extends Observable implements Observer {
             if(mode.equals(ircMode.shortModeName)){
                 try{
                     addUserToModeList(users.get(ircMode), user);
-                    Log.e(TAG, "Mode " + ircMode.modeName + " added to user " + user.nick);
+                    //Log.e(TAG, "Mode " + ircMode.modeName + " added to user " + user.nick);
                     break;
                 } catch (IllegalArgumentException e){
                     Log.e(TAG, e.getMessage());

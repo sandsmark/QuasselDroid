@@ -817,6 +817,12 @@ public class CoreConnService extends Service {
 			case R.id.CHANNEL_TOPIC_CHANGED:
 				networks.getNetworkById(msg.arg1).getBuffers().getBuffer(msg.arg2).setTopic((String)msg.obj);
 				break;
+			case R.id.SET_CONNECTED:
+				networks.getNetworkById(msg.arg1).setConnected((Boolean)msg.obj);
+				break;
+			case R.id.SET_MY_NICK:
+				networks.getNetworkById(msg.arg1).setNick((String)msg.obj);
+				break;
 			}			
 		}
 	}

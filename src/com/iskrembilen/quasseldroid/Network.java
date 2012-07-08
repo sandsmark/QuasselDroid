@@ -40,6 +40,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private String nick;
 	private boolean open;
 	private ConnectionState connectionState;
+	private Boolean isConnected;
 
 	public Network(int networkId) {
 		this.networkId = networkId;
@@ -48,6 +49,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		nickUserMap = new HashMap<String, IrcUser>();
 		open=false;
 		connectionState = ConnectionState.Disconnected;
+		isConnected = false;
 	}
 
 
@@ -89,8 +91,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	}
 
 	public Boolean isConnected() {
-		if(connectionState == ConnectionState.Disconnected) return false;
-		else return true;
+		return isConnected;
 	}
 
 
@@ -221,16 +222,23 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setConnectionState(ConnectionState state) {
 		this.connectionState = state;
-		if(state == ConnectionState.Disconnected) {
+	}
+
+
+	public void setConnected(Boolean connected) {
+		if(connected) {
+			setOpen(true);
+			if(statusBuffer != null) statusBuffer.setActive(true);
+			
+		} else {
 			setOpen(false);
 			if(statusBuffer != null) statusBuffer.setActive(false);
 			for(Buffer buffer : buffers.getRawBufferList()) {
 				buffer.setActive(false);
 			}
-		} else if(state == ConnectionState.Initialized) {
-			setOpen(true);
-			if(statusBuffer != null) statusBuffer.setActive(true);
 		}
+		this.isConnected = connected;
+		
 		this.setChanged();
 		notifyObservers();
 	}
