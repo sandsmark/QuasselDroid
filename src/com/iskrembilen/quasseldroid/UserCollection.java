@@ -45,9 +45,7 @@ public class UserCollection extends Observable implements Observer {
         }
         if(found) {
             users.get(mode).remove(userToRemove);
-            if(uniqueUsers.get(mode).contains(userToRemove)){
-                uniqueUsers.get(mode).remove(userToRemove);
-            }
+            uniqueUsers.get(mode).remove(userToRemove);
             this.setChanged();
         } else{
             throw new IllegalArgumentException("User with nick "+nick+" was not found in list for mode "+mode.modeName+".");
@@ -55,8 +53,7 @@ public class UserCollection extends Observable implements Observer {
     }
 
     private void removeUserFromModeList(List<IrcUser> list, IrcUser user){
-        if(list.contains(user)){
-            list.remove(user);
+        if(list.remove(user)){
             this.setChanged();
         }else{
             throw new IllegalArgumentException("User "+user.nick+" was not found.");
@@ -145,10 +142,7 @@ public class UserCollection extends Observable implements Observer {
         boolean lowerRank = false;
         for(IrcMode mode: IrcMode.values()) {
             if(lowerRank) {
-                if(uniqueUsers.get(mode).contains(user)){
-                    //Log.e(TAG, "Removing user "+user.nick+" from mode "+mode.modeName+".");
-                    uniqueUsers.get(mode).remove(user);
-                }
+                uniqueUsers.get(mode).remove(user);
             }
             if(mode==hasMode) {
                 lowerRank = true;
@@ -218,9 +212,7 @@ public class UserCollection extends Observable implements Observer {
             if(mode.equals(ircMode.shortModeName)){
                 try{
                     removeUserFromModeList(users.get(ircMode),user);
-                    if(uniqueUsers.get(ircMode).contains(user)){
-                        uniqueUsers.get(ircMode).remove(user);
-                    }
+                    uniqueUsers.get(ircMode).remove(user);
                     //Log.e(TAG, "Mode " + ircMode.modeName + " removed from user " + user.nick+".");
                     break;
 
