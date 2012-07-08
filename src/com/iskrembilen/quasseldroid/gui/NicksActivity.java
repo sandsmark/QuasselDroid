@@ -208,7 +208,7 @@ public class NicksActivity extends Activity{
             int counter = 0;
 			for(IrcMode mode: IrcMode.values()){
                 if (counter == groupPosition){
-                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersSortedByMode().get(mode));
+                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersWithMode(mode));
                 } else {
                     counter++;
                 }

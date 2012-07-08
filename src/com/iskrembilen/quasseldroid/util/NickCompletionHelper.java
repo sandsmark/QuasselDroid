@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class NickCompletionHelper extends Filter {
 
-	private List<IrcUser> users = new ArrayList<IrcUser>();
+	private List<IrcUser> users;
 	private int nickStart = 0;
 	private EditText inputField;
 	
@@ -19,10 +19,8 @@ public class NickCompletionHelper extends Filter {
 	private FilterResults lastFilteredResults = null;
 	private int lastFilteredIndex = 0;
 
-	public NickCompletionHelper(Map<IrcMode, ArrayList<IrcUser>> userLists) {
-		for(List<IrcUser> userList : userLists.values()) {
-			users.addAll(userList);
-		}
+	public NickCompletionHelper(ArrayList<IrcUser> userList) {
+        users = userList;
 	}
 	
 	@SuppressWarnings("unchecked")
