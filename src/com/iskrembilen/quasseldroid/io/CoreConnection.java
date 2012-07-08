@@ -900,9 +900,11 @@ public final class CoreConnection {
 							
 							String bufferName = (String)map.get("name").getData();
 							String topic = (String)map.get("topic").getData();
-							for(Buffer buffer : buffers.values()) {
+							String[] tmp = objectName.split("/");
+							int networkId = Integer.parseInt(tmp[0]);
+							for(Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
 								if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
-									Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, buffer.getInfo().networkId, buffer.getInfo().id, topic);
+									Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
 									msg.sendToTarget();
 									msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ACTIVE,buffer.getInfo().id, 0, true);
 									msg.sendToTarget();
@@ -1073,9 +1075,11 @@ public final class CoreConnection {
 						} 
 						else if (className.equals("Network") && function.equals("addIrcChannel")) {
 							Log.d(TAG, "Sync: Network -> addIrcChannel");
+							int networkId = Integer.parseInt(objectName);
 							String bufferName = (String) packedFunc.remove(0).getData();
+							System.out.println(bufferName);
 							boolean hasBuffer = false;
-							for(Buffer buffer : buffers.values()) {
+							for(Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
 								if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
 									hasBuffer = true;
 								}
@@ -1087,7 +1091,7 @@ public final class CoreConnection {
 								info.name = bufferName;
 								maxBufferId += 1;
 								info.id = maxBufferId;
-								info.networkId = Integer.parseInt(objectName);
+								info.networkId = networkId;
 								info.type = BufferInfo.Type.ChannelBuffer;
 								Buffer buffer = new Buffer(info, dbHelper);
 								buffers.put(info.id, buffer);
