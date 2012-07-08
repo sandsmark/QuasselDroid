@@ -19,8 +19,6 @@
 
     <style name="QuasseldroidThemeLight" parent="@style/ThemeBase.Light"></style>
 
-    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark">
-        <item name="android:textColor">#debc85</item>
-    </style>
+    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark"></style>
 
 </resources>

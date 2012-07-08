@@ -18,7 +18,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class SplashActivity extends Activity {
 	// Set the display time, in milliseconds (or extract it out as a configurable parameter)
-	private final int SPLASH_DISPLAY_LENGTH = 1000;
+	private final int SPLASH_DISPLAY_LENGTH = 500;
 	private final String TAG = SplashActivity.class.getSimpleName();
 	private boolean canBeFinished;
 	private Class<?> activityToStart;
