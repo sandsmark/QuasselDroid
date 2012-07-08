@@ -208,7 +208,7 @@ public class NicksActivity extends Activity{
             int counter = 0;
 			for(IrcMode mode: IrcMode.values()){
                 if (counter == groupPosition){
-                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersSortedByMode().get(mode));
+                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersWithMode(mode));
                 } else {
                     counter++;
                 }
@@ -251,7 +251,7 @@ public class NicksActivity extends Activity{
 
 
             }else{
-                if(group.second.size()>2){
+                if(group.second.size()>1){
                     holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
                 } else {
                     holder.nameView.setText(group.second.size() + " "+group.first.modeName);

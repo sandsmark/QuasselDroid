@@ -615,7 +615,7 @@ public class ChatActivity extends Activity{
 			//Testing to see if i can add item to adapter in service
 			Buffer buffer = boundConnService.getBuffer(bufferId, adapter);
 			adapter.setBuffer(buffer);
-			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsersSortedByMode());
+			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
 			findViewById(R.id.chat_auto_complete_button).setEnabled(true);
 			findViewById(R.id.ChatInputView).setEnabled(true);
 

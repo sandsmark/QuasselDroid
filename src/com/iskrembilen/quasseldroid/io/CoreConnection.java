@@ -26,6 +26,7 @@ import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.Pair;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
@@ -782,6 +783,7 @@ public final class CoreConnection {
 									if (buffer.getInfo().name.equalsIgnoreCase(chanName)) {
 										buffer.setTopic(topic);
 										buffer.setActive(true);
+                                        ArrayList<Pair<IrcUser, String>> usersToAdd = new ArrayList<Pair<IrcUser, String>>();
 										for(Entry<String, QVariant<?>> nick : userModes.entrySet()) {
 											IrcUser user = userTempMap.get(nick.getKey());
 											if(user == null) { 
@@ -795,9 +797,10 @@ public final class CoreConnection {
 	//											
 	
 											}
-											buffer.getUsers().addUser(user, (String)nick.getValue().getData());
+                                            usersToAdd.add(new Pair<IrcUser, String>(user, (String)nick.getValue().getData()));
 										}
-										foundChannel = true;
+                                        buffer.getUsers().addUsers(usersToAdd);
+                                        foundChannel = true;
 										break;
 									}
 								}

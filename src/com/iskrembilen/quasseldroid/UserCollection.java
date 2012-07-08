@@ -1,6 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
 import android.util.Log;
+import android.util.Pair;
 
 import java.util.*;
 
@@ -8,11 +9,14 @@ public class UserCollection extends Observable implements Observer {
 
 	private static final String TAG = UserCollection.class.getSimpleName();
 	private Map<IrcMode, ArrayList<IrcUser>> users;
+    private Map<IrcMode, ArrayList<IrcUser>> uniqueUsers;
 
 	public UserCollection() {
 		users = new HashMap<IrcMode, ArrayList<IrcUser>>();
+        uniqueUsers = new HashMap<IrcMode, ArrayList<IrcUser>>();
         for(IrcMode mode: IrcMode.values()){
             users.put(mode, new ArrayList<IrcUser>());
+            uniqueUsers.put(mode, new ArrayList<IrcUser>());
         }
 	}
 
@@ -20,11 +24,12 @@ public class UserCollection extends Observable implements Observer {
         for(IrcMode mode: IrcMode.values()){
             try{
                 removeUserWithNickFromModeList(mode, nick);
-                Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
+                //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
             } catch(IllegalArgumentException e) {
-                Log.e(TAG, e.getMessage());
+                //Log.e(TAG, e.getMessage());
             }
         }
+        findUniqueUsersSortedByMode();
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
@@ -48,11 +53,12 @@ public class UserCollection extends Observable implements Observer {
         for(IrcMode mode: IrcMode.values()){
             try{
                 removeUserFromModeList(users.get(mode), user);
-                Log.e(TAG,  "Mode "+mode.modeName+" removed from user "+user.nick+".");
+                //Log.e(TAG,  "Mode "+mode.modeName+" removed from user "+user.nick+".");
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, e.getMessage());
             }
         }
+        findUniqueUsersSortedByMode();
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
     }
 
@@ -64,8 +70,7 @@ public class UserCollection extends Observable implements Observer {
             throw new IllegalArgumentException("User "+user.nick+" was not found.");
         }
     }
-
-	public void addUser(IrcUser user, String modes) {
+    public void addUser(IrcUser user, String modes) {
         for(IrcMode mode: IrcMode.values()){
             if(modes.contains(mode.shortModeName)){
                 try{
@@ -76,9 +81,28 @@ public class UserCollection extends Observable implements Observer {
                 }
             }
         }
-        user.addObserver(this);
+        findUniqueUsersSortedByMode();
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
-	}
+        user.addObserver(this);
+
+    }
+    public void addUsers(ArrayList<Pair<IrcUser, String>> usersToAdd) {
+        for(Pair<IrcUser, String> user: usersToAdd) {
+            for(IrcMode mode: IrcMode.values()){
+                if(user.second.contains(mode.shortModeName)){
+                    try{
+                        addUserToModeList(users.get(mode), user.first);
+                        //Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.nick+".");
+                    } catch (IllegalArgumentException e){
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            }
+            user.first.addObserver(this);
+        }
+        findUniqueUsersSortedByMode();
+        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+    }
 
     private void addUserToModeList(List<IrcUser> list, IrcUser user) {
         if(list.contains(user)){
@@ -98,41 +122,31 @@ public class UserCollection extends Observable implements Observer {
         return users.get(mode);
     }
 
-    public Map<IrcMode, ArrayList<IrcUser>> getUniqueUsersSortedByMode(){
+    private void findUniqueUsersSortedByMode(){
         /*
         * Because IrcMode.values() starts at the first declaration and moves down,
         * we can be sure that users get added to the list with the highest ranking mode first.
         */
-        Map<IrcMode, ArrayList<IrcUser>> uniqueUsers = new HashMap<IrcMode, ArrayList<IrcUser>>();
         for(IrcMode mode: IrcMode.values()){
-            uniqueUsers.put(mode,new ArrayList<IrcUser>());
             for(IrcUser user: users.get(mode)){
-                if(!isIrcUserAlreadyAdded(uniqueUsers, user)){
+                if(!isIrcUserAlreadyAddedWithAHigherRankingMode(mode, user)){
                     uniqueUsers.get(mode).add(user);
                 }
             }
         }
-        return uniqueUsers;
     }
 
-    private boolean isIrcUserAlreadyAdded(Map<IrcMode, ArrayList<IrcUser>> uniqueUsers, IrcUser user) {
+    private boolean isIrcUserAlreadyAddedWithAHigherRankingMode(IrcMode currentMode, IrcUser user) {
         boolean found = false;
-        for(ArrayList<IrcUser> listOfAlreadyAddedUsers: uniqueUsers.values()){
-            if(isIrcUserInList(user, listOfAlreadyAddedUsers)){
-                found = true;
+        for(IrcMode mode: uniqueUsers.keySet()){
+            found = uniqueUsers.get(mode).contains(user);
+            if(currentMode == mode) {
+                break;
             }
         }
         return found;
     }
 
-    private boolean isIrcUserInList(IrcUser user, ArrayList<IrcUser> listOfAlreadyAddedUsers) {
-        for(IrcUser alreadyAddedUser: listOfAlreadyAddedUsers){
-            if (alreadyAddedUser == user) {
-                return true;
-            }
-        }
-        return false;
-    }
     public ArrayList<IrcUser> getUniqueUsers(){
         /*
         * Because IrcMode.values() starts at the first declaration and moves down,
@@ -149,6 +163,10 @@ public class UserCollection extends Observable implements Observer {
         return uniqueUsers;
     }
 
+    public ArrayList<IrcUser> getUniqueUsersWithMode(IrcMode mode) {
+        return uniqueUsers.get(mode);
+    }
+
     public int getUserCount() {
         //All users have the mode IrcMode.USER
         return users.get(IrcMode.USER).size();
@@ -162,6 +180,7 @@ public class UserCollection extends Observable implements Observer {
                 this.setChanged();
             }
         }
+        findUniqueUsersSortedByMode();
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 
 	}
@@ -178,6 +197,7 @@ public class UserCollection extends Observable implements Observer {
                 }
             }
         }
+        findUniqueUsersSortedByMode();
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 
@@ -189,7 +209,7 @@ public class UserCollection extends Observable implements Observer {
             if(mode.equals(ircMode.shortModeName)){
                 try{
                     removeUserFromModeList(users.get(ircMode),user);
-                    Log.e(TAG, "Mode " + ircMode.modeName + " removed from user " + user.nick+".");
+                    //Log.e(TAG, "Mode " + ircMode.modeName + " removed from user " + user.nick+".");
                     break;
 
                 } catch (IllegalArgumentException e){
@@ -197,6 +217,7 @@ public class UserCollection extends Observable implements Observer {
                 }
             }
         }
+        findUniqueUsersSortedByMode();
 		notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
 	}
 }
