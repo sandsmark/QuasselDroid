@@ -23,11 +23,10 @@ public class UserCollection extends Observable implements Observer {
     public void addUser(IrcUser user, String modes) {
         for(IrcMode mode: IrcMode.values()){
             if(modes.contains(mode.shortModeName)){
-                try{
-                    addUserToModeList(mode, user);
+                if(addUserToModeList(mode, user)){
                     //Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.nick+".");
-                } catch (IllegalArgumentException e){
-                    Log.e(TAG, e.getMessage());
+                } else{
+                    //Log.e(TAG, "User "+user.nick+" already has mode "+mode.modeName+".");
                 }
             }
         }
@@ -41,11 +40,10 @@ public class UserCollection extends Observable implements Observer {
         for(Pair<IrcUser, String> user: usersWithModes) {
             for(IrcMode mode: IrcMode.values()){
                 if(user.second.contains(mode.shortModeName)){
-                    try{
-                        addUserToModeList(mode, user.first);
+                    if(addUserToModeList(mode, user.first)){
                         //Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.first.nick+".");
-                    } catch (IllegalArgumentException e){
-                        //Log.e(TAG, e.getMessage());
+                    } else {
+                        //Log.e(TAG, "User "+user.nick+" already has mode "+mode.modeName+".");
                     }
                 }
             }
@@ -55,23 +53,23 @@ public class UserCollection extends Observable implements Observer {
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
     }
 
-    private void addUserToModeList(IrcMode mode, IrcUser user) {
+    private boolean addUserToModeList(IrcMode mode, IrcUser user) {
         if(users.get(mode).contains(user)){
-            throw new IllegalArgumentException("User "+user.nick+" is already in this list.");
+            return false;
         }else{
             users.get(mode).add(user);
             Collections.sort(users.get(mode));
             this.setChanged();
+            return true;
         }
     }
 
     public void removeUser(IrcUser user) {
         for(IrcMode mode: IrcMode.values()){
-            try{
-                removeUserFromModeList(mode, user);
+            if(removeUserFromModeList(mode, user)){
                 //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
-            } catch(IllegalArgumentException e) {
-                //Log.e(TAG, e.getMessage());
+            } else {
+                //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
             }
         }
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
@@ -80,11 +78,10 @@ public class UserCollection extends Observable implements Observer {
     public void removeUsers(ArrayList<IrcUser> users) {
         for(IrcUser user: users){
             for(IrcMode mode: IrcMode.values()){
-                try{
-                    removeUserFromModeList(mode, user);
+                if(removeUserFromModeList(mode, user)){
                     //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
-                } catch(IllegalArgumentException e) {
-                    //Log.e(TAG, e.getMessage());
+                } else {
+                    //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                 }
             }
         }
@@ -93,16 +90,15 @@ public class UserCollection extends Observable implements Observer {
 
     public void removeUserByNick(String nick) {
         for(IrcMode mode: IrcMode.values()){
-            try{
-                for(IrcUser user: users.get(mode)){
-                    if(user.nick.equals(nick)){
-                        removeUserFromModeList(mode, user);
+            for(IrcUser user: users.get(mode)){
+                if(user.nick.equals(nick)){
+                    if(removeUserFromModeList(mode, user)){
                         //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
                         break;
+                    } else {
+                        //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                     }
                 }
-            } catch(IllegalArgumentException e) {
-                //Log.e(TAG, e.getMessage());
             }
         }
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
@@ -111,16 +107,15 @@ public class UserCollection extends Observable implements Observer {
     public void removeUsersByNick(ArrayList<String> nicks) {
         for(String nick: nicks){
             for(IrcMode mode: IrcMode.values()){
-                try{
-                    for(IrcUser user: users.get(mode)){
-                        if(user.nick.equals(nick)){
-                            removeUserFromModeList(mode, user);
+                for(IrcUser user: users.get(mode)){
+                    if(user.nick.equals(nick)){
+                        if(removeUserFromModeList(mode, user)){
                             //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
                             break;
+                        } else {
+                            //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                         }
                     }
-                } catch(IllegalArgumentException e) {
-                    //Log.e(TAG, e.getMessage());
                 }
             }
         }
@@ -128,24 +123,24 @@ public class UserCollection extends Observable implements Observer {
 
     }
 
-    private void removeUserFromModeList(IrcMode mode, IrcUser user){
+    private boolean removeUserFromModeList(IrcMode mode, IrcUser user){
         if(users.get(mode).remove(user)){
             uniqueUsers.get(mode).remove(user);
             this.setChanged();
-        }else{
-            throw new IllegalArgumentException("User "+user.nick+" was not found.");
+            return true;
+        } else {
+            return false;
         }
     }
 
     public void addModeToUser(IrcUser user, String mode) {
         for(IrcMode ircMode: IrcMode.values()){
             if(mode.equals(ircMode.shortModeName)){
-                try{
-                    addUserToModeList(ircMode, user);
+                if(addUserToModeList(ircMode, user)){
                     //Log.e(TAG, "Mode " + ircMode.modeName + " added to user " + user.nick);
                     break;
-                } catch (IllegalArgumentException e){
-                    //Log.e(TAG, e.getMessage());
+                } else {
+                    //Log.e(TAG, "User "+user.nick+" already has mode "+mode.modeName+".");
                 }
             }
         }
@@ -155,17 +150,16 @@ public class UserCollection extends Observable implements Observer {
 
     public void removeModeFromUser(IrcUser user, String mode) {
         if(mode.equals("")){
-            throw new IllegalArgumentException("Cannot remove empty mode from user.");
+            //Log.e(TAG,"Cannot remove empty mode from user "+user.nick+".");
+            return;
         }
         for(IrcMode ircMode: IrcMode.values()){
             if(mode.equals(ircMode.shortModeName)){
-                try{
-                    removeUserFromModeList(ircMode,user);
+                if(removeUserFromModeList(ircMode,user)){
                     //Log.e(TAG, "Mode " + ircMode.modeName + " removed from user " + user.nick+".");
                     break;
-
-                } catch (IllegalArgumentException e){
-                    //Log.e(TAG, e.getMessage());
+                } else {
+                    //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                 }
             }
         }
