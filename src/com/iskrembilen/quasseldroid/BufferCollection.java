@@ -136,4 +136,14 @@ public class BufferCollection extends Observable implements Observer {
 	public List<Buffer> getRawBufferList() {
 		return bufferList;
 	}
+
+	public void removeBuffer(int bufferId) {
+		Buffer buffer = buffers.remove(bufferId);
+		bufferList.remove(buffer);
+		filteredList.remove(buffer);
+		buffer.deleteObservers();
+		
+		this.setChanged();
+		notifyObservers();		
+	}
 }

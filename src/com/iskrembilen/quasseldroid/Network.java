@@ -46,6 +46,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		this.networkId = networkId;
 		userList = new ArrayList<IrcUser>();
 		buffers = new BufferCollection();
+		buffers.addObserver(this);
 		nickUserMap = new HashMap<String, IrcUser>();
 		open=false;
 		connectionState = ConnectionState.Disconnected;
@@ -75,7 +76,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void addBuffer(Buffer buffer) {
 		buffers.addBuffer(buffer);
-		buffer.addObserver(this);
 	}
 
 
@@ -238,8 +238,13 @@ public class Network extends Observable implements Observer, Comparable<Network>
 			}
 		}
 		this.isConnected = connected;
-		
 		this.setChanged();
 		notifyObservers();
+	}
+
+
+	public void removeBuffer(int bufferId) {
+		buffers.removeBuffer(bufferId);
+		
 	}
 }

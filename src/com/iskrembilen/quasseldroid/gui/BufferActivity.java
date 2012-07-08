@@ -163,6 +163,10 @@ public class BufferActivity extends ExpandableListActivity {
 					partChannel(actionModeData.bufferId);
 					mode.finish();
 					return true;
+				case R.id.context_menu_delete:
+					deleteChannel(actionModeData.bufferId);
+					mode.finish();
+					return true;
 				default:
 					return false;
 				}
@@ -186,8 +190,10 @@ public class BufferActivity extends ExpandableListActivity {
 				if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);	
 				}else{
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
 				}
 				view.setActivated(true);
@@ -281,9 +287,11 @@ public class BufferActivity extends ExpandableListActivity {
 		if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
 			menu.findItem(R.id.context_menu_join).setVisible(false);
 			menu.findItem(R.id.context_menu_part).setVisible(true);	
+			menu.findItem(R.id.context_menu_delete).setVisible(false);
 		}else{
 			menu.findItem(R.id.context_menu_join).setVisible(true);
-			menu.findItem(R.id.context_menu_part).setVisible(false);	
+			menu.findItem(R.id.context_menu_part).setVisible(false);
+			menu.findItem(R.id.context_menu_delete).setVisible(true);
 		}
 	}
 
@@ -296,6 +304,9 @@ public class BufferActivity extends ExpandableListActivity {
 			return true;
 		case R.id.context_menu_part:
 			partChannel((int)info.id);
+			return true;
+		case R.id.context_menu_delete:
+			deleteChannel((int)info.id);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -396,6 +407,10 @@ public class BufferActivity extends ExpandableListActivity {
 
 	private void partChannel(int bufferId) {
 		boundConnService.sendMessage(bufferId, "/part "+bufferListAdapter.networks.getBufferById(bufferId).getInfo().name);
+	}
+	
+	private void deleteChannel(int bufferId) {
+		boundConnService.deleteBuffer(bufferId);
 	}
 
 	private void openBuffer(Buffer buffer) {

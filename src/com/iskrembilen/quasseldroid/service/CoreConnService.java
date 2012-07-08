@@ -201,6 +201,10 @@ public class CoreConnService extends Service {
 		coreConn.requestUnhideTempHiddenBuffer(bufferId);
 		networks.getBufferById(bufferId).setTemporarilyHidden(false);
 	}
+	
+	public void deleteBuffer(int bufferId) {
+		coreConn.requestRemoveBuffer(bufferId);
+	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
 		Buffer buffer = networks.getBufferById(bufferId);
@@ -822,6 +826,9 @@ public class CoreConnService extends Service {
 				break;
 			case R.id.SET_MY_NICK:
 				networks.getNetworkById(msg.arg1).setNick((String)msg.obj);
+				break;
+			case R.id.REMOVE_BUFFER:
+				networks.getNetworkById(msg.arg1).removeBuffer(msg.arg2);
 				break;
 			}			
 		}

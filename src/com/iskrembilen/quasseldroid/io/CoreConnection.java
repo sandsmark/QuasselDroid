@@ -127,6 +127,22 @@ public final class CoreConnection {
 			onDisconnected("Lost connection");
 		}
 	}
+	
+	public void requestRemoveBuffer(int buffer) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
+		retFunc.add(new QVariant<String>("", QVariantType.String));
+		retFunc.add(new QVariant<String>("requestRemoveBuffer", QVariantType.ByteArray));
+		retFunc.add(new QVariant<Integer>(buffer, "BufferId"));
+
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			Log.e(TAG, "IOException", e);
+			onDisconnected("Lost connection");
+		}
+	}
 
 	public void requestSetLastMsgRead(int buffer, int msgid) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
@@ -1212,7 +1228,12 @@ public final class CoreConnection {
 							//buffers.get(buffer).setRead();
 						} else if (className.equals("BufferSyncer") && function.equals("removeBuffer")) {
 							Log.d(TAG, "Sync: BufferSyncer -> removeBuffer");
-							System.out.println(packedFunc + " : "+ objectName);
+							int bufferId = (Integer) packedFunc.remove(0).getData();
+							if(buffers.containsKey(bufferId)) {
+								int networkId = buffers.get(bufferId).getInfo().networkId;
+								buffers.remove(bufferId);
+								service.getHandler().obtainMessage(R.id.REMOVE_BUFFER, networkId, bufferId).sendToTarget();
+							}
 						} else if (className.equals("BufferViewConfig") && function.equals("addBuffer")) {
 							Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
 							System.out.println(packedFunc + " : " + objectName);

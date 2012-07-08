@@ -1,63 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
-<item type="id" name="DIALOG_ADD_CORE"></item>
-<item type="id" name="DIALOG_EDIT_CORE"></item>
-<item type="id" name="DIALOG_DELETE_CORE"></item>
-<item type="id" name="DIALOG_CONNECTING"></item>
-<item type="id" name="DIALOG_HIDE_EVENTS"></item>
-<item type="id" name="DIALOG_JOIN_CHANNEL"></item>
-
-<item type="id" name="BUFFER_LIST_UPDATED"></item>
-<item type="id" name="CHAT_MESSAGES_UPDATED"></item>
-
-<item type="id" name="NOTIFICATION"></item>
-
-<item type="id" name="NEW_MESSAGE_TO_SERVICE"></item>
-<item type="id" name="NEW_BUFFER_TO_SERVICE"></item>
-<item type="id" name="SET_LAST_SEEN_TO_SERVICE"></item>
-<item type="id" name="SET_MARKERLINE_TO_SERVICE"></item>
-
-<item type="id" name="NEW_USER_ADDED"></item>
-<item type="id" name="NEW_USER_INFO"></item>
-<item type="id" name="USER_PARTED"></item>
-<item type="id" name="USER_QUIT"></item>
-<item type="id" name="USER_JOINED"></item>
-<item type="id" name="USER_CHANGEDNICK"></item>
-<item type="id" name="USER_ADD_MODE"></item>
-<item type="id" name="USER_REMOVE_MODE"></item>
-<item type="id" name="CHANNEL_TOPIC_CHANGED"></item>
-    
-<item type="id" name="NEW_USERLIST_ADDED"></item>
-<item type="id" name="SET_BUFFER_ORDER"></item>
-<item type="id" name="SET_BUFFER_ACTIVE"></item>
-<item type="id" name="BUFFER_ORDER_CHANGED"></item>
-<item type="id" name="BUFFER_HIDDEN_CHANGED"></item>
-<item type="id" name="LOST_CONNECTION"></item>
-<item type="id" name="ADD_MULTIPLE_BUFFERS"></item>
-<item type="id" name="NEW_BACKLOGITEM_TO_SERVICE"></item>
-<item type="id" name="BUFFERUPDATE_BACKLOG"></item>
-<item type="id" name="BUFFERUPDATE_NEWMESSAGE"></item>
-<item type="id" name="BUFFERUPDATE_USERSCHANGED"></item>
-<item type="id" name="DISCONNECTED"></item>
-<item type="id" name="SET_BUFFER_PERM_HIDDEN"></item>
-<item type="id" name="SET_BUFFER_TEMP_HIDDEN"></item>
-<item name="INVALID_CERTIFICATE" type="id"></item>
-<item type="id" name="NEW_CERTIFICATE"></item>
-<item type="id" name="DIALOG_NEW_CERTIFICATE"></item>
-<item type="id" name="NOTIFICATION_HIGHLIGHT"></item>
-<item type="id" name="UNSUPPORTED_PROTOCOL"></item>
-<item type="id" name="ADD_NETWORK"></item>
-<item type="id" name="LAST_SEEN_CHANGED"></item>
-<item type="id" name="INIT_PROGRESS"></item>
-<item type="id" name="INIT_DONE"></item>
-<item type="id" name="CONNECTING"/>
-<item type="id" name="NETWORK_REMOVED"/>
-<item type="id" name="SET_CONNECTION_STATE"></item>
-<item type="id" name="SET_STATUS_BUFFER"></item>
-<item type="id" name="SET_CONNECTED"></item>
-<item type="id" name="SET_MY_NICK"></item>
-
+    <item name="DIALOG_ADD_CORE" type="id"></item>
+    <item name="DIALOG_EDIT_CORE" type="id"></item>
+    <item name="DIALOG_DELETE_CORE" type="id"></item>
+    <item name="DIALOG_CONNECTING" type="id"></item>
+    <item name="DIALOG_HIDE_EVENTS" type="id"></item>
+    <item name="DIALOG_JOIN_CHANNEL" type="id"></item>
+    <item name="BUFFER_LIST_UPDATED" type="id"></item>
+    <item name="CHAT_MESSAGES_UPDATED" type="id"></item>
+    <item name="NOTIFICATION" type="id"></item>
+    <item name="NEW_MESSAGE_TO_SERVICE" type="id"></item>
+    <item name="NEW_BUFFER_TO_SERVICE" type="id"></item>
+    <item name="SET_LAST_SEEN_TO_SERVICE" type="id"></item>
+    <item name="SET_MARKERLINE_TO_SERVICE" type="id"></item>
+    <item name="NEW_USER_ADDED" type="id"></item>
+    <item name="NEW_USER_INFO" type="id"></item>
+    <item name="USER_PARTED" type="id"></item>
+    <item name="USER_QUIT" type="id"></item>
+    <item name="USER_JOINED" type="id"></item>
+    <item name="USER_CHANGEDNICK" type="id"></item>
+    <item name="USER_ADD_MODE" type="id"></item>
+    <item name="USER_REMOVE_MODE" type="id"></item>
+    <item name="CHANNEL_TOPIC_CHANGED" type="id"></item>
+    <item name="NEW_USERLIST_ADDED" type="id"></item>
+    <item name="SET_BUFFER_ORDER" type="id"></item>
+    <item name="SET_BUFFER_ACTIVE" type="id"></item>
+    <item name="BUFFER_ORDER_CHANGED" type="id"></item>
+    <item name="BUFFER_HIDDEN_CHANGED" type="id"></item>
+    <item name="LOST_CONNECTION" type="id"></item>
+    <item name="ADD_MULTIPLE_BUFFERS" type="id"></item>
+    <item name="NEW_BACKLOGITEM_TO_SERVICE" type="id"></item>
+    <item name="BUFFERUPDATE_BACKLOG" type="id"></item>
+    <item name="BUFFERUPDATE_NEWMESSAGE" type="id"></item>
+    <item name="BUFFERUPDATE_USERSCHANGED" type="id"></item>
+    <item name="DISCONNECTED" type="id"></item>
+    <item name="SET_BUFFER_PERM_HIDDEN" type="id"></item>
+    <item name="SET_BUFFER_TEMP_HIDDEN" type="id"></item>
+    <item name="INVALID_CERTIFICATE" type="id"></item>
+    <item name="NEW_CERTIFICATE" type="id"></item>
+    <item name="DIALOG_NEW_CERTIFICATE" type="id"></item>
+    <item name="NOTIFICATION_HIGHLIGHT" type="id"></item>
+    <item name="UNSUPPORTED_PROTOCOL" type="id"></item>
+    <item name="ADD_NETWORK" type="id"></item>
+    <item name="LAST_SEEN_CHANGED" type="id"></item>
+    <item name="INIT_PROGRESS" type="id"></item>
+    <item name="INIT_DONE" type="id"></item>
+    <item name="CONNECTING" type="id"/>
+    <item name="NETWORK_REMOVED" type="id"/>
+    <item name="SET_CONNECTION_STATE" type="id"></item>
+    <item name="SET_STATUS_BUFFER" type="id"></item>
+    <item name="SET_CONNECTED" type="id"></item>
+    <item name="SET_MY_NICK" type="id"></item>
+    <item name="REMOVE_BUFFER" type="id"></item>
 
 </resources>
