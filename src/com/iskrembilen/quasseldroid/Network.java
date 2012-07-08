@@ -171,7 +171,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 			if(user.nick.equals(nick)) {
 				for(Buffer buffer : buffers.getRawBufferList()) {
 					if(user.channels.contains(buffer.getInfo().name)) {
-						buffer.getUsers().removeUserWithNick(nick);
+						buffer.getUsers().removeUserByNick(nick);
 					}
 				}
 				userList.remove(user);
@@ -191,7 +191,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		}
 		for(Buffer buffer : buffers.getRawBufferList()) {
 			if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
-				buffer.getUsers().removeUserWithNick(nick);
+				buffer.getUsers().removeUserByNick(nick);
 				if(nick.equalsIgnoreCase(getNick())) {
 					buffer.setActive(false);
 				}
