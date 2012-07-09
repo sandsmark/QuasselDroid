@@ -88,11 +88,10 @@ public class ChatActivity extends Activity{
 		setTheme(ThemeUtil.theme);
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.chat_layout);
-		
 		Intent intent = getIntent();
+		
 		if(intent.hasExtra(BUFFER_ID)) {
 			bufferId = intent.getIntExtra(BUFFER_ID, 0);
-			Log.d(TAG, "Intent has bufferid" + bufferId);
 		}
 		
 		initActionBar();
@@ -209,6 +208,7 @@ public class ChatActivity extends Activity{
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, ChatActivity.class);
 	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	        intent.putExtra(BUFFER_ID, bufferId);
 	        startActivity(intent);
 		}
 		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
