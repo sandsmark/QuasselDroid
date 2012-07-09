@@ -5,4 +5,8 @@
         <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
     </style>
 
+    <style name="ListChoiceBackgroundIndicator">
+        <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>
+    </style>
+
 </resources>

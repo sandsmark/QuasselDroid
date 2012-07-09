@@ -8,9 +8,9 @@
 
     <TextView
         android:id="@+id/buffer_list_item_name"
+        style="@style/ListChoiceBackgroundIndicator"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/listChoiceBackgroundIndicator"
         android:duplicateParentState="false"
         android:textSize="21sp"
         android:textStyle="bold" />

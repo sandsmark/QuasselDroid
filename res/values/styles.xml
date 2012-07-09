@@ -3,4 +3,6 @@
 
     <style name="Buffer_Child_Item"></style>
 
+    <style name="ListChoiceBackgroundIndicator"></style>
+
 </resources>
