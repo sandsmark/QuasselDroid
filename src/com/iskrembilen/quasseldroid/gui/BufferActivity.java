@@ -41,11 +41,16 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
+import android.view.ActionMode.Callback;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.*;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.widget.ExpandableListView.OnGroupClickListener;
+import android.widget.TextView.BufferType;
+
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.gui.BufferActivity.ActionModeData;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
@@ -80,6 +85,7 @@ public class BufferActivity extends ExpandableListActivity {
 	private ActionModeData actionModeData = new ActionModeData();
 
 	private int currentTheme;
+	private boolean useActionModes;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,10 +102,13 @@ public class BufferActivity extends ExpandableListActivity {
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			initActionMenu();
+			initActionMenu();	  
+			useActionModes = true;
 		} else {
-			registerForContextMenu(getExpandableListView());	    	
+			useActionModes = false;
 		}
+		registerForContextMenu(getExpandableListView());	    	
+
 		statusReciver = new ResultReceiver(null) {
 
 			@Override
@@ -139,12 +148,50 @@ public class BufferActivity extends ExpandableListActivity {
 
 	@TargetApi(11)
 	private void initActionMenu() {
-		actionModeData.actionModeCallback = new ActionMode.Callback() {
+		actionModeData.actionModeCallbackNetwork = new ActionMode.Callback() {
 
 			@Override
 			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 				MenuInflater inflater = mode.getMenuInflater();
-				inflater.inflate(R.menu.buffer_contextual_menu, menu);
+				inflater.inflate(R.menu.buffer_contextual_menu_networks, menu);
+				return true;
+			}
+
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+				return false;
+			}
+
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				switch (item.getItemId()) {
+				case R.id.context_menu_connect:
+					connectNetwork(actionModeData.networkId);
+					mode.finish();
+					return true;
+				case R.id.context_menu_disconnect:
+					disconnectNetwork(actionModeData.networkId);
+					mode.finish();
+					return true;
+				default:
+					return false;
+				}
+			}
+
+			@Override
+			public void onDestroyActionMode(ActionMode mode) {
+				actionModeData.listItem.setActivated(false);
+				actionModeData.actionMode = null;
+
+			}
+
+		};
+		actionModeData.actionModeCallbackBuffer = new ActionMode.Callback() {
+
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+				MenuInflater inflater = mode.getMenuInflater();
+				inflater.inflate(R.menu.buffer_contextual_menu_channels, menu);
 				return true;
 			}
 
@@ -180,32 +227,6 @@ public class BufferActivity extends ExpandableListActivity {
 				actionModeData.actionMode = null;
 			}
 		};
-		getExpandableListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				// Start the CAB using the ActionMode.Callback defined above
-				actionModeData.actionMode = startActionMode(actionModeData.actionModeCallback);
-				actionModeData.bufferId = (int)id;
-				actionModeData.listItem = view;
-				Buffer buffer = bufferListAdapter.networks.getBufferById((int)id);
-				if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-				}else if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);	
-				}else{
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
-				}
-				view.setActivated(true);
-				return true;
-			}
-		});
 	}
 
 	@Override
@@ -288,21 +309,63 @@ public class BufferActivity extends ExpandableListActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		getMenuInflater().inflate(R.menu.buffer_contextual_menu, menu);
-		int bufferId = (int) ((ExpandableListContextMenuInfo)menuInfo).id;
-		Buffer buffer = bufferListAdapter.networks.getBufferById(bufferId);
-		if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-			menu.findItem(R.id.context_menu_join).setVisible(false);
-			menu.findItem(R.id.context_menu_part).setVisible(false);	
-			menu.findItem(R.id.context_menu_delete).setVisible(true);
-		}else if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
-			menu.findItem(R.id.context_menu_join).setVisible(false);
-			menu.findItem(R.id.context_menu_part).setVisible(true);	
-			menu.findItem(R.id.context_menu_delete).setVisible(false);
-		}else{
-			menu.findItem(R.id.context_menu_join).setVisible(true);
-			menu.findItem(R.id.context_menu_part).setVisible(false);
-			menu.findItem(R.id.context_menu_delete).setVisible(true);
+		v.setClickable(false);
+		ExpandableListContextMenuInfo info = ((ExpandableListContextMenuInfo)menuInfo);
+		boolean isGroup;
+		if(ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+			isGroup = true;
+		} else if (ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+			isGroup = false;
+		} else {
+			System.out.println("error");
+			throw new RuntimeException("Illegal item type for list item");
+		}
+		System.out.println("isGroup: " + isGroup);
+		useActionModes = false;
+		if(useActionModes) { //Don't make a context menu, use Action Mode with Action Bar
+			//v.setSelected(true);
+			if(isGroup) {
+
+			} else {
+				Buffer buffer = bufferListAdapter.networks.getBufferById((int)info.id);
+				actionModeData.actionMode = startActionMode(actionModeData.actionModeCallbackBuffer);
+				actionModeData.bufferId = buffer.getInfo().id;
+				actionModeData.listItem = v;
+				if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+				}else if (bufferListAdapter.networks.getBufferById((int)info.id).isActive()) {
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);	
+				}else{
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
+				}
+			}
+		} else { //Create normal context menu
+			if(isGroup) {
+
+			} else {
+				getMenuInflater().inflate(R.menu.buffer_contextual_menu_channels, menu);
+				int bufferId = (int)info.id;
+				Buffer buffer = bufferListAdapter.networks.getBufferById(bufferId);
+				if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+					menu.findItem(R.id.context_menu_join).setVisible(false);
+					menu.findItem(R.id.context_menu_part).setVisible(false);	
+					menu.findItem(R.id.context_menu_delete).setVisible(true);
+				}else if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
+					menu.findItem(R.id.context_menu_join).setVisible(false);
+					menu.findItem(R.id.context_menu_part).setVisible(true);	
+					menu.findItem(R.id.context_menu_delete).setVisible(false);
+				}else{
+					menu.findItem(R.id.context_menu_join).setVisible(true);
+					menu.findItem(R.id.context_menu_part).setVisible(false);
+					menu.findItem(R.id.context_menu_delete).setVisible(true);
+				}			
+			}
 		}
 	}
 
@@ -423,7 +486,15 @@ public class BufferActivity extends ExpandableListActivity {
 	private void deleteChannel(int bufferId) {
 		boundConnService.deleteBuffer(bufferId);
 	}
-	
+
+	private void connectNetwork(int networkId) {
+		boundConnService.connectToNetwork(networkId);
+	}
+
+	private void disconnectNetwork(int networkId) {
+		boundConnService.disconnectFromNetwork(networkId);
+	}
+
 	private void showDeleteConfirmDialog(final int bufferId) {
 		new AlertDialog.Builder(BufferActivity.this)
 		.setTitle(R.string.dialog_delete_buffer_title)
@@ -595,11 +666,31 @@ public class BufferActivity extends ExpandableListActivity {
 						}
 					}
 				});
+				//				convertView.setOnLongClickListener(new OnLongClickListener() {
+				//
+				//					@Override
+				//					public boolean onLongClick(View v) {
+				//						Network network = networks.getNetworkById(((ViewHolderGroup)v.getTag()).networkId);
+				//						actionModeData.actionMode = startActionMode(actionModeData.actionModeCallbackNetwork);
+				//						actionModeData.networkId = network.getId();
+				//						actionModeData.listItem = v;
+				//						if(bufferListAdapter.networks.getNetworkById(actionModeData.networkId).isConnected()) {
+				//							actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(true);
+				//							actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(false);						
+				//						} else {
+				//							actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(false);
+				//							actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(true);
+				//						}
+				//						v.setActivated(true);
+				//						return true;
+				//					}
+				//				});
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
 			Network entry = getGroup(groupPosition);
+			holder.networkId = entry.getId();
 			holder.statusView.setText(entry.getName());
 			holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
 			BufferUtils.setBufferViewStatus(BufferActivity.this, entry.getStatusBuffer(), holder.statusView);
@@ -610,6 +701,8 @@ public class BufferActivity extends ExpandableListActivity {
 		public boolean hasStableIds() {
 			return true;
 		}
+
+
 
 		@Override
 		public boolean isChildSelectable(int groupPosition, int childPosition) {
@@ -635,6 +728,7 @@ public class BufferActivity extends ExpandableListActivity {
 	}
 	public static class ViewHolderGroup {
 		public TextView statusView;
+		public int networkId;
 	}
 
 	/**
@@ -703,9 +797,11 @@ public class BufferActivity extends ExpandableListActivity {
 	}
 
 	class ActionModeData {
+		public int networkId;
 		public int bufferId;
 		public View listItem;
 		public ActionMode actionMode;
-		public ActionMode.Callback actionModeCallback;
+		public ActionMode.Callback actionModeCallbackNetwork;
+		public ActionMode.Callback actionModeCallbackBuffer;
 	}
 }

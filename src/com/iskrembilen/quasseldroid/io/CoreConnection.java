@@ -143,6 +143,36 @@ public final class CoreConnection {
 			onDisconnected("Lost connection");
 		}
 	}
+	
+	public void requestDisconnectNetwork(int networkId) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("Network", QVariantType.String));
+		retFunc.add(new QVariant<String>(Integer.toString(networkId), QVariantType.String));
+		retFunc.add(new QVariant<String>("requestDisconnect", QVariantType.ByteArray));
+
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			Log.e(TAG, "IOException", e);
+			onDisconnected("Lost connection");
+		}
+	}
+	
+	public void requestConnectNetwork(int networkId) {
+		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+		retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+		retFunc.add(new QVariant<String>("Network", QVariantType.String));
+		retFunc.add(new QVariant<String>(Integer.toString(networkId), QVariantType.String));
+		retFunc.add(new QVariant<String>("requestConnect", QVariantType.ByteArray));
+
+		try {
+			sendQVariantList(retFunc);
+		} catch (IOException e) {
+			Log.e(TAG, "IOException", e);
+			onDisconnected("Lost connection");
+		}
+	}
 
 	public void requestSetLastMsgRead(int buffer, int msgid) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();

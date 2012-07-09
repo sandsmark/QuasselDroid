@@ -205,6 +205,14 @@ public class CoreConnService extends Service {
 	public void deleteBuffer(int bufferId) {
 		coreConn.requestRemoveBuffer(bufferId);
 	}
+	
+	public void connectToNetwork(int networkId) {
+		coreConn.requestConnectNetwork(networkId);
+	}
+	
+	public void disconnectFromNetwork(int networkId) {
+		coreConn.requestDisconnectNetwork(networkId);
+	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
 		Buffer buffer = networks.getBufferById(bufferId);
