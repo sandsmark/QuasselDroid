@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.gui;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.content.*;
@@ -75,7 +76,7 @@ public class BufferActivity extends ExpandableListActivity {
 	private int restoreItemPosition = 0;
 
 	private long backedTimestamp = 0;
-	
+
 	private ActionModeData actionModeData = new ActionModeData();
 
 	private int currentTheme;
@@ -164,7 +165,7 @@ public class BufferActivity extends ExpandableListActivity {
 					mode.finish();
 					return true;
 				case R.id.context_menu_delete:
-					deleteChannel(actionModeData.bufferId);
+					showDeleteConfirmDialog(actionModeData.bufferId);
 					mode.finish();
 					return true;
 				default:
@@ -187,7 +188,12 @@ public class BufferActivity extends ExpandableListActivity {
 				actionModeData.actionMode = startActionMode(actionModeData.actionModeCallback);
 				actionModeData.bufferId = (int)id;
 				actionModeData.listItem = view;
-				if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
+				Buffer buffer = bufferListAdapter.networks.getBufferById((int)id);
+				if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+				}else if (bufferListAdapter.networks.getBufferById((int) id).isActive()) {
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
 					actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);	
@@ -207,11 +213,11 @@ public class BufferActivity extends ExpandableListActivity {
 		super.onResume();
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, BufferActivity.class);
-	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	        startActivity(intent);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -221,8 +227,8 @@ public class BufferActivity extends ExpandableListActivity {
 	protected void onStart() {
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, BufferActivity.class);
-	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	        startActivity(intent);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 		doBindService();
 		super.onStart();
@@ -284,7 +290,12 @@ public class BufferActivity extends ExpandableListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		getMenuInflater().inflate(R.menu.buffer_contextual_menu, menu);
 		int bufferId = (int) ((ExpandableListContextMenuInfo)menuInfo).id;
-		if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
+		Buffer buffer = bufferListAdapter.networks.getBufferById(bufferId);
+		if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+			menu.findItem(R.id.context_menu_join).setVisible(false);
+			menu.findItem(R.id.context_menu_part).setVisible(false);	
+			menu.findItem(R.id.context_menu_delete).setVisible(true);
+		}else if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
 			menu.findItem(R.id.context_menu_join).setVisible(false);
 			menu.findItem(R.id.context_menu_part).setVisible(true);	
 			menu.findItem(R.id.context_menu_delete).setVisible(false);
@@ -306,7 +317,7 @@ public class BufferActivity extends ExpandableListActivity {
 			partChannel((int)info.id);
 			return true;
 		case R.id.context_menu_delete:
-			deleteChannel((int)info.id);
+			showDeleteConfirmDialog((int)info.id);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -408,9 +419,25 @@ public class BufferActivity extends ExpandableListActivity {
 	private void partChannel(int bufferId) {
 		boundConnService.sendMessage(bufferId, "/part "+bufferListAdapter.networks.getBufferById(bufferId).getInfo().name);
 	}
-	
+
 	private void deleteChannel(int bufferId) {
 		boundConnService.deleteBuffer(bufferId);
+	}
+	
+	private void showDeleteConfirmDialog(final int bufferId) {
+		new AlertDialog.Builder(BufferActivity.this)
+		.setTitle(R.string.dialog_delete_buffer_title)
+		.setMessage(R.string.dialog_delete_buffer_message)
+		.setPositiveButton(R.string.dialog_delete_buffer_yes, new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				deleteChannel(bufferId);
+			}
+
+		})
+		.setNegativeButton(R.string.dialog_delete_buffer_no, null)
+		.show();
 	}
 
 	private void openBuffer(Buffer buffer) {
@@ -433,8 +460,8 @@ public class BufferActivity extends ExpandableListActivity {
 			userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
 			userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
 			userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
-			
-			
+
+
 		}
 
 		public void setNetworks(NetworkCollection networks){
@@ -674,7 +701,7 @@ public class BufferActivity extends ExpandableListActivity {
 			setListAdapter(null);
 		}
 	}
-	
+
 	class ActionModeData {
 		public int bufferId;
 		public View listItem;

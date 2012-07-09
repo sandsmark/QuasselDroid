@@ -32,6 +32,10 @@
     <string name="context_join">Join</string>
     <string name="context_delete">Delete</string>
     <string name="notification_you_have_been_highlighted">You have been highlighted</string>
+    <string name="dialog_delete_buffer_title">Remove buffer permanently?</string>
+    <string name="dialog_delete_buffer_message">Are you sure you want to delete this buffer permanently? This action cannot be undone.</string>
+    <string name="dialog_delete_buffer_yes">Yes</string>
+    <string name="dialog_delete_buffer_no">No</string>
 
     <plurals name="notification_highlighted_on_x_buffers">
         <item quantity="one">You have highlights on %1$d buffer</item>
