@@ -45,7 +45,7 @@ public class QuasseldroidNotificationManager {
 		int defaults = 0;
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.icon)
+		.setSmallIcon(R.drawable.stat_normal)
 		.setContentTitle(context.getText(R.string.app_name))
 		.setContentText(context.getText(R.string.notification_connected))
 		.setOngoing(true)
@@ -78,7 +78,7 @@ public class QuasseldroidNotificationManager {
 
 	public void notifyConnecting() {		
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.connecting)
+		.setSmallIcon(R.drawable.stat_connecting)
 		.setContentTitle(context.getText(R.string.app_name))
 		.setContentText(context.getText(R.string.notification_connecting))
 		.setOngoing(true)
@@ -101,7 +101,7 @@ public class QuasseldroidNotificationManager {
 		}
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.highlight)
+		.setSmallIcon(R.drawable.stat_highlight)
 		.setContentTitle(context.getText(R.string.app_name))
 		.setContentText(context.getResources().getQuantityString(R.plurals.notification_highlighted_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size()))
 		.setOngoing(true)
@@ -133,7 +133,7 @@ public class QuasseldroidNotificationManager {
 
 	public void notifyDisconnected() {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-		.setSmallIcon(R.drawable.inactive)
+		.setSmallIcon(R.drawable.stat_disconnected)
 		.setContentTitle(context.getText(R.string.app_name))
 		.setContentText(context.getText(R.string.notification_disconnected))
 		.setAutoCancel(true)

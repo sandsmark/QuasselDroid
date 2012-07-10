@@ -659,10 +659,6 @@ public class CoreConnService extends Service {
 				 * New IrcUser added
 				 */
 				user = (IrcUser) msg.obj;
-				if (networks.getNetworkById(msg.arg1) == null) {
-					Log.e(TAG, "Network is null when adding user");
-					return; //FIXME
-				}
 				networks.getNetworkById(msg.arg1).onUserJoined(user);
 				break;
 			case R.id.NEW_USER_INFO:
