@@ -38,7 +38,7 @@
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="@string/preference_colored_text"
-            android:summary="NB: buggy feature, turning off might stop crashes"
+            android:summary="Turn on/off support for mirc color coded text"
             android:title="Allow colored text" />
     </PreferenceCategory>
 
