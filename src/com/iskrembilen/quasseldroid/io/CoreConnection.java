@@ -1098,7 +1098,12 @@ public final class CoreConnection {
 							String nick = (String) packedFunc.remove(0).getData();
 							IrcUser user = new IrcUser();
 							user.nick = nick.split("!")[0];
-							service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
+							//If not done then we can add it right here, if we try to send it we might crash because service don't have the network yet
+							if(!initComplete) { 
+								networks.get(Integer.parseInt(objectName)).onUserJoined(user);
+							} else {
+								service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
+							}
 							sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
 						}  else if (className.equals("Network") && function.equals("setConnectionState")) {
 							Log.d(TAG, "Sync: Network -> setConnectionState");
