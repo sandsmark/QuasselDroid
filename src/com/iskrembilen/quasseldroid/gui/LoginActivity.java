@@ -79,8 +79,8 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
 		setTheme(ThemeUtil.theme);
+		super.onCreate(savedInstanceState);
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.login);
 

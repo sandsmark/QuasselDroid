@@ -88,12 +88,12 @@ public class BufferActivity extends ExpandableListActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		setTheme(ThemeUtil.theme);
 		super.onCreate(savedInstanceState);
 		if(savedInstanceState != null) {
 			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
 			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
 		}
-		setTheme(ThemeUtil.theme);
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.buffer_list);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

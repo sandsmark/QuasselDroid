@@ -25,6 +25,7 @@ public class SplashActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
+		setTheme(ThemeUtil.theme);
 		super.onCreate(savedInstanceState);
 		//Init crittercism
 		boolean isDebugbuild =  ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
@@ -32,7 +33,6 @@ public class SplashActivity extends Activity {
 			Log.i(TAG, "Enabeling Crittercism");
 			Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
 		}
-		setTheme(ThemeUtil.theme);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splash);
 	}
