@@ -75,6 +75,8 @@ public class ThemeUtil {
 			chatDayChangeColor = resources.getColor(R.color.chat_line_daychange_dark);
 			chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
 			chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
+		} else {
+			setTheme(context, "light");
 		}
-	}
+	} 
 }

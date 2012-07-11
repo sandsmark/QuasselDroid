@@ -11,7 +11,7 @@ public class Quasseldroid extends Application{
 		super.onCreate();
 
 		//Populate the preferences with default vaules if this has not been done before
-		PreferenceManager.setDefaultValues(this, R.layout.preferences, false);
+		PreferenceManager.setDefaultValues(this, R.layout.preferences, true);
 		//Load current theme
 		ThemeUtil.initTheme(this);
 	}
