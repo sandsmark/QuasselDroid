@@ -453,7 +453,7 @@ public class CoreConnService extends Service {
 			color = R.color.ircmessage_gray;
 			break;
 		default:
-			color = ThemeUtil.chatPlainColor;
+			color = ThemeUtil.chatPlainResource;
 		}
 		return color;
 	}

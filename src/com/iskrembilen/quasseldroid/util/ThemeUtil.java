@@ -12,6 +12,7 @@ public class ThemeUtil {
 	public static int theme;
 	public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
 	public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor, chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor, chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatHighlightColor, chatSelfColor, chatTimestampColor;
+	public static int chatPlainResource;
 
 	public static void initTheme(Context context) {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -24,6 +25,8 @@ public class ThemeUtil {
 		if(themeName.equals("light")) {
 			theme = R.style.QuasseldroidThemeLight;
 
+			chatPlainResource = R.color.chat_line_plain_light;
+			
 			bufferPartedColor = resources.getColor(R.color.buffer_parted_color_light);
 			bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color_light);
 			bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_light);
@@ -51,6 +54,8 @@ public class ThemeUtil {
 		}
 		else if(themeName.equals("dark")) {
 			theme = R.style.QuasseldroidThemeDark;
+			
+			chatPlainResource = R.color.chat_line_plain_dark;
 
 			bufferPartedColor = resources.getColor(R.color.buffer_parted_color_dark);
 			bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color_dark);
