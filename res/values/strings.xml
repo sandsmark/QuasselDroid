@@ -46,7 +46,10 @@
         <item quantity="other">You have highlights on %1$d buffers</item>
     </plurals>
 
-    <string name="title_lag">Lag: %1$sms</string>
+    <string name="title_lag">Lag: %1$s%2$s</string>
     <string name="preference_show_lag">showlag</string>
+    <string name="unit_milliseconds">ms</string>
+    <string name="unit_seconds">s</string>
+    <string name="users">Users</string>
 
 </resources>
