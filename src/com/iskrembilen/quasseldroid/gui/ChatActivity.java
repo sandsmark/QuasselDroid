@@ -28,8 +28,13 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -39,18 +44,30 @@ import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.*;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
-import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
@@ -157,10 +174,10 @@ public class ChatActivity extends Activity{
 				} else if(resultCode==CoreConnService.LATENCY_CORE) {
 				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                            setActionBarSubtitle(Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
                         } else {
                             setTitle(getResources().getString(R.string.app_name) + " - " 
-                                + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                                + Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
                             
                         }
                     }
@@ -356,7 +373,10 @@ public class ChatActivity extends Activity{
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
 			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + " ("
-				    + boundConnService.getNetworkById(buffer.getInfo().networkId).getServer() + ")");
+				    + boundConnService.getNetworkById(buffer.getInfo().networkId).getServer() + ") | "
+				    + getResources().getString(R.string.users) + ": "
+				    + boundConnService.getNetworkById(buffer.getInfo().networkId).getCountUsers() + " | "
+				    + Helper.formatLatency(boundConnService.getNetworkById(buffer.getInfo().networkId).getLatency(), getResources()));
 			} else{
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.getTopic());
 			}

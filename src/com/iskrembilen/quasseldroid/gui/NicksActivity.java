@@ -23,7 +23,6 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
-import android.*;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -48,6 +47,7 @@ import android.widget.*;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 import java.util.List;
@@ -101,10 +101,10 @@ public class NicksActivity extends Activity{
 				} else if(resultCode==CoreConnService.LATENCY_CORE) {
 				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                            setActionBarSubtitle(Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
                         } else {
                             setTitle(getResources().getString(R.string.app_name) + " - " 
-                                + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                                + Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
                             
                         }
 				    }
