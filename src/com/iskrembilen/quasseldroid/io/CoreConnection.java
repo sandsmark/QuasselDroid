@@ -795,8 +795,8 @@ public final class CoreConnection {
 						Log.d(TAG, "Got heartbeat reply");
 						if (packedFunc.size() != 0)
 						{
-    						Calendar calendarSent = (Calendar) packedFunc.remove(0).getData();
-    						Calendar calendarNow = Calendar.getInstance();
+							Calendar calendarNow = Calendar.getInstance();
+							Calendar calendarSent = (Calendar) packedFunc.remove(0).getData();
     						int latency = (int)(calendarNow.getTimeInMillis() - calendarSent.getTimeInMillis()) / 2;
     						Log.d(TAG, "Latency: " + latency);
                             service.getHandler().obtainMessage(R.id.SET_CORE_LATENCY, latency, 0, null).sendToTarget();

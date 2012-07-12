@@ -266,4 +266,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
         return server;
     }
 
+    public int getCountUsers() {
+        return userList.size();
+    }
+
 }
