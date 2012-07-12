@@ -793,6 +793,14 @@ public final class CoreConnection {
 						break;
 					case HeartBeatReply:
 						Log.d(TAG, "Got heartbeat reply");
+						if (packedFunc.size() != 0)
+						{
+    						Calendar calendarSent = (Calendar) packedFunc.remove(0).getData();
+    						Calendar calendarNow = Calendar.getInstance();
+    						int latency = (int)(calendarNow.getTimeInMillis() - calendarSent.getTimeInMillis()) / 2;
+    						Log.d(TAG, "Latency: " + latency);
+                            service.getHandler().obtainMessage(R.id.SET_CORE_LATENCY, latency, 0, null).sendToTarget();
+						}
 						break;
 						/*
 						 * This is when the core send us a new object to create.
@@ -816,6 +824,8 @@ public final class CoreConnection {
 							// Store the network name and associated nick for "our" user
 							network.setNick((String) initMap.get("myNick").getData());
 							network.setName((String) initMap.get("networkName").getData());
+                            network.setLatency((Integer) initMap.get("latency").getData());
+                            network.setServer((String) initMap.get("currentServer").getData());
 							boolean isConnected = (Boolean)initMap.get("isConnected").getData();
 							if(isConnected) network.setConnected(true);
 							else network.setConnectionState(ConnectionState.Disconnected);
@@ -1195,6 +1205,12 @@ public final class CoreConnection {
 							int networkId = Integer.parseInt(objectName);
 							service.getHandler().obtainMessage(R.id.SET_MY_NICK, networkId, 0, nick).sendToTarget();
 						}
+						else if (className.equals("Network") && function.equals("setLatency")) {
+                            Log.d(TAG, "Sync: Network -> setLatency");
+                            int networkLatency = (Integer) packedFunc.remove(0).getData();
+                            int networkId = Integer.parseInt(objectName);
+                            service.getHandler().obtainMessage(R.id.SET_NETWORK_LATENCY, networkId, networkLatency, null).sendToTarget();
+                        }
 						else if (className.equals("IrcUser") && function.equals("partChannel")) {
 							Log.d(TAG, "Sync: IrcUser -> partChannel");
 							String[] tmp = objectName.split("/");
