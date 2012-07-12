@@ -143,6 +143,38 @@ public final class CoreConnection {
 			onDisconnected("Lost connection");
 		}
 	}
+
+    public void requestTempHideBuffer(int bufferId) {
+        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+        retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
+        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>("requestRemoveBuffer", QVariantType.String));
+        retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while requestRemoveBuffer", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
+    public void requestPermHideBuffer(int bufferId) {
+        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+        retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
+        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>("requestRemoveBufferPermanently", QVariantType.String));
+        retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while requestRemoveBufferPermanently", e);
+            onDisconnected("Lost connection");
+        }
+    }
 	
 	public void requestDisconnectNetwork(int networkId) {
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
@@ -1271,9 +1303,59 @@ public final class CoreConnection {
 							}
 						} else if (className.equals("BufferViewConfig") && function.equals("addBuffer")) {
 							Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
-							System.out.println(packedFunc + " : " + objectName);
-							
-						} else {
+							int bufferId = (Integer) packedFunc.remove(0).getData();
+							if (!buffers.containsKey(bufferId)) {
+                                System.err.println("got buffer info for non-existant buffer id: " + bufferId);
+                                continue;
+                            }
+							if(bufferId > maxBufferId) {
+                                maxBufferId = bufferId;
+                            }
+							if (buffers.get(bufferId).isTemporarilyHidden())
+							{
+							    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
+	                            msg.arg1 = ((Integer) bufferId);
+	                            msg.obj = false;
+	                            msg.sendToTarget();
+							}
+							if (buffers.get(bufferId).isPermanentlyHidden())
+                            {
+							    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
+	                            msg.arg1 = ((Integer) bufferId);
+	                            msg.obj = false;
+	                            msg.sendToTarget();
+                            }
+
+                            Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
+                            msg.arg1 = bufferId;
+                            msg.arg2 = networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount();
+                            msg.sendToTarget();
+
+						} else if (className.equals("BufferViewConfig") && function.equals("removeBuffer")) {
+                            Log.d(TAG, "Sync: BufferViewConfig -> removeBuffer");
+                            int bufferId = (Integer) packedFunc.remove(0).getData();
+                            if (!buffers.containsKey(bufferId)) {
+                                Log.e(TAG, "Dont't have buffer: " + bufferId);
+                                continue;
+                            }
+                            Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
+                            msg.arg1 = ((Integer) bufferId);
+                            msg.obj = true;
+                            msg.sendToTarget();
+
+                        } else if (className.equals("BufferViewConfig") && function.equals("removeBufferPermanently")) {
+                            Log.d(TAG, "Sync: BufferViewConfig -> removeBufferPermanently");
+                            int bufferId = (Integer) packedFunc.remove(0).getData();
+                            if (!buffers.containsKey(bufferId)) {
+                                Log.e(TAG, "Dont't have buffer: " + bufferId);
+                                continue;
+                            }
+                            Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
+                            msg.arg1 = ((Integer) bufferId);
+                            msg.obj = true;
+                            msg.sendToTarget();
+
+                        } else {
 							Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
 						}
 	
