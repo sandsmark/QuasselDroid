@@ -824,6 +824,8 @@ public final class CoreConnection {
 							// Store the network name and associated nick for "our" user
 							network.setNick((String) initMap.get("myNick").getData());
 							network.setName((String) initMap.get("networkName").getData());
+                            network.setLatency((Integer) initMap.get("latency").getData());
+                            network.setServer((String) initMap.get("currentServer").getData());
 							boolean isConnected = (Boolean)initMap.get("isConnected").getData();
 							if(isConnected) network.setConnected(true);
 							else network.setConnectionState(ConnectionState.Disconnected);

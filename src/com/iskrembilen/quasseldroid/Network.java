@@ -42,6 +42,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private ConnectionState connectionState;
 	private Boolean isConnected;
 	private int latency;
+	private String server;
 
 	public Network(int networkId) {
 		this.networkId = networkId;
@@ -256,4 +257,13 @@ public class Network extends Observable implements Observer, Comparable<Network>
     public int getLatency() {
         return latency;
     }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
 }
