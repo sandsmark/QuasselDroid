@@ -41,6 +41,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 	private boolean open;
 	private ConnectionState connectionState;
 	private Boolean isConnected;
+	private int latency;
 
 	public Network(int networkId) {
 		this.networkId = networkId;
@@ -51,8 +52,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		open=false;
 		connectionState = ConnectionState.Disconnected;
 		isConnected = false;
+		latency = 0;
 	}
-
 
 	public Buffer getStatusBuffer() {
 		return statusBuffer;
@@ -247,4 +248,12 @@ public class Network extends Observable implements Observer, Comparable<Network>
 		buffers.removeBuffer(bufferId);
 		
 	}
+
+	public void setLatency(int latency) {
+        this.latency = latency;
+    }
+
+    public int getLatency() {
+        return latency;
+    }
 }
