@@ -53,5 +53,7 @@
     <item name="SET_CONNECTED" type="id"></item>
     <item name="SET_MY_NICK" type="id"></item>
     <item name="REMOVE_BUFFER" type="id"></item>
+    <item name="SET_CORE_LATENCY" type="id"></item>
+    <item name="SET_NETWORK_LATENCY" type="id"></item>
 
 </resources>
