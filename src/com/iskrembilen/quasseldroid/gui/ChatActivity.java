@@ -117,7 +117,8 @@ public class ChatActivity extends Activity{
 
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+				if (event != null && event.getAction() == KeyEvent.ACTION_DOWN && 
+				        ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER))) {
 					EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
 					String inputText = inputfield.getText().toString();
 
