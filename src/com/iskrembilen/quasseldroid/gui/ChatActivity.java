@@ -30,6 +30,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.*;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -70,6 +71,7 @@ public class ChatActivity extends Activity{
 	private int dynamicBacklogAmout;
 
 	SharedPreferences preferences;
+	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
 	private ResultReceiver statusReceiver;
 	private NickCompletionHelper nickCompletionHelper;
@@ -79,7 +81,7 @@ public class ChatActivity extends Activity{
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
-
+    private Boolean showLag = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -150,11 +152,42 @@ public class ChatActivity extends Activity{
 				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
 					Log.d(TAG, "Getting result disconnected");
 					finish();
-				}
+				} else if(resultCode==CoreConnService.LATENCY) {
+				    if (resultData.getInt(CoreConnService.LATENCY_KEY) > 0) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            getActionBar().setSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_KEY)));
+                        } else {
+                            setTitle(getResources().getString(R.string.app_name) + " - " 
+                                + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_KEY)));
+                            
+                        }
+                    }
+                }
 				super.onReceiveResult(resultCode, resultData);
 			}
 
 		};
+
+        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+        
+        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
+
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if(key.equals(getResources().getString(R.string.preference_show_lag))){
+                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+                    if(!showLag) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                                getActionBar().setSubtitle("");
+                        } else {
+                            setTitle(getResources().getString(R.string.app_name));
+                            
+                        }
+                    }
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
 	
 	@TargetApi(14)

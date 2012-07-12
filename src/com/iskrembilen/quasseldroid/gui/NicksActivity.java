@@ -31,10 +31,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -62,6 +65,11 @@ public class NicksActivity extends Activity{
     private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
     private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
 
+    SharedPreferences preferences;
+    OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+    
+    private Boolean showLag = false;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +79,9 @@ public class NicksActivity extends Activity{
 		setContentView(R.layout.nick_layout);
 
 		initActionBar();
-		
+
+	    preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 		Intent intent = getIntent();
 		if(intent.hasExtra(ChatActivity.BUFFER_ID)) {
 			bufferId = intent.getIntExtra(ChatActivity.BUFFER_ID, 0);
@@ -85,11 +95,44 @@ public class NicksActivity extends Activity{
 
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) finish();
+				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
+				    finish();
+				} else if(resultCode==CoreConnService.LATENCY) {
+				    if (resultData.getInt(CoreConnService.LATENCY_KEY) > 0) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            getActionBar().setSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_KEY)));
+                        } else {
+                            setTitle(getResources().getString(R.string.app_name) + " - " 
+                                + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_KEY)));
+                            
+                        }
+				    }
+                }
 				super.onReceiveResult(resultCode, resultData);
 			}
 
 		};
+
+        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+        
+        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
+
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if(key.equals(getResources().getString(R.string.preference_show_lag))){
+                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+                    if(!showLag) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                                getActionBar().setSubtitle("");
+                        } else {
+                            setTitle(getResources().getString(R.string.app_name));
+                            
+                        }
+                    }
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
 
 	@TargetApi(14)

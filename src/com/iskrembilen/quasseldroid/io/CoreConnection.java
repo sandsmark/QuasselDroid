@@ -1195,6 +1195,12 @@ public final class CoreConnection {
 							int networkId = Integer.parseInt(objectName);
 							service.getHandler().obtainMessage(R.id.SET_MY_NICK, networkId, 0, nick).sendToTarget();
 						}
+						else if (className.equals("Network") && function.equals("setLatency")) {
+                            Log.d(TAG, "Sync: Network -> setLatency");
+                            int latency = (Integer) packedFunc.remove(0).getData();
+                            Log.d(TAG, "Latency: " + latency);
+                            service.getHandler().obtainMessage(R.id.SET_LATENCY, latency, 0, null).sendToTarget();
+                        }
 						else if (className.equals("IrcUser") && function.equals("partChannel")) {
 							Log.d(TAG, "Sync: IrcUser -> partChannel");
 							String[] tmp = objectName.split("/");
