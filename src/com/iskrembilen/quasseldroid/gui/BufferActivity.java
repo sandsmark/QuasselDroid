@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.gui;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
@@ -72,10 +73,10 @@ public class BufferActivity extends ExpandableListActivity {
 
 	BufferListAdapter bufferListAdapter;
 
-	ResultReceiver statusReciver;
+	ResultReceiver statusReceiver;
 
 	SharedPreferences preferences;
-	OnSharedPreferenceChangeListener listener;
+	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
 	private int restoreListPosition = 0;
 	private int restoreItemPosition = 0;
@@ -85,6 +86,8 @@ public class BufferActivity extends ExpandableListActivity {
 	private ActionModeData actionModeData = new ActionModeData();
 
 	private int currentTheme;
+
+	private Boolean showLag = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -101,12 +104,12 @@ public class BufferActivity extends ExpandableListActivity {
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			initActionMenu();	  
+			initActionMenu();
 		} else {
 			registerForContextMenu(getExpandableListView());	    	
 		}
 
-		statusReciver = new ResultReceiver(null) {
+		statusReceiver = new ResultReceiver(null) {
 
 			@Override
 			protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -124,23 +127,48 @@ public class BufferActivity extends ExpandableListActivity {
 					setListAdapter(bufferListAdapter);
 					bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 				}
+				else if(resultCode==CoreConnService.LATENCY) {
+				    if(showLag) {
+    				    if (resultData.getInt(CoreConnService.LATENCY_KEY) > 0) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                                getActionBar().setSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_KEY)));
+                            } else {
+                                setTitle(getResources().getString(R.string.app_name) + " - " 
+                                    + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_KEY)));
+                                
+                            }
+                        }
+				    }
+                }
 				super.onReceiveResult(resultCode, resultData);
 			}
 
 		};
 
+		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
-		listener =new OnSharedPreferenceChangeListener() {
+		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if(key.equals(getResources().getString(R.string.preference_fontsize_channel_list))){
 					bufferListAdapter.notifyDataSetChanged();
 				}
+				if(key.equals(getResources().getString(R.string.preference_show_lag))){
+				    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+				    if(!showLag) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            getActionBar().setSubtitle("");
+                        } else {
+                            setTitle(getResources().getString(R.string.app_name));
+                            
+                        }
+                    }
+                }
 
 			}
 		};
-		preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
+		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
 
 	@TargetApi(11)
@@ -304,7 +332,7 @@ public class BufferActivity extends ExpandableListActivity {
 
 	@Override
 	protected void onDestroy() {
-		preferences.unregisterOnSharedPreferenceChangeListener(listener);
+		preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 		super.onDestroy();
 	}
 
@@ -749,7 +777,7 @@ public class BufferActivity extends ExpandableListActivity {
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
-			boundConnService.registerStatusReceiver(statusReciver);
+			boundConnService.registerStatusReceiver(statusReceiver);
 
 			//Testing to see if i can add item to adapter in service
 			if(boundConnService.isInitComplete()) { 
@@ -789,7 +817,7 @@ public class BufferActivity extends ExpandableListActivity {
 			Log.i(TAG, "Unbinding service");
 			bufferListAdapter.stopObserving();
 			if (boundConnService != null)
-				boundConnService.unregisterStatusReceiver(statusReciver);
+				boundConnService.unregisterStatusReceiver(statusReceiver);
 			// Detach our existing connection.
 			unbindService(mConnection);
 			isBound = false;

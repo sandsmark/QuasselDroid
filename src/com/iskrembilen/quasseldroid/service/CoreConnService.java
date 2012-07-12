@@ -71,10 +71,13 @@ public class CoreConnService extends Service {
 	public static final int INIT_PROGRESS = 4;
 	public static final int INIT_DONE = 5;
 	public static final int CONNECTION_CONNECTING = 6;
+	public static final int LATENCY = 7;
 
 	public static final String STATUS_KEY = "status";
 	public static final String CERT_KEY = "certificate";
 	public static final String PROGRESS_KEY = "networkname";
+
+	public static final String LATENCY_KEY = "latency";
 
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
@@ -91,6 +94,8 @@ public class CoreConnService extends Service {
 	private boolean preferenceParseColors;
 
 	private OnSharedPreferenceChangeListener preferenceListener;
+
+	private int latency;
 
 
 	/**
@@ -483,6 +488,9 @@ public class CoreConnService extends Service {
 		} else {
 			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
 		}
+		Bundle bundle = new Bundle();
+        bundle.putInt(CoreConnService.LATENCY_KEY, latency);
+        resultReceiver.send(CoreConnService.LATENCY, bundle);
 
 	}
 
@@ -834,7 +842,13 @@ public class CoreConnService extends Service {
 			case R.id.REMOVE_BUFFER:
 				networks.getNetworkById(msg.arg1).removeBuffer(msg.arg2);
 				break;
-			}			
+			case R.id.SET_LATENCY:
+                latency = msg.arg1;
+                Bundle bundleLatency = new Bundle();
+                bundleLatency.putInt(CoreConnService.LATENCY_KEY, latency);
+                sendStatusMessage(CoreConnService.LATENCY, bundleLatency);
+                break;
+			}
 		}
 	}
 
