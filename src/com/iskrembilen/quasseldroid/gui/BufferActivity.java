@@ -100,6 +100,7 @@ public class BufferActivity extends ExpandableListActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.buffer_list);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
@@ -131,7 +132,7 @@ public class BufferActivity extends ExpandableListActivity {
 				    if(showLag) {
     				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                getActionBar().setSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                                setActionBarSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
                             } else {
                                 setTitle(getResources().getString(R.string.app_name) + " - " 
                                     + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
@@ -145,8 +146,6 @@ public class BufferActivity extends ExpandableListActivity {
 
 		};
 
-		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
 			@Override
@@ -158,7 +157,7 @@ public class BufferActivity extends ExpandableListActivity {
 				    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 				    if(!showLag) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            getActionBar().setSubtitle("");
+                            setActionBarSubtitle("");
                         } else {
                             setTitle(getResources().getString(R.string.app_name));
                             
@@ -169,6 +168,11 @@ public class BufferActivity extends ExpandableListActivity {
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+	}
+	
+	@TargetApi(11)
+	private void setActionBarSubtitle(String subtitle) {
+		getActionBar().setSubtitle(subtitle);
 	}
 
 	@TargetApi(11)

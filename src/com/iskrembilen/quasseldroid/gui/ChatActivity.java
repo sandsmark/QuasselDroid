@@ -100,6 +100,7 @@ public class ChatActivity extends Activity{
 		initActionBar();
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
 		adapter = new BacklogAdapter(this, null);
 		backlogList = ((ListView)findViewById(R.id.chatBacklogList));
@@ -156,7 +157,7 @@ public class ChatActivity extends Activity{
 				} else if(resultCode==CoreConnService.LATENCY_CORE) {
 				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            getActionBar().setSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                            setActionBarSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
                         } else {
                             setTitle(getResources().getString(R.string.app_name) + " - " 
                                 + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
@@ -169,7 +170,6 @@ public class ChatActivity extends Activity{
 
 		};
 
-        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
         
         sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
@@ -179,7 +179,7 @@ public class ChatActivity extends Activity{
                     showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
                     if(!showLag) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                getActionBar().setSubtitle("");
+                                setActionBarSubtitle("");
                         } else {
                             setTitle(getResources().getString(R.string.app_name));
                             
@@ -189,6 +189,11 @@ public class ChatActivity extends Activity{
             }
         };
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+	}
+	
+	@TargetApi(11)
+	private void setActionBarSubtitle(String subtitle) {
+		getActionBar().setSubtitle(subtitle);
 	}
 	
 	@TargetApi(14)
