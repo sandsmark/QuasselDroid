@@ -205,6 +205,14 @@ public class CoreConnService extends Service {
 	public void deleteBuffer(int bufferId) {
 		coreConn.requestRemoveBuffer(bufferId);
 	}
+
+	public void tempHideBuffer(int bufferId) {
+        coreConn.requestTempHideBuffer(bufferId);
+    }
+
+	public void permHideBuffer(int bufferId) {
+        coreConn.requestPermHideBuffer(bufferId);
+    }
 	
 	public void connectToNetwork(int networkId) {
 		coreConn.requestConnectNetwork(networkId);
