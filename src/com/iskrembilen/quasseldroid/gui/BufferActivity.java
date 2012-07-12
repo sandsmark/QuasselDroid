@@ -212,6 +212,14 @@ public class BufferActivity extends ExpandableListActivity {
 					showDeleteConfirmDialog(actionModeData.id);
 					mode.finish();
 					return true;
+				case R.id.context_menu_hide_temp:
+				    tempHideChannel(actionModeData.id);
+                    mode.finish();
+                    return true;
+				case R.id.context_menu_hide_perm:
+				    permHideChannel(actionModeData.id);
+                    mode.finish();
+                    return true;
 				default:
 					return false;
 				}
@@ -243,14 +251,20 @@ public class BufferActivity extends ExpandableListActivity {
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
 					}else if (buffer.isActive()) {
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);	
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);	
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
 					}else{
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);	
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
 					}
 				} else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
 					Network network = bufferListAdapter.getGroup(groupPosition);
@@ -370,14 +384,20 @@ public class BufferActivity extends ExpandableListActivity {
 				menu.findItem(R.id.context_menu_join).setVisible(false);
 				menu.findItem(R.id.context_menu_part).setVisible(false);	
 				menu.findItem(R.id.context_menu_delete).setVisible(true);
+				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
+				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
 			}else if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
 				menu.findItem(R.id.context_menu_join).setVisible(false);
 				menu.findItem(R.id.context_menu_part).setVisible(true);	
 				menu.findItem(R.id.context_menu_delete).setVisible(false);
+				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
+				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
 			}else{
 				menu.findItem(R.id.context_menu_join).setVisible(true);
 				menu.findItem(R.id.context_menu_part).setVisible(false);
 				menu.findItem(R.id.context_menu_delete).setVisible(true);
+				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
+				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
 			}		
 		}
 	}
@@ -402,6 +422,12 @@ public class BufferActivity extends ExpandableListActivity {
 		case R.id.context_menu_disconnect:
 			disconnectNetwork(id);
 			return true;
+		case R.id.context_menu_hide_temp:
+		    tempHideChannel(id);
+            return true;
+		case R.id.context_menu_hide_perm:
+		    permHideChannel(id);
+            return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -506,6 +532,14 @@ public class BufferActivity extends ExpandableListActivity {
 	private void deleteChannel(int bufferId) {
 		boundConnService.deleteBuffer(bufferId);
 	}
+
+	private void tempHideChannel(int bufferId) {
+        boundConnService.tempHideBuffer(bufferId);
+    }
+
+	private void permHideChannel(int bufferId) {
+        boundConnService.permHideBuffer(bufferId);
+    }
 
 	private void connectNetwork(int networkId) {
 		boundConnService.connectToNetwork(networkId);
