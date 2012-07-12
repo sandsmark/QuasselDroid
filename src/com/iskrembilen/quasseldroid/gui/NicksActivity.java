@@ -81,6 +81,7 @@ public class NicksActivity extends Activity{
 		initActionBar();
 
 	    preferences = PreferenceManager.getDefaultSharedPreferences(this);
+	    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
 		Intent intent = getIntent();
 		if(intent.hasExtra(ChatActivity.BUFFER_ID)) {
@@ -100,7 +101,7 @@ public class NicksActivity extends Activity{
 				} else if(resultCode==CoreConnService.LATENCY_CORE) {
 				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            getActionBar().setSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
+                            setActionBarSubtitle(String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
                         } else {
                             setTitle(getResources().getString(R.string.app_name) + " - " 
                                 + String.format(getResources().getString(R.string.title_lag), resultData.getInt(CoreConnService.LATENCY_CORE_KEY)));
@@ -113,7 +114,6 @@ public class NicksActivity extends Activity{
 
 		};
 
-        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
         
         sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
@@ -123,7 +123,7 @@ public class NicksActivity extends Activity{
                     showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
                     if(!showLag) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                getActionBar().setSubtitle("");
+                                setActionBarSubtitle("");
                         } else {
                             setTitle(getResources().getString(R.string.app_name));
                             
@@ -133,6 +133,11 @@ public class NicksActivity extends Activity{
             }
         };
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+	}
+	
+	@TargetApi(11)
+	private void setActionBarSubtitle(String subtitle) {
+		getActionBar().setSubtitle(subtitle);
 	}
 
 	@TargetApi(14)
