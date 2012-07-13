@@ -104,6 +104,7 @@ public class BufferActivity extends ExpandableListActivity {
 	private ActionModeData actionModeData = new ActionModeData();
 
 	private int currentTheme;
+	private int offlineColor;
 
 	private Boolean showLag = false;
 
@@ -119,6 +120,7 @@ public class BufferActivity extends ExpandableListActivity {
 		setContentView(R.layout.buffer_list);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+		offlineColor = getResources().getColor(R.color.buffer_offline_color);
 
 		bufferListAdapter = new BufferListAdapter(this);
 		getExpandableListView().setDividerHeight(0);
@@ -706,7 +708,7 @@ public class BufferActivity extends ExpandableListActivity {
 					holder.bufferImage.setImageBitmap(userAwayBitmap);
 				} else if (boundConnService.isUserOnline(nick, entry.getInfo().networkId)) {
 					holder.bufferImage.setImageBitmap(userOfflineBitmap);
-					holder.bufferView.setTextColor(getResources().getColor(R.color.buffer_offline_color));//FIXME
+					holder.bufferView.setTextColor(offlineColor);
 				} else {
 					holder.bufferImage.setImageBitmap(userBitmap);
 				}
