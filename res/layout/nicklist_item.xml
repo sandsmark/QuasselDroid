@@ -9,6 +9,7 @@
     android:paddingTop="2dp" >
 
     <ImageView
+        android:id="@+id/nicklist_nick_image"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:src="@drawable/im_user" />

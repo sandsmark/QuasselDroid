@@ -411,6 +411,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 	 */
 	public void setName(String name) {
 		info.name = name;
+		this.setChanged();
 		notifyObservers();
 	}
 
