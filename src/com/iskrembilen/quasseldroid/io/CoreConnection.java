@@ -1234,6 +1234,33 @@ public final class CoreConnection {
 							 * Does nothing, Why would we need a sync call, when we got a RPC call about renaming the user object
 							 */
 						}
+						else if (className.equals("IrcUser") && function.equals("setServer")) {
+							Log.d(TAG, "Sync: IrcUser -> setServer");
+							String[] tmp = objectName.split("/");
+							int networkId = Integer.parseInt(tmp[0]);
+							Bundle bundle = new Bundle();
+							bundle.putString("nick", tmp[1]);
+							bundle.putString("server", (String) packedFunc.remove(0).getData());
+							service.getHandler().obtainMessage(R.id.SET_USER_SERVER, networkId, 0, bundle).sendToTarget();
+						}
+						else if (className.equals("IrcUser") && function.equals("setAway")) {
+							Log.d(TAG, "Sync: IrcUser -> setAway");
+							String[] tmp = objectName.split("/");
+							int networkId = Integer.parseInt(tmp[0]);
+							Bundle bundle = new Bundle();
+							bundle.putString("nick", tmp[1]);
+							bundle.putBoolean("away", (Boolean) packedFunc.remove(0).getData());
+							service.getHandler().obtainMessage(R.id.SET_USER_AWAY, networkId, 0, bundle).sendToTarget();
+						}
+						else if (className.equals("IrcUser") && function.equals("setRealName")) {
+							Log.d(TAG, "Sync: IrcUser -> setRealName");
+							String[] tmp = objectName.split("/");
+							int networkId = Integer.parseInt(tmp[0]);
+							Bundle bundle = new Bundle();
+							bundle.putString("nick", tmp[1]);
+							bundle.putString("realname", (String) packedFunc.remove(0).getData());
+							service.getHandler().obtainMessage(R.id.SET_USER_REALNAME, networkId, 0, bundle).sendToTarget();
+						}
 						else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
 							Log.d(TAG, "Sync: IrcChannel -> joinIrcUsers");
 							List<String> nicks = (List<String>)packedFunc.remove(0).getData();
@@ -1317,6 +1344,16 @@ public final class CoreConnection {
 								buffers.remove(bufferId);
 								service.getHandler().obtainMessage(R.id.REMOVE_BUFFER, networkId, bufferId).sendToTarget();
 							}
+						} else if (className.equals("BufferSyncer") && function.equals("renameBuffer")) {
+							Log.d(TAG, "Sync: BufferSyncer -> renameBuffer");
+							int bufferId = (Integer) packedFunc.remove(0).getData();
+							String newName = (String) packedFunc.remove(0).getData();
+							Message msg = service.getHandler().obtainMessage(R.id.RENAME_BUFFER);
+							msg.arg1 = bufferId;
+							msg.arg2 = 0;
+							msg.obj = newName;
+							msg.sendToTarget();
+							
 						} else if (className.equals("BufferViewConfig") && function.equals("addBuffer")) {
 							Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
 							int bufferId = (Integer) packedFunc.remove(0).getData();

@@ -236,12 +236,19 @@ public class NicksActivity extends Activity{
 				convertView = inflater.inflate(R.layout.nicklist_item, null);
 				holder = new ViewHolderChild();
 				holder.nickView = (TextView)convertView.findViewById(R.id.nicklist_nick_view);
+				holder.userImage = (ImageView)convertView.findViewById(R.id.nicklist_nick_image);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderChild)convertView.getTag();
 			}
 			IrcUser entry = getChild(groupPosition, childPosition);
 			holder.nickView.setText(entry.nick);
+			if (entry.away){
+				holder.userImage.setImageResource(R.drawable.im_user_away);
+			}
+			else {
+				holder.userImage.setImageResource(R.drawable.im_user);
+			}
 			return convertView;
 		}
 
@@ -328,6 +335,7 @@ public class NicksActivity extends Activity{
 
 	public static class ViewHolderChild {
 		public TextView nickView;
+		public ImageView userImage;
 	}
 	public static class ViewHolderGroup {
 		public TextView nameView;
