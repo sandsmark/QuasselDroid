@@ -68,6 +68,7 @@ import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.Helper;
+import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
@@ -145,7 +146,9 @@ public class ChatActivity extends Activity{
 
 					if (!"".equals(inputText)) {
 						boundConnService.sendMessage(adapter.buffer.getInfo().id, inputText);
+						InputHistoryHelper.addHistoryEntry(inputText);
 						inputfield.setText("");
+						InputHistoryHelper.tempStoreCurrentEntry("");
 					}
 
 					return true;
@@ -158,6 +161,19 @@ public class ChatActivity extends Activity{
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN) {
 					onSearchRequested();
+					return true;
+				}
+				if (keyCode == KeyEvent.KEYCODE_DPAD_UP && event.getAction() == KeyEvent.ACTION_DOWN) {
+					EditText text = (EditText)v;
+					InputHistoryHelper.tempStoreCurrentEntry(text.getText().toString());
+					text.setText(InputHistoryHelper.getNextHistoryEntry());
+					text.setSelection(text.getText().length());
+					return true;
+				}
+				if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.getAction() == KeyEvent.ACTION_DOWN) {
+					EditText text = (EditText)v;
+					text.setText(InputHistoryHelper.getPreviousHistoryEntry());
+					text.setSelection(text.getText().length());
 					return true;
 				}
 				return false;
