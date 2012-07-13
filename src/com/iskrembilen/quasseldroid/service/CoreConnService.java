@@ -864,15 +864,33 @@ public class CoreConnService extends Service {
 				break;
 			case R.id.SET_USER_SERVER:
 				bundle = (Bundle) msg.obj;
-				networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick")).server = bundle.getString("server");
+				Network networkServer = networks.getNetworkById(msg.arg1);
+				if (networkServer != null) {
+					IrcUser userServer = networkServer.getUserByNick(bundle.getString("nick"));
+					if (userServer != null) {
+						userServer.server = bundle.getString("server");
+					}
+				}
 				break;
 			case R.id.SET_USER_REALNAME:
 				bundle = (Bundle) msg.obj;
-				networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick")).realName = bundle.getString("realname");
+				Network networkRealName = networks.getNetworkById(msg.arg1);
+				if (networkRealName != null) {
+					IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
+					if (userRealName != null) {
+						userRealName.realName = bundle.getString("realname");
+					}
+				}
 				break;
 			case R.id.SET_USER_AWAY:
 				bundle = (Bundle) msg.obj;
-				networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick")).away = bundle.getBoolean("away");
+				Network networkAway = networks.getNetworkById(msg.arg1);
+				if (networkAway != null) {
+					IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
+					if (userAway != null) {
+						userAway.away = bundle.getBoolean("away");
+					}
+				}
 				break;
 			}
 		}
