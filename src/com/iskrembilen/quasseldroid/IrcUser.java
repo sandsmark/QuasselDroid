@@ -34,7 +34,8 @@ public class IrcUser extends Observable implements Comparable<IrcUser>{
 	public String ircOperator;
 	public String nick;
 	public List<String> channels = new ArrayList<String>();
-	
+	public String server;
+	public String realName;
 	
 	public String toString(){
 		return nick + " away: " + away + " Num chans: "+ channels.size();
