@@ -70,6 +70,7 @@ import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
+import com.iskrembilen.quasseldroid.util.SenderColorHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 import java.util.ArrayList;
@@ -527,8 +528,7 @@ public class ChatActivity extends Activity{
 				if(entry.isSelf()) {
 					holder.nickView.setTextColor(ThemeUtil.chatSelfColor);
 				}else{
-					int hashcode = entry.getNick().hashCode();
-					holder.nickView.setTextColor(Color.rgb(hashcode & 0xFF0000, hashcode & 0xFF00, hashcode & 0xFF));
+					holder.nickView.setTextColor(entry.senderColor);
 				}
 				holder.msgView.setTextColor(ThemeUtil.chatPlainColor);
 				holder.msgView.setTypeface(Typeface.DEFAULT);

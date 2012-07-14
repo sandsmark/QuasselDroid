@@ -28,6 +28,8 @@ import android.text.Spannable;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.iskrembilen.quasseldroid.util.SenderColorHelper;
+
 public class IrcMessage implements Comparable<IrcMessage>{
 	public enum Type {
 		Plain     (0x00001),
@@ -88,9 +90,10 @@ public class IrcMessage implements Comparable<IrcMessage>{
 	public int messageId;
 	public BufferInfo bufferInfo;
 	public Spannable content;
-	public String sender;
+	private String sender;
 	public Type type;
 	public byte flags;
+	public int senderColor;
 
 	private ArrayList<String> urls = new ArrayList<String>();
 
@@ -102,16 +105,21 @@ public class IrcMessage implements Comparable<IrcMessage>{
 
 	@Override
 	public String toString() {
-		return sender +": " + content;
+		return getSender() +": " + content;
 	}
 
 
 	public String getTime(){
 		return String.format("%02d:%02d:%02d", timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
 	}
+	
+	public void setSender(String sender) {
+		this.sender = sender;
+		this.senderColor = SenderColorHelper.getSenderColor(getNick());
+	}
 
 	public String getNick(){
-		return sender.split("!")[0];
+		return getSender().split("!")[0];
 	}
 
 	public void setFlag(Flag flag) {
@@ -135,5 +143,9 @@ public class IrcMessage implements Comparable<IrcMessage>{
 
 	public boolean hasURLs() {
 		return !urls.isEmpty();
+	}
+
+	public String getSender() {
+		return sender;
 	}
 }

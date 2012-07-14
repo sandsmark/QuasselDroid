@@ -38,7 +38,7 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 		stream.writeUInt(data.timestamp.getTime() / 1000, 32);
 		stream.writeUInt(data.type.getValue(), 32);
 		stream.writeByte(data.flags);
-		stream.writeBytes(data.sender);// TODO FIXME
+		stream.writeBytes(data.getSender());// TODO FIXME
 		stream.writeBytes(data.content.toString());//ditto
 	}
 
@@ -51,7 +51,7 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
 		ret.type = IrcMessage.Type.getForValue((int) stream.readUInt(32));
 		ret.flags = stream.readByte();
 		ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().unserialize(stream, version);
-		ret.sender = (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
+		ret.setSender((String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version));
 		ret.content =  SpannableString.valueOf((String)QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version));
 		
 		return ret;
