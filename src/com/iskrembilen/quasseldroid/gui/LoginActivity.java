@@ -41,6 +41,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.gui.fragments.ConnectingDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -48,7 +49,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends FragmentActivity implements Observer, DialogInterface.OnCancelListener {
+public class LoginActivity extends FragmentActivity implements Observer, ConnectingDialog.Callbacks{
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -292,14 +293,6 @@ public class LoginActivity extends FragmentActivity implements Observer, DialogI
 			dialog.findViewById(R.id.cancel_button).setOnClickListener(buttonListener);
 			dialog.findViewById(R.id.save_button).setOnClickListener(buttonListener);	
 			break;
-		
-		case R.id.DIALOG_CONNECTING:
-			ProgressDialog prog = new ProgressDialog(LoginActivity.this);
-			prog.setMessage("Connecting...");
-			prog.setCancelable(true);
-			prog.setOnCancelListener(this);
-			dialog = prog;
-			break;
 
 		case R.id.DIALOG_NEW_CERTIFICATE:
 			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
@@ -372,7 +365,7 @@ public class LoginActivity extends FragmentActivity implements Observer, DialogI
 				return;
 			}
 			
-			showDialog(R.id.DIALOG_CONNECTING);
+			ConnectingDialog.newInstance().show(getSupportFragmentManager(), "dialog");
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
@@ -444,7 +437,7 @@ public class LoginActivity extends FragmentActivity implements Observer, DialogI
 	}
 
 	@Override
-	public void onCancel(DialogInterface dialog) {
+	public void onCanceled() {
 		boundConnService.disconnectFromCore();
 	}
 
