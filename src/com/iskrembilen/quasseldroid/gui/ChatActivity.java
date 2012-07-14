@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -77,7 +78,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-public class ChatActivity extends Activity{
+public class ChatActivity extends FragmentActivity {
 
 
 	public static final int MESSAGE_RECEIVED = 0;

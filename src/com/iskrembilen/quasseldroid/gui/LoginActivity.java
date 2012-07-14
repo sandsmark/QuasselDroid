@@ -33,6 +33,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,7 +48,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends Activity implements Observer, DialogInterface.OnCancelListener {
+public class LoginActivity extends FragmentActivity implements Observer, DialogInterface.OnCancelListener {
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";

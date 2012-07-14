@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -45,7 +46,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.iskrembilen.quasseldroid.*;
-import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class NicksActivity extends Activity{
+public class NicksActivity extends FragmentActivity {
 
 	private static final String TAG = NicksActivity.class.getSimpleName();
 	private ResultReceiver statusReceiver;

@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.gui;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
@@ -41,6 +42,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
@@ -58,8 +60,12 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ExpandableListView.OnGroupCollapseListener;
+import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -78,7 +84,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import java.util.Observable;
 import java.util.Observer;
 
-public class BufferActivity extends ExpandableListActivity {
+public class BufferActivity extends FragmentActivity implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener{
 
 	private static final String TAG = BufferActivity.class.getSimpleName();
 
@@ -90,6 +96,7 @@ public class BufferActivity extends ExpandableListActivity {
 	private static final String LIST_POSITION_KEY = "listpos";
 
 	BufferListAdapter bufferListAdapter;
+	ExpandableListView bufferList;
 
 	ResultReceiver statusReceiver;
 
@@ -122,12 +129,14 @@ public class BufferActivity extends ExpandableListActivity {
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 		offlineColor = getResources().getColor(R.color.buffer_offline_color);
 
+		bufferList = (ExpandableListView) findViewById(R.id.buffer_list);
 		bufferListAdapter = new BufferListAdapter(this);
-		getExpandableListView().setDividerHeight(0);
+		bufferList.setAdapter(bufferListAdapter);
+		bufferList.setDividerHeight(0);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			initActionMenu();
 		} else {
-			registerForContextMenu(getExpandableListView());	    	
+			registerForContextMenu(bufferList);	    	
 		}
 
 		statusReceiver = new ResultReceiver(null) {
@@ -145,7 +154,7 @@ public class BufferActivity extends ExpandableListActivity {
 				else if(resultCode==CoreConnService.INIT_PROGRESS) {
 					((TextView)findViewById(R.id.buffer_list_progress_text)).setText(resultData.getString(CoreConnService.PROGRESS_KEY));
 				}else if(resultCode==CoreConnService.INIT_DONE) {
-					setListAdapter(bufferListAdapter);
+					bufferList.setAdapter(bufferListAdapter);
 					bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 				}
 				else if(resultCode==CoreConnService.LATENCY_CORE) {
@@ -285,12 +294,12 @@ public class BufferActivity extends ExpandableListActivity {
 			}
 		};
 		
-		getExpandableListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+		bufferList.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				long packedPosition = getExpandableListView().getExpandableListPosition(position);
+				long packedPosition = bufferList.getExpandableListPosition(position);
 				int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
 				int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
 				
@@ -377,7 +386,7 @@ public class BufferActivity extends ExpandableListActivity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		ExpandableListView listView = getExpandableListView();
+		ExpandableListView listView = bufferList;
 		// Save position of first visible item
 		restoreListPosition = listView.getFirstVisiblePosition();
 		outState.putInt(LIST_POSITION_KEY, restoreListPosition);
@@ -556,7 +565,6 @@ public class BufferActivity extends ExpandableListActivity {
 	}
 
 
-
 	@Override
 	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 		openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
@@ -647,12 +655,12 @@ public class BufferActivity extends ExpandableListActivity {
 				return;
 			networks.addObserver(this);
 			notifyDataSetChanged();
-			if(getExpandableListAdapter() != null) {
+			if(bufferListAdapter != null) {
 				for(int group = 0; group < getGroupCount(); group++) {
-					if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
-					else getExpandableListView().collapseGroup(group);
+					if(getGroup(group).isOpen()) bufferList.expandGroup(group);
+					else bufferList.collapseGroup(group);
 				}
-				getExpandableListView().setSelectionFromTop(restoreListPosition, restoreItemPosition);
+				bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
 			}
 		}
 
@@ -665,8 +673,8 @@ public class BufferActivity extends ExpandableListActivity {
 		public void update(Observable observable, Object data) {
 			notifyDataSetChanged();
 			for(int group = 0; group < getGroupCount(); group++) {
-				if(getGroup(group).isOpen()) getExpandableListView().expandGroup(group);
-				else getExpandableListView().collapseGroup(group);
+				if(getGroup(group).isOpen()) bufferList.expandGroup(group);
+				else bufferList.collapseGroup(group);
 			}
 		}
 
@@ -839,7 +847,6 @@ public class BufferActivity extends ExpandableListActivity {
 
 			//Testing to see if i can add item to adapter in service
 			if(boundConnService.isInitComplete()) { 
-				setListAdapter(bufferListAdapter);
 				bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 			}
 
@@ -880,7 +887,6 @@ public class BufferActivity extends ExpandableListActivity {
 			unbindService(mConnection);
 			isBound = false;
 			bufferListAdapter.clearBuffers();
-			setListAdapter(null);
 		}
 	}
 
