@@ -78,6 +78,9 @@ public final class CoreConnection {
 
 	private boolean initComplete;
 	private int initBacklogBuffers;
+	private int networkInitsLeft;
+	private boolean networkInitComplete;
+	private LinkedList<List<QVariant<?>>> packageQueue;
 	
 	//Used to create the ID of new channels we join
 	private int maxBufferId = 0;
@@ -499,7 +502,10 @@ public final class CoreConnection {
 
 		updateInitProgress("Requesting network and buffer information...");
 		// We must do this here, to get network names early enough
+		networkInitsLeft = 0;
+		networkInitComplete = false;
 		for(Network network: networks.values()) {
+			networkInitsLeft += 1;
 			sendInitRequest("Network", Integer.toString(network.getId()));
 		}
 		sendInitRequest("BufferSyncer", "");
@@ -722,6 +728,7 @@ public final class CoreConnection {
 
 		public String doRun() throws EmptyQVariantException {
 			this.running = true;
+			packageQueue = new LinkedList<List<QVariant<?>>>();
 
 			try {
 				connect();
@@ -757,13 +764,27 @@ public final class CoreConnection {
 			final long startWait = System.currentTimeMillis();
 			while (running) {
 				try {
-					packedFunc = readQVariantList();
+					if(networkInitComplete && packageQueue.size() > 0) {
+						Log.e(TAG, "Queue not empty, retrive element");
+						packedFunc = packageQueue.poll();
+					} else {
+						packedFunc = readQVariantList();
+					}
 					//Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 			
 					//We received a package, aka we are not disconnected, restart timer
 					//Log.i(TAG, "Package reviced, reseting countdown");
 					checkAlive.cancel();
 					checkAlive.start();
+					
+					//if network init is not complete and we receive anything but a network init object, queue it
+					if(!networkInitComplete) {
+						if(RequestType.getForVal((Integer)packedFunc.get(0).getData()) != RequestType.InitData && !((String)packedFunc.get(1).getData()).equals("Network")) {
+							Log.e(TAG, "Package not network, queueing it");
+							packageQueue.add(packedFunc);
+							continue; //Read next packageFunc
+						}
+					}
 	
 					long start = System.currentTimeMillis();
 					RequestType type = RequestType.getForVal((Integer)packedFunc.remove(0).getData());
@@ -911,8 +932,13 @@ public final class CoreConnection {
 							reqPackedFunc.add(new QVariant<String>("BufferSyncer", QVariantType.String));
 							reqPackedFunc.add(new QVariant<String>("", QVariantType.String));
 							reqPackedFunc.add(new QVariant<String>("requestPurgeBufferIds", QVariantType.String));
-
 							sendQVariantList(reqPackedFunc);	
+							
+							if(!initComplete) {
+								networkInitsLeft -= 1;
+								if(networkInitsLeft <= 0) 
+									networkInitComplete = true;
+							}
 	
 							long endWait = System.currentTimeMillis();
 							Log.w(TAG, "Network parsed, took: "+(endWait-startWait));
@@ -1358,7 +1384,7 @@ public final class CoreConnection {
 							Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
 							int bufferId = (Integer) packedFunc.remove(0).getData();
 							if (!buffers.containsKey(bufferId)) {
-                                System.err.println("got buffer info for non-existant buffer id: " + bufferId);
+//                                System.err.println("got buffer info for non-existant buffer id: " + bufferId);
                                 continue;
                             }
 							if(bufferId > maxBufferId) {
