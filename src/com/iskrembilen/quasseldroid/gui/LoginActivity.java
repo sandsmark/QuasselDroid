@@ -41,7 +41,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.gui.fragments.ConnectingDialog;
+import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -49,7 +49,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends FragmentActivity implements Observer, ConnectingDialog.Callbacks{
+public class LoginActivity extends FragmentActivity implements Observer, LoginProgressDialog.Callbacks{
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -365,7 +365,7 @@ public class LoginActivity extends FragmentActivity implements Observer, Connect
 				return;
 			}
 			
-			ConnectingDialog.newInstance().show(getSupportFragmentManager(), "dialog");
+			LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);

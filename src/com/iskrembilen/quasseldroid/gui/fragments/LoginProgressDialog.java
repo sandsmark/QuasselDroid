@@ -1,7 +1,7 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
-import com.iskrembilen.quasseldroid.gui.fragments.ConnectingDialog.Callbacks;
+import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog.Callbacks;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,15 +11,15 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-public class ConnectingDialog extends DialogFragment {
+public class LoginProgressDialog extends DialogFragment {
 	public interface Callbacks {
 		public void onCanceled();
 
 	}
 	private Callbacks callbacks;
 
-	public  static ConnectingDialog newInstance() {
-		return new ConnectingDialog();
+	public  static LoginProgressDialog newInstance() {
+		return new LoginProgressDialog();
 	}
 
 	@Override
