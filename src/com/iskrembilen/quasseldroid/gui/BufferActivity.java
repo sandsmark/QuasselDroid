@@ -77,9 +77,16 @@ import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -139,42 +146,6 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 			registerForContextMenu(bufferList);	    	
 		}
 
-		statusReceiver = new ResultReceiver(null) {
-
-			@Override
-			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
-					if (resultData!=null){
-						removeDialog(R.id.DIALOG_CONNECTING);
-						Toast.makeText(BufferActivity.this.getApplicationContext(), resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
-					}
-					finish();
-					startActivity(new Intent(BufferActivity.this, LoginActivity.class));
-				}
-				else if(resultCode==CoreConnService.INIT_PROGRESS) {
-					((TextView)findViewById(R.id.buffer_list_progress_text)).setText(resultData.getString(CoreConnService.PROGRESS_KEY));
-				}else if(resultCode==CoreConnService.INIT_DONE) {
-					bufferList.setAdapter(bufferListAdapter);
-					bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
-				}
-				else if(resultCode==CoreConnService.LATENCY_CORE) {
-				    if(showLag) {
-    				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                setActionBarSubtitle(Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
-                            } else {
-                                setTitle(getResources().getString(R.string.app_name) + " - " 
-                                    + Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
-                                
-                            }
-                        }
-				    }
-                }
-				super.onReceiveResult(resultCode, resultData);
-			}
-
-		};
-
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
 			@Override
@@ -183,22 +154,22 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 					bufferListAdapter.notifyDataSetChanged();
 				}
 				if(key.equals(getResources().getString(R.string.preference_show_lag))){
-				    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-				    if(!showLag) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle("");
-                        } else {
-                            setTitle(getResources().getString(R.string.app_name));
-                            
-                        }
-                    }
-                }
+					showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+					if(!showLag) {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+							setActionBarSubtitle("");
+						} else {
+							setTitle(getResources().getString(R.string.app_name));
+
+						}
+					}
+				}
 
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
-	
+
 	@TargetApi(11)
 	private void setActionBarSubtitle(String subtitle) {
 		getActionBar().setSubtitle(subtitle);
@@ -274,13 +245,13 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 					mode.finish();
 					return true;
 				case R.id.context_menu_hide_temp:
-				    tempHideChannel(actionModeData.id);
-                    mode.finish();
-                    return true;
+					tempHideChannel(actionModeData.id);
+					mode.finish();
+					return true;
 				case R.id.context_menu_hide_perm:
-				    permHideChannel(actionModeData.id);
-                    mode.finish();
-                    return true;
+					permHideChannel(actionModeData.id);
+					mode.finish();
+					return true;
 				default:
 					return false;
 				}
@@ -293,7 +264,7 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 				actionModeData.actionMode = null;
 			}
 		};
-		
+
 		bufferList.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
@@ -302,7 +273,7 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 				long packedPosition = bufferList.getExpandableListPosition(position);
 				int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
 				int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
-				
+
 				if(ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
 					Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
 					actionModeData.actionMode = startActionMode(actionModeData.actionModeCallbackBuffer);
@@ -319,13 +290,13 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
 					}else{
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
 						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
 					}
 				} else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
 					Network network = bufferListAdapter.getGroup(groupPosition);
@@ -352,12 +323,15 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 			Intent intent = new Intent(this, BufferActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
+			return;
 		}
+		BusProvider.getInstance().register(this);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		BusProvider.getInstance().unregister(this);
 	}
 
 	@Override
@@ -484,11 +458,11 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 			disconnectNetwork(id);
 			return true;
 		case R.id.context_menu_hide_temp:
-		    tempHideChannel(id);
-            return true;
+			tempHideChannel(id);
+			return true;
 		case R.id.context_menu_hide_perm:
-		    permHideChannel(id);
-            return true;
+			permHideChannel(id);
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -594,12 +568,12 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 	}
 
 	private void tempHideChannel(int bufferId) {
-        boundConnService.tempHideBuffer(bufferId);
-    }
+		boundConnService.tempHideBuffer(bufferId);
+	}
 
 	private void permHideChannel(int bufferId) {
-        boundConnService.permHideBuffer(bufferId);
-    }
+		boundConnService.permHideBuffer(bufferId);
+	}
 
 	private void connectNetwork(int networkId) {
 		boundConnService.connectToNetwork(networkId);
@@ -843,8 +817,6 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
-			boundConnService.registerStatusReceiver(statusReceiver);
-
 			//Testing to see if i can add item to adapter in service
 			if(boundConnService.isInitComplete()) { 
 				bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
@@ -881,8 +853,6 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
 			bufferListAdapter.stopObserving();
-			if (boundConnService != null)
-				boundConnService.unregisterStatusReceiver(statusReceiver);
 			// Detach our existing connection.
 			unbindService(mConnection);
 			isBound = false;
@@ -896,5 +866,42 @@ public class BufferActivity extends FragmentActivity implements OnGroupExpandLis
 		public ActionMode actionMode;
 		public ActionMode.Callback actionModeCallbackNetwork;
 		public ActionMode.Callback actionModeCallbackBuffer;
+	}
+
+	@Subscribe
+	public void onConnectionChanged(ConnectionChangedEvent event) {
+		if(event.status == Status.Disconnected) {
+			if(event.reason != "") {
+				removeDialog(R.id.DIALOG_CONNECTING);
+				Toast.makeText(BufferActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
+
+			}
+			finish();
+			startActivity(new Intent(BufferActivity.this, LoginActivity.class));
+		}
+	}
+
+	@Subscribe
+	public void onInitProgressed(InitProgressEvent event) {
+		if(event.done) {
+			bufferList.setAdapter(bufferListAdapter);
+			bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));				
+		} else {
+			((TextView)findViewById(R.id.buffer_list_progress_text)).setText(event.progress);				
+		}
+	}
+
+	@Subscribe
+	public void onLatencyChanged(LatencyChangedEvent event) {
+		if(showLag) {
+			if (event.latency > 0) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+					setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
+				} else {
+					setTitle(getResources().getString(R.string.app_name) + " - " 
+							+ Helper.formatLatency(event.latency, getResources()));           
+				}
+			}
+		}
 	}
 }

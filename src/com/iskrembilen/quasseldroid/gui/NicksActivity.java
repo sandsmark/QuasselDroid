@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.Pair;
@@ -46,9 +47,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
 
 import java.util.List;
 import java.util.Observable;
@@ -62,13 +68,13 @@ public class NicksActivity extends FragmentActivity {
 	private ExpandableListView list;
 	private int bufferId;
 	private int currentTheme;
-    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
-    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
+	private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
+	private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
 
-    SharedPreferences preferences;
-    OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
-    
-    private Boolean showLag = false;
+	SharedPreferences preferences;
+	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+
+	private Boolean showLag = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -80,8 +86,8 @@ public class NicksActivity extends FragmentActivity {
 
 		initActionBar();
 
-	    preferences = PreferenceManager.getDefaultSharedPreferences(this);
-	    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
 		Intent intent = getIntent();
 		if(intent.hasExtra(ChatActivity.BUFFER_ID)) {
@@ -92,49 +98,27 @@ public class NicksActivity extends FragmentActivity {
 		adapter = new NicksAdapter(this);
 		list = (ExpandableListView)findViewById(R.id.userList);
 		list.setAdapter(adapter);
-		statusReceiver = new ResultReceiver(null) {
+
+		sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
 			@Override
-			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
-				    finish();
-				} else if(resultCode==CoreConnService.LATENCY_CORE) {
-				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle(Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
-                        } else {
-                            setTitle(getResources().getString(R.string.app_name) + " - " 
-                                + Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
-                            
-                        }
-				    }
-                }
-				super.onReceiveResult(resultCode, resultData);
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals(getResources().getString(R.string.preference_show_lag))){
+					showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+					if(!showLag) {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+							setActionBarSubtitle("");
+						} else {
+							setTitle(getResources().getString(R.string.app_name));
+
+						}
+					}
+				}
 			}
-
 		};
-
-        
-        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
-
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals(getResources().getString(R.string.preference_show_lag))){
-                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-                    if(!showLag) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                setActionBarSubtitle("");
-                        } else {
-                            setTitle(getResources().getString(R.string.app_name));
-                            
-                        }
-                    }
-                }
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
-	
+
 	@TargetApi(11)
 	private void setActionBarSubtitle(String subtitle) {
 		getActionBar().setSubtitle(subtitle);
@@ -147,14 +131,26 @@ public class NicksActivity extends FragmentActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		BusProvider.getInstance().register(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		BusProvider.getInstance().unregister(this);
+	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, BufferActivity.class);
-	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	        startActivity(intent);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 		doBindService();
 	}
@@ -222,7 +218,7 @@ public class NicksActivity extends FragmentActivity {
 
 		@Override
 		public long getChildId(int groupPosition, int childPosition) {
-            //TODO: This will cause bugs when you have more than 99 children in a group
+			//TODO: This will cause bugs when you have more than 99 children in a group
 			return groupPosition*100 + childPosition;
 		}
 
@@ -260,15 +256,15 @@ public class NicksActivity extends FragmentActivity {
 
 		@Override
 		public Pair<IrcMode,List<IrcUser>> getGroup(int groupPosition) {
-            int counter = 0;
+			int counter = 0;
 			for(IrcMode mode: IrcMode.values()){
-                if (counter == groupPosition){
-                    return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersWithMode(mode));
-                } else {
-                    counter++;
-                }
-            }
-            return null;
+				if (counter == groupPosition){
+					return new Pair<IrcMode, List<IrcUser>>(mode,users.getUniqueUsersWithMode(mode));
+				} else {
+					counter++;
+				}
+			}
+			return null;
 		}
 
 		@Override
@@ -291,35 +287,35 @@ public class NicksActivity extends FragmentActivity {
 				holder = new ViewHolderGroup();
 				holder.nameView = (TextView)convertView.findViewById(R.id.nicklist_group_name_view);
 				holder.imageView = (ImageView)convertView.findViewById(R.id.nicklist_group_image_view);
-                holder.expanderView = (ImageView)convertView.findViewById(R.id.nicklist_expander_image_view);
-                holder.groupHolderView = (LinearLayout)convertView.findViewById(R.id.nicklist_holder_view);
+				holder.expanderView = (ImageView)convertView.findViewById(R.id.nicklist_expander_image_view);
+				holder.groupHolderView = (LinearLayout)convertView.findViewById(R.id.nicklist_holder_view);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolderGroup)convertView.getTag();
 			}
-            Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
-            if(group.second.size()<1){
-                holder.nameView.setVisibility(View.GONE);
-                holder.imageView.setVisibility(View.GONE);
-                holder.expanderView.setVisibility(View.GONE);
-                holder.groupHolderView.setPadding(0,0,0,0);
+			Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
+			if(group.second.size()<1){
+				holder.nameView.setVisibility(View.GONE);
+				holder.imageView.setVisibility(View.GONE);
+				holder.expanderView.setVisibility(View.GONE);
+				holder.groupHolderView.setPadding(0,0,0,0);
 
 
-            }else{
-                if(group.second.size()>1){
-                    holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
-                } else {
-                    holder.nameView.setText(group.second.size() + " "+group.first.modeName);
-                }
-                holder.nameView.setVisibility(View.VISIBLE);
-                holder.imageView.setVisibility(View.VISIBLE);
-                holder.expanderView.setVisibility(View.VISIBLE);
-                holder.imageView.setImageResource(group.first.iconResource);
-                holder.groupHolderView.setPadding(5,2,2,2);
-                holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition)? EXPANDED_STATE : NOT_EXPANDED_STATE);
-            }
-            return convertView;
-        }
+			}else{
+				if(group.second.size()>1){
+					holder.nameView.setText(group.second.size() + " "+group.first.modeName+group.first.pluralization);
+				} else {
+					holder.nameView.setText(group.second.size() + " "+group.first.modeName);
+				}
+				holder.nameView.setVisibility(View.VISIBLE);
+				holder.imageView.setVisibility(View.VISIBLE);
+				holder.expanderView.setVisibility(View.VISIBLE);
+				holder.imageView.setImageResource(group.first.iconResource);
+				holder.groupHolderView.setPadding(5,2,2,2);
+				holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition)? EXPANDED_STATE : NOT_EXPANDED_STATE);
+			}
+			return convertView;
+		}
 
 		@Override
 		public boolean hasStableIds() {
@@ -340,8 +336,8 @@ public class NicksActivity extends FragmentActivity {
 	public static class ViewHolderGroup {
 		public TextView nameView;
 		public ImageView imageView;
-        public ImageView expanderView;
-        public LinearLayout groupHolderView;
+		public ImageView expanderView;
+		public LinearLayout groupHolderView;
 	}
 
 
@@ -363,8 +359,6 @@ public class NicksActivity extends FragmentActivity {
 
 			Buffer buffer = boundConnService.getBuffer(bufferId, null);
 			adapter.setUsers(buffer.getUsers());
-
-			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -392,10 +386,28 @@ public class NicksActivity extends FragmentActivity {
 			Log.i(TAG, "Unbinding service");
 			// Detach our existing connection.
 			adapter.stopObserving();
-			boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
 
+		}
+	}
+
+	@Subscribe
+	public void onConnectionChanged(ConnectionChangedEvent event) {
+		if(event.status == Status.Disconnected)
+			finish();
+	}
+
+	@Subscribe
+	public void onLatencyChanged(LatencyChangedEvent event) {
+		if (event.latency > 0) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
+			} else {
+				setTitle(getResources().getString(R.string.app_name) + " - " 
+						+ Helper.formatLatency(event.latency, getResources()));
+
+			}
 		}
 	}
 }

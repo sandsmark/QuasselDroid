@@ -40,9 +40,17 @@ import android.util.Log;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
+import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Produce;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,7 +91,6 @@ public class CoreConnService extends Service {
 	private final IBinder binder = new LocalBinder();
 
 	Handler incomingHandler;
-	ArrayList<ResultReceiver> statusReceivers;
 
 	SharedPreferences preferences;
 
@@ -136,12 +143,13 @@ public class CoreConnService extends Service {
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
-		statusReceivers = new ArrayList<ResultReceiver>();
+		BusProvider.getInstance().register(this);
 	}
 
 	@Override
 	public void onDestroy() {
 		this.disconnectFromCore();
+		BusProvider.getInstance().unregister(this);
 
 	}
 
@@ -482,42 +490,6 @@ public class CoreConnService extends Service {
 	}
 
 	/**
-	 * Register a resultReceiver with this server, that will get notification
-	 * when a change happens with the connection to the core Like when the
-	 * connection is lost.
-	 * 
-	 * @param resultReceiver
-	 *            - Receiver that will get the status updates
-	 */
-	public void registerStatusReceiver(ResultReceiver resultReceiver) {
-		statusReceivers.add(resultReceiver);
-		if (coreConn != null && coreConn.isConnected()) {
-			resultReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
-		} else {
-			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
-		}
-		Bundle bundle = new Bundle();
-        bundle.putInt(CoreConnService.LATENCY_CORE_KEY, latency);
-        resultReceiver.send(CoreConnService.LATENCY_CORE, bundle);
-
-	}
-
-	/**
-	 * Unregister a receiver when you don't want any more updates.
-	 * 
-	 * @param resultReceiver
-	 */
-	public void unregisterStatusReceiver(ResultReceiver resultReceiver) {
-		statusReceivers.remove(resultReceiver);
-	}
-
-	private void sendStatusMessage(int messageId, Bundle bundle) {
-		for (ResultReceiver statusReceiver : statusReceivers) {
-			statusReceiver.send(messageId, bundle);
-		}
-	}
-
-	/**
 	 * Handler of incoming messages from CoreConnection, since it's in another
 	 * read thread.
 	 */
@@ -652,7 +624,7 @@ public class CoreConnService extends Service {
 				 * CoreConn has connected to a core
 				 */
 				notificationManager.notifyConnecting();
-				sendStatusMessage(CoreConnService.CONNECTION_CONNECTING, null);
+				BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connecting));
 				break;
 
 				
@@ -662,11 +634,9 @@ public class CoreConnService extends Service {
 				 */
 				if (msg.obj != null) { // Have description of what is wrong,
 					// used only for login atm
-					bundle = new Bundle();
-					bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
-					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, bundle);
+					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, (String)msg.obj));
 				} else {
-					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, null);
+					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
 				}
 				notificationManager.notifyDisconnected();
 				break;
@@ -736,7 +706,7 @@ public class CoreConnService extends Service {
 				 */
 				bundle = new Bundle();
 				bundle.putString(CERT_KEY, (String) msg.obj);
-				sendStatusMessage(CoreConnService.NEW_CERTIFICATE, bundle);
+				BusProvider.getInstance().post(new NewCertificateEvent((String)msg.obj));
 				break;
 			case R.id.SET_BUFFER_ACTIVE:
 				/**
@@ -748,19 +718,17 @@ public class CoreConnService extends Service {
 				/**
 				 * The protocol version of the core is not supported so tell user it is to old
 				 */
-				sendStatusMessage(CoreConnService.UNSUPPORTED_PROTOCOL, null);
+				BusProvider.getInstance().post(new UnsupportedProtocolEvent());
 				break;
 			case R.id.INIT_PROGRESS:
-				bundle = new Bundle();
-				bundle.putString(PROGRESS_KEY, (String)msg.obj);
-				sendStatusMessage(CoreConnService.INIT_PROGRESS, bundle);
+				BusProvider.getInstance().post(new InitProgressEvent(false, (String)msg.obj));
 				break;
 			case R.id.INIT_DONE:
 				/**
 				 * CoreConn has connected to a core
 				 */
 				notificationManager.notifyConnected();
-				sendStatusMessage(CoreConnService.INIT_DONE, null);
+				BusProvider.getInstance().post(new InitProgressEvent(true, ""));
 				break;
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
@@ -852,9 +820,7 @@ public class CoreConnService extends Service {
 				break;
 			case R.id.SET_CORE_LATENCY:
                 latency = msg.arg1;
-                Bundle bundleLatency = new Bundle();
-                bundleLatency.putInt(CoreConnService.LATENCY_CORE_KEY, latency);
-                sendStatusMessage(CoreConnService.LATENCY_CORE, bundleLatency);
+                BusProvider.getInstance().post(new LatencyChangedEvent(latency));
                 break;
 			case R.id.SET_NETWORK_LATENCY:
                 networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
@@ -918,4 +884,17 @@ public class CoreConnService extends Service {
 	public Network getNetworkById(int networkId) {
         return networks.getNetworkById(networkId);
     }
+	
+	@Produce
+	public ConnectionChangedEvent produceConnectionStatus() {
+		if(isConnected())
+			return new ConnectionChangedEvent(Status.Connected);
+		else 
+			return new ConnectionChangedEvent(Status.Disconnected);
+	}
+	
+	@Produce
+	public LatencyChangedEvent produceLatency() {
+		return new LatencyChangedEvent(latency);
+	}
 }

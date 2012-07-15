@@ -67,12 +67,17 @@ import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.SenderColorHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Observable;
@@ -94,15 +99,14 @@ public class ChatActivity extends FragmentActivity {
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
-	private ResultReceiver statusReceiver;
 	private NickCompletionHelper nickCompletionHelper;
-	
+
 	private int bufferId;
 	private int currentTheme;
 
 	private static final String TAG = ChatActivity.class.getSimpleName();
 
-    private Boolean showLag = false;
+	private Boolean showLag = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -112,11 +116,11 @@ public class ChatActivity extends FragmentActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.chat_layout);
 		Intent intent = getIntent();
-		
+
 		if(intent.hasExtra(BUFFER_ID)) {
 			bufferId = intent.getIntExtra(BUFFER_ID, 0);
 		}
-		
+
 		initActionBar();
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -142,7 +146,7 @@ public class ChatActivity extends FragmentActivity {
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (event != null && event.getAction() == KeyEvent.ACTION_DOWN && 
-				        ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER))) {
+						((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER))) {
 					EditText inputfield = (EditText)findViewById(R.id.ChatInputView);
 					String inputText = inputfield.getText().toString();
 
@@ -182,61 +186,37 @@ public class ChatActivity extends FragmentActivity {
 			}
 		});
 
-		statusReceiver = new ResultReceiver(null) {
+		sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
 			@Override
-			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
-					Log.d(TAG, "Getting result disconnected");
-					finish();
-				} else if(resultCode==CoreConnService.LATENCY_CORE) {
-				    if (resultData.getInt(CoreConnService.LATENCY_CORE_KEY) > 0) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle(Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
-                        } else {
-                            setTitle(getResources().getString(R.string.app_name) + " - " 
-                                + Helper.formatLatency(resultData.getInt(CoreConnService.LATENCY_CORE_KEY), getResources()));
-                            
-                        }
-                    }
-                }
-				super.onReceiveResult(resultCode, resultData);
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals(getResources().getString(R.string.preference_show_lag))){
+					showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+					if(!showLag) {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+							setActionBarSubtitle("");
+						} else {
+							setTitle(getResources().getString(R.string.app_name));
+
+						}
+					}
+				}
 			}
-
 		};
-
-        
-        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
-
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals(getResources().getString(R.string.preference_show_lag))){
-                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-                    if(!showLag) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                setActionBarSubtitle("");
-                        } else {
-                            setTitle(getResources().getString(R.string.app_name));
-                            
-                        }
-                    }
-                }
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
-	
+
 	@TargetApi(11)
 	private void setActionBarSubtitle(String subtitle) {
 		getActionBar().setSubtitle(subtitle);
 	}
-	
+
 	@TargetApi(14)
 	private void initActionBar() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-	        ActionBar actionBar = getActionBar();
-	        actionBar.setDisplayHomeAsUpEnabled(true);
-	    }
+			ActionBar actionBar = getActionBar();
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
 	}
 
 	@Override
@@ -256,9 +236,9 @@ public class ChatActivity extends FragmentActivity {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			Intent intent = new Intent(this, BufferActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            return true;
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			return true;
 		case R.id.menu_preferences:
 			Intent i = new Intent(ChatActivity.this, PreferenceView.class);
 			startActivity(i);
@@ -276,15 +256,27 @@ public class ChatActivity extends FragmentActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		BusProvider.getInstance().register(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		BusProvider.getInstance().unregister(this);
+	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, ChatActivity.class);
-	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	        intent.putExtra(BUFFER_ID, bufferId);
-	        startActivity(intent);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra(BUFFER_ID, bufferId);
+			startActivity(intent);
 		}
 		dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
 		findViewById(R.id.chat_auto_complete_button).setEnabled(false);
@@ -312,13 +304,13 @@ public class ChatActivity extends FragmentActivity {
 		}
 		doUnbindService();
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putInt(BUFFER_ID, bufferId);
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		bufferId = savedInstanceState.getInt(BUFFER_ID);
@@ -391,10 +383,10 @@ public class ChatActivity extends FragmentActivity {
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name);
 			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + " ("
-				    + boundConnService.getNetworkById(buffer.getInfo().networkId).getServer() + ") | "
-				    + getResources().getString(R.string.users) + ": "
-				    + boundConnService.getNetworkById(buffer.getInfo().networkId).getCountUsers() + " | "
-				    + Helper.formatLatency(boundConnService.getNetworkById(buffer.getInfo().networkId).getLatency(), getResources()));
+						+ boundConnService.getNetworkById(buffer.getInfo().networkId).getServer() + ") | "
+						+ getResources().getString(R.string.users) + ": "
+						+ boundConnService.getNetworkById(buffer.getInfo().networkId).getCountUsers() + " | "
+						+ Helper.formatLatency(boundConnService.getNetworkById(buffer.getInfo().networkId).getLatency(), getResources()));
 			} else{
 				((TextView)findViewById(R.id.chatNameView)).setText(buffer.getInfo().name + ": " + buffer.getTopic());
 			}
@@ -707,8 +699,6 @@ public class ChatActivity extends FragmentActivity {
 			}else{
 				adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
 			}
-
-			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -736,10 +726,28 @@ public class ChatActivity extends FragmentActivity {
 			Log.i(TAG, "Unbinding service");
 			// Detach our existing connection.
 			adapter.stopObserving();
-			boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
 
 		}
+	}
+	
+	@Subscribe
+	public void onConnectionChanged(ConnectionChangedEvent event) {
+		if(event.status == Status.Disconnected) {
+			Log.d(TAG, "Getting result disconnected");
+			finish();				
+		}
+	}
+	@Subscribe
+	public void onLatencyChanged(LatencyChangedEvent event) {
+		if (event.latency > 0) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
+			} else {
+				setTitle(getResources().getString(R.string.app_name) + " - " 
+						+ Helper.formatLatency(event.latency, getResources()));
+			}
+		}			
 	}
 }
