@@ -5,14 +5,15 @@ import java.util.List;
 
 public class InputHistoryHelper {
 	private static List<String> history = new ArrayList<String>();
-	private static int currentIndex = 0;
+	private static int currentIndex = -1;
+	private static String tempStore;
 	
 	public static String getNextHistoryEntry(){
 		if (history.size() == 0) {
 			return "";
 		}
 
-		if (currentIndex < history.size() -1 ) {
+		if (currentIndex < history.size()-1 ) {
 			currentIndex++;
 		}
 
@@ -24,26 +25,23 @@ public class InputHistoryHelper {
 			return "";
 		}
 
-		if (currentIndex > 0) {
+		if (currentIndex >= 0) {
 			currentIndex--;
-		}
+		} 
+		if(currentIndex == -1)
+			return tempStore;
 
 		return  history.get(currentIndex);
 	}
 
 	public static void addHistoryEntry(String text)
 	{
-		history.add(1, text);
-		currentIndex=0;
+		history.add(0, text);
+		currentIndex=-1;
 	}
 
-	public static void tempStoreCurrentEntry(String text)
-	{
-		if (currentIndex == 0) {
-			if (history.size() > 0) {
-				history.remove(0);
-			}
-			history.add(0, text);
-		}
+	public static void tempStoreCurrentEntry(String text) {
+		if(currentIndex == -1)
+			tempStore = text;
 	}
 }
