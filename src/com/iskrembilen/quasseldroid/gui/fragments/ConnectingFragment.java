@@ -13,7 +13,7 @@ public class ConnectingFragment extends Fragment {
 
 	private TextView progressTextView;
 
-	static ConnectingFragment newInstance() {
+	public static ConnectingFragment newInstance() {
 		ConnectingFragment f = new ConnectingFragment();
 		return f;
 	}
@@ -23,7 +23,7 @@ public class ConnectingFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View root = inflater.inflate(R.layout.connecting_fragment_layout, container, false);
 		progressTextView = (TextView) root.findViewById(R.id.buffer_list_progress_text);
-		return super.onCreateView(inflater, container, savedInstanceState);
+		return root;
 	}
 
 	public void updateProgress(String info) {

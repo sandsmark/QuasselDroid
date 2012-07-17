@@ -43,6 +43,8 @@ import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
@@ -81,6 +83,7 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -99,15 +102,10 @@ public class BufferActivity extends FragmentActivity {
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 
-	private static final String ITEM_POSITION_KEY = "itempos";
-
-	private static final String LIST_POSITION_KEY = "listpos";
-
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
 	private int currentTheme;
-
 	private Boolean showLag = false;
 
 	@Override
@@ -115,7 +113,15 @@ public class BufferActivity extends FragmentActivity {
 		setTheme(ThemeUtil.theme);
 		super.onCreate(savedInstanceState);
 		currentTheme = ThemeUtil.theme;
-		setContentView(R.layout.buffer_list);
+		setContentView(R.layout.buffer_list_layout);
+		
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		
+		ConnectingFragment fragment = ConnectingFragment.newInstance();
+		fragmentTransaction.add(R.id.buffer_list_fragment_container, fragment);
+		fragmentTransaction.commit();
+		
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
@@ -191,12 +197,12 @@ public class BufferActivity extends FragmentActivity {
 		case R.id.menu_preferences:
 			Intent i = new Intent(BufferActivity.this, PreferenceView.class);
 			startActivity(i);
-			break;
+			return true;
 		case R.id.menu_disconnect:
 			this.boundConnService.disconnectFromCore();
 			startActivity(new Intent(this, LoginActivity.class));
 			finish();
-			break;
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -282,9 +288,14 @@ public class BufferActivity extends FragmentActivity {
 	@Subscribe
 	public void onInitProgressed(InitProgressEvent event) {
 		if(event.done) {
-			//TODO: add fragment transaction				
+			FragmentManager fragmentManager = getSupportFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			
+			BufferFragment fragment = BufferFragment.newInstance();
+			fragmentTransaction.replace(R.id.buffer_list_fragment_container, fragment);
+			fragmentTransaction.commit();
 		} else {
-			((ConnectingFragment)getSupportFragmentManager().findFragmentById(1)).updateProgress(event.progress); //TODO TEMP ID
+			((ConnectingFragment)getSupportFragmentManager().findFragmentById(R.id.buffer_list_fragment_container)).updateProgress(event.progress);
 
 		}
 	}

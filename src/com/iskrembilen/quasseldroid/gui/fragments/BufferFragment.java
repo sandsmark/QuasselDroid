@@ -127,6 +127,10 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
 	private int offlineColor;
 
+	public static BufferFragment newInstance() {
+		return new BufferFragment();
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -134,6 +138,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
 			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
 		}
+		setHasOptionsMenu(true);
 		offlineColor = getResources().getColor(R.color.buffer_offline_color);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
@@ -151,7 +156,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View root =  inflater.inflate(R.layout.buffer_list, container, false);
+		View root =  inflater.inflate(R.layout.buffer_list_fragment_layout, container, false);
 		bufferList = (ExpandableListView) root.findViewById(R.id.buffer_list);
 		return root;
 	}
@@ -162,6 +167,9 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		bufferListAdapter = new BufferListAdapter(getActivity());
 		bufferList.setAdapter(bufferListAdapter);
 		bufferList.setDividerHeight(0);
+		bufferList.setOnChildClickListener(this);
+		bufferList.setOnGroupCollapseListener(this);
+		bufferList.setOnGroupExpandListener(this);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			initActionMenu();
 		} else {
@@ -323,6 +331,18 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		super.onPause();
 		BusProvider.getInstance().unregister(this);
 	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+		doBindService();
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		doUnbindService();
+	}
 
 	@Override
 	public void onDestroy() {
@@ -348,24 +368,16 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.buffer_menu, menu);
+		inflater.inflate(R.menu.buffer_list_fragment_menu, menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_preferences:
-			Intent i = new Intent(getActivity(), PreferenceView.class);
-			startActivity(i);
-			break;
-		case R.id.menu_disconnect:
-			this.boundConnService.disconnectFromCore();
-			startActivity(new Intent(getActivity(), LoginActivity.class));
-			getActivity().finish();
-			break;
 		case R.id.menu_join_channel:
 			if(bufferListAdapter.networks == null) Toast.makeText(getActivity(), "Not available now", Toast.LENGTH_SHORT).show();
 			else showJoinChannelDialog();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -741,7 +753,8 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 
 			//Testing to see if i can add item to adapter in service
-			if(boundConnService.isInitComplete()) { 
+			if(boundConnService.isInitComplete()) {
+				System.out.println("INIT DONE ADDING NETWORK");
 				bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
 			}
 
@@ -757,6 +770,30 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
 		}
 	};
+	
+	void doBindService() {
+		// Establish a connection with the service. We use an explicit
+		// class name because we want a specific service implementation that
+		// we know will be running in our own process (and thus won't be
+		// supporting component replacement by other applications).
+
+		// Send a ResultReciver with the intent to the service, so that we can 
+		// get a notification if the connection status changes like we disconnect. 
+
+		getActivity().bindService(new Intent(getActivity(), CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
+		isBound = true;
+		Log.i(TAG, "BINDING");
+	}
+
+	void doUnbindService() {
+		if (isBound) {
+			Log.i(TAG, "Unbinding service");
+			// Detach our existing connection.
+			getActivity().unbindService(mConnection);
+			isBound = false;;
+		}
+	}
+
 
 	class ActionModeData {
 		public int id;

@@ -37,11 +37,14 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.widget.Toast;
+
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
@@ -51,6 +54,7 @@ import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -896,5 +900,22 @@ public class CoreConnService extends Service {
 	@Produce
 	public LatencyChangedEvent produceLatency() {
 		return new LatencyChangedEvent(latency);
+	}
+	
+	@Subscribe
+	public void doJoinChannel(JoinChannelEvent event) {
+		int networksStatusBufferId = -1;
+		for(Network network : networks.getNetworkList()) {
+			if(network.getName().equals(event.networkName)) {
+				networksStatusBufferId = network.getStatusBuffer().getInfo().id;
+				break;
+			}
+		}
+		if(networksStatusBufferId != -1) {
+			sendMessage(networksStatusBufferId, "/join "+ event.channelName);
+			Toast.makeText(getApplicationContext(), "Joining channel " + event.channelName, Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(getApplicationContext(), "Error joining channel", Toast.LENGTH_LONG).show();
+		}
 	}
 }
