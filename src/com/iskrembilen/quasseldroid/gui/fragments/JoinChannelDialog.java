@@ -54,8 +54,6 @@ public class JoinChannelDialog extends DialogFragment{
 			@Override
 			public void onClick(View v) {
 				if (v.getId()==R.id.dialog_join_channel_cancel_button) {
-					channelNameField.setText("");
-					((ArrayAdapter<String>)networkSpinner.getAdapter()).clear();
 					getDialog().dismiss();
 
 
@@ -63,9 +61,7 @@ public class JoinChannelDialog extends DialogFragment{
 					String channelName = channelNameField.getText().toString().trim();
 					String networkSelected = (String) networkSpinner.getSelectedItem();
 					BusProvider.getInstance().post(new JoinChannelEvent(networkSelected, channelName));
-					channelNameField.setText("");
-					((ArrayAdapter<String>)networkSpinner.getAdapter()).clear();
-					getDialog().dismiss();
+					dismiss();
 				}
 			}
 		};
@@ -76,6 +72,6 @@ public class JoinChannelDialog extends DialogFragment{
 	}
 
 	public String[] getNetworkNames() {
-		return getArguments().getStringArray("networknames");
+		return getArguments().getStringArray("networks");
 	}
 }
