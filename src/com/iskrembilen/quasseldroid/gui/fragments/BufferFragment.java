@@ -42,8 +42,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
@@ -82,7 +84,9 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.gui.BufferActivity;
 import com.iskrembilen.quasseldroid.gui.ChatActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.PreferenceView;
@@ -93,6 +97,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -121,7 +126,28 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	private ActionModeData actionModeData = new ActionModeData();
 
 	private int offlineColor;
-	
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if(savedInstanceState != null) {
+			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
+			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
+		}
+		offlineColor = getResources().getColor(R.color.buffer_offline_color);
+		preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
+
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if(key.equals(getResources().getString(R.string.preference_fontsize_channel_list))){
+					bufferListAdapter.notifyDataSetChanged();
+				}
+			}
+		};
+		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -129,7 +155,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		bufferList = (ExpandableListView) root.findViewById(R.id.buffer_list);
 		return root;
 	}
-	
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -141,18 +167,9 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		} else {
 			registerForContextMenu(bufferList);	    	
 		}
-		
+
 	}
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if(savedInstanceState != null) {
-			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
-			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
-		}
-		offlineColor = getResources().getColor(R.color.buffer_offline_color);
-	}
 
 	@TargetApi(11)
 	private void initActionMenu() {
@@ -327,7 +344,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
 
 	}
-	
+
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
@@ -348,9 +365,29 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			break;
 		case R.id.menu_join_channel:
 			if(bufferListAdapter.networks == null) Toast.makeText(getActivity(), "Not available now", Toast.LENGTH_SHORT).show();
-			else getActivity().showDialog(R.id.DIALOG_JOIN_CHANNEL);
+			else showJoinChannelDialog();
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void showJoinChannelDialog() {
+		List<Network> networkList = bufferListAdapter.networks.getNetworkList();
+		String[] networkArray = new String[networkList.size()];
+
+		for(int i = 0; i < networkList.size(); i++) {
+			networkArray[i] = networkList.get(i).getName();
+		}
+		
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+		if (prev != null) {
+			ft.remove(prev);
+		}
+		ft.addToBackStack(null);
+
+		// Create and show the dialog.
+		DialogFragment newFragment = JoinChannelDialog.newInstance(networkArray);
+		newFragment.show(ft, "dialog");
 	}
 
 	@Override
@@ -751,7 +788,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			((TextView)getView().findViewById(R.id.buffer_list_progress_text)).setText(event.progress);				
 		}
 	}
-	
+
 	@Subscribe
 	public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
 		bufferListAdapter.notifyDataSetChanged();

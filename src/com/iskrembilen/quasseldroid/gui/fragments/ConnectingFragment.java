@@ -7,8 +7,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class ConnectingFragment extends Fragment {
+
+	private TextView progressTextView;
 
 	static ConnectingFragment newInstance() {
 		ConnectingFragment f = new ConnectingFragment();
@@ -19,7 +22,12 @@ public class ConnectingFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View root = inflater.inflate(R.layout.connecting_fragment_layout, container, false);
+		progressTextView = (TextView) root.findViewById(R.id.buffer_list_progress_text);
 		return super.onCreateView(inflater, container, savedInstanceState);
+	}
+
+	public void updateProgress(String info) {
+		progressTextView.setText(info);				
 	}
 
 }
