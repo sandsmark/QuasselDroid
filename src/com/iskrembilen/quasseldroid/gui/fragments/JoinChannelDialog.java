@@ -56,7 +56,6 @@ public class JoinChannelDialog extends DialogFragment{
 				if (v.getId()==R.id.dialog_join_channel_cancel_button) {
 					getDialog().dismiss();
 
-
 				}else if (v.getId()==R.id.dialog_join_channel_join_button && !channelNameField.getText().toString().equals("")) {
 					String channelName = channelNameField.getText().toString().trim();
 					String networkSelected = (String) networkSpinner.getSelectedItem();

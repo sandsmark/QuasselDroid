@@ -81,6 +81,7 @@ import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
@@ -170,14 +171,7 @@ public class BufferActivity extends FragmentActivity {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
-		doBindService();
 		super.onStart();
-	}
-
-	@Override
-	protected void onStop() {
-		doUnbindService();
-		super.onStop();
 	}
 
 	@Override
@@ -199,71 +193,14 @@ public class BufferActivity extends FragmentActivity {
 			startActivity(i);
 			return true;
 		case R.id.menu_disconnect:
-			this.boundConnService.disconnectFromCore();
-			startActivity(new Intent(this, LoginActivity.class));
+			BusProvider.getInstance().post(new DisconnectCoreEvent());
+			startActivity(new Intent(this, LoginActivity.class)); 
 			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	/**
-	 * Code for service binding:
-	 */
-	private CoreConnService boundConnService;
-	private Boolean isBound;
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			// This is called when the connection with the service has been
-			// established, giving us the service object we can use to
-			// interact with the service. Because we have bound to a explicit
-			// service that we know is running in our own process, we can
-			// cast its IBinder to a concrete class and directly access it.
-			Log.i(TAG, "BINDING ON SERVICE DONE");
-			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-
-			//Testing to see if i can add item to adapter in service
-			if(boundConnService.isInitComplete()) { 
-				//bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
-			}
-
-
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			// This is called when the connection with the service has been
-			// unexpectedly disconnected -- that is, its process crashed.
-			// Because it is running in our same process, we should never
-			// see this happen.
-			boundConnService = null;
-
-		}
-	};
-
-	void doBindService() {
-		// Establish a connection with the service. We use an explicit
-		// class name because we want a specific service implementation that
-		// we know will be running in our own process (and thus won't be
-		// supporting component replacement by other applications).
-
-		// Send a ResultReciver with the intent to the service, so that we can 
-		// get a notification if the connection status changes like we disconnect. 
-
-		bindService(new Intent(BufferActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
-		isBound = true;
-		Log.i(TAG, "BINDING");
-	}
-
-	void doUnbindService() {
-		if (isBound) {
-			Log.i(TAG, "Unbinding service");
-			// Detach our existing connection.
-			unbindService(mConnection);
-			isBound = false;;
-		}
-	}
-
+	
 	class ActionModeData {
 		public int id;
 		public View listItem;

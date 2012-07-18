@@ -83,14 +83,21 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
+import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
+import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.gui.BufferActivity;
 import com.iskrembilen.quasseldroid.gui.ChatActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -114,8 +121,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
 	BufferListAdapter bufferListAdapter;
 	ExpandableListView bufferList;
-
-	ResultReceiver statusReceiver;
 
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -199,11 +204,11 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch (item.getItemId()) {
 				case R.id.context_menu_connect:
-					connectNetwork(actionModeData.id);
+					BufferHelper.connectNetwork(actionModeData.id);
 					mode.finish();
 					return true;
 				case R.id.context_menu_disconnect:
-					disconnectNetwork(actionModeData.id);
+					BufferHelper.disconnectNetwork(actionModeData.id);
 					mode.finish();
 					return true;
 				default:
@@ -237,23 +242,23 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 				switch (item.getItemId()) {
 				case R.id.context_menu_join:
-					joinChannel(actionModeData.id);
+					BufferHelper.joinChannel(actionModeData.id, bufferListAdapter.networks);
 					mode.finish();
 					return true;
 				case R.id.context_menu_part:
-					partChannel(actionModeData.id);
+					BufferHelper.partChannel(actionModeData.id, bufferListAdapter.networks);
 					mode.finish();
 					return true;
 				case R.id.context_menu_delete:
-					showDeleteConfirmDialog(actionModeData.id);
+					BufferHelper.showDeleteConfirmDialog(getActivity(), actionModeData.id);
 					mode.finish();
 					return true;
 				case R.id.context_menu_hide_temp:
-					tempHideChannel(actionModeData.id);
+					BufferHelper.tempHideChannel(actionModeData.id);
 					mode.finish();
 					return true;
 				case R.id.context_menu_hide_perm:
-					permHideChannel(actionModeData.id);
+					BufferHelper.permHideChannel(actionModeData.id);
 					mode.finish();
 					return true;
 				default:
@@ -330,18 +335,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	public void onPause() {
 		super.onPause();
 		BusProvider.getInstance().unregister(this);
-	}
-	
-	@Override
-	public void onStart() {
-		super.onStart();
-		doBindService();
-	}
-	
-	@Override
-	public void onStop() {
-		super.onStop();
-		doUnbindService();
 	}
 
 	@Override
@@ -449,25 +442,25 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		int id = (int)info.id;
 		switch (item.getItemId()) {
 		case R.id.context_menu_join:
-			joinChannel(id);
+			BufferHelper.joinChannel(id, bufferListAdapter.networks);
 			return true;
 		case R.id.context_menu_part:
-			partChannel(id);
+			BufferHelper.partChannel(id, bufferListAdapter.networks);
 			return true;
 		case R.id.context_menu_delete:
-			showDeleteConfirmDialog(id);
+			BufferHelper.showDeleteConfirmDialog(getActivity(), id);
 			return true;
 		case R.id.context_menu_connect:
-			connectNetwork(id);
+			BufferHelper.connectNetwork(id);
 			return true;
 		case R.id.context_menu_disconnect:
-			disconnectNetwork(id);
+			BufferHelper.disconnectNetwork(id);
 			return true;
 		case R.id.context_menu_hide_temp:
-			tempHideChannel(id);
+			BufferHelper.tempHideChannel(id);
 			return true;
 		case R.id.context_menu_hide_perm:
-			permHideChannel(id);
+			BufferHelper.permHideChannel(id);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -488,50 +481,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	@Override
 	public void onGroupCollapse(int groupPosition) {
 		bufferListAdapter.getGroup(groupPosition).setOpen(false);
-	}
-
-	private void joinChannel(int bufferId) {
-		boundConnService.sendMessage(bufferId, "/join "+bufferListAdapter.networks.getBufferById(bufferId).getInfo().name);
-	}
-
-	private void partChannel(int bufferId) {
-		boundConnService.sendMessage(bufferId, "/part "+bufferListAdapter.networks.getBufferById(bufferId).getInfo().name);
-	}
-
-	private void deleteChannel(int bufferId) {
-		boundConnService.deleteBuffer(bufferId);
-	}
-
-	private void tempHideChannel(int bufferId) {
-		boundConnService.tempHideBuffer(bufferId);
-	}
-
-	private void permHideChannel(int bufferId) {
-		boundConnService.permHideBuffer(bufferId);
-	}
-
-	private void connectNetwork(int networkId) {
-		boundConnService.connectToNetwork(networkId);
-	}
-
-	private void disconnectNetwork(int networkId) {
-		boundConnService.disconnectFromNetwork(networkId);
-	}
-
-	private void showDeleteConfirmDialog(final int bufferId) {
-		new AlertDialog.Builder(getActivity())
-		.setTitle(R.string.dialog_delete_buffer_title)
-		.setMessage(R.string.dialog_delete_buffer_message)
-		.setPositiveButton(R.string.dialog_delete_buffer_yes, new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				deleteChannel(bufferId);
-			}
-
-		})
-		.setNegativeButton(R.string.dialog_delete_buffer_no, null)
-		.show();
 	}
 
 	private void openBuffer(Buffer buffer) {
@@ -620,10 +569,9 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
-
-				if (boundConnService.isUserAway(nick, entry.getInfo().networkId)) {
+				if(bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
 					holder.bufferImage.setImageBitmap(userAwayBitmap);
-				} else if (boundConnService.isUserOnline(nick, entry.getInfo().networkId)) {
+				} else if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
 					holder.bufferImage.setImageBitmap(userOfflineBitmap);
 					holder.bufferView.setTextColor(offlineColor);
 				} else {
@@ -735,66 +683,15 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		public TextView statusView;
 		public int networkId;
 	}
-
-	/**
-	 * Code for service binding:
-	 */
-	private CoreConnService boundConnService;
-	private Boolean isBound;
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			// This is called when the connection with the service has been
-			// established, giving us the service object we can use to
-			// interact with the service. Because we have bound to a explicit
-			// service that we know is running in our own process, we can
-			// cast its IBinder to a concrete class and directly access it.
-			Log.i(TAG, "BINDING ON SERVICE DONE");
-			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-
-			//Testing to see if i can add item to adapter in service
-			if(boundConnService.isInitComplete()) {
-				System.out.println("INIT DONE ADDING NETWORK");
-				bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));
-			}
-
-
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			// This is called when the connection with the service has been
-			// unexpectedly disconnected -- that is, its process crashed.
-			// Because it is running in our same process, we should never
-			// see this happen.
-			boundConnService = null;
-
-		}
-	};
 	
-	void doBindService() {
-		// Establish a connection with the service. We use an explicit
-		// class name because we want a specific service implementation that
-		// we know will be running in our own process (and thus won't be
-		// supporting component replacement by other applications).
-
-		// Send a ResultReciver with the intent to the service, so that we can 
-		// get a notification if the connection status changes like we disconnect. 
-
-		getActivity().bindService(new Intent(getActivity(), CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
-		isBound = true;
-		Log.i(TAG, "BINDING");
-	}
-
-	void doUnbindService() {
-		if (isBound) {
-			Log.i(TAG, "Unbinding service");
-			// Detach our existing connection.
-			getActivity().unbindService(mConnection);
-			isBound = false;;
+	@Subscribe
+	public void onNetworksAvailable(NetworksAvailableEvent event) {
+		if(event.networks != null) {
+			event.networks.addObserver(bufferListAdapter);
+			bufferListAdapter.setNetworks(event.networks);			
 		}
 	}
-
-
+	
 	class ActionModeData {
 		public int id;
 		public View listItem;
@@ -813,16 +710,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			}
 			getActivity().finish();
 			startActivity(new Intent(getActivity(), LoginActivity.class));
-		}
-	}
-
-	@Subscribe
-	public void onInitProgressed(InitProgressEvent event) {
-		if(event.done) {
-			bufferList.setAdapter(bufferListAdapter);
-			bufferListAdapter.setNetworks(boundConnService.getNetworkList(bufferListAdapter));				
-		} else {
-			((TextView)getView().findViewById(R.id.buffer_list_progress_text)).setText(event.progress);				
 		}
 	}
 

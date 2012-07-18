@@ -43,11 +43,18 @@ import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
+import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
+import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -217,26 +224,6 @@ public class CoreConnService extends Service {
 	public void unhideTempHiddenBuffer(int bufferId) {
 		coreConn.requestUnhideTempHiddenBuffer(bufferId);
 		networks.getBufferById(bufferId).setTemporarilyHidden(false);
-	}
-	
-	public void deleteBuffer(int bufferId) {
-		coreConn.requestRemoveBuffer(bufferId);
-	}
-
-	public void tempHideBuffer(int bufferId) {
-        coreConn.requestTempHideBuffer(bufferId);
-    }
-
-	public void permHideBuffer(int bufferId) {
-        coreConn.requestPermHideBuffer(bufferId);
-    }
-	
-	public void connectToNetwork(int networkId) {
-		coreConn.requestConnectNetwork(networkId);
-	}
-	
-	public void disconnectFromNetwork(int networkId) {
-		coreConn.requestDisconnectNetwork(networkId);
 	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
@@ -870,20 +857,6 @@ public class CoreConnService extends Service {
 		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
-	
-	public boolean isUserAway(String nick, int networkId) {
-		Network network = networks.getNetworkById(networkId);
-		if (network == null) return false;
-		IrcUser user = network.getUserByNick(nick);
-		if (user == null) return false;
-		return user.away;
-	}
-	
-	public boolean isUserOnline(String nick, int networkId) {
-		Network network = networks.getNetworkById(networkId);
-		if (network == null) return true;
-		return !network.hasNick(nick);
-	}
 
 	public Network getNetworkById(int networkId) {
         return networks.getNetworkById(networkId);
@@ -902,6 +875,11 @@ public class CoreConnService extends Service {
 		return new LatencyChangedEvent(latency);
 	}
 	
+	@Produce
+	public NetworksAvailableEvent produceNetworksAvailable() {
+		return new NetworksAvailableEvent(networks);
+	}
+	
 	@Subscribe
 	public void doJoinChannel(JoinChannelEvent event) {
 		int networksStatusBufferId = -1;
@@ -916,6 +894,36 @@ public class CoreConnService extends Service {
 			Toast.makeText(getApplicationContext(), "Joining channel " + event.channelName, Toast.LENGTH_LONG).show();
 		} else {
 			Toast.makeText(getApplicationContext(), "Error joining channel", Toast.LENGTH_LONG).show();
+		}
+	}
+	
+	@Subscribe
+	public void doDisconnectCore(DisconnectCoreEvent event) {
+		disconnectFromCore();
+	}
+	
+	@Subscribe
+	public void doSendMessage(SendMessageEvent event) {
+		sendMessage(event.bufferId, event.message);
+	}
+	
+	@Subscribe
+	public void doManageChannel(ManageChannelEvent event) {
+		if(event.action == ChannelAction.DELETE) {
+			coreConn.requestRemoveBuffer(event.bufferId);
+		} else if(event.action == ChannelAction.PERM_HIDE) {
+			coreConn.requestPermHideBuffer(event.bufferId);
+		} else if(event.action == ChannelAction.TEMP_HIDE) {
+			coreConn.requestTempHideBuffer(event.bufferId);
+		}
+	}
+	
+	@Subscribe
+	public void doManageNetwork(ManageNetworkEvent event) {
+		if(event.action == NetworkAction.CONNECT) {
+			coreConn.requestConnectNetwork(event.networkId);
+		} else if(event.action == NetworkAction.DISCONNECT) {
+			coreConn.requestDisconnectNetwork(event.networkId);
 		}
 	}
 }
