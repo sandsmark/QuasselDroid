@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_hide_events"
+        android:icon="?actionEditIcon"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_hide_events" android:orderInCategory="1">
+    </item>
+    <item
+        android:id="@+id/menu_users_list"
+        android:icon="?actionUserListIcon"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_users_list" android:orderInCategory="2">
+    </item>
+
+</menu>

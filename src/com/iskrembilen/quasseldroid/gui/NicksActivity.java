@@ -50,6 +50,7 @@ import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -90,8 +91,8 @@ public class NicksActivity extends FragmentActivity {
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
 		Intent intent = getIntent();
-		if(intent.hasExtra(ChatActivity.BUFFER_ID)) {
-			bufferId = intent.getIntExtra(ChatActivity.BUFFER_ID, 0);
+		if(intent.hasExtra(ChatFragment.BUFFER_ID)) {
+			bufferId = intent.getIntExtra(ChatFragment.BUFFER_ID, 0);
 			Log.d(TAG, "Intent has bufferid" + bufferId);
 		}
 
@@ -167,7 +168,7 @@ public class NicksActivity extends FragmentActivity {
 		case android.R.id.home:
 			Intent intent = new Intent(this, ChatActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(ChatActivity.BUFFER_ID, bufferId);
+			intent.putExtra(ChatFragment.BUFFER_ID, bufferId);
 			startActivity(intent);
 			return true;
 		}

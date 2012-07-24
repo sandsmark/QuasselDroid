@@ -44,11 +44,15 @@ import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
+import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
+import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
+import com.iskrembilen.quasseldroid.events.ManageMessageEvent;
 import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
+import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
 import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
@@ -130,11 +134,6 @@ public class CoreConnService extends Service {
 	public IBinder onBind(Intent intent) {
 		return binder;
 	}
-
-    public void onHighlightsRead(int bufferId) {
-           notificationManager.notifyHighlightsRead(bufferId);
-     }
-
 	
 	@Override
 	public void onCreate() {
@@ -205,21 +204,6 @@ public class CoreConnService extends Service {
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
 	}
-
-	public void markBufferAsRead(int bufferId) {
-		coreConn.requestMarkBufferAsRead(bufferId);
-	}
-
-	public void setLastSeen(int bufferId, int msgId) {
-		notificationManager.notifyHighlightsRead(bufferId);
-		coreConn.requestSetLastMsgRead(bufferId, msgId);
-		networks.getBufferById(bufferId).setLastSeenMessage(msgId);
-	}
-
-	public void setMarkerLine(int bufferId, int msgId) {
-		coreConn.requestSetMarkerLine(bufferId, msgId);
-		networks.getBufferById(bufferId).setMarkerLineMessage(msgId);
-	}
 	
 	public void unhideTempHiddenBuffer(int bufferId) {
 		coreConn.requestUnhideTempHiddenBuffer(bufferId);
@@ -231,11 +215,6 @@ public class CoreConnService extends Service {
 		if(obs != null && buffer != null)
 			buffer.addObserver(obs);
 		return buffer;
-	}
-
-	public void getMoreBacklog(int bufferId, int amount){
-		Log.d(TAG, "Fetching more backlog");
-		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
 	public NetworkCollection getNetworkList(Observer obs) {
@@ -720,6 +699,7 @@ public class CoreConnService extends Service {
 				 */
 				notificationManager.notifyConnected();
 				BusProvider.getInstance().post(new InitProgressEvent(true, ""));
+				BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
 				break;
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
@@ -915,6 +895,10 @@ public class CoreConnService extends Service {
 			coreConn.requestPermHideBuffer(event.bufferId);
 		} else if(event.action == ChannelAction.TEMP_HIDE) {
 			coreConn.requestTempHideBuffer(event.bufferId);
+		} else if(event.action == ChannelAction.MARK_AS_READ) {
+			coreConn.requestMarkBufferAsRead(event.bufferId);
+		} else if(event.action == ChannelAction.HIGHLIGHTS_READ) {
+			notificationManager.notifyHighlightsRead(event.bufferId);
 		}
 	}
 	
@@ -925,5 +909,31 @@ public class CoreConnService extends Service {
 		} else if(event.action == NetworkAction.DISCONNECT) {
 			coreConn.requestDisconnectNetwork(event.networkId);
 		}
+	}
+	
+	@Subscribe
+	public void doManageMessage(ManageMessageEvent event) {
+		if(event.action == MessageAction.LAST_SEEN) {
+			notificationManager.notifyHighlightsRead(event.bufferId);
+			coreConn.requestSetLastMsgRead(event.bufferId, event.messageId);
+			networks.getBufferById(event.bufferId).setLastSeenMessage(event.messageId);
+		} else if(event.action == MessageAction.MARKER_LINE) {
+			coreConn.requestSetMarkerLine(event.bufferId, event.messageId);
+			networks.getBufferById(event.bufferId).setMarkerLineMessage(event.messageId);
+		}
+	}
+	
+	@Subscribe
+	public void getGetBacklog(GetBacklogEvent event) {
+		Log.d(TAG, "Fetching more backlog");
+		coreConn.requestMoreBacklog(event.bufferId, event.backlogAmount);
+	}
+	
+	@Subscribe
+	public void onFilterMessages(FilterMessagesEvent event) {
+		if(event.filtered) 
+			networks.getBufferById(event.bufferId).addFilterType(event.filterType);
+		else 
+			networks.getBufferById(event.bufferId).removeFilterType(event.filterType);
 	}
 }
