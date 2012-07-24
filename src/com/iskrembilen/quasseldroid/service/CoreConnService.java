@@ -118,6 +118,8 @@ public class CoreConnService extends Service {
 	private OnSharedPreferenceChangeListener preferenceListener;
 
 	private int latency;
+	private boolean initDone = false;
+	private String initReason = "";
 
 
 	/**
@@ -691,13 +693,16 @@ public class CoreConnService extends Service {
 				BusProvider.getInstance().post(new UnsupportedProtocolEvent());
 				break;
 			case R.id.INIT_PROGRESS:
-				BusProvider.getInstance().post(new InitProgressEvent(false, (String)msg.obj));
+				initDone = false;
+				initReason = (String)msg.obj;
+				BusProvider.getInstance().post(new InitProgressEvent(false, initReason));
 				break;
 			case R.id.INIT_DONE:
 				/**
 				 * CoreConn has connected to a core
 				 */
 				notificationManager.notifyConnected();
+				initDone = true;
 				BusProvider.getInstance().post(new InitProgressEvent(true, ""));
 				BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
 				break;
@@ -935,5 +940,10 @@ public class CoreConnService extends Service {
 			networks.getBufferById(event.bufferId).addFilterType(event.filterType);
 		else 
 			networks.getBufferById(event.bufferId).removeFilterType(event.filterType);
+	}
+	
+	@Produce
+	public InitProgressEvent produceInitDoneEvent() {
+		return new InitProgressEvent(initDone, initReason);
 	}
 }

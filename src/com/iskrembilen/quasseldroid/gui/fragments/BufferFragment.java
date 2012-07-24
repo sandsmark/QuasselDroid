@@ -83,6 +83,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
+import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
@@ -92,8 +93,7 @@ import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
 import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
-import com.iskrembilen.quasseldroid.gui.BufferActivity;
-import com.iskrembilen.quasseldroid.gui.ChatActivity;
+import com.iskrembilen.quasseldroid.gui.MainActivity; 
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
@@ -102,6 +102,7 @@ import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -131,6 +132,8 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	private ActionModeData actionModeData = new ActionModeData();
 
 	private int offlineColor;
+
+	private int openedBufferId = -1;
 
 	public static BufferFragment newInstance() {
 		return new BufferFragment();
@@ -484,10 +487,8 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	}
 
 	private void openBuffer(Buffer buffer) {
-		Intent i = new Intent(getActivity(), ChatActivity.class);
-		i.putExtra(BUFFER_ID_EXTRA, buffer.getInfo().id);
-		i.putExtra(BUFFER_NAME_EXTRA, buffer.getInfo().name);
-		startActivity(i);
+		this.openedBufferId = buffer.getInfo().id;
+		BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
 	}
 
 	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
@@ -716,5 +717,10 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	@Subscribe
 	public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
 		bufferListAdapter.notifyDataSetChanged();
+	}
+	
+	@Produce
+	public int produceBufferOpened() {
+		return openedBufferId;
 	}
 }

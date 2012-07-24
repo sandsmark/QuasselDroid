@@ -1,6 +1,10 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
+import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.squareup.otto.Subscribe;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,9 +29,23 @@ public class ConnectingFragment extends Fragment {
 		progressTextView = (TextView) root.findViewById(R.id.buffer_list_progress_text);
 		return root;
 	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+		BusProvider.getInstance().register(this);
+	}
+	@Override
+	public void onStop() {
+		super.onStop();
+		BusProvider.getInstance().unregister(this);
+	}
 
-	public void updateProgress(String info) {
-		progressTextView.setText(info);				
+	@Subscribe
+	public void onInitProgressed(InitProgressEvent event) {
+		if(!event.done) {
+			progressTextView.setText(event.progress);
+		}
 	}
 
 }

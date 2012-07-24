@@ -38,12 +38,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".gui.ChatActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:windowSoftInputMode="stateHidden" >
-        </activity>
-        <activity
-            android:name=".gui.BufferActivity">
+            android:name=".gui.MainActivity">
         </activity>
 
         <service android:name=".service.CoreConnService" >

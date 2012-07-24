@@ -145,7 +145,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
 	protected void onStart() {
 		super.onStart();
 		if(ThemeUtil.theme != currentTheme) {
-			Intent intent = new Intent(this, BufferActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        startActivity(intent);
 		}
@@ -391,7 +391,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 			if(boundConnService.isConnected()) {
-				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
 				finish();
 			} else {
 				boundConnService.disconnectFromCore();
@@ -430,7 +430,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
 	public void onConnectionChanged(ConnectionChangedEvent event) {
 		if(event.status == Status.Connecting) {
 			removeDialog(R.id.DIALOG_CONNECTING);
-			LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+			LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
 			finish();				
 		} else if(event.status == Status.Disconnected) {
 			if (event.reason != ""){

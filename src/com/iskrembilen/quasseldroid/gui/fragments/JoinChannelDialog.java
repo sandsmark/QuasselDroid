@@ -3,7 +3,7 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
-import com.iskrembilen.quasseldroid.gui.BufferActivity;
+import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 
 import android.app.Dialog;

@@ -42,9 +42,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.ActionMode;
@@ -79,12 +82,15 @@ import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
+import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -96,9 +102,9 @@ import com.squareup.otto.Subscribe;
 import java.util.Observable;
 import java.util.Observer;
 
-public class BufferActivity extends FragmentActivity {
+public class MainActivity extends FragmentActivity {
 
-	private static final String TAG = BufferActivity.class.getSimpleName();
+	private static final String TAG = MainActivity.class.getSimpleName();
 
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
@@ -109,20 +115,19 @@ public class BufferActivity extends FragmentActivity {
 	private int currentTheme;
 	private Boolean showLag = false;
 
+	private ViewPager pager;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setTheme(ThemeUtil.theme);
 		super.onCreate(savedInstanceState);
 		currentTheme = ThemeUtil.theme;
-		setContentView(R.layout.buffer_list_layout);
-		
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		
-		ConnectingFragment fragment = ConnectingFragment.newInstance();
-		fragmentTransaction.add(R.id.buffer_list_fragment_container, fragment);
-		fragmentTransaction.commit();
-		
+		setContentView(R.layout.main_layout);
+
+		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
+		pager = (ViewPager) findViewById(R.id.pager);
+		pager.setAdapter(adapter);
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
@@ -153,31 +158,36 @@ public class BufferActivity extends FragmentActivity {
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-		BusProvider.getInstance().register(this);
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		BusProvider.getInstance().unregister(this);
-	}
-
-	@Override
 	protected void onStart() {
 		if(ThemeUtil.theme != currentTheme) {
-			Intent intent = new Intent(this, BufferActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
+		BusProvider.getInstance().register(this);
 		super.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		BusProvider.getInstance().unregister(this);
+
 	}
 
 	@Override
 	protected void onDestroy() {
 		preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 		super.onDestroy();
+	}
+
+	@Override
+	public boolean onSearchRequested() {
+		if(pager.getCurrentItem() == 1) {
+			getSupportFragmentManager().findFragmentById(R.id.chat_fragment_container);
+			return false; //Activity ate the request
+		}
+		return true;
 	}
 
 	@Override
@@ -189,7 +199,7 @@ public class BufferActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_preferences:
-			Intent i = new Intent(BufferActivity.this, PreferenceView.class);
+			Intent i = new Intent(MainActivity.this, PreferenceView.class);
 			startActivity(i);
 			return true;
 		case R.id.menu_disconnect:
@@ -200,7 +210,7 @@ public class BufferActivity extends FragmentActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	class ActionModeData {
 		public int id;
 		public View listItem;
@@ -214,25 +224,58 @@ public class BufferActivity extends FragmentActivity {
 		if(event.status == Status.Disconnected) {
 			if(event.reason != "") {
 				removeDialog(R.id.DIALOG_CONNECTING);
-				Toast.makeText(BufferActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
+				Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
 
 			}
 			finish();
-			startActivity(new Intent(BufferActivity.this, LoginActivity.class));
+			startActivity(new Intent(MainActivity.this, LoginActivity.class));
 		}
+	}
+
+	public class FragmentAdapter extends FragmentPagerAdapter {
+
+		public FragmentAdapter(FragmentManager fm) {
+			super(fm);
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			if(position == 0) {
+				return BufferFragment.newInstance();
+			} else if(position == 1) {
+				return ChatFragment.newInstance();
+			}
+			return null;
+		}
+
+		@Override
+		public int getCount() {
+			return 2;
+		}
+
 	}
 
 	@Subscribe
 	public void onInitProgressed(InitProgressEvent event) {
+		FragmentManager manager = getSupportFragmentManager();
 		if(event.done) {
-			FragmentManager fragmentManager = getSupportFragmentManager();
-			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-			
-			BufferFragment fragment = BufferFragment.newInstance();
-			fragmentTransaction.replace(R.id.buffer_list_fragment_container, fragment);
-			fragmentTransaction.commit();
+			if(manager.findFragmentById(R.id.connecting_fragment_container) != null) {
+				FragmentTransaction trans = manager.beginTransaction();
+				trans.remove(manager.findFragmentById(R.id.connecting_fragment_container));
+				trans.commit();
+				pager.setVisibility(View.VISIBLE);
+				findViewById(R.id.connecting_fragment_container).setVisibility(View.GONE);
+			}
 		} else {
-			((ConnectingFragment)getSupportFragmentManager().findFragmentById(R.id.buffer_list_fragment_container)).updateProgress(event.progress);
+			if(manager.findFragmentById(R.id.connecting_fragment_container) == null) {
+				findViewById(R.id.connecting_fragment_container).setVisibility(View.VISIBLE);
+				pager.setVisibility(View.GONE);
+				FragmentManager fragmentManager = getSupportFragmentManager();
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				ConnectingFragment fragment = ConnectingFragment.newInstance();
+				fragmentTransaction.add(R.id.connecting_fragment_container, fragment, "connect");
+				fragmentTransaction.commit();
+			}
 
 		}
 	}
@@ -249,5 +292,10 @@ public class BufferActivity extends FragmentActivity {
 				}
 			}
 		}
+	}
+
+	@Subscribe
+	public void onBufferOpened(BufferOpenedEvent event) {
+		pager.setCurrentItem(1);
 	}
 }

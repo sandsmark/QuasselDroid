@@ -87,7 +87,7 @@ public class SplashActivity extends Activity {
 			// cast its IBinder to a concrete class and directly access it.
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 			if(boundConnService.isConnected()) {
-				startActivity(BufferActivity.class);
+				startActivity(MainActivity.class);
 			} else {
 				startActivity(LoginActivity.class);
 			}

@@ -12,6 +12,7 @@ import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
+import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
@@ -21,8 +22,7 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
-import com.iskrembilen.quasseldroid.gui.BufferActivity;
-import com.iskrembilen.quasseldroid.gui.ChatActivity;
+import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.NicksActivity;
 import com.iskrembilen.quasseldroid.gui.PreferenceView;
@@ -569,7 +569,6 @@ public class ChatFragment extends Fragment {
 	public void onNetworksAvailable(NetworksAvailableEvent event) {
 		if(event.networks != null) {
 			this.networks = event.networks;
-			setBuffer(bufferId);
 		}
 	}
 
@@ -586,6 +585,14 @@ public class ChatFragment extends Fragment {
 			startActivity(new Intent(getActivity(), LoginActivity.class));
 		}  else if(event.status == Status.Connected) {
 			this.connected = true;
+		}
+	}
+
+	@Subscribe
+	public void onBufferOpened(BufferOpenedEvent event) {
+		if(event.bufferId != -1) {
+			this.bufferId = event.bufferId;
+			setBuffer(bufferId);
 		}
 	}
 }

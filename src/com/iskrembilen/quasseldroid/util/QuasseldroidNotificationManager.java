@@ -10,7 +10,7 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.gui.BufferActivity;
+import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class QuasseldroidNotificationManager {
 		}
 		if(defaults != 0) builder.setDefaults(defaults);
 
-		Intent launch = new Intent(context, BufferActivity.class);
+		Intent launch = new Intent(context, MainActivity.class);
 		launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
 		builder.setContentIntent(contentIntent);
@@ -84,7 +84,7 @@ public class QuasseldroidNotificationManager {
 		.setOngoing(true)
 		.setWhen(System.currentTimeMillis());
 
-		Intent launch = new Intent(context, BufferActivity.class);
+		Intent launch = new Intent(context, MainActivity.class);
 		launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
 		builder.setContentIntent(contentIntent);
@@ -109,7 +109,7 @@ public class QuasseldroidNotificationManager {
 		.setWhen(System.currentTimeMillis())
 		.setNumber(highlightedBuffers.size());
 
-		Intent launch = new Intent(context, BufferActivity.class);
+		Intent launch = new Intent(context, MainActivity.class);
 		launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
 		builder.setContentIntent(contentIntent);

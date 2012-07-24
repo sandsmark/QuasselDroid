@@ -138,7 +138,7 @@ public class NicksActivity extends FragmentActivity {
 	protected void onStart() {
 		super.onStart();
 		if(ThemeUtil.theme != currentTheme) {
-			Intent intent = new Intent(this, BufferActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
@@ -156,7 +156,7 @@ public class NicksActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			Intent intent = new Intent(this, ChatActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.putExtra(ChatFragment.BUFFER_ID, bufferId);
 			startActivity(intent);
