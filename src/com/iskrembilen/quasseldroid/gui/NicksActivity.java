@@ -49,6 +49,7 @@ import android.widget.*;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
@@ -132,18 +133,6 @@ public class NicksActivity extends FragmentActivity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		BusProvider.getInstance().register(this);
-	}
-	
-	@Override
-	protected void onPause() {
-		super.onPause();
-		BusProvider.getInstance().unregister(this);
-	}
 
 	@Override
 	protected void onStart() {
@@ -153,13 +142,14 @@ public class NicksActivity extends FragmentActivity {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
-		doBindService();
+		BusProvider.getInstance().register(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		doUnbindService();
+		adapter.stopObserving();
+		BusProvider.getInstance().unregister(this);
 	}
 
 	@Override
@@ -340,56 +330,12 @@ public class NicksActivity extends FragmentActivity {
 		public ImageView expanderView;
 		public LinearLayout groupHolderView;
 	}
-
-
-	/**
-	 * Code for service binding:
-	 */
-	private CoreConnService boundConnService;
-	private Boolean isBound;
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			// This is called when the connection with the service has been
-			// established, giving us the service object we can use to
-			// interact with the service. Because we have bound to a explicit
-			// service that we know is running in our own process, we can
-			// cast its IBinder to a concrete class and directly access it.
-			Log.d(TAG, "BINDING ON SERVICE DONE");
-			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-
-			Buffer buffer = boundConnService.getBuffer(bufferId, null);
-			adapter.setUsers(buffer.getUsers());
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			// This is called when the connection with the service has been
-			// unexpectedly disconnected -- that is, its process crashed.
-			// Because it is running in our same process, we should never
-			// see this happen.
-			boundConnService = null;
-
-		}
-	};
-
-	void doBindService() {
-		// Establish a connection with the service. We use an explicit
-		// class name because we want a specific service implementation that
-		// we know will be running in our own process (and thus won't be
-		// supporting component replacement by other applications).
-		bindService(new Intent(NicksActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
-		isBound = true;
-		Log.i(TAG, "BINDING");
-	}
-
-	void doUnbindService() {
-		if (isBound) {
-			Log.i(TAG, "Unbinding service");
-			// Detach our existing connection.
-			adapter.stopObserving();
-			unbindService(mConnection);
-			isBound = false;
-
+	
+	@Subscribe
+	public void onNetworksAvailable(NetworksAvailableEvent event) {
+		if(event.networks != null) {
+			Buffer buffer = event.networks.getBufferById(bufferId);
+			adapter.setUsers(buffer.getUsers());			
 		}
 	}
 
