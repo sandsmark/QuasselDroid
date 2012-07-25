@@ -780,7 +780,7 @@ public final class CoreConnection {
 					
 					//if network init is not complete and we receive anything but a network init object, queue it
 					if(!networkInitComplete) {
-						if(RequestType.getForVal((Integer)packedFunc.get(0).getData()) != RequestType.InitData && !((String)packedFunc.get(1).getData()).equals("Network")) {
+						if(RequestType.getForVal((Integer)packedFunc.get(0).getData()) != RequestType.InitData || !((String)packedFunc.get(1).getData()).equals("Network")) {
 							Log.e(TAG, "Package not network, queueing it");
 							packageQueue.add(packedFunc);
 							continue; //Read next packageFunc
