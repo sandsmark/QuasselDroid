@@ -2,6 +2,7 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 
 import java.util.ArrayList;
 
+import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
@@ -16,7 +17,7 @@ import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-public class HideEventsDialog extends DialogFragment{
+public class HideEventsDialog extends SherlockDialogFragment{
 		
 	public static HideEventsDialog newInstance(Buffer buffer) {
 		HideEventsDialog fragment = new HideEventsDialog();
@@ -42,7 +43,7 @@ public class HideEventsDialog extends DialogFragment{
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		AlertDialog.Builder builder = new AlertDialog.Builder(getSherlockActivity());
 		builder.setTitle("Hide Events");
 		
 		builder.setMultiChoiceItems(getFilterList(), getCheckedList(), new OnMultiChoiceClickListener() {

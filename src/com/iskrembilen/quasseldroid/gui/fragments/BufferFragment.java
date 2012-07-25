@@ -48,13 +48,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ActionMode;
+import com.actionbarsherlock.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -74,6 +74,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
@@ -109,7 +110,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class BufferFragment extends Fragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener{
+public class BufferFragment extends SherlockFragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener{
 
 	private static final String TAG = BufferFragment.class.getSimpleName();
 
@@ -148,7 +149,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		}
 		setHasOptionsMenu(true);
 		offlineColor = getResources().getColor(R.color.buffer_offline_color);
-		preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		preferences = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
 			@Override
@@ -172,22 +173,20 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		bufferListAdapter = new BufferListAdapter(getActivity());
+		bufferListAdapter = new BufferListAdapter(getSherlockActivity());
 		bufferList.setAdapter(bufferListAdapter);
 		bufferList.setDividerHeight(0);
 		bufferList.setOnChildClickListener(this);
 		bufferList.setOnGroupCollapseListener(this);
 		bufferList.setOnGroupExpandListener(this);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			initActionMenu();
-		} else {
-			registerForContextMenu(bufferList);	    	
-		}
+//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		initActionMenu();
+//		} else {
+//			registerForContextMenu(bufferList);	    	
+//		}
 
 	}
 
-
-	@TargetApi(11)
 	private void initActionMenu() {
 		actionModeData.actionModeCallbackNetwork = new ActionMode.Callback() {
 
@@ -221,7 +220,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
 			@Override
 			public void onDestroyActionMode(ActionMode mode) {
-				actionModeData.listItem.setActivated(false);
+//				actionModeData.listItem.setActivated(false);
 				actionModeData.actionMode = null;
 
 			}
@@ -253,7 +252,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 					mode.finish();
 					return true;
 				case R.id.context_menu_delete:
-					BufferHelper.showDeleteConfirmDialog(getActivity(), actionModeData.id);
+					BufferHelper.showDeleteConfirmDialog(getSherlockActivity(), actionModeData.id);
 					mode.finish();
 					return true;
 				case R.id.context_menu_hide_temp:
@@ -272,7 +271,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			// Called when the user exits the action mode
 			@Override
 			public void onDestroyActionMode(ActionMode mode) {
-				actionModeData.listItem.setActivated(false);
+//				actionModeData.listItem.setActivated(false);
 				actionModeData.actionMode = null;
 			}
 		};
@@ -288,7 +287,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
 				if(ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
 					Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
-					actionModeData.actionMode = getActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
+					actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
 					actionModeData.id = buffer.getInfo().id;
 					actionModeData.listItem = view;
 					if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
@@ -312,7 +311,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 					}
 				} else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
 					Network network = bufferListAdapter.getGroup(groupPosition);
-					actionModeData.actionMode = getActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
+					actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
 					actionModeData.id = network.getId();
 					actionModeData.listItem = view;
 					if(network.isConnected()) {
@@ -360,6 +359,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
 
 	}
+	
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -371,7 +371,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_join_channel:
-			if(bufferListAdapter.networks == null) Toast.makeText(getActivity(), "Not available now", Toast.LENGTH_SHORT).show();
+			if(bufferListAdapter.networks == null) Toast.makeText(getSherlockActivity(), "Not available now", Toast.LENGTH_SHORT).show();
 			else showJoinChannelDialog();
 			return true;
 		}
@@ -398,77 +398,77 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 		newFragment.show(ft, "dialog");
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		ExpandableListContextMenuInfo info = ((ExpandableListContextMenuInfo)menuInfo);
-		if(ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
-			getActivity().getMenuInflater().inflate(R.menu.buffer_contextual_menu_networks, menu);
-			int networkId = (int)info.id;
-			Network network = bufferListAdapter.networks.getNetworkById(networkId);
-			if(network.isConnected()) {
-				menu.findItem(R.id.context_menu_disconnect).setVisible(true);
-				menu.findItem(R.id.context_menu_connect).setVisible(false);						
-			} else {
-				menu.findItem(R.id.context_menu_disconnect).setVisible(false);
-				menu.findItem(R.id.context_menu_connect).setVisible(true);
-			}		
-		} else if (ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-			getActivity().getMenuInflater().inflate(R.menu.buffer_contextual_menu_channels, menu);
-			int bufferId = (int)info.id;
-			Buffer buffer = bufferListAdapter.networks.getBufferById(bufferId);
-			if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-				menu.findItem(R.id.context_menu_join).setVisible(false);
-				menu.findItem(R.id.context_menu_part).setVisible(false);	
-				menu.findItem(R.id.context_menu_delete).setVisible(true);
-				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
-				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
-			}else if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
-				menu.findItem(R.id.context_menu_join).setVisible(false);
-				menu.findItem(R.id.context_menu_part).setVisible(true);	
-				menu.findItem(R.id.context_menu_delete).setVisible(false);
-				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
-				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
-			}else{
-				menu.findItem(R.id.context_menu_join).setVisible(true);
-				menu.findItem(R.id.context_menu_part).setVisible(false);
-				menu.findItem(R.id.context_menu_delete).setVisible(true);
-				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
-				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
-			}		
-		}
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
-		int id = (int)info.id;
-		switch (item.getItemId()) {
-		case R.id.context_menu_join:
-			BufferHelper.joinChannel(id, bufferListAdapter.networks);
-			return true;
-		case R.id.context_menu_part:
-			BufferHelper.partChannel(id, bufferListAdapter.networks);
-			return true;
-		case R.id.context_menu_delete:
-			BufferHelper.showDeleteConfirmDialog(getActivity(), id);
-			return true;
-		case R.id.context_menu_connect:
-			BufferHelper.connectNetwork(id);
-			return true;
-		case R.id.context_menu_disconnect:
-			BufferHelper.disconnectNetwork(id);
-			return true;
-		case R.id.context_menu_hide_temp:
-			BufferHelper.tempHideChannel(id);
-			return true;
-		case R.id.context_menu_hide_perm:
-			BufferHelper.permHideChannel(id);
-			return true;
-		default:
-			return super.onContextItemSelected(item);
-		}
-	}
+//	@Override
+//	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+//		super.onCreateContextMenu(menu, v, menuInfo);
+//		ExpandableListContextMenuInfo info = ((ExpandableListContextMenuInfo)menuInfo);
+//		if(ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+//			getSherlockActivity().getSupportMenuInflater().inflate(R.menu.buffer_contextual_menu_networks, menu);
+//			int networkId = (int)info.id;
+//			Network network = bufferListAdapter.networks.getNetworkById(networkId);
+//			if(network.isConnected()) {
+//				menu.findItem(R.id.context_menu_disconnect).setVisible(true);
+//				menu.findItem(R.id.context_menu_connect).setVisible(false);						
+//			} else {
+//				menu.findItem(R.id.context_menu_disconnect).setVisible(false);
+//				menu.findItem(R.id.context_menu_connect).setVisible(true);
+//			}		
+//		} else if (ExpandableListView.getPackedPositionType(info.packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+//			getSherlockActivity().getSupportMenuInflater().inflate(R.menu.buffer_contextual_menu_channels, menu);
+//			int bufferId = (int)info.id;
+//			Buffer buffer = bufferListAdapter.networks.getBufferById(bufferId);
+//			if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+//				menu.findItem(R.id.context_menu_join).setVisible(false);
+//				menu.findItem(R.id.context_menu_part).setVisible(false);	
+//				menu.findItem(R.id.context_menu_delete).setVisible(true);
+//				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
+//				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
+//			}else if (bufferListAdapter.networks.getBufferById(bufferId).isActive()) {
+//				menu.findItem(R.id.context_menu_join).setVisible(false);
+//				menu.findItem(R.id.context_menu_part).setVisible(true);	
+//				menu.findItem(R.id.context_menu_delete).setVisible(false);
+//				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
+//				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
+//			}else{
+//				menu.findItem(R.id.context_menu_join).setVisible(true);
+//				menu.findItem(R.id.context_menu_part).setVisible(false);
+//				menu.findItem(R.id.context_menu_delete).setVisible(true);
+//				menu.findItem(R.id.context_menu_hide_temp).setVisible(true);
+//				menu.findItem(R.id.context_menu_hide_perm).setVisible(true);
+//			}		
+//		}
+//	}
+//
+//	@Override
+//	public boolean onContextItemSelected(MenuItem item) {
+//		ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo) item.getMenuInfo();
+//		int id = (int)info.id;
+//		switch (item.getItemId()) {
+//		case R.id.context_menu_join:
+//			BufferHelper.joinChannel(id, bufferListAdapter.networks);
+//			return true;
+//		case R.id.context_menu_part:
+//			BufferHelper.partChannel(id, bufferListAdapter.networks);
+//			return true;
+//		case R.id.context_menu_delete:
+//			BufferHelper.showDeleteConfirmDialog(getSherlockActivity(), id);
+//			return true;
+//		case R.id.context_menu_connect:
+//			BufferHelper.connectNetwork(id);
+//			return true;
+//		case R.id.context_menu_disconnect:
+//			BufferHelper.disconnectNetwork(id);
+//			return true;
+//		case R.id.context_menu_hide_temp:
+//			BufferHelper.tempHideChannel(id);
+//			return true;
+//		case R.id.context_menu_hide_perm:
+//			BufferHelper.permHideChannel(id);
+//			return true;
+//		default:
+//			return super.onContextItemSelected(item);
+//		}
+//	}
 
 	@Override
 	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
@@ -587,7 +587,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 				holder.bufferView.setText("XXXX " + entry.getInfo().name);
 			}				
 
-			BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
+			BufferUtils.setBufferViewStatus(getSherlockActivity(), entry, holder.bufferView);
 			return convertView;
 		}
 
@@ -634,7 +634,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 						if(getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
 							openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
 						} else { //TODO: mabye show the chatActivity but have it be empty, logo or something
-							Toast.makeText(getActivity(), "Not Available", Toast.LENGTH_SHORT).show(); 
+							Toast.makeText(getSherlockActivity(), "Not Available", Toast.LENGTH_SHORT).show(); 
 						}
 					}
 				});
@@ -647,7 +647,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 			holder.networkId = entry.getId();
 			holder.statusView.setText(entry.getName());
 			holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
-			BufferUtils.setBufferViewStatus(getActivity(), entry.getStatusBuffer(), holder.statusView);
+			BufferUtils.setBufferViewStatus(getSherlockActivity(), entry.getStatusBuffer(), holder.statusView);
 			return convertView;
 		}
 
@@ -705,12 +705,12 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 	public void onConnectionChanged(ConnectionChangedEvent event) {
 		if(event.status == Status.Disconnected) {
 			if(event.reason != "") {
-				getActivity().removeDialog(R.id.DIALOG_CONNECTING);
-				Toast.makeText(getActivity(), event.reason, Toast.LENGTH_LONG).show();
+				getSherlockActivity().removeDialog(R.id.DIALOG_CONNECTING);
+				Toast.makeText(getSherlockActivity(), event.reason, Toast.LENGTH_LONG).show();
 
 			}
-			getActivity().finish();
-			startActivity(new Intent(getActivity(), LoginActivity.class));
+			getSherlockActivity().finish();
+			startActivity(new Intent(getSherlockActivity(), LoginActivity.class));
 		}
 	}
 

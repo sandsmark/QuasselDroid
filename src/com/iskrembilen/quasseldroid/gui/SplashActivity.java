@@ -11,12 +11,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Window;
+
+import com.actionbarsherlock.app.SherlockActivity;
 import com.crittercism.app.Crittercism;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends SherlockActivity {
 	// Set the display time, in milliseconds (or extract it out as a configurable parameter)
 	private final int SPLASH_DISPLAY_LENGTH = 500;
 	private final String TAG = SplashActivity.class.getSimpleName();
@@ -33,8 +35,8 @@ public class SplashActivity extends Activity {
 			Log.i(TAG, "Enabeling Crittercism");
 			Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
 		}
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.splash);
+		getSupportActionBar().hide();
 	}
 
 	@Override

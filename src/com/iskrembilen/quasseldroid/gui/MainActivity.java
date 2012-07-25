@@ -22,8 +22,6 @@
  */
 
 package com.iskrembilen.quasseldroid.gui;
-
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -54,9 +52,9 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -76,6 +74,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
@@ -103,7 +102,7 @@ import com.squareup.otto.Subscribe;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends SherlockFragmentActivity {
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -154,9 +153,8 @@ public class MainActivity extends FragmentActivity {
 		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
 
-	@TargetApi(11)
 	private void setActionBarSubtitle(String subtitle) {
-		getActionBar().setSubtitle(subtitle);
+		getSupportActionBar().setSubtitle(subtitle);
 	}
 
 	@Override
@@ -194,7 +192,7 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.base_menu, menu);
+		getSupportMenuInflater().inflate(R.menu.base_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 	@Override

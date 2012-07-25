@@ -35,11 +35,13 @@ import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
@@ -55,7 +57,7 @@ import com.squareup.otto.Subscribe;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends FragmentActivity implements Observer, LoginProgressDialog.Callbacks{
+public class LoginActivity extends SherlockFragmentActivity implements Observer, LoginProgressDialog.Callbacks{
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -125,7 +127,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.login_menu, menu);
+		getSupportMenuInflater().inflate(R.menu.login_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 

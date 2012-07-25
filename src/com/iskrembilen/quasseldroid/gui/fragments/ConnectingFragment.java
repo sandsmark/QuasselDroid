@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
@@ -13,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class ConnectingFragment extends Fragment {
+public class ConnectingFragment extends SherlockFragment {
 
 	private TextView progressTextView;
 

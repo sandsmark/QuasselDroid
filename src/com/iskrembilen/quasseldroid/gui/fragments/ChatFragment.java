@@ -46,9 +46,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -63,7 +65,7 @@ import android.widget.Toast;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.TextView.OnEditorActionListener;
 
-public class ChatFragment extends Fragment {
+public class ChatFragment extends SherlockFragment {
 
 	private static final String TAG = ChatFragment.class.getSimpleName();
 	public static final String BUFFER_ID = "bufferid";
@@ -90,8 +92,8 @@ public class ChatFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
-		adapter = new BacklogAdapter(getActivity(), null);
-		preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		adapter = new BacklogAdapter(getSherlockActivity(), null);
+		preferences = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
 		if(savedInstanceState != null && savedInstanceState.containsKey(BUFFER_ID)) {
 			bufferId = savedInstanceState.getInt(BUFFER_ID);
 		}
@@ -222,7 +224,7 @@ public class ChatFragment extends Fragment {
 	}
 
 	private void openNickList(Buffer buffer) {
-		Intent i = new Intent(getActivity(), NicksActivity.class);
+		Intent i = new Intent(getSherlockActivity(), NicksActivity.class);
 		i.putExtra(BUFFER_ID, buffer.getInfo().id);
 		i.putExtra(BUFFER_NAME, buffer.getInfo().name);
 		startActivity(i);
@@ -580,12 +582,12 @@ public class ChatFragment extends Fragment {
 		if(event.status == Status.Disconnected) {
 			if(event.reason != "") {
 				this.connected = false;
-				getActivity().removeDialog(R.id.DIALOG_CONNECTING);
-				Toast.makeText(getActivity(), event.reason, Toast.LENGTH_LONG).show();
+				getSherlockActivity().removeDialog(R.id.DIALOG_CONNECTING);
+				Toast.makeText(getSherlockActivity(), event.reason, Toast.LENGTH_LONG).show();
 
 			}
-			getActivity().finish();
-			startActivity(new Intent(getActivity(), LoginActivity.class));
+			getSherlockActivity().finish();
+			startActivity(new Intent(getSherlockActivity(), LoginActivity.class));
 		}  else if(event.status == Status.Connected) {
 			this.connected = true;
 		}

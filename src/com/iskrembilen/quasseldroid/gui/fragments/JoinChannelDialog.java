@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
@@ -19,7 +20,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class JoinChannelDialog extends DialogFragment{
+public class JoinChannelDialog extends SherlockDialogFragment{
 
 	private Spinner networkSpinner;
 	private EditText channelNameField;
@@ -37,7 +38,7 @@ public class JoinChannelDialog extends DialogFragment{
 	public void onActivityCreated(Bundle arg0) {
 		super.onActivityCreated(arg0);
 		getDialog().setTitle("Join Channel");
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, getNetworkNames());
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(getSherlockActivity(), android.R.layout.simple_spinner_item, getNetworkNames());
 		networkSpinner.setAdapter(adapter);
 
 	}

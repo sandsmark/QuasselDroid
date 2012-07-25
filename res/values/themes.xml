@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="ThemeBase.Light" parent="@android:style/Theme.Light">
+    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.ForceOverflow">
         <item name="actionJoinChannelIcon">@drawable/menu_new</item>
         <item name="actionSettingsIcon">@drawable/menu_settings</item>
         <item name="actionDisconnectIcon">@drawable/menu_stop</item>
@@ -9,7 +9,7 @@
         <item name="actionUserListIcon">@drawable/menu_nicks</item>
     </style>
 
-    <style name="ThemeBase.Dark" parent="@android:style/Theme">
+    <style name="ThemeBase.Dark" parent="Theme.Sherlock.ForceOverflow">
         <item name="actionJoinChannelIcon">@drawable/menu_new</item>
         <item name="actionSettingsIcon">@drawable/menu_settings</item>
         <item name="actionDisconnectIcon">@drawable/menu_stop</item>

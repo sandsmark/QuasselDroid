@@ -24,7 +24,7 @@
 package com.iskrembilen.quasseldroid.gui;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,10 +42,12 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
@@ -62,7 +64,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class NicksActivity extends FragmentActivity {
+public class NicksActivity extends SherlockFragmentActivity {
 
 	private static final String TAG = NicksActivity.class.getSimpleName();
 	private ResultReceiver statusReceiver;
@@ -86,7 +88,7 @@ public class NicksActivity extends FragmentActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.nick_layout);
 
-		initActionBar();
+//		initActionBar();
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
@@ -121,18 +123,16 @@ public class NicksActivity extends FragmentActivity {
 		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
 	}
 
-	@TargetApi(11)
 	private void setActionBarSubtitle(String subtitle) {
-		getActionBar().setSubtitle(subtitle);
+		getSupportActionBar().setSubtitle(subtitle);
 	}
 
-	@TargetApi(14)
-	private void initActionBar() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			ActionBar actionBar = getActionBar();
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
-	}
+//	private void initActionBar() {
+//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//			ActionBar actionBar = getSupportActionBar();
+//			actionBar.setDisplayHomeAsUpEnabled(true);
+//		}
+//	}
 
 	@Override
 	protected void onStart() {
