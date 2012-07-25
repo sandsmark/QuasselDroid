@@ -371,7 +371,7 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_join_channel:
-			if(bufferListAdapter.networks == null) Toast.makeText(getSherlockActivity(), "Not available now", Toast.LENGTH_SHORT).show();
+			if(bufferListAdapter.networks == null) Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
 			else showJoinChannelDialog();
 			return true;
 		}

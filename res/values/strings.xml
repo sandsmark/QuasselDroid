@@ -51,5 +51,5 @@
     <string name="unit_milliseconds">ms</string>
     <string name="unit_seconds">s</string>
     <string name="users">Users</string>
-
+    <string name="not_available">Not available now</string>
 </resources>

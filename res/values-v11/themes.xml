@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light">
+    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.DarkActionBar">
         <item name="actionJoinChannelIcon">@drawable/action_new_light</item>
         <item name="actionSettingsIcon">@drawable/action_settings_light</item>
         <item name="actionDisconnectIcon">@drawable/action_stop_light</item>

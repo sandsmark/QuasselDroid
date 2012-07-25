@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.ForceOverflow">
+    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.DarkActionBar.ForceOverflow">
         <item name="actionJoinChannelIcon">@drawable/menu_new</item>
         <item name="actionSettingsIcon">@drawable/menu_settings</item>
         <item name="actionDisconnectIcon">@drawable/menu_stop</item>

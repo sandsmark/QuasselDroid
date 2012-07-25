@@ -45,6 +45,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -128,6 +129,11 @@ public class MainActivity extends SherlockFragmentActivity {
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
 		pager.setOnPageChangeListener(adapter);
+		
+		PagerTabStrip pagerIndicator = (PagerTabStrip) findViewById(R.id.pagerIndicator);
+		pagerIndicator.setDrawFullUnderline(false);
+		pagerIndicator.setTextColor(getResources().getColor(R.color.pager_indicator_text_color));
+		pagerIndicator.setTabIndicatorColor(getResources().getColor(R.color.pager_indicator_color));
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
@@ -211,14 +217,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	class ActionModeData {
-		public int id;
-		public View listItem;
-		public ActionMode actionMode;
-		public ActionMode.Callback actionModeCallbackNetwork;
-		public ActionMode.Callback actionModeCallbackBuffer;
-	}
-
 	@Subscribe
 	public void onConnectionChanged(ConnectionChangedEvent event) {
 		if(event.status == Status.Disconnected) {
@@ -254,6 +252,18 @@ public class MainActivity extends SherlockFragmentActivity {
 		@Override
 		public int getCount() {
 			return PAGE_COUNT;
+		}
+		
+		@Override
+		public CharSequence getPageTitle(int position) {
+			switch (position) {
+			case BUFFERS_POS:
+				return "Buffers";
+			case CHAT_POS:
+				return "Chat";
+			default:
+				return super.getPageTitle(position);
+			}
 		}
 
 		@Override

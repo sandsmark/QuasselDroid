@@ -78,7 +78,7 @@ public class ChatFragment extends SherlockFragment {
 	private ImageButton autoCompleteButton;
 	private int dynamicBacklogAmout;
 	private NickCompletionHelper nickCompletionHelper;
-	private int bufferId;
+	private int bufferId = -1;
 
 	SharedPreferences preferences;
 	private boolean connected;
@@ -178,10 +178,14 @@ public class ChatFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_hide_events:
-			showHideEventsDialog();
+			if(adapter.buffer == null)
+				Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
+			else showHideEventsDialog();
 			return true;
 		case R.id.menu_users_list:
-			openNickList(adapter.buffer);
+			if(adapter.buffer == null)
+				Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
+			else openNickList(adapter.buffer);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -574,6 +578,9 @@ public class ChatFragment extends SherlockFragment {
 	public void onNetworksAvailable(NetworksAvailableEvent event) {
 		if(event.networks != null) {
 			this.networks = event.networks;
+			if(bufferId != -1) {
+				setBuffer(bufferId);
+			}
 		}
 	}
 
