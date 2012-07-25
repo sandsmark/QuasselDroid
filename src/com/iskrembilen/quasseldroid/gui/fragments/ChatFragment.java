@@ -22,6 +22,7 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
+import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.NicksActivity;
@@ -196,22 +197,8 @@ public class ChatFragment extends Fragment {
 	@Override
 	public void onStop() {
 		super.onStop();
-		if (adapter.buffer != null && connected) {
-			adapter.buffer.setDisplayed(false);
-
-			//Dont save position if list is at bottom
-			if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
-				adapter.buffer.setTopMessageShown(0);
-			}else{
-				adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
-			}
-			if (adapter.buffer.getUnfilteredSize()!= 0){
-				BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId, MessageAction.LAST_SEEN));
-				BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
-				BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId, MessageAction.MARKER_LINE));
-			}
-		}
-		adapter.stopObserving();
+		if (connected) updateRead();
+		adapter.clearBuffer();
 		BusProvider.getInstance().unregister(this);
 	}
 
@@ -240,15 +227,32 @@ public class ChatFragment extends Fragment {
 		i.putExtra(BUFFER_NAME, buffer.getInfo().name);
 		startActivity(i);
 	}
+	
+	private void updateRead() {
+		if(adapter.buffer != null) {
+			adapter.buffer.setDisplayed(false);
+
+			//Dont save position if list is at bottom
+			if (backlogList.getLastVisiblePosition()==adapter.getCount()-1) {
+				adapter.buffer.setTopMessageShown(0);
+			}else{
+				adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+			}
+			if (adapter.buffer.getUnfilteredSize()!= 0){
+				BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
+				BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId, MessageAction.LAST_SEEN));
+				BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId, MessageAction.MARKER_LINE));
+			}
+
+		}
+	}
 
 	public void setBuffer(int bufferId) {
 		this.bufferId = bufferId;
 		if(adapter != null && networks != null) {
-			System.out.println("not null");
+			updateRead();
+			adapter.clearBuffer();
 			Buffer buffer = networks.getBufferById(bufferId);
-			if(adapter.buffer != null) {
-				adapter.stopObserving();
-			}
 			adapter.setBuffer(buffer, networks);
 			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
 			autoCompleteButton.setEnabled(true);
@@ -486,14 +490,13 @@ public class ChatFragment extends Fragment {
 			}
 		}
 
-		public void stopObserving() {
-			if(buffer != null) buffer.deleteObserver(this);
-
-		}
-
 		public void clearBuffer() {
-			buffer = null;
-
+			if(buffer != null) {
+				buffer.deleteObserver(this);
+				buffer.setDisplayed(false);
+				buffer = null;
+				notifyDataSetChanged();
+			}
 		}
 
 		public int getBufferId() {
@@ -594,5 +597,10 @@ public class ChatFragment extends Fragment {
 			this.bufferId = event.bufferId;
 			setBuffer(bufferId);
 		}
+	}
+	
+	@Subscribe
+	public void onUpdateBufferRead(UpdateReadBufferEvent event) {
+		updateRead();
 	}
 }

@@ -88,6 +88,7 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
@@ -127,6 +128,7 @@ public class MainActivity extends FragmentActivity {
 		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
+		pager.setOnPageChangeListener(adapter);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
@@ -232,7 +234,7 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
-	public class FragmentAdapter extends FragmentPagerAdapter {
+	public class FragmentAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
 
 		public FragmentAdapter(FragmentManager fm) {
 			super(fm);
@@ -253,6 +255,22 @@ public class MainActivity extends FragmentActivity {
 			return 2;
 		}
 
+		@Override
+		public void onPageScrollStateChanged(int state) {
+			// TODO Auto-generated method stub	
+		}
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+			// TODO Auto-generated method stub	
+		}
+
+		@Override
+		public void onPageSelected(int position) {
+			if(position == 0) {
+				BusProvider.getInstance().post(new UpdateReadBufferEvent());
+			}
+		}
 	}
 
 	@Subscribe
