@@ -235,16 +235,19 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	public class FragmentAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
-
+		public static final int BUFFERS_POS = 0;
+		public static final int CHAT_POS = 1;
+		public static final int PAGE_COUNT = 2;
+		
 		public FragmentAdapter(FragmentManager fm) {
 			super(fm);
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			if(position == 0) {
+			if(position == BUFFERS_POS) {
 				return BufferFragment.newInstance();
-			} else if(position == 1) {
+			} else if(position == CHAT_POS) {
 				return ChatFragment.newInstance();
 			}
 			return null;
@@ -252,7 +255,7 @@ public class MainActivity extends FragmentActivity {
 
 		@Override
 		public int getCount() {
-			return 2;
+			return PAGE_COUNT;
 		}
 
 		@Override
@@ -267,7 +270,7 @@ public class MainActivity extends FragmentActivity {
 
 		@Override
 		public void onPageSelected(int position) {
-			if(position == 0) {
+			if(position == BUFFERS_POS) {
 				BusProvider.getInstance().post(new UpdateReadBufferEvent());
 			}
 		}
@@ -314,6 +317,6 @@ public class MainActivity extends FragmentActivity {
 
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
-		pager.setCurrentItem(1);
+		pager.setCurrentItem(FragmentAdapter.CHAT_POS);
 	}
 }
