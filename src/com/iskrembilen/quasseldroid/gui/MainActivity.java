@@ -127,14 +127,14 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 		pager = (ViewPager) findViewById(R.id.pager);
-		pager.setOnPageChangeListener(adapter);
-		pager.setAdapter(adapter);
 		
 		PagerTabStrip pagerIndicator = (PagerTabStrip) findViewById(R.id.pagerIndicator);
 		pagerIndicator.setDrawFullUnderline(false);
 		pagerIndicator.setTextColor(getResources().getColor(R.color.pager_indicator_text_color));
 		pagerIndicator.setTabIndicatorColor(getResources().getColor(R.color.pager_indicator_color));
 
+		pager.setOnPageChangeListener(adapter);
+		pager.setAdapter(adapter);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);

@@ -233,7 +233,7 @@ public class ChatFragment extends SherlockFragment {
 		i.putExtra(BUFFER_NAME, buffer.getInfo().name);
 		startActivity(i);
 	}
-	
+
 	private void updateRead() {
 		if(adapter.buffer != null) {
 			adapter.buffer.setDisplayed(false);
@@ -607,7 +607,7 @@ public class ChatFragment extends SherlockFragment {
 			setBuffer(bufferId);
 		}
 	}
-	
+
 	@Subscribe
 	public void onUpdateBufferRead(UpdateReadBufferEvent event) {
 		updateRead();
