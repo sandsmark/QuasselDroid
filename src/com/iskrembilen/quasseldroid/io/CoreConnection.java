@@ -998,7 +998,7 @@ public final class CoreConnection {
 							bundle.putString("ircOperator", (String) userMap.get("ircOperator").getData());
 							bundle.putString("nick", (String) userMap.get("nick").getData());
 							Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_INFO);
-							int networkId = Integer.parseInt(objectName.split("/")[0]);
+							int networkId = Integer.parseInt(objectName.split("/", 2)[0]);
 							msg.obj = bundle;
 							msg.arg1 = networkId;
 							msg.sendToTarget();
@@ -1014,7 +1014,7 @@ public final class CoreConnection {
 							
 							String bufferName = (String)map.get("name").getData();
 							String topic = (String)map.get("topic").getData();
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							for(Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
 								if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
@@ -1239,7 +1239,7 @@ public final class CoreConnection {
                         }
 						else if (className.equals("IrcUser") && function.equals("partChannel")) {
 							Log.d(TAG, "Sync: IrcUser -> partChannel");
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							String userName = tmp[1];
 							Bundle bundle = new Bundle();
@@ -1249,7 +1249,7 @@ public final class CoreConnection {
 						}
 						else if (className.equals("IrcUser") && function.equals("quit")) {
 							Log.d(TAG, "Sync: IrcUser -> quit");
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							String userName = tmp[1];
 							service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
@@ -1262,7 +1262,7 @@ public final class CoreConnection {
 						}
 						else if (className.equals("IrcUser") && function.equals("setServer")) {
 							Log.d(TAG, "Sync: IrcUser -> setServer");
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							Bundle bundle = new Bundle();
 							bundle.putString("nick", tmp[1]);
@@ -1271,7 +1271,7 @@ public final class CoreConnection {
 						}
 						else if (className.equals("IrcUser") && function.equals("setAway")) {
 							Log.d(TAG, "Sync: IrcUser -> setAway");
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							Bundle bundle = new Bundle();
 							bundle.putString("nick", tmp[1]);
@@ -1280,7 +1280,7 @@ public final class CoreConnection {
 						}
 						else if (className.equals("IrcUser") && function.equals("setRealName")) {
 							Log.d(TAG, "Sync: IrcUser -> setRealName");
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							Bundle bundle = new Bundle();
 							bundle.putString("nick", tmp[1]);
@@ -1291,7 +1291,7 @@ public final class CoreConnection {
 							Log.d(TAG, "Sync: IrcChannel -> joinIrcUsers");
 							List<String> nicks = (List<String>)packedFunc.remove(0).getData();
 							List<String> modes = (List<String>)packedFunc.remove(0).getData();
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							String bufferName = tmp[1];
 							
@@ -1305,7 +1305,7 @@ public final class CoreConnection {
 						}
 						else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
 							Log.d(TAG, "Sync: IrcChannel -> addUserMode");
-	                        String[] tmp = objectName.split("/");
+	                        String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							String channel = tmp[1];
 							
@@ -1322,7 +1322,7 @@ public final class CoreConnection {
 						}
 						else if (className.equals("IrcChannel") && function.equals("removeUserMode")) {
 							Log.d(TAG, "Sync: IrcChannel -> removeUserMode");
-							String[] tmp = objectName.split("/");
+							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							String channel = tmp[1];
 							
@@ -1470,10 +1470,10 @@ public final class CoreConnection {
 							//11-12 21:48:02.514: I/CoreConnection(277): Unhandled RpcCall: __objectRenamed__ ([IrcUser, 1/Kenji, 1/Kenj1]).
 						} else if(functionName.equals("__objectRenamed__") && ((String)packedFunc.get(0).getData()).equals("IrcUser")) {
 							packedFunc.remove(0); //Drop the "ircUser"
-							String[] tmp = ((String)packedFunc.remove(0).getData()).split("/");
+							String[] tmp = ((String)packedFunc.remove(0).getData()).split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
 							String newNick = tmp[1];
-							tmp = ((String)packedFunc.remove(0).getData()).split("/");
+							tmp = ((String)packedFunc.remove(0).getData()).split("/", 2);
 							String oldNick = tmp[1];
 	
 							Bundle bundle = new Bundle();
