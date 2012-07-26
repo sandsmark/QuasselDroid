@@ -69,7 +69,7 @@ public class SplashActivity extends SherlockActivity {
 
 	private void startActivity(Class<?> activity) {
 		if(canBeFinished) {
-			Intent mainIntent = new Intent(SplashActivity.this, activityToStart);
+			Intent mainIntent = new Intent(SplashActivity.this, activity);
 			SplashActivity.this.startActivity(mainIntent);
 			finish();
 		} else {
