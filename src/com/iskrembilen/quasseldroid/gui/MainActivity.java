@@ -127,13 +127,14 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 		pager = (ViewPager) findViewById(R.id.pager);
-		pager.setAdapter(adapter);
 		pager.setOnPageChangeListener(adapter);
+		pager.setAdapter(adapter);
 		
 		PagerTabStrip pagerIndicator = (PagerTabStrip) findViewById(R.id.pagerIndicator);
 		pagerIndicator.setDrawFullUnderline(false);
 		pagerIndicator.setTextColor(getResources().getColor(R.color.pager_indicator_text_color));
 		pagerIndicator.setTabIndicatorColor(getResources().getColor(R.color.pager_indicator_color));
+
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
@@ -294,6 +295,9 @@ public class MainActivity extends SherlockFragmentActivity {
 				trans.commit();
 				pager.setVisibility(View.VISIBLE);
 				findViewById(R.id.connecting_fragment_container).setVisibility(View.GONE);
+				
+				//Doing this seems to fix a bug where menu items doesn't show up in the actionbar
+				pager.setCurrentItem(FragmentAdapter.BUFFERS_POS);
 			}
 		} else {
 			if(manager.findFragmentById(R.id.connecting_fragment_container) == null) {
