@@ -37,12 +37,35 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.widget.Toast;
+
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
+import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
+import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
+import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
+import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
+import com.iskrembilen.quasseldroid.events.ManageMessageEvent;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
+import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
+import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
+import com.iskrembilen.quasseldroid.events.SendMessageEvent;
+import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
+import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
+import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Produce;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,7 +106,6 @@ public class CoreConnService extends Service {
 	private final IBinder binder = new LocalBinder();
 
 	Handler incomingHandler;
-	ArrayList<ResultReceiver> statusReceivers;
 
 	SharedPreferences preferences;
 
@@ -96,6 +118,8 @@ public class CoreConnService extends Service {
 	private OnSharedPreferenceChangeListener preferenceListener;
 
 	private int latency;
+	private boolean initDone = false;
+	private String initReason = "";
 
 
 	/**
@@ -112,11 +136,6 @@ public class CoreConnService extends Service {
 	public IBinder onBind(Intent intent) {
 		return binder;
 	}
-
-    public void onHighlightsRead(int bufferId) {
-           notificationManager.notifyHighlightsRead(bufferId);
-     }
-
 	
 	@Override
 	public void onCreate() {
@@ -136,12 +155,13 @@ public class CoreConnService extends Service {
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
-		statusReceivers = new ArrayList<ResultReceiver>();
+		BusProvider.getInstance().register(this);
 	}
 
 	@Override
 	public void onDestroy() {
 		this.disconnectFromCore();
+		BusProvider.getInstance().unregister(this);
 
 	}
 
@@ -186,45 +206,10 @@ public class CoreConnService extends Service {
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
 	}
-
-	public void markBufferAsRead(int bufferId) {
-		coreConn.requestMarkBufferAsRead(bufferId);
-	}
-
-	public void setLastSeen(int bufferId, int msgId) {
-		notificationManager.notifyHighlightsRead(bufferId);
-		coreConn.requestSetLastMsgRead(bufferId, msgId);
-		networks.getBufferById(bufferId).setLastSeenMessage(msgId);
-	}
-
-	public void setMarkerLine(int bufferId, int msgId) {
-		coreConn.requestSetMarkerLine(bufferId, msgId);
-		networks.getBufferById(bufferId).setMarkerLineMessage(msgId);
-	}
 	
 	public void unhideTempHiddenBuffer(int bufferId) {
 		coreConn.requestUnhideTempHiddenBuffer(bufferId);
 		networks.getBufferById(bufferId).setTemporarilyHidden(false);
-	}
-	
-	public void deleteBuffer(int bufferId) {
-		coreConn.requestRemoveBuffer(bufferId);
-	}
-
-	public void tempHideBuffer(int bufferId) {
-        coreConn.requestTempHideBuffer(bufferId);
-    }
-
-	public void permHideBuffer(int bufferId) {
-        coreConn.requestPermHideBuffer(bufferId);
-    }
-	
-	public void connectToNetwork(int networkId) {
-		coreConn.requestConnectNetwork(networkId);
-	}
-	
-	public void disconnectFromNetwork(int networkId) {
-		coreConn.requestDisconnectNetwork(networkId);
 	}
 
 	public Buffer getBuffer(int bufferId, Observer obs) {
@@ -232,11 +217,6 @@ public class CoreConnService extends Service {
 		if(obs != null && buffer != null)
 			buffer.addObserver(obs);
 		return buffer;
-	}
-
-	public void getMoreBacklog(int bufferId, int amount){
-		Log.d(TAG, "Fetching more backlog");
-		coreConn.requestMoreBacklog(bufferId, amount);
 	}
 
 	public NetworkCollection getNetworkList(Observer obs) {
@@ -482,42 +462,6 @@ public class CoreConnService extends Service {
 	}
 
 	/**
-	 * Register a resultReceiver with this server, that will get notification
-	 * when a change happens with the connection to the core Like when the
-	 * connection is lost.
-	 * 
-	 * @param resultReceiver
-	 *            - Receiver that will get the status updates
-	 */
-	public void registerStatusReceiver(ResultReceiver resultReceiver) {
-		statusReceivers.add(resultReceiver);
-		if (coreConn != null && coreConn.isConnected()) {
-			resultReceiver.send(CoreConnService.CONNECTION_CONNECTED, null);
-		} else {
-			resultReceiver.send(CoreConnService.CONNECTION_DISCONNECTED, null);
-		}
-		Bundle bundle = new Bundle();
-        bundle.putInt(CoreConnService.LATENCY_CORE_KEY, latency);
-        resultReceiver.send(CoreConnService.LATENCY_CORE, bundle);
-
-	}
-
-	/**
-	 * Unregister a receiver when you don't want any more updates.
-	 * 
-	 * @param resultReceiver
-	 */
-	public void unregisterStatusReceiver(ResultReceiver resultReceiver) {
-		statusReceivers.remove(resultReceiver);
-	}
-
-	private void sendStatusMessage(int messageId, Bundle bundle) {
-		for (ResultReceiver statusReceiver : statusReceivers) {
-			statusReceiver.send(messageId, bundle);
-		}
-	}
-
-	/**
 	 * Handler of incoming messages from CoreConnection, since it's in another
 	 * read thread.
 	 */
@@ -652,7 +596,7 @@ public class CoreConnService extends Service {
 				 * CoreConn has connected to a core
 				 */
 				notificationManager.notifyConnecting();
-				sendStatusMessage(CoreConnService.CONNECTION_CONNECTING, null);
+				BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connecting));
 				break;
 
 				
@@ -662,11 +606,9 @@ public class CoreConnService extends Service {
 				 */
 				if (msg.obj != null) { // Have description of what is wrong,
 					// used only for login atm
-					bundle = new Bundle();
-					bundle.putString(CoreConnService.STATUS_KEY, (String) msg.obj);
-					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, bundle);
+					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, (String)msg.obj));
 				} else {
-					sendStatusMessage(CoreConnService.CONNECTION_DISCONNECTED, null);
+					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
 				}
 				notificationManager.notifyDisconnected();
 				break;
@@ -736,7 +678,7 @@ public class CoreConnService extends Service {
 				 */
 				bundle = new Bundle();
 				bundle.putString(CERT_KEY, (String) msg.obj);
-				sendStatusMessage(CoreConnService.NEW_CERTIFICATE, bundle);
+				BusProvider.getInstance().post(new NewCertificateEvent((String)msg.obj));
 				break;
 			case R.id.SET_BUFFER_ACTIVE:
 				/**
@@ -748,19 +690,21 @@ public class CoreConnService extends Service {
 				/**
 				 * The protocol version of the core is not supported so tell user it is to old
 				 */
-				sendStatusMessage(CoreConnService.UNSUPPORTED_PROTOCOL, null);
+				BusProvider.getInstance().post(new UnsupportedProtocolEvent());
 				break;
 			case R.id.INIT_PROGRESS:
-				bundle = new Bundle();
-				bundle.putString(PROGRESS_KEY, (String)msg.obj);
-				sendStatusMessage(CoreConnService.INIT_PROGRESS, bundle);
+				initDone = false;
+				initReason = (String)msg.obj;
+				BusProvider.getInstance().post(new InitProgressEvent(false, initReason));
 				break;
 			case R.id.INIT_DONE:
 				/**
 				 * CoreConn has connected to a core
 				 */
 				notificationManager.notifyConnected();
-				sendStatusMessage(CoreConnService.INIT_DONE, null);
+				initDone = true;
+				BusProvider.getInstance().post(new InitProgressEvent(true, ""));
+				BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
 				break;
 			case R.id.USER_PARTED:
 				bundle = (Bundle) msg.obj;
@@ -852,9 +796,7 @@ public class CoreConnService extends Service {
 				break;
 			case R.id.SET_CORE_LATENCY:
                 latency = msg.arg1;
-                Bundle bundleLatency = new Bundle();
-                bundleLatency.putInt(CoreConnService.LATENCY_CORE_KEY, latency);
-                sendStatusMessage(CoreConnService.LATENCY_CORE, bundleLatency);
+                BusProvider.getInstance().post(new LatencyChangedEvent(latency));
                 break;
 			case R.id.SET_NETWORK_LATENCY:
                 networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
@@ -900,22 +842,108 @@ public class CoreConnService extends Service {
 		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
-	
-	public boolean isUserAway(String nick, int networkId) {
-		Network network = networks.getNetworkById(networkId);
-		if (network == null) return false;
-		IrcUser user = network.getUserByNick(nick);
-		if (user == null) return false;
-		return user.away;
-	}
-	
-	public boolean isUserOnline(String nick, int networkId) {
-		Network network = networks.getNetworkById(networkId);
-		if (network == null) return true;
-		return !network.hasNick(nick);
-	}
 
 	public Network getNetworkById(int networkId) {
         return networks.getNetworkById(networkId);
     }
+	
+	@Produce
+	public ConnectionChangedEvent produceConnectionStatus() {
+		if(isConnected())
+			return new ConnectionChangedEvent(Status.Connected);
+		else 
+			return new ConnectionChangedEvent(Status.Disconnected);
+	}
+	
+	@Produce
+	public LatencyChangedEvent produceLatency() {
+		return new LatencyChangedEvent(latency);
+	}
+	
+	@Produce
+	public NetworksAvailableEvent produceNetworksAvailable() {
+		return new NetworksAvailableEvent(networks);
+	}
+	
+	@Subscribe
+	public void doJoinChannel(JoinChannelEvent event) {
+		int networksStatusBufferId = -1;
+		for(Network network : networks.getNetworkList()) {
+			if(network.getName().equals(event.networkName)) {
+				networksStatusBufferId = network.getStatusBuffer().getInfo().id;
+				break;
+			}
+		}
+		if(networksStatusBufferId != -1) {
+			sendMessage(networksStatusBufferId, "/join "+ event.channelName);
+			Toast.makeText(getApplicationContext(), "Joining channel " + event.channelName, Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(getApplicationContext(), "Error joining channel", Toast.LENGTH_LONG).show();
+		}
+	}
+	
+	@Subscribe
+	public void doDisconnectCore(DisconnectCoreEvent event) {
+		disconnectFromCore();
+	}
+	
+	@Subscribe
+	public void doSendMessage(SendMessageEvent event) {
+		sendMessage(event.bufferId, event.message);
+	}
+	
+	@Subscribe
+	public void doManageChannel(ManageChannelEvent event) {
+		if(event.action == ChannelAction.DELETE) {
+			coreConn.requestRemoveBuffer(event.bufferId);
+		} else if(event.action == ChannelAction.PERM_HIDE) {
+			coreConn.requestPermHideBuffer(event.bufferId);
+		} else if(event.action == ChannelAction.TEMP_HIDE) {
+			coreConn.requestTempHideBuffer(event.bufferId);
+		} else if(event.action == ChannelAction.MARK_AS_READ) {
+			coreConn.requestMarkBufferAsRead(event.bufferId);
+		} else if(event.action == ChannelAction.HIGHLIGHTS_READ) {
+			notificationManager.notifyHighlightsRead(event.bufferId);
+		}
+	}
+	
+	@Subscribe
+	public void doManageNetwork(ManageNetworkEvent event) {
+		if(event.action == NetworkAction.CONNECT) {
+			coreConn.requestConnectNetwork(event.networkId);
+		} else if(event.action == NetworkAction.DISCONNECT) {
+			coreConn.requestDisconnectNetwork(event.networkId);
+		}
+	}
+	
+	@Subscribe
+	public void doManageMessage(ManageMessageEvent event) {
+		if(event.action == MessageAction.LAST_SEEN) {
+			notificationManager.notifyHighlightsRead(event.bufferId);
+			coreConn.requestSetLastMsgRead(event.bufferId, event.messageId);
+			networks.getBufferById(event.bufferId).setLastSeenMessage(event.messageId);
+		} else if(event.action == MessageAction.MARKER_LINE) {
+			coreConn.requestSetMarkerLine(event.bufferId, event.messageId);
+			networks.getBufferById(event.bufferId).setMarkerLineMessage(event.messageId);
+		}
+	}
+	
+	@Subscribe
+	public void getGetBacklog(GetBacklogEvent event) {
+		Log.d(TAG, "Fetching more backlog");
+		coreConn.requestMoreBacklog(event.bufferId, event.backlogAmount);
+	}
+	
+	@Subscribe
+	public void onFilterMessages(FilterMessagesEvent event) {
+		if(event.filtered) 
+			networks.getBufferById(event.bufferId).addFilterType(event.filterType);
+		else 
+			networks.getBufferById(event.bufferId).removeFilterType(event.filterType);
+	}
+	
+	@Produce
+	public InitProgressEvent produceInitDoneEvent() {
+		return new InitProgressEvent(initDone, initReason);
+	}
 }

@@ -2,8 +2,6 @@ package com.iskrembilen.quasseldroid;
 
 import java.util.*;
 
-import com.iskrembilen.quasseldroid.gui.BufferActivity.BufferListAdapter;
-
 public class Network extends Observable implements Observer, Comparable<Network> {
 	public enum ConnectionState {
 		Disconnected(0),

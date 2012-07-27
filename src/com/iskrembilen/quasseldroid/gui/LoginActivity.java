@@ -33,21 +33,31 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
+import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
 
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends Activity implements Observer, DialogInterface.OnCancelListener {
+public class LoginActivity extends SherlockFragmentActivity implements Observer, LoginProgressDialog.Callbacks{
 
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -58,8 +68,6 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	
 	SharedPreferences settings;
 	QuasselDbHelper dbHelper;
-	
-	private ResultReceiver statusReceiver;
 
 	Spinner core;
 	EditText username;
@@ -115,47 +123,31 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
-		
-		statusReceiver = new ResultReceiver(null) {
-
-			@Override
-			protected void onReceiveResult(int resultCode, Bundle resultData) {
-				if (resultCode==CoreConnService.CONNECTION_CONNECTING) {
-					removeDialog(R.id.DIALOG_CONNECTING);
-					LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
-					finish();
-				}else if (resultCode==CoreConnService.CONNECTION_DISCONNECTED) {
-					if (resultData!=null){
-						removeDialog(R.id.DIALOG_CONNECTING);
-						Toast.makeText(LoginActivity.this, resultData.getString(CoreConnService.STATUS_KEY), Toast.LENGTH_LONG).show();
-					}
-				} else if (resultCode == CoreConnService.NEW_CERTIFICATE) {
-					hashedCert = resultData.getString(CoreConnService.CERT_KEY);
-					removeDialog(R.id.DIALOG_CONNECTING);
-					showDialog(R.id.DIALOG_NEW_CERTIFICATE);
-				} else if(resultCode == CoreConnService.UNSUPPORTED_PROTOCOL) {
-					removeDialog(R.id.DIALOG_CONNECTING);
-					Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();
-				}
-				super.onReceiveResult(resultCode, resultData);
-			}
-			
-		};
-		
 	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.login_menu, menu);
+		getSupportMenuInflater().inflate(R.menu.login_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		BusProvider.getInstance().register(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		BusProvider.getInstance().unregister(this);
+	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
 		if(ThemeUtil.theme != currentTheme) {
-			Intent intent = new Intent(this, BufferActivity.class);
+			Intent intent = new Intent(this, MainActivity.class);
 	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        startActivity(intent);
 		}
@@ -291,14 +283,6 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 			dialog.findViewById(R.id.cancel_button).setOnClickListener(buttonListener);
 			dialog.findViewById(R.id.save_button).setOnClickListener(buttonListener);	
 			break;
-		
-		case R.id.DIALOG_CONNECTING:
-			ProgressDialog prog = new ProgressDialog(LoginActivity.this);
-			prog.setMessage("Connecting...");
-			prog.setCancelable(true);
-			prog.setOnCancelListener(this);
-			dialog = prog;
-			break;
 
 		case R.id.DIALOG_NEW_CERTIFICATE:
 			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
@@ -371,7 +355,7 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 				return;
 			}
 			
-			showDialog(R.id.DIALOG_CONNECTING);
+			LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
@@ -409,12 +393,11 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 			Log.i(TAG, "BINDING ON SERVICE DONE");
 			boundConnService = ((CoreConnService.LocalBinder)service).getService();
 			if(boundConnService.isConnected()) {
-				LoginActivity.this.startActivity(new Intent(LoginActivity.this, BufferActivity.class));
+				LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
 				finish();
 			} else {
 				boundConnService.disconnectFromCore();
 			}
-			boundConnService.registerStatusReceiver(statusReceiver);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -435,16 +418,40 @@ public class LoginActivity extends Activity implements Observer, DialogInterface
 	void doUnbindService() {
 		if (isBound) {
 			Log.i(TAG, "Unbinding service");
-			if (boundConnService != null)
-				boundConnService.unregisterStatusReceiver(statusReceiver);
 			unbindService(mConnection);
 			isBound = false;
 		}
 	}
 
 	@Override
-	public void onCancel(DialogInterface dialog) {
+	public void onCanceled() {
 		boundConnService.disconnectFromCore();
 	}
-
+	
+	@Subscribe
+	public void onConnectionChanged(ConnectionChangedEvent event) {
+		if(event.status == Status.Connecting) {
+			removeDialog(R.id.DIALOG_CONNECTING);
+			LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
+			finish();				
+		} else if(event.status == Status.Disconnected) {
+			if (event.reason != ""){
+				removeDialog(R.id.DIALOG_CONNECTING);
+				Toast.makeText(LoginActivity.this, event.reason, Toast.LENGTH_LONG).show();
+			}				
+		}
+	}
+	
+	@Subscribe
+	public void onNewCertificate(NewCertificateEvent event) {
+		hashedCert = event.certificateString;
+		removeDialog(R.id.DIALOG_CONNECTING);
+		showDialog(R.id.DIALOG_NEW_CERTIFICATE);			
+	}
+	
+	@Subscribe
+	public void onUnsupportedProtocol(UnsupportedProtocolEvent event) {
+		removeDialog(R.id.DIALOG_CONNECTING);
+		Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();			
+	}
 }

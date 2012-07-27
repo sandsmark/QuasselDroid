@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Buffer_Child_Item"></style>
+    <style name="ActivatedItemBackground"></style>
 
     <style name="ListChoiceBackgroundIndicator"></style>
 

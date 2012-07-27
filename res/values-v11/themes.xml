@@ -1,20 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ThemeBase.Light" parent="@android:style/Theme.Holo.Light">
-        <item name="actionJoinChannelIcon">@drawable/action_new_light</item>
-        <item name="actionSettingsIcon">@drawable/action_settings_light</item>
-        <item name="actionDisconnectIcon">@drawable/action_stop_light</item>
-        <item name="actionEditIcon">@drawable/action_edit_light</item>
-        <item name="actionUserListIcon">@drawable/action_nicks_light</item>
-    </style>
+    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.DarkActionBar"></style>
 
-    <style name="ThemeBase.Dark" parent="@android:style/Theme.Holo">
-        <item name="actionJoinChannelIcon">@drawable/action_new_dark</item>
-        <item name="actionSettingsIcon">@drawable/action_settings_dark</item>
-        <item name="actionDisconnectIcon">@drawable/action_stop_dark</item>
-        <item name="actionEditIcon">@drawable/action_edit_dark</item>
-        <item name="actionUserListIcon">@drawable/action_nicks_dark</item>
-    </style>
+    <style name="ThemeBase.Dark" parent="Theme.Sherlock"></style>
 
 </resources>

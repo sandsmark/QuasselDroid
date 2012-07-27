@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="ThemeBase.Light" parent="@android:style/Theme.Light">
-        <item name="actionJoinChannelIcon">@drawable/menu_new</item>
-        <item name="actionSettingsIcon">@drawable/menu_settings</item>
-        <item name="actionDisconnectIcon">@drawable/menu_stop</item>
-        <item name="actionEditIcon">@drawable/menu_edit</item>
-        <item name="actionUserListIcon">@drawable/menu_nicks</item>
+    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.DarkActionBar.ForceOverflow"></style>
+
+    <style name="ThemeBase.Dark" parent="Theme.Sherlock.ForceOverflow"></style>
+
+    <style name="QuasseldroidThemeLight" parent="@style/ThemeBase.Light">
+        <item name="actionJoinChannelIcon">@drawable/action_new</item>
+        <item name="actionSettingsIcon">@drawable/action_settings</item>
+        <item name="actionDisconnectIcon">@drawable/action_stop</item>
+        <item name="actionEditIcon">@drawable/action_edit</item>
+        <item name="actionUserListIcon">@drawable/action_nicks</item>
     </style>
 
-    <style name="ThemeBase.Dark" parent="@android:style/Theme">
-        <item name="actionJoinChannelIcon">@drawable/menu_new</item>
-        <item name="actionSettingsIcon">@drawable/menu_settings</item>
-        <item name="actionDisconnectIcon">@drawable/menu_stop</item>
-        <item name="actionEditIcon">@drawable/menu_edit</item>
-        <item name="actionUserListIcon">@drawable/menu_nicks</item>
+    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark">
+        <item name="actionJoinChannelIcon">@drawable/action_new</item>
+        <item name="actionSettingsIcon">@drawable/action_settings</item>
+        <item name="actionDisconnectIcon">@drawable/action_stop</item>
+        <item name="actionEditIcon">@drawable/action_edit</item>
+        <item name="actionUserListIcon">@drawable/action_nicks</item>
     </style>
-
-    <style name="QuasseldroidThemeLight" parent="@style/ThemeBase.Light"></style>
-
-    <style name="QuasseldroidThemeDark" parent="@style/ThemeBase.Dark"></style>
 
 </resources>
