@@ -131,6 +131,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 		pager = (ViewPager) findViewById(R.id.pager);
+		pager.setOffscreenPageLimit(2);
 
 		PagerTabStrip pagerIndicator = (PagerTabStrip) findViewById(R.id.pagerIndicator);
 		pagerIndicator.setDrawFullUnderline(false);

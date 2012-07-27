@@ -345,14 +345,13 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		ExpandableListView listView = bufferList;
 		// Save position of first visible item
-		restoreListPosition = listView.getFirstVisiblePosition();
+		restoreListPosition = bufferList.getFirstVisiblePosition();
 		outState.putInt(LIST_POSITION_KEY, restoreListPosition);
 
 		// Save scroll position of item
-		View itemView = listView.getChildAt(0);
-		restoreItemPosition = itemView == null ? 0 : itemView.getTop();
+		View itemView = bufferList.getChildAt(0);
+		restoreItemPosition = bufferList == null ? 0 : itemView.getTop();
 		outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
 
 	}
@@ -629,10 +628,5 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 	@Subscribe
 	public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
 		bufferListAdapter.notifyDataSetChanged();
-	}
-
-	@Produce
-	public int produceBufferOpened() {
-		return openedBufferId;
 	}
 }

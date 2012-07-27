@@ -5,26 +5,13 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/nick_list_header"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
-        android:layout_marginBottom="2dip"
-        android:background="#000000" />
-
     <ExpandableListView
         android:id="@+id/userList"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:childDivider="@android:color/transparent"
         android:divider="@android:color/transparent"
-        android:groupIndicator="@android:color/transparent">
+        android:groupIndicator="@android:color/transparent" >
     </ExpandableListView>
 
 </LinearLayout>

@@ -46,6 +46,10 @@ public class NickListFragment extends SherlockFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		adapter = new NicksAdapter();		
+		
+		if(savedInstanceState != null) {
+			bufferId = savedInstanceState.getInt("bufferid");
+		}
 	}
 
 	@Override
@@ -73,6 +77,12 @@ public class NickListFragment extends SherlockFragment {
 		super.onStop();
 		adapter.stopObserving();
 		BusProvider.getInstance().unregister(this);
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt("bufferid", bufferId);
+		super.onSaveInstanceState(outState);
 	}
 
 	public class NicksAdapter extends BaseExpandableListAdapter implements Observer{
