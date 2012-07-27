@@ -1,168 +1,78 @@
-/*
-    QuasselDroid - Quassel client for Android
- 	Copyright (C) 2011 Ken Børge Viktil
- 	Copyright (C) 2011 Magnus Fjell
- 	Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
-
-    This program is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation, either version 3 of the License, or (at your option)
-    any later version, or under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either version 2.1 of
-    the License, or (at your option) any later version.
-
- 	This program is distributed in the hope that it will be useful,
- 	but WITHOUT ANY WARRANTY; without even the implied warranty of
- 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- 	GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License and the
-    GNU Lesser General Public License along with this program.  If not, see
-    <http://www.gnu.org/licenses/>.
- */
-
-package com.iskrembilen.quasseldroid.gui;
-
-import android.annotation.TargetApi;
-import com.actionbarsherlock.app.ActionBar;
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.ResultReceiver;
-import android.preference.PreferenceManager;
-import android.provider.ContactsContract.CommonDataKinds.Event;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.util.Pair;
-import android.view.LayoutInflater;
-import com.actionbarsherlock.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.*;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.iskrembilen.quasseldroid.*;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
-import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
-import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
-import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Subscribe;
+package com.iskrembilen.quasseldroid.gui.fragments;
 
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class NicksActivity extends SherlockFragmentActivity {
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-	private static final String TAG = NicksActivity.class.getSimpleName();
-	private ResultReceiver statusReceiver;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.IrcMode;
+import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.UserCollection;
+import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
+import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
+import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.squareup.otto.Subscribe;
+
+public class NickListFragment extends SherlockFragment {
 	private NicksAdapter adapter;
 	private ExpandableListView list;
-	private int bufferId;
-	private int currentTheme;
+	private int bufferId = -1;
+	private NetworkCollection networks;
 	private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
 	private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
 
-	SharedPreferences preferences;
-	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+	public static NickListFragment newInstance() {
+		return new NickListFragment();
+	}
 
-	private Boolean showLag = false;
-
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		setTheme(ThemeUtil.theme);
 		super.onCreate(savedInstanceState);
-		currentTheme = ThemeUtil.theme;
-		setContentView(R.layout.nick_layout);
-
-//		initActionBar();
-
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-
-		Intent intent = getIntent();
-		if(intent.hasExtra(ChatFragment.BUFFER_ID)) {
-			bufferId = intent.getIntExtra(ChatFragment.BUFFER_ID, 0);
-			Log.d(TAG, "Intent has bufferid" + bufferId);
-		}
-
-		adapter = new NicksAdapter(this);
-		list = (ExpandableListView)findViewById(R.id.userList);
-		list.setAdapter(adapter);
-
-		sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
-
-			@Override
-			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-				if(key.equals(getResources().getString(R.string.preference_show_lag))){
-					showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-					if(!showLag) {
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-							setActionBarSubtitle("");
-						} else {
-							setTitle(getResources().getString(R.string.app_name));
-
-						}
-					}
-				}
-			}
-		};
-		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+		adapter = new NicksAdapter();		
 	}
-
-	private void setActionBarSubtitle(String subtitle) {
-		getSupportActionBar().setSubtitle(subtitle);
-	}
-
-//	private void initActionBar() {
-//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//			ActionBar actionBar = getSupportActionBar();
-//			actionBar.setDisplayHomeAsUpEnabled(true);
-//		}
-//	}
 
 	@Override
-	protected void onStart() {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
+		list = (ExpandableListView)root.findViewById(R.id.userList);
+		return root;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		list.setAdapter(adapter);
+
+	}
+
+	@Override
+	public void onStart() {
 		super.onStart();
-		if(ThemeUtil.theme != currentTheme) {
-			Intent intent = new Intent(this, MainActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-		}
 		BusProvider.getInstance().register(this);
 	}
 
 	@Override
-	protected void onStop() {
+	public void onStop() {
 		super.onStop();
 		adapter.stopObserving();
 		BusProvider.getInstance().unregister(this);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			Intent intent = new Intent(this, MainActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(ChatFragment.BUFFER_ID, bufferId);
-			startActivity(intent);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	public class NicksAdapter extends BaseExpandableListAdapter implements Observer{
@@ -171,8 +81,8 @@ public class NicksActivity extends SherlockFragmentActivity {
 		private UserCollection users;
 
 
-		public NicksAdapter(Context context) {
-			inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		public NicksAdapter() {
+			inflater = getActivity().getLayoutInflater();
 			this.users = null;
 		}
 
@@ -198,7 +108,8 @@ public class NicksActivity extends SherlockFragmentActivity {
 		}
 
 		public void stopObserving() {
-			users.deleteObserver(this);
+			if(users != null)
+				users.deleteObserver(this);
 
 		}
 
@@ -260,6 +171,7 @@ public class NicksActivity extends SherlockFragmentActivity {
 
 		@Override
 		public int getGroupCount() {
+			if(users == null) return 0;
 			return IrcMode.values().length;
 		}
 
@@ -330,31 +242,29 @@ public class NicksActivity extends SherlockFragmentActivity {
 		public ImageView expanderView;
 		public LinearLayout groupHolderView;
 	}
-	
+
 	@Subscribe
 	public void onNetworksAvailable(NetworksAvailableEvent event) {
 		if(event.networks != null) {
-			Buffer buffer = event.networks.getBufferById(bufferId);
-			adapter.setUsers(buffer.getUsers());			
-		}
-	}
-
-	@Subscribe
-	public void onConnectionChanged(ConnectionChangedEvent event) {
-		if(event.status == Status.Disconnected)
-			finish();
-	}
-
-	@Subscribe
-	public void onLatencyChanged(LatencyChangedEvent event) {
-		if (event.latency > 0) {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-				setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
-			} else {
-				setTitle(getResources().getString(R.string.app_name) + " - " 
-						+ Helper.formatLatency(event.latency, getResources()));
-
+			this.networks = event.networks;
+			if(bufferId != -1) {
+				updateUsers();
 			}
 		}
+	}
+
+	@Subscribe
+	public void onBufferOpened(BufferOpenedEvent event) {
+		if(event.bufferId != -1) {
+			this.bufferId = event.bufferId;
+			if(networks != null) {
+				updateUsers();				
+			}
+		}
+	}
+
+	private void updateUsers() {
+		Buffer buffer = networks.getBufferById(bufferId);
+		adapter.setUsers(buffer.getUsers());				
 	}
 }

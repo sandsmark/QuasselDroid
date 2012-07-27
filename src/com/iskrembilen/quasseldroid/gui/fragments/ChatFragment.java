@@ -25,7 +25,6 @@ import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
-import com.iskrembilen.quasseldroid.gui.NicksActivity;
 import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -182,11 +181,6 @@ public class ChatFragment extends SherlockFragment {
 				Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
 			else showHideEventsDialog();
 			return true;
-		case R.id.menu_users_list:
-			if(adapter.buffer == null)
-				Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
-			else openNickList(adapter.buffer);
-			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -225,13 +219,6 @@ public class ChatFragment extends SherlockFragment {
 		// Create and show the dialog.
 		DialogFragment newFragment = HideEventsDialog.newInstance(adapter.buffer);
 		newFragment.show(ft, "dialog");
-	}
-
-	private void openNickList(Buffer buffer) {
-		Intent i = new Intent(getSherlockActivity(), NicksActivity.class);
-		i.putExtra(BUFFER_ID, buffer.getInfo().id);
-		i.putExtra(BUFFER_NAME, buffer.getInfo().name);
-		startActivity(i);
 	}
 
 	private void updateRead() {

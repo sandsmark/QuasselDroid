@@ -93,11 +93,13 @@ import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
+import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.util.Observable;
@@ -118,6 +120,8 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	private ViewPager pager;
 
+	private int openedBuffer = -1;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setTheme(ThemeUtil.theme);
@@ -127,7 +131,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
 		pager = (ViewPager) findViewById(R.id.pager);
-		
+
 		PagerTabStrip pagerIndicator = (PagerTabStrip) findViewById(R.id.pagerIndicator);
 		pagerIndicator.setDrawFullUnderline(false);
 		pagerIndicator.setTextColor(getResources().getColor(R.color.pager_indicator_text_color));
@@ -218,50 +222,44 @@ public class MainActivity extends SherlockFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Subscribe
-	public void onConnectionChanged(ConnectionChangedEvent event) {
-		if(event.status == Status.Disconnected) {
-			if(event.reason != "") {
-				removeDialog(R.id.DIALOG_CONNECTING);
-				Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
-
-			}
-			finish();
-			startActivity(new Intent(MainActivity.this, LoginActivity.class));
-		}
-	}
-
 	public class FragmentAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
 		public static final int BUFFERS_POS = 0;
 		public static final int CHAT_POS = 1;
-		public static final int PAGE_COUNT = 2;
-		
+		public static final int NICKS_POS = 2; 
+		public static final int PAGE_COUNT = 3;
+
 		public FragmentAdapter(FragmentManager fm) {
 			super(fm);
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			if(position == BUFFERS_POS) {
+			switch (position) {
+			case BUFFERS_POS:
 				return BufferFragment.newInstance();
-			} else if(position == CHAT_POS) {
+			case CHAT_POS:
 				return ChatFragment.newInstance();
+			case NICKS_POS:
+				return NickListFragment.newInstance();
+			default:
+				return null;
 			}
-			return null;
 		}
 
 		@Override
 		public int getCount() {
 			return PAGE_COUNT;
 		}
-		
+
 		@Override
 		public CharSequence getPageTitle(int position) {
 			switch (position) {
 			case BUFFERS_POS:
-				return "Buffers";
+				return "Channels";
 			case CHAT_POS:
 				return "Chat";
+			case NICKS_POS:
+				return "Nicks";
 			default:
 				return super.getPageTitle(position);
 			}
@@ -295,7 +293,7 @@ public class MainActivity extends SherlockFragmentActivity {
 				trans.commit();
 				pager.setVisibility(View.VISIBLE);
 				findViewById(R.id.connecting_fragment_container).setVisibility(View.GONE);
-				
+
 				//Doing this seems to fix a bug where menu items doesn't show up in the actionbar
 				pager.setCurrentItem(FragmentAdapter.BUFFERS_POS);
 			}
@@ -328,7 +326,28 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	@Subscribe
-	public void onBufferOpened(BufferOpenedEvent event) {
-		pager.setCurrentItem(FragmentAdapter.CHAT_POS);
+	public void onConnectionChanged(ConnectionChangedEvent event) {
+		if(event.status == Status.Disconnected) {
+			if(event.reason != "") {
+				removeDialog(R.id.DIALOG_CONNECTING);
+				Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
+
+			}
+			finish();
+			startActivity(new Intent(MainActivity.this, LoginActivity.class));
+		}
 	}
+
+	@Subscribe
+	public void onBufferOpened(BufferOpenedEvent event) {
+		if(event.bufferId != -1) {
+			openedBuffer = event.bufferId;
+			pager.setCurrentItem(FragmentAdapter.CHAT_POS);
+		}
+	}
+	
+	 @Produce
+	 public BufferOpenedEvent produceBufferOpenedEvent() {
+		 return new BufferOpenedEvent(openedBuffer);
+	 }
 }

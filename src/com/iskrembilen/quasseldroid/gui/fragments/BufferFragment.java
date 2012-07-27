@@ -325,14 +325,14 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
+	public void onStart() {
+		super.onStart();
 		BusProvider.getInstance().register(this);
 	}
 
 	@Override
-	public void onPause() {
-		super.onPause();
+	public void onStop() {
+		super.onStop();
 		BusProvider.getInstance().unregister(this);
 	}
 
@@ -495,11 +495,11 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 				break;
 			case QueryBuffer:
 				String nick = entry.getInfo().name;
-				if(bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-					holder.bufferImage.setImageBitmap(userAwayBitmap);
-				} else if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
+				if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
 					holder.bufferImage.setImageBitmap(userOfflineBitmap);
 					holder.bufferView.setTextColor(offlineColor);
+				} else if(bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
+					holder.bufferImage.setImageBitmap(userAwayBitmap);
 				} else {
 					holder.bufferImage.setImageBitmap(userBitmap);
 				}
@@ -624,19 +624,6 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 		public ActionMode actionMode;
 		public ActionMode.Callback actionModeCallbackNetwork;
 		public ActionMode.Callback actionModeCallbackBuffer;
-	}
-
-	@Subscribe
-	public void onConnectionChanged(ConnectionChangedEvent event) {
-		if(event.status == Status.Disconnected) {
-			if(event.reason != "") {
-				getSherlockActivity().removeDialog(R.id.DIALOG_CONNECTING);
-				Toast.makeText(getSherlockActivity(), event.reason, Toast.LENGTH_LONG).show();
-
-			}
-			getSherlockActivity().finish();
-			startActivity(new Intent(getSherlockActivity(), LoginActivity.class));
-		}
 	}
 
 	@Subscribe
