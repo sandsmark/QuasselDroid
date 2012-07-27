@@ -7,11 +7,5 @@
         android:showAsAction="ifRoom|withText"
         android:title="@string/menu_hide_events" android:orderInCategory="1">
     </item>
-    <item
-        android:id="@+id/menu_users_list"
-        android:icon="?actionUserListIcon"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/menu_users_list" android:orderInCategory="2">
-    </item>
 
 </menu>
