@@ -47,6 +47,11 @@
             android:summary="Show the core latency"
             android:title="Show Lag" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/preference_wake_lock"
+            android:summary="Use more battery when you turn off the screen, to keep connections alive"
+            android:title="Use a wake-lock to inhibit sleep" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Notifications" >

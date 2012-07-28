@@ -24,11 +24,15 @@
 package com.iskrembilen.quasseldroid.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Typeface;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.*;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -120,6 +124,11 @@ public class CoreConnService extends Service {
 	private int latency;
 	private boolean initDone = false;
 	private String initReason = "";
+	
+	private boolean preferenceUseWakeLock;
+	private WakeLock wakeLock;
+
+	private WifiLock wifiLock;
 
 
 	/**
@@ -145,13 +154,18 @@ public class CoreConnService extends Service {
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
+		preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
 		preferenceListener = new OnSharedPreferenceChangeListener() {
 			
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 				if(key.equals(getString(R.string.preference_colored_text))) {
 					preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-				}
+				} else if(key.equals(getString(R.string.preference_wake_lock))) {
+					preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
+					if(!preferenceUseWakeLock) releaseWakeLockIfExists();
+					else if(preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
+				} 
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
@@ -197,9 +211,37 @@ public class CoreConnService extends Service {
 				+ " with username " + username);
 		networks = new NetworkCollection();
 		
+		acquireWakeLockIfEnabled();
 		
 		coreConn = new CoreConnection(address, port, username, password, ssl,
 				this);
+	}
+	
+	private void acquireWakeLockIfEnabled() {
+		if (preferenceUseWakeLock) {
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "quasseldroid wakelock");
+			wakeLock.acquire();
+			Log.i(TAG, "WakeLock acquired");
+			
+			WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+			wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "quasseldroid wifilock");
+			wifiLock.acquire();
+			Log.i(TAG, "WifiLock acquired");
+		}
+	}
+
+	private void releaseWakeLockIfExists() {
+		if(wakeLock != null) {
+			wakeLock.release();
+			Log.i(TAG, "WakeLock released");
+		}
+		if(wifiLock != null) {
+			wifiLock.release();
+			Log.i(TAG, "WifiLock released");
+		}
+		wakeLock = null;
+		wifiLock = null;
 	}
 
 
@@ -452,6 +494,7 @@ public class CoreConnService extends Service {
 	}
 
 	public void disconnectFromCore() {
+		releaseWakeLockIfExists();
 		if (coreConn != null)
 			coreConn.closeConnection();
 		notificationManager.remove();
@@ -611,6 +654,7 @@ public class CoreConnService extends Service {
 					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
 				}
 				notificationManager.notifyDisconnected();
+				releaseWakeLockIfExists();
 				break;
 			case R.id.NEW_USER_ADDED:
 				/**
