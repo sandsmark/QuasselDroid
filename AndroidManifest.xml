@@ -38,7 +38,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".gui.MainActivity">
+            android:name=".gui.MainActivity" android:launchMode="singleTop">
         </activity>
 
         <service android:name=".service.CoreConnService" >
