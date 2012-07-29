@@ -149,7 +149,7 @@ public class CoreConnService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
+		Log.i(TAG, "Service created");
 		incomingHandler = new IncomingHandler();
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
