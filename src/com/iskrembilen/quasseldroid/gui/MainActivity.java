@@ -59,6 +59,7 @@ import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
@@ -281,6 +282,8 @@ public class MainActivity extends SherlockFragmentActivity {
 			if(position == BUFFERS_POS) {
 				BusProvider.getInstance().post(new UpdateReadBufferEvent());
 			}
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(pager.getWindowToken(), 0);
 		}
 	}
 
