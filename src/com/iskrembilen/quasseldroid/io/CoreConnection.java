@@ -556,9 +556,6 @@ public final class CoreConnection {
 	 */
 	public synchronized void onDisconnected(String informationMessage) {
 		Log.d(TAG, "Disconnected so closing connection");
-		if(readThread.running) {
-			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, informationMessage).sendToTarget();
-		}
 		closeConnection();
 	}
 
@@ -1531,6 +1528,8 @@ public final class CoreConnection {
 			} catch (IOException e) {
 				Log.w(TAG, "IOException while closing socket", e);
 			}
+			
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, null).sendToTarget();
 			return null;
 		}
 	}

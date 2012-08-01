@@ -108,6 +108,7 @@ public class CoreConnService extends Service {
 
 	private CoreConnection coreConn;
 	private final IBinder binder = new LocalBinder();
+	private boolean requestedDisconnect;
 
 	Handler incomingHandler;
 
@@ -201,6 +202,7 @@ public class CoreConnService extends Service {
 		if (coreConn != null) {
 			this.disconnectFromCore();
 		}
+		requestedDisconnect = false;
 		Bundle connectData = intent.getExtras();
 		String address = connectData.getString("address");
 		int port = connectData.getInt("port");
@@ -497,7 +499,7 @@ public class CoreConnService extends Service {
 		releaseWakeLockIfExists();
 		if (coreConn != null)
 			coreConn.closeConnection();
-		notificationManager.remove();
+		requestedDisconnect = true;
 	}
 
 	public boolean isConnected() {
@@ -509,6 +511,7 @@ public class CoreConnService extends Service {
 	 * read thread.
 	 */
 	class IncomingHandler extends Handler {
+
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -653,7 +656,11 @@ public class CoreConnService extends Service {
 				} else {
 					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
 				}
-				notificationManager.notifyDisconnected();
+				if(requestedDisconnect) {
+					notificationManager.remove();
+				} else {
+					notificationManager.notifyDisconnected();
+				}
 				releaseWakeLockIfExists();
 				break;
 			case R.id.NEW_USER_ADDED:

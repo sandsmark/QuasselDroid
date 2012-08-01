@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
@@ -33,11 +35,13 @@ public class QuasseldroidNotificationManager {
 	}
 
 	public void notifyHighlightsRead(int bufferId) {
-		highlightedBuffers.remove((Integer)bufferId);
-		if(highlightedBuffers.size() == 0) {
-			notifyConnected(false);
-		}else{
-			notifyHighlight(null);
+		if(highlightedBuffers.contains((Integer)bufferId)) {
+			highlightedBuffers.remove((Integer)bufferId);
+			if(highlightedBuffers.size() == 0) {
+				notifyConnected(false);
+			}else{
+				notifyHighlight(null);
+			}
 		}
 	}
 
@@ -76,7 +80,7 @@ public class QuasseldroidNotificationManager {
 		notifyConnected(true);
 	}
 
-	public void notifyConnecting() {		
+	public void notifyConnecting() {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 		.setSmallIcon(R.drawable.stat_connecting)
 		.setContentTitle(context.getText(R.string.app_name))
