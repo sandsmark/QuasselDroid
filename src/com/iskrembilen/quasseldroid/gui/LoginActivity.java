@@ -44,6 +44,7 @@ import android.widget.*;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
@@ -78,12 +79,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	private String hashedCert;//ugly
 	private int currentTheme;
 
-	/* EXample of how to get a preference
-	 * SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean update = prefs.getBoolean("updatePref", false);
-	 * 
-	 */
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -96,14 +91,12 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		dbHelper = new QuasselDbHelper(this);
 		dbHelper.open();
 
-
 		core = (Spinner)findViewById(R.id.serverSpinner);
 		username = (EditText)findViewById(R.id.usernameField);
 		password = (EditText)findViewById(R.id.passwordField);
 		rememberMe = (CheckBox)findViewById(R.id.remember_me_checkbox);
 
 		//setup the core spinner
-		//dbHelper.addCore("testcore", "test.core.com", 8848);
 		Cursor c = dbHelper.getAllCores();
 		startManagingCursor(c);
 
@@ -151,13 +144,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        startActivity(intent);
 		}
-		doBindService();
-	}
-	
-	@Override
-	protected void onStop() {
-		super.onStop();
-		doUnbindService();
 	}
 	
 	@Override
@@ -169,22 +155,16 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		}
 
 	}
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-
-		return super.onPrepareOptionsMenu(menu);
-	}
-
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_add_core:
-			showDialog(R.id.DIALOG_ADD_CORE);
+			showDialog(R.id.DIALOG_ADD_CORE); //TODO: convert to fragment
 			break;
 		case R.id.menu_edit_core:
 			if(dbHelper.hasCores()) {
-				showDialog(R.id.DIALOG_EDIT_CORE);
+				showDialog(R.id.DIALOG_EDIT_CORE); //TODO: convert to fragment
 			} else {
 				Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
 			}
@@ -380,52 +360,9 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		
 	}
 	
-	
-	private CoreConnService boundConnService = null;
-	private boolean isBound = false;
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			// This is called when the connection with the service has been
-			// established, giving us the service object we can use to
-			// interact with the service. Because we have bound to a explicit
-			// service that we know is running in our own process, we can
-			// cast its IBinder to a concrete class and directly access it.
-			Log.i(TAG, "BINDING ON SERVICE DONE");
-			boundConnService = ((CoreConnService.LocalBinder)service).getService();
-			if(boundConnService.isConnected()) {
-				LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
-				finish();
-			} else {
-				boundConnService.disconnectFromCore();
-			}
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			boundConnService = null;
-		}
-	};
-	
-	void doBindService() {
-		// Establish a connection with the service. We use an explicit
-		// class name because we want a specific service implementation that
-		// we know will be running in our own process (and thus won't be
-		// supporting component replacement by other applications).
-		bindService(new Intent(LoginActivity.this, CoreConnService.class), mConnection, Context.BIND_AUTO_CREATE);
-		isBound = true;
-		Log.i(TAG, "Binding Service");
-	}
-
-	void doUnbindService() {
-		if (isBound) {
-			Log.i(TAG, "Unbinding service");
-			unbindService(mConnection);
-			isBound = false;
-		}
-	}
-
 	@Override
 	public void onCanceled() {
-		boundConnService.disconnectFromCore();
+		BusProvider.getInstance().post(new DisconnectCoreEvent());
 	}
 	
 	@Subscribe

@@ -383,7 +383,7 @@ public final class CoreConnection {
 
 		sendQVariantMap(initial);
 		// END CLIENT INFO
-
+	
 		// START CORE INFO
 		updateInitProgress("Getting core info...");
 		inStream = new QDataInputStream(socket.getInputStream());
@@ -442,8 +442,7 @@ public final class CoreConnection {
 			Log.w(TAG, "SSL DISABLED!");
 		}
 		// FINISHED SSL CONNECTION
-
-
+			
 		// START LOGIN
 		updateInitProgress("Logging in...");
 		Map<String, QVariant<?>> login = new HashMap<String, QVariant<?>>();
@@ -453,7 +452,7 @@ public final class CoreConnection {
 		sendQVariantMap(login);
 		// FINISH LOGIN
 
-
+		
 		// START LOGIN ACK 
 		reply = readQVariantMap();
 		if (!reply.get("MsgType").toString().equals("ClientLoginAck"))
@@ -658,6 +657,7 @@ public final class CoreConnection {
 
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
 		//		System.out.println(ret.toString());
+		if(!readThread.running) throw new IOException(); //Stops crashing while connecting if we are told to disconnect, so 2 instances are not reading the network
 		return ret;
 	}
 
@@ -767,6 +767,11 @@ public final class CoreConnection {
 						packedFunc = packageQueue.poll();
 					} else {
 						packedFunc = readQVariantList();
+					}
+					
+					//Check if we where told to disconnect while reading qvariantlist
+					if(!running) {
+						break;
 					}
 					//Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 			
@@ -1530,6 +1535,7 @@ public final class CoreConnection {
 			}
 			
 			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, null).sendToTarget();
+			service = null;
 			return null;
 		}
 	}

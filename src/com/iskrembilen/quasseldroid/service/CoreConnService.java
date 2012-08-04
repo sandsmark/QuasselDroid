@@ -155,7 +155,7 @@ public class CoreConnService extends Service {
 		notificationManager = new QuasseldroidNotificationManager(this);
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
-		preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
+		preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), false);
 		preferenceListener = new OnSharedPreferenceChangeListener() {
 			
 			@Override
@@ -171,12 +171,15 @@ public class CoreConnService extends Service {
 		};
 		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
 		BusProvider.getInstance().register(this);
+		startForeground(R.id.NOTIFICATION, notificationManager.getConnectingNotification());
 	}
 
 	@Override
 	public void onDestroy() {
+		Log.i(TAG, "Destroying service");
 		this.disconnectFromCore();
 		BusProvider.getInstance().unregister(this);
+		stopForeground(true);
 
 	}
 
@@ -499,7 +502,9 @@ public class CoreConnService extends Service {
 		releaseWakeLockIfExists();
 		if (coreConn != null)
 			coreConn.closeConnection();
-		requestedDisconnect = true;
+		coreConn = null;
+		notificationManager = null;
+		stopSelf();
 	}
 
 	public boolean isConnected() {
@@ -515,8 +520,7 @@ public class CoreConnService extends Service {
 
 		@Override
 		public void handleMessage(Message msg) {
-			if (msg == null) {
-				Log.e(TAG, "Msg was null?");
+			if (msg == null || coreConn == null) {
 				return;
 			}
 
@@ -650,18 +654,16 @@ public class CoreConnService extends Service {
 				/**
 				 * Lost connection with core, update notification
 				 */
-				if (msg.obj != null) { // Have description of what is wrong,
-					// used only for login atm
-					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, (String)msg.obj));
-				} else {
-					BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
-				}
-				if(requestedDisconnect) {
-					notificationManager.remove();
-				} else {
+				if(coreConn != null) {
+					if (msg.obj != null) { // Have description of what is wrong,
+						// used only for login atm
+						BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, (String)msg.obj));
+					} else {
+						BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
+					}
 					notificationManager.notifyDisconnected();
 				}
-				releaseWakeLockIfExists();
+				disconnectFromCore();
 				break;
 			case R.id.NEW_USER_ADDED:
 				/**

@@ -80,7 +80,7 @@ public class QuasseldroidNotificationManager {
 		notifyConnected(true);
 	}
 
-	public void notifyConnecting() {
+	public Notification getConnectingNotification() {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 		.setSmallIcon(R.drawable.stat_connecting)
 		.setContentTitle(context.getText(R.string.app_name))
@@ -92,9 +92,12 @@ public class QuasseldroidNotificationManager {
 		launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
 		builder.setContentIntent(contentIntent);
+		return builder.getNotification();
 
+	}
+	public void notifyConnecting() {
 		// Send the notification.
-		notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
+		notifyManager.notify(R.id.NOTIFICATION, getConnectingNotification());
 	}	
 
 	public void notifyHighlight(Integer bufferId) {
@@ -151,10 +154,5 @@ public class QuasseldroidNotificationManager {
 		builder.setContentIntent(contentIntent);
 		//Send the notification.
 		notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
-	}
-
-	public void remove() {
-		notifyManager.cancelAll();
-
 	}
 }

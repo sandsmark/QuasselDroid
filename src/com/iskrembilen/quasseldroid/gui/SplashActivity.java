@@ -77,6 +77,7 @@ public class SplashActivity extends SherlockActivity {
 
 	@Subscribe
 	public void onConnectionChanged(ConnectionChangedEvent event) {
+		Log.i(TAG, "COOOn");
 		if(event.status == Status.Connected || event.status == Status.Connecting) {
 			activityToStart = MainActivity.class;
 		} else {
