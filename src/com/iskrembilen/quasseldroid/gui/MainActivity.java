@@ -104,6 +104,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
+import java.util.GregorianCalendar;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -113,6 +114,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
+	private static final long BACK_THRESHOLD = 4000;
 
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -123,6 +125,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	private ViewPager pager;
 
 	private int openedBuffer = -1;
+
+	private long lastBackPressed = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -200,6 +204,16 @@ public class MainActivity extends SherlockFragmentActivity {
 	protected void onDestroy() {
 		preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 		super.onDestroy();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		long currentTime = System.currentTimeMillis();
+		if(currentTime - lastBackPressed < BACK_THRESHOLD) super.onBackPressed(); 
+		else {
+			Toast.makeText(this, getString(R.string.pressed_back_toast), Toast.LENGTH_SHORT).show();
+			lastBackPressed = currentTime;
+		}
 	}
 
 	@Override
