@@ -148,11 +148,12 @@ public class QuasseldroidNotificationManager {
 
 		// The PendingIntent to launch our activity if the user selects this notification
 		Intent launch = new Intent(context, LoginActivity.class);
+		launch.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
 
 		// Set the info for the views that show in the notification panel.
 		builder.setContentIntent(contentIntent);
 		//Send the notification.
-		notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
+		notifyManager.notify(R.id.NOTIFICATION_DISCONNECTED, builder.getNotification());
 	}
 }

@@ -10,6 +10,7 @@ import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
@@ -197,7 +198,7 @@ public class ChatFragment extends SherlockFragment {
 	@Override
 	public void onStop() {
 		super.onStop();
-		if (connected) updateRead();
+		if (Quasseldroid.connected) updateRead();
 		adapter.clearBuffer();
 		BusProvider.getInstance().unregister(this);
 	}
@@ -568,22 +569,6 @@ public class ChatFragment extends SherlockFragment {
 			if(bufferId != -1) {
 				setBuffer(bufferId);
 			}
-		}
-	}
-
-	@Subscribe
-	public void onConnectionChanged(ConnectionChangedEvent event) {
-		if(event.status == Status.Disconnected) {
-			if(event.reason != "") {
-				this.connected = false;
-				getSherlockActivity().removeDialog(R.id.DIALOG_CONNECTING);
-				Toast.makeText(getSherlockActivity(), event.reason, Toast.LENGTH_LONG).show();
-
-			}
-			getSherlockActivity().finish();
-			startActivity(new Intent(getSherlockActivity(), LoginActivity.class));
-		}  else if(event.status == Status.Connected) {
-			this.connected = true;
 		}
 	}
 

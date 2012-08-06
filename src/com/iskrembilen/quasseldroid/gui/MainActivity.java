@@ -82,6 +82,7 @@ import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
@@ -178,6 +179,9 @@ public class MainActivity extends SherlockFragmentActivity {
 			startActivity(intent);
 		}
 		BusProvider.getInstance().register(this);
+		if(!Quasseldroid.connected) {
+			returnToLogin();
+		}
 		super.onStart();
 	}
 
@@ -337,9 +341,15 @@ public class MainActivity extends SherlockFragmentActivity {
 				Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
 
 			}
-			finish();
-			startActivity(new Intent(MainActivity.this, LoginActivity.class));
+			returnToLogin();
 		}
+	}
+	
+	private void returnToLogin() {
+		finish();
+		Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
 	}
 
 	@Subscribe

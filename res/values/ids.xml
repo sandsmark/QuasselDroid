@@ -10,6 +10,7 @@
     <item name="BUFFER_LIST_UPDATED" type="id"></item>
     <item name="CHAT_MESSAGES_UPDATED" type="id"></item>
     <item name="NOTIFICATION" type="id"></item>
+    <item name="NOTIFICATION_DISCONNECTED" type="id"></item>
     <item name="NEW_MESSAGE_TO_SERVICE" type="id"></item>
     <item name="NEW_BUFFER_TO_SERVICE" type="id"></item>
     <item name="SET_LAST_SEEN_TO_SERVICE" type="id"></item>
