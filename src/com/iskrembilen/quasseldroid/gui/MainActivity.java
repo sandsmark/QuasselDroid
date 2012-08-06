@@ -173,21 +173,25 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	@Override
 	protected void onStart() {
+		super.onStart();
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, MainActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
+	}
+	@Override
+	protected void onResume() {
+		super.onResume();
 		BusProvider.getInstance().register(this);
 		if(!Quasseldroid.connected) {
 			returnToLogin();
 		}
-		super.onStart();
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
+	protected void onPause() {
+		super.onPause();
 		BusProvider.getInstance().unregister(this);
 
 	}
