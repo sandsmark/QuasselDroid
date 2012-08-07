@@ -33,6 +33,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ResultReceiver;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import com.actionbarsherlock.view.Menu;
@@ -334,7 +335,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 				return;
 			}
 			
-			LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
@@ -347,6 +347,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 			
 			startService(connectIntent);
 
+			LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
 		}
 	};
 
@@ -359,6 +360,14 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		
 	}
 	
+	private void dismissLoginDialog() {
+		DialogFragment dialog = ((DialogFragment)getSupportFragmentManager().findFragmentByTag("dialog"));
+		if(dialog != null) {
+			dialog.dismiss();
+		}
+		
+	}
+	
 	@Override
 	public void onCanceled() {
 		BusProvider.getInstance().post(new DisconnectCoreEvent());
@@ -367,27 +376,27 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	@Subscribe
 	public void onConnectionChanged(ConnectionChangedEvent event) {
 		if(event.status == Status.Connecting) {
-			removeDialog(R.id.DIALOG_CONNECTING);
+			dismissLoginDialog();
 			LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
 			finish();				
 		} else if(event.status == Status.Disconnected) {
+			dismissLoginDialog();
 			if (event.reason != ""){
-				removeDialog(R.id.DIALOG_CONNECTING);
 				Toast.makeText(LoginActivity.this, event.reason, Toast.LENGTH_LONG).show();
-			}				
+			}
 		}
 	}
 	
 	@Subscribe
 	public void onNewCertificate(NewCertificateEvent event) {
 		hashedCert = event.certificateString;
-		removeDialog(R.id.DIALOG_CONNECTING);
+		dismissLoginDialog();
 		showDialog(R.id.DIALOG_NEW_CERTIFICATE);			
 	}
 	
 	@Subscribe
 	public void onUnsupportedProtocol(UnsupportedProtocolEvent event) {
-		removeDialog(R.id.DIALOG_CONNECTING);
+		dismissLoginDialog();
 		Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();			
 	}
 }

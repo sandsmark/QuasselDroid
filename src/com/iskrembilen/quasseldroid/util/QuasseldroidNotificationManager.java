@@ -32,6 +32,8 @@ public class QuasseldroidNotificationManager {
 		preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		highlightedBuffers = new ArrayList<Integer>();
+		//Remove any disconnect notification since we are connecting again
+		notifyManager.cancel(R.id.NOTIFICATION_DISCONNECTED);
 	}
 
 	public void notifyHighlightsRead(int bufferId) {

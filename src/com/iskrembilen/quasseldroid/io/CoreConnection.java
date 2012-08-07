@@ -722,6 +722,34 @@ public final class CoreConnection {
 				Log.e(TAG, "Protocol error", e);
 				onDisconnected("Protocol error!");
 			}
+			
+			//Close everything
+			if (heartbeatTimer!=null) {
+				heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
+			}
+			
+			//Close streams and socket
+			try {
+				if (outStream != null) {
+					outStream.flush();
+					outStream.close();
+				}
+			} catch (IOException e) {
+				Log.w(TAG, "IOException while closing outStream", e);
+			} try {
+				if(inStream != null)
+					inStream.close();
+			} catch (IOException e) {
+				Log.w(TAG, "IOException while closing inStream", e);
+			} try {
+				if (socket != null)
+					socket.close();
+			} catch (IOException e) {
+				Log.w(TAG, "IOException while closing socket", e);
+			}
+			
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, null).sendToTarget();
+			service = null;
 		}
 
 		public String doRun() throws EmptyQVariantException {
@@ -1510,32 +1538,6 @@ public final class CoreConnection {
 					Log.w(TAG, "IO error, lost connection?", e);
 				}
 			}
-			if (heartbeatTimer!=null) {
-				heartbeatTimer.cancel(); // Has this stopped executing now? Nobody knows.
-			}
-			
-			//Close streams and socket
-			try {
-				if (outStream != null) {
-					outStream.flush();
-					outStream.close();
-				}
-			} catch (IOException e) {
-				Log.w(TAG, "IOException while closing outStream", e);
-			} try {
-				if(inStream != null)
-					inStream.close();
-			} catch (IOException e) {
-				Log.w(TAG, "IOException while closing inStream", e);
-			} try {
-				if (socket != null)
-					socket.close();
-			} catch (IOException e) {
-				Log.w(TAG, "IOException while closing socket", e);
-			}
-			
-			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, null).sendToTarget();
-			service = null;
 			return null;
 		}
 	}
