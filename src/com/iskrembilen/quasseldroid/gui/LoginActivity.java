@@ -329,9 +329,8 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 			//TODO: quick fix for checking if we have internett before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
 			//Check that the phone has either mobile or wifi connection to querry teh bus oracle
 			ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-			//0 is mobile, 1 is wifi
-			if (conn.getActiveNetworkInfo() != null && !conn.getActiveNetworkInfo().isConnected()) {
-				Toast.makeText(LoginActivity.this, "This application requires a internett connection", Toast.LENGTH_LONG).show();
+			if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
+				Toast.makeText(LoginActivity.this, "This application requires a internet connection", Toast.LENGTH_SHORT).show();
 				return;
 			}
 			
