@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+<RelativeLayout android:layout_width="fill_parent"
+    android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.iskrembilen.quasseldroid.util.AlwaysScrollingTextView
         android:id="@+id/chat_topic_view"
@@ -30,28 +29,26 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
-
+
         <EditText
             android:id="@+id/chat_input_view"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionSend"
             android:inputType="textMultiLine"
-            android:paddingLeft="30dp" >
+            android:paddingLeft="36dp" >
 
-        </EditText>
-
-        <ImageButton
+        </EditText><ImageButton
             android:id="@+id/chat_auto_complete_button"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center_vertical"
             android:background="@android:color/transparent"
             android:contentDescription="Autocomplete button"
-            android:paddingBottom="4dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:scaleType="center"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
             android:src="@drawable/icon_search" />
+
     </FrameLayout>
 
 </RelativeLayout>
