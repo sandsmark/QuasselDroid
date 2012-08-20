@@ -351,7 +351,7 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
 		// Save scroll position of item
 		View itemView = bufferList.getChildAt(0);
-		restoreItemPosition = bufferList == null ? 0 : itemView.getTop();
+		restoreItemPosition = itemView == null ? 0 : itemView.getTop();
 		outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
 
 	}
