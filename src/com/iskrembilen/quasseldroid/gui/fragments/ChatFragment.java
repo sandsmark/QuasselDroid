@@ -530,7 +530,6 @@ public class ChatFragment extends SherlockFragment {
 	private class BacklogScrollListener implements OnScrollListener {
 
 		private int visibleThreshold;
-		private boolean loading = false;
 
 		public BacklogScrollListener(int visibleThreshold) {
 			this.visibleThreshold = visibleThreshold;
@@ -538,22 +537,10 @@ public class ChatFragment extends SherlockFragment {
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-			if (loading) {
-				if (!adapter.buffer.hasPendingBacklog()) {
-					loading = false;
-				}
-			}
 			//			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
-			if (!loading && (firstVisibleItem <= visibleThreshold)) {
-				if (adapter.buffer!=null) {
-					loading = true;
-					adapter.getMoreBacklog();
-				}else {
-					Log.w(TAG, "Can't get backlog on null buffer");
-				}
-
+			if (adapter.buffer!=null && !adapter.buffer.hasPendingBacklog() && (firstVisibleItem <= visibleThreshold)) {
+				adapter.getMoreBacklog();
 			}	
-
 		}
 
 		@Override
