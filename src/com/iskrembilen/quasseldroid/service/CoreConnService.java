@@ -675,11 +675,16 @@ public class CoreConnService extends Service {
 			case R.id.NEW_USER_INFO:
 				bundle = (Bundle) msg.obj;
 				user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-				user.away = bundle.getBoolean("away");
-				user.awayMessage = bundle.getString("awayMessage");
-				user.ircOperator = bundle.getString("ircOperator");
-				user.channels = (ArrayList<String>) bundle.getSerializable("channels");
-				user.notifyObservers();
+				if(user != null) {
+					user.away = bundle.getBoolean("away");
+					user.awayMessage = bundle.getString("awayMessage");
+					user.ircOperator = bundle.getString("ircOperator");
+					user.channels = (ArrayList<String>) bundle.getSerializable("channels");
+					user.notifyObservers();
+				} else {
+					Log.e(TAG, "User not found for new user info");
+					//TODO: why is it not found...
+				}
 				break;
 			case R.id.SET_BUFFER_ORDER:
 				/**
