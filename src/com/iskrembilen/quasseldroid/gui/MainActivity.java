@@ -87,6 +87,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
@@ -219,7 +220,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onSearchRequested() {
 		if(pager.getCurrentItem() == 1) {
-			getSupportFragmentManager().findFragmentById(R.id.chat_fragment_container);
+			BusProvider.getInstance().post(new CompleteNickEvent());
 			return false; //Activity ate the request
 		}
 		return true;

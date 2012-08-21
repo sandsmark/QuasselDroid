@@ -14,6 +14,7 @@ import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
+import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
@@ -513,7 +514,7 @@ public class ChatFragment extends SherlockFragment {
 		}
 	}	
 
-	public void onNickComplete() {
+	private void onNickComplete() {
 		nickCompletionHelper.completeNick(inputField);
 	}
 
@@ -571,4 +572,10 @@ public class ChatFragment extends SherlockFragment {
 	public void onUpdateBufferRead(UpdateReadBufferEvent event) {
 		updateRead();
 	}
+	
+	@Subscribe
+	public void onCompleteNick(CompleteNickEvent event) {
+		onNickComplete();
+	}
 }
+
