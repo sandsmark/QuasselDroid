@@ -80,4 +80,10 @@ public class NetworkCollection extends Observable implements Observer {
 		setChanged();
 		notifyObservers();
 	}
+
+	public void clear() {
+		networkList.clear();
+		networkMap.clear();
+		
+	}
 }

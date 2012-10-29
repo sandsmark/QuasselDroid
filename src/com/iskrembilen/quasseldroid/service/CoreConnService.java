@@ -215,6 +215,7 @@ public class CoreConnService extends Service {
 		Log.i(TAG, "Connecting to core: " + address + ":" + port
 				+ " with username " + username);
 		networks = NetworkCollection.getInstance();
+		networks.clear();
 		
 		acquireWakeLockIfEnabled();
 		
