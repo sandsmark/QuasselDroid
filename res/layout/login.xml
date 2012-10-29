@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/serverSpinner"
             android:layout_below="@+id/TableLayout01"
-            android:checked="false"
+            android:checked="true"
             android:text="Remember me" />
 
         <LinearLayout
