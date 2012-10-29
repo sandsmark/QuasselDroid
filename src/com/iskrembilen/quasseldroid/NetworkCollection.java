@@ -6,6 +6,17 @@ public class NetworkCollection extends Observable implements Observer {
 	private static final String TAG = NetworkCollection.class.getSimpleName();
 	List<Network> networkList = new ArrayList<Network>();
 	HashMap<Integer, Network> networkMap = new HashMap<Integer, Network>();
+
+	private static NetworkCollection instance;
+	private NetworkCollection() {
+	}
+	
+	static public NetworkCollection getInstance() {
+		if (instance == null)
+			instance = new NetworkCollection();
+		
+		return instance;
+	}
 	
 	public void addNetwork(Network network) {
 		networkMap.put(network.getId(), network);

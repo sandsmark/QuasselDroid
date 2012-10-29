@@ -214,7 +214,7 @@ public class CoreConnService extends Service {
 		Boolean ssl = connectData.getBoolean("ssl");
 		Log.i(TAG, "Connecting to core: " + address + ":" + port
 				+ " with username " + username);
-		networks = new NetworkCollection();
+		networks = NetworkCollection.getInstance();
 		
 		acquireWakeLockIfEnabled();
 		
