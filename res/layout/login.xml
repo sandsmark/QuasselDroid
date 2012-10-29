@@ -17,22 +17,6 @@
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="20dip"
             android:layout_marginTop="10dip" >
-
-            <ImageView
-                android:id="@+id/logo_img"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:src="@drawable/icon_big" />
-
-            <TextView
-                android:id="@+id/introText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:text="uasseldroid"
-                android:textColor="@color/logo_text_color"
-                android:textSize="40dip" />
         </LinearLayout>
 
         <Spinner
