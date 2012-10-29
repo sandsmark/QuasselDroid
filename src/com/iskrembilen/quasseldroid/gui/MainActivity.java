@@ -128,6 +128,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	private int openedBuffer = -1;
 
 	private long lastBackPressed = 0;
+	
+	private FragmentAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +138,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.main_layout);
 
-		FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
+		adapter = new FragmentAdapter(getSupportFragmentManager());
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setOffscreenPageLimit(2);
 
@@ -252,6 +254,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		public static final int CHAT_POS = 1;
 		public static final int NICKS_POS = 2; 
 		public static final int PAGE_COUNT = 3;
+		public boolean chatShown = false;
 
 		public FragmentAdapter(FragmentManager fm) {
 			super(fm);
@@ -273,7 +276,10 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		@Override
 		public int getCount() {
-			return PAGE_COUNT;
+			if (chatShown)
+				return PAGE_COUNT;
+			else
+				return 1;
 		}
 
 		@Override
@@ -374,6 +380,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
 		if(event.bufferId != -1) {
+			adapter.chatShown = true;
 			openedBuffer = event.bufferId;
 			setTitle(NetworkCollection.getInstance().getBufferById(event.bufferId).getInfo().name);
 			pager.setCurrentItem(FragmentAdapter.CHAT_POS, true);
