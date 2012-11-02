@@ -172,6 +172,10 @@ public class MainActivity extends SherlockFragmentActivity {
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+		
+		if (savedInstanceState != null) {
+			setBuffer(savedInstanceState.getInt("bufferid", -1));
+		}
 	}
 
 	private void setActionBarSubtitle(String subtitle) {
@@ -379,10 +383,14 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
-		if(event.bufferId != -1) {
+		setBuffer(event.bufferId);
+	}
+	
+	private void setBuffer(int id) {
+		if(id != -1) {
 			adapter.chatShown = true;
-			openedBuffer = event.bufferId;
-			setTitle(NetworkCollection.getInstance().getBufferById(event.bufferId).getInfo().name);
+			openedBuffer = id;
+			setTitle(NetworkCollection.getInstance().getBufferById(id).getInfo().name);
 			pager.setCurrentItem(FragmentAdapter.CHAT_POS, true);
 		}
 	}
@@ -390,5 +398,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	 @Produce
 	 public BufferOpenedEvent produceBufferOpenedEvent() {
 		 return new BufferOpenedEvent(openedBuffer);
+	 }
+	 
+	 @Override
+	 protected void onSaveInstanceState (Bundle outState) {
+		 outState.putInt("bufferid", openedBuffer);
 	 }
 }
