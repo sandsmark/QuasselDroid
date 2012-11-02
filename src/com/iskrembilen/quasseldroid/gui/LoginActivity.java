@@ -331,7 +331,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 			//Check that the phone has either mobile or wifi connection to querry teh bus oracle
 			ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 			if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
-				Toast.makeText(LoginActivity.this, "This application requires a internet connection", Toast.LENGTH_SHORT).show();
+				Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();
 				return;
 			}
 			
