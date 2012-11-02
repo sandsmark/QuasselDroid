@@ -17,7 +17,7 @@
             android:layout_below="@+id/serverSpinner"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="10dip" >
-            
+
             <TableRow
                 android:id="@+id/TableRow01"
                 android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
 		            android:layout_above="@+id/serverSpinner"
 		            android:layout_alignLeft="@+id/serverSpinner"
 		            android:text="Core" />
-		        
+
                 <Spinner
 		            android:id="@+id/serverSpinner"
 		            android:layout_width="wrap_content"
@@ -79,31 +79,27 @@
                     android:inputType="textPassword"
                     android:singleLine="true" />
             </TableRow>
-        </TableLayout>
 
-        <CheckBox
-            android:id="@+id/remember_me_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/serverSpinner"
-            android:layout_below="@+id/TableLayout01"
-            android:checked="true"
-            android:text="Remember me" />
+            <TableRow
+                android:id="@+id/TableRow04"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
 
-        <LinearLayout
-            android:id="@+id/LinearLayout01"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_below="@+id/remember_me_checkbox"
-            android:paddingTop="20dip" >
-
+                <CheckBox
+		            android:id="@+id/remember_me_checkbox"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_alignLeft="@+id/serverSpinner"
+		            android:layout_below="@+id/TableLayout01"
+		            android:checked="true"
+		            android:text="Remember me" />
+            </TableRow>
             <Button
-                android:id="@+id/connect_button"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:text="Connect" />
-        </LinearLayout>
+	                android:id="@+id/connect_button"
+	                android:layout_width="fill_parent"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="bottom"
+	                android:text="Connect" />
+        </TableLayout>
     </RelativeLayout>
-
 </ScrollView>
