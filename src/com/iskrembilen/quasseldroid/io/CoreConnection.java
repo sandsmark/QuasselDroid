@@ -555,7 +555,7 @@ public final class CoreConnection {
 	 * 
 	 */
 	public synchronized void onDisconnected(String informationMessage) {
-		Log.d(TAG, "Disconnected so closing connection");
+		Log.d(TAG, "Disconnected so closing connection: " + informationMessage);
 		closeConnection();
 	}
 
@@ -652,12 +652,9 @@ public final class CoreConnection {
 	 * @throws EmptyQVariantException 
 	 */
 	private Map<String, QVariant<?>> readQVariantMap() throws IOException, EmptyQVariantException {
-		// Length of this packet (why do they send this? noone knows!).
-		inStream.readUInt(32);
-		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+		QVariant <Map<String, QVariant<?>>> v = (QVariant <Map<String, QVariant<?>>>)readQVariant();
 
 		Map<String, QVariant<?>>ret = (Map<String, QVariant<?>>)v.getData();
-		//		System.out.println(ret.toString());
 		if(!readThread.running) throw new IOException(); //Stops crashing while connecting if we are told to disconnect, so 2 instances are not reading the network
 		return ret;
 	}
@@ -667,12 +664,17 @@ public final class CoreConnection {
 	 * @throws EmptyQVariantException 
 	 */	
 	private List<QVariant<?>> readQVariantList() throws IOException, EmptyQVariantException {	
-		inStream.readUInt(32); // Length
-		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+		QVariant <List<QVariant<?>>> v = (QVariant <List<QVariant<?>>>)readQVariant();
 
 		List<QVariant<?>>ret = (List<QVariant<?>>)v.getData();
-		//		System.out.println(ret.toString());
 		return ret;
+	}
+	
+	private QVariant<?> readQVariant() throws IOException, EmptyQVariantException {
+		inStream.readUInt(32); // Length, duplicated for your convenience
+		
+		QVariant<?> v = (QVariant<?>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+		return v;
 	}
 
 	/**
