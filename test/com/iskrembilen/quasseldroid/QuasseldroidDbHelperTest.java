@@ -64,6 +64,33 @@ public class QuasseldroidDbHelperTest {
 		Assert.assertEquals(1, c.getCount());
 		c.moveToFirst();
 		Assert.assertEquals("user2", c.getString(c.getColumnIndex(QuasselDbHelper.KEY_USERNAME)));
+		c.close();
+	}
+	
+	@Test
+	public void certificateRemovedOnCoreDeleteTest() throws Exception {
+		long coreId = addCore();
+		String hash = "hash";
+		dbHelper.storeCertificate(hash, coreId);
+		Assert.assertEquals("hash", dbHelper.getCertificate(coreId));
+
+		dbHelper.deleteCore(coreId);
+		Assert.assertNull(dbHelper.getCertificate(coreId));
+	}
+	
+	@Test
+	public void certificatesAreUniqueAndOverridesOldEntriesTest() throws Exception {
+		long coreId = addCore();
+		SQLiteDatabase db = dbHelper.getDatabase();
+		dbHelper.storeCertificate("hash", coreId);
+		Assert.assertEquals("hash", dbHelper.getCertificate(coreId));
+		
+		dbHelper.storeCertificate("hash2", coreId);
+		Cursor c = db.query(QuasselDbHelper.CERTIFICATE_TABLE, new String[] {QuasselDbHelper.KEY_CERTIFICATE}, null, null, null, null, null);
+		Assert.assertEquals(1, c.getCount());
+		c.close();
+		System.out.println(dbHelper.getCertificate(coreId));
+		Assert.assertEquals("hash2", dbHelper.getCertificate(coreId));
 	}
 
 	private long addCore() {

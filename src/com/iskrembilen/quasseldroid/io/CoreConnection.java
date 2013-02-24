@@ -66,6 +66,7 @@ public final class CoreConnection {
 	private CoreInfo coreInfo;
 	private Map<Integer, Network> networks;
 
+	private long coreId;
 	private String address;
 	private int port;
 	private String username;
@@ -89,8 +90,9 @@ public final class CoreConnection {
 
 
 
-	public CoreConnection(String address, int port, String username,
+	public CoreConnection(long coreId, String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
+		this.coreId = coreId;
 		this.address = address;
 		this.port = port;
 		this.username = username;
@@ -1544,6 +1546,10 @@ public final class CoreConnection {
 
 	public boolean isInitComplete() {
 		return initComplete;
+	}
+	
+	public long getCoreId() {
+		return coreId;
 	}
 }
 

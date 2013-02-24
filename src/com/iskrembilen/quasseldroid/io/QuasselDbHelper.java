@@ -41,7 +41,7 @@ public class QuasselDbHelper {
 	public static final String KEY_ADDRESS = "server";
 	public static final String KEY_PORT = "port";
 	public static final String KEY_SSL = "ssl";
-	public static final String KEY_CERTIFICATE = "certificates";
+	public static final String KEY_CERTIFICATE = "certificate";
 	public static final String KEY_BUFFERID = "bufferid";
 	public static final String KEY_EVENT = "event";
 	public static final String KEY_USERNAME = "username";
@@ -59,7 +59,7 @@ public class QuasselDbHelper {
 	public static final String HIDDENEVENTS_TABLE = "hiddenevents";
 	private static final String DATABASE_CREATE_TABLE1 = 
 		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
-	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (content text);";
+	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (certificate text, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE);";
 	private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
 	private static final String DATABASE_CREATE_TABLE4 = "CREATE TABLE user(userid integer primary key autoincrement, username text not null, password text not null, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE)";
 	private static final int DATABASE_VERSION = 2;
@@ -169,26 +169,29 @@ public class QuasselDbHelper {
 		db.update(CORE_TABLE, args, KEY_ID + "=" + rowId, null);
 		//TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we  get problems if names are the same
 	}
-	public void storeCertificate(byte[] certificate) {
+	public void storeCertificate(String certificateHash, long coreId) {
 		try {
 			ContentValues value = new ContentValues();
-			value.put(KEY_CERTIFICATE, certificate);
-			db.insert(CERTIFICATE_TABLE, null, value);
+			value.put(KEY_CERTIFICATE, certificateHash);
+			value.put(KEY_COREIDREFERENCE, coreId);
+			long res = db.insert(CERTIFICATE_TABLE, null, value);
+			if(res == -1) {
+				db.replace(CERTIFICATE_TABLE, null, value);
+			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public boolean hasCertificate(String certificate) {
-		Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
-		boolean ret = false;
-		if (c != null) { // This is retarded, fuck Android.
-			if (Arrays.equals(c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)), certificate.getBytes())) {
-				ret = true;
-			}
+	public String getCertificate(long coreId) {
+		Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, KEY_COREIDREFERENCE + "=" + coreId, null, null, null, null);
+		String cert = null;
+		if (c != null && c.getCount() > 0) {
+			c.moveToFirst();
+			cert = c.getString(c.getColumnIndex(KEY_CERTIFICATE));
 			c.close();
 		}
-		return ret;
+		return cert;
 	}
 
 	public void addHiddenEvent(IrcMessage.Type event, int bufferId) {
@@ -209,7 +212,10 @@ public class QuasselDbHelper {
 			initialValues.put(KEY_USERNAME, userName);
 			initialValues.put(KEY_PASSWORD, password);
 			initialValues.put(KEY_COREIDREFERENCE, coreId);
-			db.insert(USER_TABLE, null, initialValues);
+			long res = db.insert(USER_TABLE, null, initialValues);
+			if(res == -1) {
+				db.replace(USER_TABLE, null, initialValues);
+			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}

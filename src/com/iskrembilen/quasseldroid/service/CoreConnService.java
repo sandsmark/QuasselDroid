@@ -207,6 +207,7 @@ public class CoreConnService extends Service {
 		}
 		requestedDisconnect = false;
 		Bundle connectData = intent.getExtras();
+		long id = connectData.getLong("id");
 		String address = connectData.getString("address");
 		int port = connectData.getInt("port");
 		String username = connectData.getString("username");
@@ -218,7 +219,7 @@ public class CoreConnService extends Service {
 		
 		acquireWakeLockIfEnabled();
 		
-		coreConn = new CoreConnection(address, port, username, password, ssl,
+		coreConn = new CoreConnection(id, address, port, username, password, ssl,
 				this);
 	}
 	

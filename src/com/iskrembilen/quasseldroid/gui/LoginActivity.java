@@ -285,12 +285,11 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
 		case R.id.DIALOG_NEW_CERTIFICATE:
 			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-			final SharedPreferences certPrefs = getSharedPreferences("CertificateStorage", Context.MODE_PRIVATE);
 			builder.setMessage("Received a new certificate, do you trust it?\n" + hashedCert)
 			       .setCancelable(false)
 			       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {
-							certPrefs.edit().putString("certificate", hashedCert).commit();
+			        	   dbHelper.storeCertificate(hashedCert, core.getSelectedItemId());
 							onConnect.onClick(null);
 			           }
 			       })
@@ -351,6 +350,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
 			//Make intent to send to the CoreConnect service, with connection data
 			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
+			connectIntent.putExtra("id", core.getSelectedItemId());
 			connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
 			connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
 			connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
