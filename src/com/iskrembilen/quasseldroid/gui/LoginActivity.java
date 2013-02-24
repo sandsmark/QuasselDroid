@@ -45,6 +45,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
@@ -228,6 +229,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		final Dialog dialog;
+		String certificateMessage = null;
 		switch (id) {
 
 		case R.id.DIALOG_EDIT_CORE: //fallthrough
@@ -282,10 +284,14 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 			dialog.findViewById(R.id.cancel_button).setOnClickListener(buttonListener);
 			dialog.findViewById(R.id.save_button).setOnClickListener(buttonListener);	
 			break;
-
+		case R.id.DIALOG_CHANGED_CERTIFICATE:
+			certificateMessage = "The core SSL-Certificate has changed, do you trust the new one?\n";
 		case R.id.DIALOG_NEW_CERTIFICATE:
+			if(certificateMessage == null) {
+				certificateMessage = "Received a new certificate, do you trust it?\n";
+			}
 			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-			builder.setMessage("Received a new certificate, do you trust it?\n" + hashedCert)
+			builder.setMessage(certificateMessage + hashedCert)
 			       .setCancelable(false)
 			       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {
@@ -405,6 +411,13 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		hashedCert = event.certificateString;
 		dismissLoginDialog();
 		showDialog(R.id.DIALOG_NEW_CERTIFICATE);			
+	}
+	
+	@Subscribe
+	public void onCertificateChanged(CertificateChangedEvent event) {
+		hashedCert = event.certificateHash;
+		dismissLoginDialog();
+		showDialog(R.id.DIALOG_CHANGED_CERTIFICATE);
 	}
 	
 	@Subscribe

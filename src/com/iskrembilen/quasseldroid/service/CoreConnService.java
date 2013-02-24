@@ -46,6 +46,7 @@ import android.widget.Toast;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
@@ -731,12 +732,12 @@ public class CoreConnService extends Service {
 				/**
 				 * Received a mismatching certificate
 				 */
+				BusProvider.getInstance().post(new CertificateChangedEvent((String)msg.obj));
+				break;
 			case R.id.NEW_CERTIFICATE:
 				/**
 				 * Received a new, unseen certificate
 				 */
-				bundle = new Bundle();
-				bundle.putString(CERT_KEY, (String) msg.obj);
 				BusProvider.getInstance().post(new NewCertificateEvent((String)msg.obj));
 				break;
 			case R.id.SET_BUFFER_ACTIVE:

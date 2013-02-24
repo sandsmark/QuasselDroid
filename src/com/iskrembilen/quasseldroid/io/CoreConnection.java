@@ -769,17 +769,19 @@ public final class CoreConnection {
 				closeConnection();
 				return null;
 			} catch (IOException e) {
+				Log.w(TAG, "Got IOException while connecting");
 				if(e.getCause() instanceof NewCertificateException) {
-					service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
+					Log.w(TAG, "Got NewCertificateException while connecting");
+					service.getHandler().obtainMessage(R.id.NEW_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
 					closeConnection();
-				}else{
+				} else if(e.getCause() instanceof CertificateException) {
+					Log.w(TAG, "Got CertificateException while connecting");
+					service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, e.getCause().getMessage()).sendToTarget();
+					closeConnection();
+				} else{
 					e.printStackTrace();
 					return "IO error while connecting! " + e.getMessage();
 				}
-				return null;
-			} catch (CertificateException e) {
-				service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
-				closeConnection();
 				return null;
 			} catch (GeneralSecurityException e) {
 				Log.w(TAG, "Invalid username/password combination");

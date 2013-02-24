@@ -85,7 +85,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 			dbHelper.close();
 			if(storedCert != null) {
 				if (!storedCert.equals(hashedCert)) {
-					throw new CertificateException();
+					throw new CertificateException(hashedCert);
 				}
 			} else {
 				throw new NewCertificateException(hashedCert);
