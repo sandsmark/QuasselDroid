@@ -41,6 +41,7 @@ import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.R;
@@ -64,16 +65,13 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	private static final String TAG = LoginActivity.class.getSimpleName();
 	public static final String PREFS_ACCOUNT = "AccountPreferences";
 	public static final String PREFS_CORE = "coreSelection";
-	public static final String PREFS_USERNAME = "username";
-	public static final String PREFS_PASSWORD = "password";
-	public static final String PREFS_REMEMBERME = "rememberMe";
 	
 	SharedPreferences settings;
 	QuasselDbHelper dbHelper;
 
 	Spinner core;
-	EditText username;
-	EditText password;
+	EditText usernameField;
+	EditText passwordField;
 	CheckBox rememberMe;
 	Button connect;
 	
@@ -93,10 +91,33 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		dbHelper.open();
 
 		core = (Spinner)findViewById(R.id.serverSpinner);
-		username = (EditText)findViewById(R.id.usernameField);
-		password = (EditText)findViewById(R.id.passwordField);
+		usernameField = (EditText)findViewById(R.id.usernameField);
+		passwordField = (EditText)findViewById(R.id.passwordField);
 		rememberMe = (CheckBox)findViewById(R.id.remember_me_checkbox);
 
+		core.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				Bundle user = dbHelper.getUser(id);
+				if(user != null) {
+					String username = user.getString(QuasselDbHelper.KEY_USERNAME);
+					String password = user.getString(QuasselDbHelper.KEY_PASSWORD);
+					usernameField.setText(username);
+					passwordField.setText(password);
+					rememberMe.setChecked(true);
+				} else {
+					usernameField.setText("");
+					passwordField.setText("");
+					rememberMe.setChecked(false);
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				// TODO Auto-generated method stub
+			}
+		});
+		
 		//setup the core spinner
 		Cursor c = dbHelper.getAllCores();
 		startManagingCursor(c);
@@ -111,9 +132,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		//Use saved settings
 		if(core.getCount()>settings.getInt(PREFS_CORE, 0))
 			core.setSelection(settings.getInt(PREFS_CORE, 0));
-		username.setText(settings.getString(PREFS_USERNAME,""));
-		password.setText(settings.getString(PREFS_PASSWORD,""));
-		rememberMe.setChecked(settings.getBoolean(PREFS_REMEMBERME, false));
 
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
@@ -293,8 +311,8 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
 	private OnClickListener onConnect = new OnClickListener() {
 		public void onClick(View v) {
-			if(username.getText().length()==0 ||
-					password.getText().length()==0 ||
+			if(usernameField.getText().length()==0 ||
+					passwordField.getText().length()==0 ||
 					core.getCount() == 0){
 
 				AlertDialog.Builder diag=new AlertDialog.Builder(LoginActivity.this);
@@ -311,21 +329,16 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 			SharedPreferences.Editor settingsedit = settings.edit();
 			if(rememberMe.isChecked()){//save info
 				settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-				settingsedit.putString(PREFS_USERNAME,username.getText().toString());
-				settingsedit.putString(PREFS_PASSWORD, password.getText().toString());
-				settingsedit.putBoolean(PREFS_REMEMBERME, true);
+				dbHelper.addUser(usernameField.getText().toString(), passwordField.getText().toString(), core.getSelectedItemId());
 
 			}else {
 				settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-				settingsedit.remove(PREFS_USERNAME);
-				settingsedit.remove(PREFS_PASSWORD);
-				settingsedit.remove(PREFS_REMEMBERME);
+				dbHelper.deleteUser(core.getSelectedItemId());
 
 			}
 			settingsedit.commit();
 			//dbHelper.open();
 			Bundle res = dbHelper.getCore(core.getSelectedItemId());
-			
 			
 			//TODO: quick fix for checking if we have internett before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
 			//Check that the phone has either mobile or wifi connection to querry teh bus oracle
@@ -342,8 +355,8 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 			connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
 			connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
 			connectIntent.putExtra("ssl", res.getBoolean(QuasselDbHelper.KEY_SSL));
-			connectIntent.putExtra("username", username.getText().toString().trim());
-			connectIntent.putExtra("password", password.getText().toString());
+			connectIntent.putExtra("username", usernameField.getText().toString().trim());
+			connectIntent.putExtra("password", passwordField.getText().toString());
 			
 			startService(connectIntent);
 
