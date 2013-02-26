@@ -69,5 +69,6 @@
 	
 	<color name="pager_indicator_text_color">#96AA39</color>
 	<color name="pager_indicator_color">#3B3B3B</color>
+	<color name="topic_border_color">#3B3B3B</color>
 	
 </resources>
