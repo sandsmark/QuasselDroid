@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="Quassel" >
-
-        <EditTextPreference
+    <PreferenceCategory android:title="Backlog Fetching" >
+		<CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_fetch_to_last_seen"
+            android:summary="Fetch all unseen messages on connect"
+            android:title="Unread messages per chat" 
+            android:disableDependentsState="true"
+            />
+		
+		<EditTextPreference
             android:defaultValue="10"
             android:key="@string/preference_initial_backlog_limit"
             android:numeric="integer"
             android:summary="How many lines to fetch on connect"
-            android:title="Backlog Limit" />
-
+            android:title="Initial backlog amount"
+            android:dependency="@string/preference_fetch_to_last_seen" 
+		/>
+        
         <EditTextPreference
             android:defaultValue="20"
             android:key="@string/preference_dynamic_backlog"
             android:numeric="integer"
             android:summary="How many lines to fetch on scroll"
-            android:title="Additional backlog" />
-
+            android:title="Dynamic backlog amount" />
+	</PreferenceCategory>>
+    
+    <PreferenceCategory android:title="Quassel" >
         <ListPreference
             android:defaultValue="20"
             android:dialogTitle="Choose fontsize for the bufferlist"
