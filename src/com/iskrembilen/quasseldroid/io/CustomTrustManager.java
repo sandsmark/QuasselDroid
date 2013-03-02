@@ -79,10 +79,13 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 			 * or throw a security exception to let the user know that something is wrong.
 			 */
 			String hashedCert = hash(chain[0].getEncoded());
-			SharedPreferences preferences = this.coreConnection.service.getSharedPreferences("CertificateStorage", Context.MODE_PRIVATE);
-			if (preferences.contains("certificate")) { 
-				if (!preferences.getString("certificate", "lol").equals(hashedCert)) {
-					throw new CertificateException();
+			QuasselDbHelper dbHelper = new QuasselDbHelper(coreConnection.service);
+			dbHelper.open();
+			String storedCert = dbHelper.getCertificate(coreConnection.getCoreId());
+			dbHelper.close();
+			if(storedCert != null) {
+				if (!storedCert.equals(hashedCert)) {
+					throw new CertificateException(hashedCert);
 				}
 			} else {
 				throw new NewCertificateException(hashedCert);

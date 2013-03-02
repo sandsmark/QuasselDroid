@@ -21,6 +21,7 @@
 
 package com.iskrembilen.quasseldroid.io;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
@@ -33,6 +34,7 @@ import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
 import com.iskrembilen.quasseldroid.qtcomm.*;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.MessageUtil;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -66,6 +68,7 @@ public final class CoreConnection {
 	private CoreInfo coreInfo;
 	private Map<Integer, Network> networks;
 
+	private long coreId;
 	private String address;
 	private int port;
 	private String username;
@@ -89,8 +92,9 @@ public final class CoreConnection {
 
 
 
-	public CoreConnection(String address, int port, String username,
+	public CoreConnection(long coreId, String address, int port, String username,
 			String password, Boolean ssl, CoreConnService parent) {
+		this.coreId = coreId;
 		this.address = address;
 		this.port = port;
 		this.username = username;
@@ -263,13 +267,6 @@ public final class CoreConnection {
 			onDisconnected("Lost connection");
 		}		
 	}
-	
-	/**
-	 * Requests the unread backlog for a given buffer.
-	 */
-	public void requestUnreadBacklog(int buffer) {
-		requestBacklog(buffer, buffers.get(buffer).getLastSeenMessage());
-	}
 
 	/**
 	 * Requests moar backlog for a give buffer
@@ -295,7 +292,7 @@ public final class CoreConnection {
 	 * Requests backlog between two given message IDs.
 	 */
 	private void requestBacklog(int buffer, int firstMsgId, int lastMsgId) {
-		requestBacklog(buffer, firstMsgId, lastMsgId, 10); //TODO: get the number from the shared preferences 
+		requestBacklog(buffer, firstMsgId, lastMsgId, -1); 
 	}
 
 	private void requestBacklog(int buffer, int firstMsgId, int lastMsgId, int maxAmount) {
@@ -511,12 +508,16 @@ public final class CoreConnection {
 		sendInitRequest("BufferSyncer", "");
 		//sendInitRequest("BufferViewManager", ""); this is about where this should be, but don't know what it does
 		sendInitRequest("BufferViewConfig", "0");
-
-		int backlogAmout = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(service).getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
-		initBacklogBuffers = 0;
-		for (Buffer buffer:buffers.values()) {
-			initBacklogBuffers += 1;
-			requestMoreBacklog(buffer.getInfo().id, backlogAmout);
+		SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(service);
+		
+		//Get backlog if user selected a fixed amount
+		if(!options.getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
+			int backlogAmout = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
+			initBacklogBuffers = 0;
+			for (Buffer buffer:buffers.values()) {
+				initBacklogBuffers += 1;
+				requestMoreBacklog(buffer.getInfo().id, backlogAmout);
+			}			
 		}
 
 		TimerTask sendPingAction = new TimerTask() {
@@ -767,17 +768,19 @@ public final class CoreConnection {
 				closeConnection();
 				return null;
 			} catch (IOException e) {
+				Log.w(TAG, "Got IOException while connecting");
 				if(e.getCause() instanceof NewCertificateException) {
-					service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
+					Log.w(TAG, "Got NewCertificateException while connecting");
+					service.getHandler().obtainMessage(R.id.NEW_CERTIFICATE, ((NewCertificateException)e.getCause()).hashedCert()).sendToTarget();					
 					closeConnection();
-				}else{
+				} else if(e.getCause() instanceof CertificateException) {
+					Log.w(TAG, "Got CertificateException while connecting");
+					service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, e.getCause().getMessage()).sendToTarget();
+					closeConnection();
+				} else{
 					e.printStackTrace();
 					return "IO error while connecting! " + e.getMessage();
 				}
-				return null;
-			} catch (CertificateException e) {
-				service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, "Invalid SSL certificate from core!").sendToTarget();
-				closeConnection();
 				return null;
 			} catch (GeneralSecurityException e) {
 				Log.w(TAG, "Invalid username/password combination");
@@ -988,6 +991,10 @@ public final class CoreConnection {
 								int bufferId = (Integer)lastSeen.get(i).getData();
 								int msgId = (Integer)lastSeen.get(i+1).getData();
 								if (buffers.containsKey(bufferId)){ // We only care for buffers we have open
+									if(PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
+										initBacklogBuffers += 1;
+										requestBacklog(bufferId, msgId);
+									}  
 									Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
 									msg.arg1 = bufferId;
 									msg.arg2 = msgId;
@@ -1176,16 +1183,40 @@ public final class CoreConnection {
 							List<QVariant<?>> data = (List<QVariant<?>>)(packedFunc.remove(0).getData());
 							Collections.reverse(data); // Apparently, we receive them in the wrong order
 						
-							// Send our the backlog messages to our listeners
-							for (QVariant<?> message: data) {
-								Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
-								msg.obj = message.getData();
-								msg.sendToTarget();
-							}
 							if(!initComplete) { //We are still initializing backlog for the first time
+								boolean preferenceParseColors = PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_colored_text), false);
+								for (QVariant<?> message: data) {
+									IrcMessage msg = (IrcMessage) message.getData();
+									Buffer buffer = buffers.get(msg.bufferInfo.id);
+									
+									if (buffer == null) {
+										Log.e(TAG, "A message buffer is null:" + msg);
+										continue;
+									}
+
+									if (!buffer.hasMessage(msg)) {
+										/**
+										 * Check if we are highlighted in the message, TODO: Add
+										 * support for custom highlight masks
+										 */
+										MessageUtil.checkMessageForHighlight(networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
+										if(preferenceParseColors) MessageUtil.parseStyleCodes(service, msg);
+										buffer.addBacklogMessage(msg);
+									} else {
+										Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
+									}
+								}
 								initBacklogBuffers -= 1;
 								if(initBacklogBuffers<=0) {
 									updateInitDone();
+								}
+							} else {
+								// Send our the backlog messages to our listeners
+								//TODO: bundle them up before sending to save message objects
+								for (QVariant<?> message: data) {
+									Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
+									msg.obj = message.getData();
+									msg.sendToTarget();
 								}
 							}
 							/* 
@@ -1544,6 +1575,10 @@ public final class CoreConnection {
 
 	public boolean isInitComplete() {
 		return initComplete;
+	}
+	
+	public long getCoreId() {
+		return coreId;
 	}
 }
 

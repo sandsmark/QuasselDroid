@@ -7,6 +7,7 @@
     <item name="DIALOG_CONNECTING" type="id"></item>
     <item name="DIALOG_HIDE_EVENTS" type="id"></item>
     <item name="DIALOG_JOIN_CHANNEL" type="id"></item>
+    <item name="DIALOG_CHANGED_CERTIFICATE" type="id"></item>
     <item name="BUFFER_LIST_UPDATED" type="id"></item>
     <item name="CHAT_MESSAGES_UPDATED" type="id"></item>
     <item name="NOTIFICATION" type="id"></item>

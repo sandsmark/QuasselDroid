@@ -41,22 +41,28 @@ public class QuasselDbHelper {
 	public static final String KEY_ADDRESS = "server";
 	public static final String KEY_PORT = "port";
 	public static final String KEY_SSL = "ssl";
-	public static final String KEY_CERTIFICATE = "certificates";
+	public static final String KEY_CERTIFICATE = "certificate";
 	public static final String KEY_BUFFERID = "bufferid";
 	public static final String KEY_EVENT = "event";
+	public static final String KEY_USERNAME = "username";
+	public static final String KEY_PASSWORD = "password";
+	public static final String KEY_COREIDREFERENCE = "coreid";
+	
 
 	private DatabaseHelper dbHelper;
 	private SQLiteDatabase db;
 
 	private static final String DATABASE_NAME = "data";
-	private static final String CORE_TABLE = "cores";
-	private static final String CERTIFICATE_TABLE = "certificates";
-	private static final String HIDDENEVENTS_TABLE = "hiddenevents";
+	public static final String CORE_TABLE = "cores";
+	public static final String USER_TABLE = "user";
+	public static final String CERTIFICATE_TABLE = "certificates";
+	public static final String HIDDENEVENTS_TABLE = "hiddenevents";
 	private static final String DATABASE_CREATE_TABLE1 = 
 		"create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
-	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (content text);";
+	private static final String DATABASE_CREATE_TABLE2 =  "create table certificates (certificate text, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE);";
 	private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
-	private static final int DATABASE_VERSION = 1;
+	private static final String DATABASE_CREATE_TABLE4 = "CREATE TABLE user(userid integer primary key autoincrement, username text not null, password text not null, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE)";
+	private static final int DATABASE_VERSION = 2;
 
 	private static final String TAG = "DbHelper";
 	private final Context context;
@@ -68,19 +74,24 @@ public class QuasselDbHelper {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
+			db.execSQL("PRAGMA foreign_keys=ON;");
 			db.execSQL(DATABASE_CREATE_TABLE1);
 			db.execSQL(DATABASE_CREATE_TABLE2);
 			db.execSQL(DATABASE_CREATE_TABLE3);
+			db.execSQL(DATABASE_CREATE_TABLE4);
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
 					+ newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS " + CORE_TABLE);
-			db.execSQL("DROP TABLE IF EXISTS " + CERTIFICATE_TABLE);
-			db.execSQL("DROP TABLE IF EXISTS " + HIDDENEVENTS_TABLE);
-			onCreate(db);
+			if(oldVersion <= 1) {
+				db.execSQL("DROP TABLE IF EXISTS " + CORE_TABLE);
+				db.execSQL("DROP TABLE IF EXISTS " + CERTIFICATE_TABLE);
+				db.execSQL("DROP TABLE IF EXISTS " + HIDDENEVENTS_TABLE);
+				db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
+				onCreate(db);
+			}
 		}
 	}
 
@@ -158,26 +169,29 @@ public class QuasselDbHelper {
 		db.update(CORE_TABLE, args, KEY_ID + "=" + rowId, null);
 		//TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we  get problems if names are the same
 	}
-	public void storeCertificate(byte[] certificate) {
+	public void storeCertificate(String certificateHash, long coreId) {
 		try {
 			ContentValues value = new ContentValues();
-			value.put(KEY_CERTIFICATE, certificate);
-			db.insert(CERTIFICATE_TABLE, null, value);
+			value.put(KEY_CERTIFICATE, certificateHash);
+			value.put(KEY_COREIDREFERENCE, coreId);
+			long res = db.insert(CERTIFICATE_TABLE, null, value);
+			if(res == -1) {
+				db.replace(CERTIFICATE_TABLE, null, value);
+			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public boolean hasCertificate(String certificate) {
-		Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, null, null, null, null, null);
-		boolean ret = false;
-		if (c != null) { // This is retarded, fuck Android.
-			if (Arrays.equals(c.getBlob(c.getColumnIndex(KEY_CERTIFICATE)), certificate.getBytes())) {
-				ret = true;
-			}
+	public String getCertificate(long coreId) {
+		Cursor c = db.query(CERTIFICATE_TABLE, new String[] {KEY_CERTIFICATE}, KEY_COREIDREFERENCE + "=" + coreId, null, null, null, null);
+		String cert = null;
+		if (c != null && c.getCount() > 0) {
+			c.moveToFirst();
+			cert = c.getString(c.getColumnIndex(KEY_CERTIFICATE));
 			c.close();
 		}
-		return ret;
+		return cert;
 	}
 
 	public void addHiddenEvent(IrcMessage.Type event, int bufferId) {
@@ -189,6 +203,39 @@ public class QuasselDbHelper {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void addUser(String userName, String password, long coreId) {
+		try {
+			db.delete(USER_TABLE, KEY_COREIDREFERENCE+"="+coreId, null);
+			ContentValues initialValues = new ContentValues();
+			initialValues.put(KEY_USERNAME, userName);
+			initialValues.put(KEY_PASSWORD, password);
+			initialValues.put(KEY_COREIDREFERENCE, coreId);
+			long res = db.insert(USER_TABLE, null, initialValues);
+			if(res == -1) {
+				db.replace(USER_TABLE, null, initialValues);
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Bundle getUser(long id) throws SQLException {
+		Cursor cursor = db.query(true, USER_TABLE, new String[] {KEY_USERNAME, KEY_PASSWORD}, KEY_COREIDREFERENCE + "=" + id, null, null, null, null, null);
+		Bundle b = null;
+		if (cursor != null && cursor.getCount() > 0) {
+			b = new Bundle();
+			cursor.moveToFirst();
+			b.putString(KEY_USERNAME, cursor.getString(cursor.getColumnIndex(KEY_USERNAME)));
+			b.putString(KEY_PASSWORD, cursor.getString(cursor.getColumnIndex(KEY_PASSWORD)));
+			cursor.close(); 
+		}
+		return b;
+	}
+	
+	public void deleteUser(long coreId) {
+		db.delete(USER_TABLE, KEY_COREIDREFERENCE + "=" + coreId, null);
 	}
 
 	public void cleanupEvents(Integer[] bufferids) {
@@ -225,5 +272,12 @@ public class QuasselDbHelper {
 		}
 		return events;
 	}
+	
+	/**
+	 * ONLY USED FOR TESTING!
+	 */
+	public SQLiteDatabase getDatabase() {
+		return db;
+	}
+	
 }
-

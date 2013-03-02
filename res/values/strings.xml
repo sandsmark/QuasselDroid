@@ -28,6 +28,7 @@
     <string name="preference_notify_connect">notifyconnect</string>
     <string name="preference_notification_sound_file">notificationsoundfile</string>
     <string name="preference_notification_connect_sound_file">notificationconnectsoundfile</string>
+    <string name="preference_fetch_to_last_seen">getallunseenbacklog</string>
     <string name="context_part">Part</string>
     <string name="context_join">Join</string>
     <string name="context_delete">Delete</string>

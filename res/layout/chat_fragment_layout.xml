@@ -3,24 +3,42 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <com.iskrembilen.quasseldroid.util.AlwaysScrollingTextView
-        android:id="@+id/chat_topic_view"
+    <FrameLayout
+        android:id="@+id/chat_topic_frame"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:ellipsize="marquee"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:gravity="center"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:singleLine="true" />
+        android:background="@drawable/topic_view_border" >
+
+        <TextView
+            android:id="@+id/chat_topic_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:paddingBottom="2dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="2dp"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/chat_topic_view_full"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:gravity="center"
+            android:padding="5dp"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <ListView
         android:id="@+id/chat_backlog_list_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/R.id.chat_input_frame"
-        android:layout_below="@+id/chat_topic_view"
+        android:layout_below="@+id/chat_topic_frame"
         android:divider="@null"
         android:dividerHeight="0dp"
         android:transcriptMode="normal" />

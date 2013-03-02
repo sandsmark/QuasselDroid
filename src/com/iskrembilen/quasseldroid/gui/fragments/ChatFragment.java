@@ -39,12 +39,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 
@@ -76,6 +78,7 @@ public class ChatFragment extends SherlockFragment {
 	private ListView backlogList;
 	private EditText inputField;
 	private TextView topicView;
+	private TextView topicViewFull;
 	private ImageButton autoCompleteButton;
 	private int dynamicBacklogAmout;
 	private NickCompletionHelper nickCompletionHelper;
@@ -108,6 +111,22 @@ public class ChatFragment extends SherlockFragment {
 		backlogList = (ListView) root.findViewById(R.id.chat_backlog_list_view);
 		inputField = (EditText) root.findViewById(R.id.chat_input_view);
 		topicView = (TextView) root.findViewById(R.id.chat_topic_view);
+		topicViewFull = (TextView) root.findViewById(R.id.chat_topic_view_full);
+		OnClickListener topicListener = new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(topicView.isShown()) {
+					topicView.setVisibility(View.GONE);
+					topicViewFull.setVisibility(View.VISIBLE);
+				} else {
+					topicViewFull.setVisibility(View.GONE);
+					topicView.setVisibility(View.VISIBLE);
+				}
+			}
+		};
+		topicView.setOnClickListener(topicListener);
+		topicViewFull.setOnClickListener(topicListener);
 		autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
 
 		backlogList.setAdapter(adapter);
@@ -279,17 +298,20 @@ public class ChatFragment extends SherlockFragment {
 		public void setBuffer(Buffer buffer, NetworkCollection networks) {
 			this.buffer = buffer;
 			buffer.addObserver(this);
+			String topic = "";
 			if ( buffer.getInfo().type == BufferInfo.Type.QueryBuffer ){
-				topicView.setText(buffer.getInfo().name);
+				topic = buffer.getInfo().name;
 			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
-				topicView.setText(buffer.getInfo().name + " ("
+				topic = buffer.getInfo().name + " ("
 						+ networks.getNetworkById(buffer.getInfo().networkId).getServer() + ") | "
 						+ getResources().getString(R.string.users) + ": "
 						+ networks.getNetworkById(buffer.getInfo().networkId).getCountUsers() + " | "
-						+ Helper.formatLatency(networks.getNetworkById(buffer.getInfo().networkId).getLatency(), getResources()));
+						+ Helper.formatLatency(networks.getNetworkById(buffer.getInfo().networkId).getLatency(), getResources());
 			} else{
-				topicView.setText(buffer.getInfo().name + ": " + buffer.getTopic());
+				 topic = buffer.getInfo().name + ": " + buffer.getTopic();
 			}
+			topicView.setText(topic);
+			topicViewFull.setText(topic);
 			notifyDataSetChanged();
 			backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
 		}
