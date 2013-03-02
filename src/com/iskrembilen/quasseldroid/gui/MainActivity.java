@@ -391,7 +391,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			adapter.chatShown = true;
 			openedBuffer = id;
 			setTitle(NetworkCollection.getInstance().getBufferById(id).getInfo().name);
-			pager.setCurrentItem(FragmentAdapter.CHAT_POS, true);
+			pager.setCurrentItem(FragmentAdapter.CHAT_POS, false); //using false here solved a problem with lables not showing up
 		}
 	}
 	
