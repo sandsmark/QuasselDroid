@@ -172,10 +172,6 @@ public class MainActivity extends SherlockFragmentActivity {
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
-		
-		if (savedInstanceState != null) {
-			setBuffer(savedInstanceState.getInt("bufferid", -1));
-		}
 	}
 
 	private void setActionBarSubtitle(String subtitle) {
@@ -386,13 +382,9 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
-		setBuffer(event.bufferId);
-	}
-	
-	private void setBuffer(int id) {
-		if(id != -1) {
+		if(event.bufferId != -1) {
 			adapter.chatShown = true;
-			openedBuffer = id;
+			openedBuffer = event.bufferId;
 			pager.setCurrentItem(FragmentAdapter.CHAT_POS, false); //using false here solved a problem with lables not showing up
 		}
 	}
@@ -400,10 +392,5 @@ public class MainActivity extends SherlockFragmentActivity {
 	 @Produce
 	 public BufferOpenedEvent produceBufferOpenedEvent() {
 		 return new BufferOpenedEvent(openedBuffer);
-	 }
-	 
-	 @Override
-	 protected void onSaveInstanceState (Bundle outState) {
-		 outState.putInt("bufferid", openedBuffer);
 	 }
 }
