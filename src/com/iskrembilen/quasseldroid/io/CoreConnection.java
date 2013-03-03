@@ -84,6 +84,7 @@ public final class CoreConnection {
 	private int networkInitsLeft;
 	private boolean networkInitComplete;
 	private LinkedList<List<QVariant<?>>> packageQueue;
+	private String errorMessage;
 	
 	//Used to create the ID of new channels we join
 	private int maxBufferId = 0;
@@ -556,6 +557,7 @@ public final class CoreConnection {
 	 */
 	public synchronized void onDisconnected(String informationMessage) {
 		Log.d(TAG, "Disconnected so closing connection");
+		errorMessage = informationMessage;
 		closeConnection();
 	}
 
@@ -715,9 +717,8 @@ public final class CoreConnection {
 
 
 		public void run() {
-			String errorMessage = null;
 			try {
-				errorMessage = doRun();
+				String errorMessage = doRun();
 				if(errorMessage != null) onDisconnected(errorMessage);
 			} catch (EmptyQVariantException e) {
 				Log.e(TAG, "Protocol error", e);
@@ -749,12 +750,13 @@ public final class CoreConnection {
 				Log.w(TAG, "IOException while closing socket", e);
 			}
 			
-			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, null).sendToTarget();
+			service.getHandler().obtainMessage(R.id.LOST_CONNECTION, errorMessage).sendToTarget();
 			service = null;
 		}
 
 		public String doRun() throws EmptyQVariantException {
 			this.running = true;
+			errorMessage = null;
 			packageQueue = new LinkedList<List<QVariant<?>>>();
 
 			try {
