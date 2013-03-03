@@ -163,7 +163,7 @@ public class MainActivity extends SherlockFragmentActivity {
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 							setActionBarSubtitle("");
 						} else {
-							setTitle(getResources().getString(R.string.app_name));
+							getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
 						}
 					}
@@ -314,6 +314,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		public void onPageSelected(int position) {
 			if(position == BUFFERS_POS) {
 				BusProvider.getInstance().post(new UpdateReadBufferEvent());
+				getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+			} else {
+				getSupportActionBar().setTitle(NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name);
 			}
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(pager.getWindowToken(), 0);
@@ -390,7 +393,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(id != -1) {
 			adapter.chatShown = true;
 			openedBuffer = id;
-			setTitle(NetworkCollection.getInstance().getBufferById(id).getInfo().name);
 			pager.setCurrentItem(FragmentAdapter.CHAT_POS, false); //using false here solved a problem with lables not showing up
 		}
 	}
