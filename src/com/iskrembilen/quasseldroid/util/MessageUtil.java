@@ -31,7 +31,7 @@ public class MessageUtil {
 	 *            the message to check
 	 */
 	public static void checkMessageForHighlight(String nick, Buffer buffer, IrcMessage message) {
-		if (message.type == IrcMessage.Type.Plain) {
+		if (message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Action) {
 			if(nick == null) {
 				Log.e(TAG, "Nick is null in check message for highlight");
 				return;
