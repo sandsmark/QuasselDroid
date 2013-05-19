@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="C:\Users\kenborge\AndroidStudioProjects\QuasselDroid\ActionBarSherlock\assets" />
+    </dataSet>
+    <dataSet config="release" >
+        <source path="C:\Users\kenborge\AndroidStudioProjects\QuasselDroid\ActionBarSherlock\src\release\assets" />
+    </dataSet>
+
+</merger>

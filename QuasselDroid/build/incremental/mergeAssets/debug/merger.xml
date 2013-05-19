@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="ActionBarSherlock.aar" >
+        <source path="C:\Users\kenborge\AndroidStudioProjects\QuasselDroid\QuasselDroid\build\exploded-bundles\ActionBarSherlock.aar\assets" />
+    </dataSet>
+    <dataSet config="main" >
+        <source path="C:\Users\kenborge\AndroidStudioProjects\QuasselDroid\QuasselDroid\src\main\assets" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="C:\Users\kenborge\AndroidStudioProjects\QuasselDroid\QuasselDroid\src\debug\assets" />
+    </dataSet>
+
+</merger>
