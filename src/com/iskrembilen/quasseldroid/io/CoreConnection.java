@@ -41,6 +41,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -49,12 +50,58 @@ import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Message;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.util.Pair;
+
+import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferCollection;
+import com.iskrembilen.quasseldroid.BufferInfo;
+import com.iskrembilen.quasseldroid.CoreInfo;
+import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
+import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
+import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
+import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
+import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
+import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
+import com.iskrembilen.quasseldroid.qtcomm.QVariant;
+import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
+import com.iskrembilen.quasseldroid.service.CoreConnService;
 
 public final class CoreConnection {
 
@@ -374,7 +421,7 @@ public final class CoreConnection {
 		initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
 		initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariantType.Bool));
 		initial.put("ClientVersion", new QVariant<String>("QuasselDroid", QVariantType.String));
-		initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
+		initial.put("UseCompression", new QVariant<Boolean>(true, QVariantType.Bool));
 		initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
 		initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariantType.Int));
 
@@ -603,6 +650,7 @@ public final class CoreConnection {
 			this.data = data;
 		}
 
+		private Deflater deflater = new Deflater();
 		@Override
 		public void run() {
 			try {
@@ -670,10 +718,28 @@ public final class CoreConnection {
 		return ret;
 	}
 	
+	
+	private Inflater inflater = new Inflater();
 	private QVariant<?> readQVariant() throws IOException, EmptyQVariantException {
-		inStream.readUInt(32); // Length, duplicated for your convenience
+		int blocksize = (int)inStream.readUInt(32); // Length, duplicated for your convenience
 		
-		QVariant<?> v = (QVariant<?>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
+		// Read a QByteArray
+		int bytearraySize = (int)inStream.readUInt(32);
+		byte bytearray [] = new byte[bytearraySize];
+		inStream.read(bytearray);
+		
+		// Inflate the bytearray (TODO: reuse the normal QByteArray unserializer
+		inflater.setInput(bytearray);
+		byte block[] = new byte[blocksize];
+		try {
+			inflater.inflate(block);
+		} catch (DataFormatException e) {
+			e.printStackTrace();
+			throw new IOException("Invalid compressed data");
+		}
+		
+		QDataInputStream bytestream = new QDataInputStream(new ByteArrayInputStream(block));
+		QVariant<?> v = (QVariant<?>)QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, bytestream);
 		return v;
 	}
 
