@@ -133,6 +133,10 @@ public class MainActivity extends SherlockFragmentActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.main_layout);
 
+        if(savedInstanceState != null) {
+            openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
+        }
+
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
@@ -193,8 +197,14 @@ public class MainActivity extends SherlockFragmentActivity {
 		preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 		super.onDestroy();
 	}
-	
-	@Override
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
 	public void onBackPressed() {
 		long currentTime = System.currentTimeMillis();
 		if(currentTime - lastBackPressed < BACK_THRESHOLD) super.onBackPressed(); 
@@ -305,7 +315,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	public void onInitProgressed(InitProgressEvent event) {
 		FragmentManager manager = getSupportFragmentManager();
         Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
-        Log.d(TAG, "InitProgress");
 		if(event.done) {
 			if(currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
 				FragmentTransaction trans = manager.beginTransaction();
