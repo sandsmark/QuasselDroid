@@ -3,7 +3,6 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
-import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.squareup.otto.Subscribe;
 

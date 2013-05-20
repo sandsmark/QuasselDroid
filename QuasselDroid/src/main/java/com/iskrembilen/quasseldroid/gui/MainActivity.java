@@ -22,89 +22,37 @@
  */
 
 package com.iskrembilen.quasseldroid.gui;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ExpandableListActivity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.PagerTabStrip;
+import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.*;
-import android.view.ContextMenu.ContextMenuInfo;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
-import android.widget.ExpandableListView.OnChildClickListener;
-import android.widget.ExpandableListView.OnGroupCollapseListener;
-import android.widget.ExpandableListView.OnGroupExpandListener;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
+import android.content.res.Configuration;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.BufferUtils;
-import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.*;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
-import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
-import com.iskrembilen.quasseldroid.events.InitProgressEvent;
-import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
-import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
-import com.iskrembilen.quasseldroid.gui.MainActivity.FragmentAdapter;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-
-import java.util.GregorianCalendar;
-import java.util.Observable;
-import java.util.Observer;
 
 public class MainActivity extends SherlockFragmentActivity {
 
@@ -118,11 +66,17 @@ public class MainActivity extends SherlockFragmentActivity {
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
     private DrawerLayout drawer;
+    private ActionBarDrawerToggle drawerToggle;
 
 	private int currentTheme;
 	private Boolean showLag = false;
 
+    private Fragment chatFragment;
+    private Fragment bufferFragment;
+    private Fragment nickFragment;
+
 	private int openedBuffer = -1;
+    private boolean isDrawerOpen = false;
 
 	private long lastBackPressed = 0;
 
@@ -133,6 +87,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.main_layout);
 
+        Log.d(TAG, "Before saved");
         if(savedInstanceState != null) {
             openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
         }
@@ -141,6 +96,45 @@ public class MainActivity extends SherlockFragmentActivity {
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
         drawer = (DrawerLayout)findViewById(R.id.drawer);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,                   /* host Activity */
+                drawer,                 /* DrawerLayout object */
+                R.drawable.ic_drawer,   /* nav drawer icon to replace 'Up' caret */
+                R.string.drawer_open,   /* "open drawer" description */
+                R.string.drawer_close   /* "close drawer" description */
+        ) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View drawerView) {
+                getSupportFragmentManager().findFragmentById(drawerView.getId()).setMenuVisibility(false);
+                chatFragment.setMenuVisibility(true);
+
+                if(openedBuffer != -1) {
+                    getSupportActionBar().setTitle(NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name);
+                } else {
+                    getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+                    invalidateOptionsMenu();
+                }
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                if(drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
+                    BusProvider.getInstance().post(new UpdateReadBufferEvent());
+                }
+                getSupportFragmentManager().findFragmentById(drawerView.getId()).setMenuVisibility(true);
+                chatFragment.setMenuVisibility(false);
+
+                getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+                invalidateOptionsMenu();
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        drawer.setDrawerListener(drawerToggle);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
@@ -167,6 +161,14 @@ public class MainActivity extends SherlockFragmentActivity {
 		getSupportActionBar().setSubtitle(subtitle);
 	}
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
+        isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
+    }
+
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -183,11 +185,14 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(!Quasseldroid.connected) {
 			returnToLogin();
 		}
+        if(isDrawerOpen) drawer.openDrawer(Gravity.LEFT);
+        else drawer.closeDrawer(Gravity.LEFT);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+        isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
 		BusProvider.getInstance().unregister(this);
 
 	}
@@ -200,8 +205,15 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "Saving instance state");
         outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -225,91 +237,32 @@ public class MainActivity extends SherlockFragmentActivity {
 		getSupportMenuInflater().inflate(R.menu.base_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_preferences:
-			Intent i = new Intent(MainActivity.this, PreferenceView.class);
-			startActivity(i);
-			return true;
-		case R.id.menu_disconnect:
-			BusProvider.getInstance().post(new DisconnectCoreEvent());
-			startActivity(new Intent(this, LoginActivity.class)); 
-			finish();
-			return true;
-		}
+            case android.R.id.home:
+                if (drawer.isDrawerOpen(Gravity.LEFT)) {
+                    drawer.closeDrawer(Gravity.LEFT);
+                } else {
+                    drawer.openDrawer(Gravity.LEFT);
+                }
+                return true;
+            case R.id.menu_preferences:
+                Intent i = new Intent(MainActivity.this, PreferenceView.class);
+                startActivity(i);
+                return true;
+            case R.id.menu_disconnect:
+                BusProvider.getInstance().post(new DisconnectCoreEvent());
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+                return true;
+        }
 		return super.onOptionsItemSelected(item);
 	}
 
-	public class FragmentAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
-        //public static final int BUFFERS_POS = 0;
-		public static final int CHAT_POS = 0;
-		public static final int NICKS_POS = 1;
-		public static final int PAGE_COUNT = 2;
-		public boolean chatShown = false;
-
-		public FragmentAdapter(FragmentManager fm) {
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position) {
-			switch (position) {
-			//case BUFFERS_POS:
-			//	return BufferFragment.newInstance();
-			case CHAT_POS:
-				return ChatFragment.newInstance();
-			case NICKS_POS:
-				return NickListFragment.newInstance();
-			default:
-				return null;
-			}
-		}
-
-		@Override
-		public int getCount() {
-			if (chatShown)
-				return PAGE_COUNT;
-			else
-				return 1;
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position) {
-			switch (position) {
-			//case BUFFERS_POS:
-			//	return "Channels";
-			case CHAT_POS:
-				return "Chat";
-			case NICKS_POS:
-				return "Nicks";
-			default:
-				return super.getPageTitle(position);
-			}
-		}
-
-		@Override
-		public void onPageScrollStateChanged(int state) {
-			// TODO Auto-generated method stub	
-		}
-
-		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-			// TODO Auto-generated method stub	
-		}
-
-		@Override
-		public void onPageSelected(int position) {
-			//if(position == BUFFERS_POS) {
-			//	BusProvider.getInstance().post(new UpdateReadBufferEvent());
-			//	getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-			//} else {
-				getSupportActionBar().setTitle(NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name);
-			//}
 			//InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 			//	imm.hideSoftInputFromWindow(pager.getWindowToken(), 0);
-		}
-	}
 
 	@Subscribe
 	public void onInitProgressed(InitProgressEvent event) {
@@ -318,16 +271,17 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(event.done) {
 			if(currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
 				FragmentTransaction trans = manager.beginTransaction();
-                Fragment chatFragment = ChatFragment.newInstance();
+                chatFragment = ChatFragment.newInstance();
                 trans.replace(R.id.main_content_container, chatFragment);
 
                 //Initialize the buffer drawer
-                BufferFragment bufferFragment =  BufferFragment.newInstance();
+                bufferFragment =  BufferFragment.newInstance();
                 trans.add(R.id.left_drawer, bufferFragment);
                 drawer.openDrawer(Gravity.LEFT);
+                isDrawerOpen = true;
 
                 //Initialize the nick drawer
-                NickListFragment nickFragment =  NickListFragment.newInstance();
+                nickFragment =  NickListFragment.newInstance();
                 trans.add(R.id.right_drawer, nickFragment);
 
                 trans.commit();

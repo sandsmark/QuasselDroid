@@ -55,4 +55,8 @@
     <string name="not_available">Not available now</string>
     <string name="preference_wake_lock">wakelock</string>
     <string name="pressed_back_toast">Press back again to close</string>
+
+    <string name="drawer_open">Open buffer list</string>
+    <string name="drawer_close">Close buffer list</string>
+
 </resources>
