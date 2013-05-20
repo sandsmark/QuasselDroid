@@ -26,4 +26,10 @@ android {
         minSdkVersion 7
         targetSdkVersion 15
     }
+
+    buildTypes {
+        debug {
+            packageNameSuffix ".debug"
+        }
+    }
 }

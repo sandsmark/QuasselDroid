@@ -47,18 +47,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ActionMode;
-import android.view.ContextMenu;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -120,16 +117,14 @@ public class MainActivity extends SherlockFragmentActivity {
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
+    private DrawerLayout drawer;
+
 	private int currentTheme;
 	private Boolean showLag = false;
-
-	private ViewPager pager;
 
 	private int openedBuffer = -1;
 
 	private long lastBackPressed = 0;
-	
-	private FragmentAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -138,20 +133,10 @@ public class MainActivity extends SherlockFragmentActivity {
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.main_layout);
 
-		adapter = new FragmentAdapter(getSupportFragmentManager());
-		pager = (ViewPager) findViewById(R.id.pager);
-		pager.setOffscreenPageLimit(2);
-
-		PagerTabStrip pagerIndicator = (PagerTabStrip) findViewById(R.id.pagerIndicator);
-		pagerIndicator.setDrawFullUnderline(false);
-		pagerIndicator.setTextColor(getResources().getColor(R.color.pager_indicator_text_color));
-		pagerIndicator.setTabIndicatorColor(getResources().getColor(R.color.pager_indicator_color));
-
-		pager.setOnPageChangeListener(adapter);
-		pager.setAdapter(adapter);
-
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+
+        drawer = (DrawerLayout)findViewById(R.id.drawer);
 
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
@@ -221,11 +206,8 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	@Override
 	public boolean onSearchRequested() {
-		if(pager.getCurrentItem() == 1) {
-			BusProvider.getInstance().post(new CompleteNickEvent());
-			return false; //Activity ate the request
-		}
-		return true;
+		BusProvider.getInstance().post(new CompleteNickEvent());
+		return false; //Activity ate the request
 	}
 
 	@Override
@@ -250,10 +232,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
 	public class FragmentAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
-		public static final int BUFFERS_POS = 0;
-		public static final int CHAT_POS = 1;
-		public static final int NICKS_POS = 2; 
-		public static final int PAGE_COUNT = 3;
+        //public static final int BUFFERS_POS = 0;
+		public static final int CHAT_POS = 0;
+		public static final int NICKS_POS = 1;
+		public static final int PAGE_COUNT = 2;
 		public boolean chatShown = false;
 
 		public FragmentAdapter(FragmentManager fm) {
@@ -263,8 +245,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		@Override
 		public Fragment getItem(int position) {
 			switch (position) {
-			case BUFFERS_POS:
-				return BufferFragment.newInstance();
+			//case BUFFERS_POS:
+			//	return BufferFragment.newInstance();
 			case CHAT_POS:
 				return ChatFragment.newInstance();
 			case NICKS_POS:
@@ -285,8 +267,8 @@ public class MainActivity extends SherlockFragmentActivity {
 		@Override
 		public CharSequence getPageTitle(int position) {
 			switch (position) {
-			case BUFFERS_POS:
-				return "Channels";
+			//case BUFFERS_POS:
+			//	return "Channels";
 			case CHAT_POS:
 				return "Chat";
 			case NICKS_POS:
@@ -308,39 +290,44 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		@Override
 		public void onPageSelected(int position) {
-			if(position == BUFFERS_POS) {
-				BusProvider.getInstance().post(new UpdateReadBufferEvent());
-				getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-			} else {
+			//if(position == BUFFERS_POS) {
+			//	BusProvider.getInstance().post(new UpdateReadBufferEvent());
+			//	getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+			//} else {
 				getSupportActionBar().setTitle(NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name);
-			}
-			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(pager.getWindowToken(), 0);
+			//}
+			//InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			//	imm.hideSoftInputFromWindow(pager.getWindowToken(), 0);
 		}
 	}
 
 	@Subscribe
 	public void onInitProgressed(InitProgressEvent event) {
 		FragmentManager manager = getSupportFragmentManager();
+        Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
+        Log.d(TAG, "InitProgress");
 		if(event.done) {
-			if(manager.findFragmentById(R.id.connecting_fragment_container) != null) {
+			if(currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
 				FragmentTransaction trans = manager.beginTransaction();
-				trans.remove(manager.findFragmentById(R.id.connecting_fragment_container));
-				trans.commit();
-				pager.setVisibility(View.VISIBLE);
-				findViewById(R.id.connecting_fragment_container).setVisibility(View.GONE);
+                Fragment chatFragment = ChatFragment.newInstance();
+                trans.replace(R.id.main_content_container, chatFragment);
 
-				//Doing this seems to fix a bug where menu items doesn't show up in the actionbar
-				pager.setCurrentItem(FragmentAdapter.BUFFERS_POS);
+                //Initialize the buffer drawer
+                BufferFragment bufferFragment =  BufferFragment.newInstance();
+                trans.add(R.id.left_drawer, bufferFragment);
+                drawer.openDrawer(Gravity.LEFT);
+
+                //Initialize the nick drawer
+                NickListFragment nickFragment =  NickListFragment.newInstance();
+                trans.add(R.id.right_drawer, nickFragment);
+
+                trans.commit();
 			}
 		} else {
-			if(manager.findFragmentById(R.id.connecting_fragment_container) == null) {
-				findViewById(R.id.connecting_fragment_container).setVisibility(View.VISIBLE);
-				pager.setVisibility(View.GONE);
-				FragmentManager fragmentManager = getSupportFragmentManager();
-				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			if(currentFragment == null) {
+				FragmentTransaction fragmentTransaction = manager.beginTransaction();
 				ConnectingFragment fragment = ConnectingFragment.newInstance();
-				fragmentTransaction.add(R.id.connecting_fragment_container, fragment, "connect");
+				fragmentTransaction.add(R.id.main_content_container, fragment, "connect");
 				fragmentTransaction.commit();
 			}
 
@@ -383,9 +370,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
 		if(event.bufferId != -1) {
-			adapter.chatShown = true;
 			openedBuffer = event.bufferId;
-			pager.setCurrentItem(FragmentAdapter.CHAT_POS, false); //using false here solved a problem with lables not showing up
+            drawer.closeDrawers();
 		}
 	}
 	

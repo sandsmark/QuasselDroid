@@ -3,25 +3,33 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
-    <LinearLayout
-        android:id="@+id/connecting_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
-    </LinearLayout>
+    <android.support.v4.widget.DrawerLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <android.support.v4.view.PagerTabStrip
-            android:id="@+id/pagerIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:background="@color/pager_indicator_color" />
+        <FrameLayout
+                android:id="@+id/main_content_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+        </FrameLayout>
 
-    </android.support.v4.view.ViewPager>
+        <FrameLayout
+                android:id="@+id/left_drawer"
+                android:layout_width="320dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="left"
+                android:background="?android:attr/windowBackground" >
+        </FrameLayout>
+
+        <FrameLayout
+                android:id="@+id/right_drawer"
+                android:layout_width="320dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:background="?android:attr/windowBackground" >
+        </FrameLayout>
+    </android.support.v4.widget.DrawerLayout>
 
 </RelativeLayout>
