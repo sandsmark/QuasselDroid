@@ -61,6 +61,8 @@ public class MainActivity extends SherlockFragmentActivity {
 	public static final String BUFFER_ID_EXTRA = "bufferid";
 	public static final String BUFFER_NAME_EXTRA = "buffername";
 	private static final long BACK_THRESHOLD = 4000;
+    private static final String DRAWER_BUFFER_OPEN = "bufferdrawer";
+    private static final String DRAWER_NICKS_OPEN = "nicksdrawer";
 
 	SharedPreferences preferences;
 	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -82,20 +84,35 @@ public class MainActivity extends SherlockFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "MainActivity created");
 		setTheme(ThemeUtil.theme);
 		super.onCreate(savedInstanceState);
 		currentTheme = ThemeUtil.theme;
 		setContentView(R.layout.main_layout);
 
-        Log.d(TAG, "Before saved");
+        drawer = (DrawerLayout)findViewById(R.id.drawer);
+
         if(savedInstanceState != null) {
+            Log.d(TAG, "MainActivity has savedInstanceState");
             openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
+            isDrawerOpen = savedInstanceState.getBoolean(DRAWER_BUFFER_OPEN);
+            if(savedInstanceState.getBoolean(DRAWER_NICKS_OPEN)) drawer.openDrawer(Gravity.RIGHT);
+            FragmentManager manager = getSupportFragmentManager();
+            bufferFragment = manager.findFragmentById(R.id.left_drawer);
+            nickFragment = manager.findFragmentById(R.id.right_drawer);
+            Fragment fragment = manager.findFragmentById(R.id.main_content_container);
+            if(fragment.getClass() == BufferFragment.class) {
+                bufferFragment = fragment;
+            }
+        } else {
+            chatFragment = ChatFragment.newInstance();
+            nickFragment =  NickListFragment.newInstance();
+            bufferFragment =  BufferFragment.newInstance();
         }
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
-        drawer = (DrawerLayout)findViewById(R.id.drawer);
         drawerToggle = new ActionBarDrawerToggle(
                 this,                   /* host Activity */
                 drawer,                 /* DrawerLayout object */
@@ -106,8 +123,9 @@ public class MainActivity extends SherlockFragmentActivity {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View drawerView) {
-                getSupportFragmentManager().findFragmentById(drawerView.getId()).setMenuVisibility(false);
-                chatFragment.setMenuVisibility(true);
+                Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
+                if(drawerFragment != null) drawerFragment.setMenuVisibility(false);
+                if(chatFragment != null) chatFragment.setMenuVisibility(true);
 
                 if(openedBuffer != -1) {
                     getSupportActionBar().setTitle(NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name);
@@ -122,8 +140,9 @@ public class MainActivity extends SherlockFragmentActivity {
                 if(drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
                     BusProvider.getInstance().post(new UpdateReadBufferEvent());
                 }
-                getSupportFragmentManager().findFragmentById(drawerView.getId()).setMenuVisibility(true);
-                chatFragment.setMenuVisibility(false);
+                Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
+                if(drawerFragment != null) drawerFragment.setMenuVisibility(true);
+                if(chatFragment != null) chatFragment.setMenuVisibility(false);
 
                 getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
                 invalidateOptionsMenu();
@@ -185,7 +204,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(!Quasseldroid.connected) {
 			returnToLogin();
 		}
-        if(isDrawerOpen) drawer.openDrawer(Gravity.LEFT);
+        if(isDrawerOpen && bufferFragment != null) drawer.openDrawer(Gravity.LEFT);
         else drawer.closeDrawer(Gravity.LEFT);
 	}
 
@@ -207,11 +226,14 @@ public class MainActivity extends SherlockFragmentActivity {
     protected void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "Saving instance state");
         outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
+        outState.putBoolean(DRAWER_BUFFER_OPEN, drawer.isDrawerOpen(Gravity.LEFT));
+        outState.putBoolean(DRAWER_NICKS_OPEN, drawer.isDrawerOpen(Gravity.RIGHT));
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        Log.d(TAG, "Configuration changed");
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
     }
@@ -271,19 +293,15 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(event.done) {
 			if(currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
 				FragmentTransaction trans = manager.beginTransaction();
-                chatFragment = ChatFragment.newInstance();
                 trans.replace(R.id.main_content_container, chatFragment);
 
                 //Initialize the buffer drawer
-                bufferFragment =  BufferFragment.newInstance();
                 trans.add(R.id.left_drawer, bufferFragment);
                 drawer.openDrawer(Gravity.LEFT);
                 isDrawerOpen = true;
 
                 //Initialize the nick drawer
-                nickFragment =  NickListFragment.newInstance();
                 trans.add(R.id.right_drawer, nickFragment);
-
                 trans.commit();
 			}
 		} else {
