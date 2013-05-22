@@ -33,10 +33,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import android.widget.Toast;
 import android.content.res.Configuration;
+import android.content.Context;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.iskrembilen.quasseldroid.NetworkCollection;
@@ -144,6 +146,8 @@ public class MainActivity extends SherlockFragmentActivity {
                 if(drawerFragment != null) drawerFragment.setMenuVisibility(true);
                 if(chatFragment != null) chatFragment.setMenuVisibility(false);
 
+                hideKeyboard(bufferFragment.getView());
+
                 getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
                 invalidateOptionsMenu();
             }
@@ -204,8 +208,11 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(!Quasseldroid.connected) {
 			returnToLogin();
 		}
-        if(isDrawerOpen && bufferFragment != null) drawer.openDrawer(Gravity.LEFT);
+        if(isDrawerOpen && bufferFragment != null) {
+            drawer.openDrawer(Gravity.LEFT);
+        }
         else drawer.closeDrawer(Gravity.LEFT);
+        hideKeyboard(drawer);
 	}
 
 	@Override
@@ -283,8 +290,11 @@ public class MainActivity extends SherlockFragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-			//InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-			//	imm.hideSoftInputFromWindow(pager.getWindowToken(), 0);
+    private void hideKeyboard(View view) {
+        view.requestFocus();
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+    }
 
 	@Subscribe
 	public void onInitProgressed(InitProgressEvent event) {
