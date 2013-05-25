@@ -213,14 +213,23 @@ public class ChatFragment extends SherlockFragment {
 		autoCompleteButton.setEnabled(false);
 		inputField.setEnabled(false);
 		BusProvider.getInstance().register(this);
+        setUserVisibleHint(true);
 	}
 
-	@Override
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "pausing fragment");
+    }
+
+    @Override
 	public void onStop() {
+        Log.d(TAG, "Stopping fragment");
 		super.onStop();
-		if (Quasseldroid.connected) updateRead();
+		if (Quasseldroid.connected && getUserVisibleHint()) updateRead();
 		adapter.clearBuffer();
 		BusProvider.getInstance().unregister(this);
+        setUserVisibleHint(false);
 	}
 
 	@Override
@@ -242,7 +251,14 @@ public class ChatFragment extends SherlockFragment {
 		newFragment.show(ft, "dialog");
 	}
 
-	private void updateRead() {
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        Log.d(TAG, "ChatFragment visible hint: " + isVisibleToUser);
+    }
+
+    private void updateRead() {
+        Log.d(TAG, "Updating buffer read, chat is visible: " + getUserVisibleHint());
 		if(adapter.buffer != null) {
 			adapter.buffer.setDisplayed(false);
 
@@ -255,16 +271,22 @@ public class ChatFragment extends SherlockFragment {
 			if (adapter.buffer.getUnfilteredSize()!= 0){
 				BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
 				BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId, MessageAction.LAST_SEEN));
-				BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize()-1).messageId, MessageAction.MARKER_LINE));
 			}
 
 		}
 	}
 
+    private void updateMarkerLine() {
+        BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getLastSeenMessage(), MessageAction.MARKER_LINE));
+    }
+
 	public void setBuffer(int bufferId) {
+        Log.d(TAG, "Setting buffer and chat is visible: " + getUserVisibleHint());
 		this.bufferId = bufferId;
 		if(adapter != null && networks != null) {
-			updateRead();
+            if(adapter.buffer != null && bufferId != adapter.buffer.getInfo().id) {
+                updateMarkerLine();
+            }
 			adapter.clearBuffer();
 			Buffer buffer = networks.getBufferById(bufferId);
 			adapter.setBuffer(buffer, networks);
@@ -469,7 +491,10 @@ public class ChatFragment extends SherlockFragment {
 			}
 			switch ((Integer)data) {
 			case R.id.BUFFERUPDATE_NEWMESSAGE:
-				notifyDataSetChanged();				
+				notifyDataSetChanged();
+                if(getUserVisibleHint()) {
+                    updateRead();
+                }
 				break;
 			case R.id.BUFFERUPDATE_BACKLOG:
 				int topId = getListTopMessageId();
@@ -574,24 +599,29 @@ public class ChatFragment extends SherlockFragment {
 
 	@Subscribe
 	public void onNetworksAvailable(NetworksAvailableEvent event) {
+        Log.d(TAG, "onNetworksAvailable event");
 		if(event.networks != null) {
 			this.networks = event.networks;
 			if(bufferId != -1) {
 				setBuffer(bufferId);
 			}
 		}
+        Log.d(TAG, "onNetworksAvailable done");
 	}
 
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
+        Log.d(TAG, "onBufferOpened event");
 		if(event.bufferId != -1) {
 			this.bufferId = event.bufferId;
 			setBuffer(bufferId);
 		}
+        Log.d(TAG, "onBufferOpened done");
 	}
 
 	@Subscribe
 	public void onUpdateBufferRead(UpdateReadBufferEvent event) {
+        Log.d(TAG, "onUpdateBufferRead event");
 		updateRead();
 	}
 	

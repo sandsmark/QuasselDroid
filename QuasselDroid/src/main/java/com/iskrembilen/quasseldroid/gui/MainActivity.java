@@ -103,8 +103,8 @@ public class MainActivity extends SherlockFragmentActivity {
             bufferFragment = manager.findFragmentById(R.id.left_drawer);
             nickFragment = manager.findFragmentById(R.id.right_drawer);
             Fragment fragment = manager.findFragmentById(R.id.main_content_container);
-            if(fragment.getClass() == BufferFragment.class) {
-                bufferFragment = fragment;
+            if(fragment.getClass() == ChatFragment.class) {
+                chatFragment = fragment;
             }
         } else {
             chatFragment = ChatFragment.newInstance();
@@ -125,6 +125,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View drawerView) {
+                Log.d(TAG, "drawer closed");
                 Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
                 if(drawerFragment != null) drawerFragment.setMenuVisibility(false);
                 if(chatFragment != null) chatFragment.setMenuVisibility(true);
@@ -135,12 +136,16 @@ public class MainActivity extends SherlockFragmentActivity {
                     getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
                     invalidateOptionsMenu();
                 }
+                if(drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
+                    chatFragment.setUserVisibleHint(true);
+                    BusProvider.getInstance().post(new UpdateReadBufferEvent());
+                }
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 if(drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
-                    BusProvider.getInstance().post(new UpdateReadBufferEvent());
+                    if(chatFragment != null) chatFragment.setUserVisibleHint(false);
                 }
                 Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
                 if(drawerFragment != null) drawerFragment.setMenuVisibility(true);
@@ -210,6 +215,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		}
         if(isDrawerOpen && bufferFragment != null) {
             drawer.openDrawer(Gravity.LEFT);
+            if(chatFragment != null) chatFragment.setUserVisibleHint(false);
         }
         else drawer.closeDrawer(Gravity.LEFT);
         hideKeyboard(drawer);
@@ -321,7 +327,6 @@ public class MainActivity extends SherlockFragmentActivity {
 				fragmentTransaction.add(R.id.main_content_container, fragment, "connect");
 				fragmentTransaction.commit();
 			}
-
 		}
 	}
 
