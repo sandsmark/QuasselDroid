@@ -68,33 +68,12 @@ public class MessageUtil {
 		int start, end, endSearchOffset, startIndicatorLength, style, fg, bg;
 		while (true) {
 			content = newString.toString();
+			start = -1;
 			end = -1;
 			startIndicatorLength = 1;
 			style = 0;
 			fg = -1;
 			bg = -1;
-
-			start = content.indexOf(boldIndicator);
-			if (start != -1) {
-				end = content.indexOf(boldIndicator, start+1);
-				style = Typeface.BOLD;
-			}
-
-			if (start == -1) {
-				start = content.indexOf(italicIndicator);
-				if (start != -1) {
-					end = content.indexOf(italicIndicator, start+1);
-					style = Typeface.ITALIC;
-				}
-			}
-
-			if (start == -1) {
-				start = content.indexOf(underlineIndicator);
-				if (start != -1) {
-					end = content.indexOf(underlineIndicator, start+1);
-					style = -1;
-				}
-			}
 
 			endSearchOffset = start + 1;
 
@@ -132,6 +111,30 @@ public class MessageUtil {
 					startIndicatorLength = endSearchOffset - start;
 
 					end = content.indexOf(colorIndicator, endSearchOffset);
+				}
+			}
+
+			if (start == -1) {
+				start = content.indexOf(boldIndicator);
+				if (start != -1) {
+					end = content.indexOf(boldIndicator, start+1);
+					style = Typeface.BOLD;
+				}
+			}
+
+			if (start == -1) {
+				start = content.indexOf(italicIndicator);
+				if (start != -1) {
+					end = content.indexOf(italicIndicator, start+1);
+					style = Typeface.ITALIC;
+				}
+			}
+
+			if (start == -1) {
+				start = content.indexOf(underlineIndicator);
+				if (start != -1) {
+					end = content.indexOf(underlineIndicator, start+1);
+					style = -1;
 				}
 			}
 
