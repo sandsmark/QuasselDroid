@@ -1,3 +1,8 @@
 bin/*
 gen/*
 /.classpath
+**/build/*
+*.iml
+local.properties
+.gradle/*
+.idea/*
