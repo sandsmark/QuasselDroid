@@ -13,6 +13,13 @@ for your convenience):
     - Otto: http://square.github.com/otto/
     - Android Support Library: http://developer.android.com/tools/extras/support-library.html
     - Crittercism: https://www.crittercism.com/developers/docs-android
+    - ActionBarSherlock: http://actionbarsherlock.com/
+
+Building:
+Building is done using gradle. Run "gradlew tasks" to see possible build tasks. Some useful tasks are
+assemble and installDebug
+NB! I have found some bugs with the build system where i have to run --info and or --stacktrace to not get errors
+during build process.
 
 
 We do support encryption, but no compression support for now (qCompress should,
