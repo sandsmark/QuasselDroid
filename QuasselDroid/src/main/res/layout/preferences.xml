@@ -26,7 +26,24 @@
             android:summary="How many lines to fetch on scroll"
             android:title="Dynamic backlog amount" />
 	</PreferenceCategory>>
-    
+
+    <PreferenceCategory android:title="Core Connection" >
+        <EditTextPreference
+                android:defaultValue="5"
+                android:key="@string/preference_reconnect_counter"
+                android:numeric="integer"
+                android:summary="How often to retry to reconnect after loss of connection"
+                android:title="Reconnect counter"
+                />
+        <EditTextPreference
+                android:defaultValue="30"
+                android:key="@string/preference_reconnect_delay"
+                android:numeric="integer"
+                android:summary="How long to wait before every try to reconnect"
+                android:title="Delay before reconnect (in seconds)"
+                />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Quassel" >
         <ListPreference
             android:defaultValue="20"

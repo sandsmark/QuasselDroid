@@ -28,26 +28,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.graphics.Typeface;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
-import android.os.*;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferInfo;
+import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
+import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
@@ -55,30 +60,25 @@ import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent;
-import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
+import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
-import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Observer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This Service holds the connection to the core from the phone, it handles all
@@ -134,7 +134,17 @@ public class CoreConnService extends Service {
 	private WifiLock wifiLock;
 
 
-	/**
+    private int reconnectCounter;
+    private static String RECONNECT_COUNTER_DEFAULT = "5";
+    private static String RECONNECT_DELAY_DEFAULT = "30";
+    private long id;
+    private String address;
+    private int port;
+    private String username;
+    private String password;
+    private Boolean ssl;
+
+    /**
 	 * Class for clients to access. Because we know this service always runs in
 	 * the same process as its clients, we don't need to deal with IPC.
 	 */
@@ -168,12 +178,17 @@ public class CoreConnService extends Service {
 					preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
 					if(!preferenceUseWakeLock) releaseWakeLockIfExists();
 					else if(preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
-				} 
+				} else if(key.equals(getString(R.string.preference_reconnect_counter))) {
+                    reconnectCounter = Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_counter),
+                            RECONNECT_COUNTER_DEFAULT));
+                }
 			}
 		};
 		preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
-		BusProvider.getInstance().register(this);
-		startForeground(R.id.NOTIFICATION, notificationManager.getConnectingNotification());
+        reconnectCounter = Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_counter),
+                RECONNECT_COUNTER_DEFAULT));
+        BusProvider.getInstance().register(this);
+        startForeground(R.id.NOTIFICATION, notificationManager.getConnectingNotification());
 	}
 
 	@Override
@@ -182,7 +197,7 @@ public class CoreConnService extends Service {
 		this.disconnectFromCore();
 		BusProvider.getInstance().unregister(this);
 		stopForeground(true);
-
+        notificationManager = null;
 	}
 
 	public Handler getHandler() {
@@ -209,30 +224,34 @@ public class CoreConnService extends Service {
 		}
 		requestedDisconnect = false;
 		Bundle connectData = intent.getExtras();
-		long id = connectData.getLong("id");
-		String address = connectData.getString("address");
-		int port = connectData.getInt("port");
-		String username = connectData.getString("username");
-		String password = connectData.getString("password");
-		Boolean ssl = connectData.getBoolean("ssl");
-		Log.i(TAG, "Connecting to core: " + address + ":" + port
-				+ " with username " + username);
-		networks = NetworkCollection.getInstance();
-		networks.clear();
-		
-		acquireWakeLockIfEnabled();
-		
-		coreConn = new CoreConnection(id, address, port, username, password, ssl,
-				this);
+        id = connectData.getLong("id");
+        address = connectData.getString("address");
+        port = connectData.getInt("port");
+        username = connectData.getString("username");
+        password = connectData.getString("password");
+        ssl = connectData.getBoolean("ssl");
+        connect();
 	}
-	
-	private void acquireWakeLockIfEnabled() {
+
+    private void connect() {
+        Log.i(TAG, "Connecting to core: " + address + ":" + port
+                + " with username " + username);
+        networks = NetworkCollection.getInstance();
+        networks.clear();
+
+        acquireWakeLockIfEnabled();
+
+        coreConn = new CoreConnection(id, address, port, username, password, ssl,
+                this);
+    }
+
+    private void acquireWakeLockIfEnabled() {
 		if (preferenceUseWakeLock) {
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "quasseldroid wakelock");
 			wakeLock.acquire();
 			Log.i(TAG, "WakeLock acquired");
-			
+
 			WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 			wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "quasseldroid wifilock");
 			wifiLock.acquire();
@@ -279,7 +298,6 @@ public class CoreConnService extends Service {
 		if (coreConn != null)
 			coreConn.closeConnection();
 		coreConn = null;
-		notificationManager = null;
 		stopSelf();
 	}
 
@@ -428,20 +446,10 @@ public class CoreConnService extends Service {
 
 				
 			case R.id.LOST_CONNECTION:
-				/**
-				 * Lost connection with core, update notification
-				 */
-				if(coreConn != null) {
-					if (msg.obj != null) { // Have description of what is wrong,
-						// used only for login atm
-						BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, (String)msg.obj));
-					} else {
-						BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
-					}
-					notificationManager.notifyDisconnected();
-				}
-				disconnectFromCore();
-				break;
+                String errorMessage = (String) msg.obj;
+                reconnect(errorMessage);
+
+                break;
 			case R.id.NEW_USER_ADDED:
 				/**
 				 * New IrcUser added
@@ -538,6 +546,8 @@ public class CoreConnService extends Service {
 				 */
 				notificationManager.notifyConnected();
 				initDone = true;
+                reconnectCounter = Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_counter),
+                        RECONNECT_COUNTER_DEFAULT));
 				BusProvider.getInstance().post(new InitProgressEvent(true, ""));
 				BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
 				break;
@@ -673,7 +683,46 @@ public class CoreConnService extends Service {
 		}
 	}
 
-	public boolean isInitComplete() {
+    private void reconnect(String message)
+    {
+        if (coreConn != null) {
+            coreConn.closeConnection();
+        }
+
+        if (reconnectCounter > 0) {
+            reconnectCounter--;
+
+            BusProvider.getInstance().post(new InitProgressEvent(false, "Reconnecting..."));
+
+            getHandler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    connect();
+                }
+            }, Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_delay),
+                    RECONNECT_DELAY_DEFAULT)) * 1000);
+        } else {
+            connectionLost(message);
+        }
+    }
+
+    private void connectionLost(String message) {
+        /**
+         * Lost connection with core, update notification
+         */
+        if(coreConn != null) {
+            if (message != null && !message.equals("")) { // Have description of what is wrong,
+                // used only for login atm
+                BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, message));
+            } else {
+                BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
+            }
+            notificationManager.notifyDisconnected();
+        }
+        disconnectFromCore();
+    }
+
+    public boolean isInitComplete() {
 		if(coreConn == null) return false;
 		return coreConn.isInitComplete();
 	}
@@ -756,10 +805,16 @@ public class CoreConnService extends Service {
 		if(event.action == MessageAction.LAST_SEEN) {
 			notificationManager.notifyHighlightsRead(event.bufferId);
 			coreConn.requestSetLastMsgRead(event.bufferId, event.messageId);
-			networks.getBufferById(event.bufferId).setLastSeenMessage(event.messageId);
-		} else if(event.action == MessageAction.MARKER_LINE) {
+            Buffer buffer = networks.getBufferById(event.bufferId);
+            if (buffer != null) {
+                buffer.setLastSeenMessage(event.messageId);
+            }
+        } else if(event.action == MessageAction.MARKER_LINE) {
 			coreConn.requestSetMarkerLine(event.bufferId, event.messageId);
-			networks.getBufferById(event.bufferId).setMarkerLineMessage(event.messageId);
+            Buffer buffer = networks.getBufferById(event.bufferId);
+            if (buffer != null) {
+                buffer.setMarkerLineMessage(event.messageId);
+            }
 		}
 	}
 	
@@ -771,10 +826,14 @@ public class CoreConnService extends Service {
 	
 	@Subscribe
 	public void onFilterMessages(FilterMessagesEvent event) {
-		if(event.filtered) 
-			networks.getBufferById(event.bufferId).addFilterType(event.filterType);
-		else 
-			networks.getBufferById(event.bufferId).removeFilterType(event.filterType);
+        Buffer buffer = networks.getBufferById(event.bufferId);
+        if (buffer != null) {
+            if(event.filtered) {
+                buffer.addFilterType(event.filterType);
+            } else {
+                buffer.removeFilterType(event.filterType);
+            }
+        }
 	}
 	
 	@Produce

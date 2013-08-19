@@ -23,33 +23,39 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
@@ -100,18 +106,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		core.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				Bundle user = dbHelper.getUser(id);
-				if(user != null) {
-					String username = user.getString(QuasselDbHelper.KEY_USERNAME);
-					String password = user.getString(QuasselDbHelper.KEY_PASSWORD);
-					usernameField.setText(username);
-					passwordField.setText(password);
-					rememberMe.setChecked(true);
-				} else {
-					usernameField.setText("");
-					passwordField.setText("");
-					rememberMe.setChecked(false);
-				}
+                loadUserPreferences(id);
 			}
 
 			@Override
@@ -132,14 +127,32 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		core.setAdapter(adapter);
 
 		//Use saved settings
-		if(core.getCount()>settings.getInt(PREFS_CORE, 0))
-			core.setSelection(settings.getInt(PREFS_CORE, 0));
+        int coreIndex = settings.getInt(PREFS_CORE, 0);
+        if(core.getCount() > coreIndex) {
+			core.setSelection(coreIndex);
+            loadUserPreferences(core.getAdapter().getItemId(coreIndex));
+        }
 
 		connect = (Button)findViewById(R.id.connect_button);
 		connect.setOnClickListener(onConnect);
 	}
-	
-	@Override
+
+    private void loadUserPreferences(long coreIndex) {
+        Bundle user = dbHelper.getUser(coreIndex);
+        if(user != null) {
+            String username = user.getString(QuasselDbHelper.KEY_USERNAME);
+            String password = user.getString(QuasselDbHelper.KEY_PASSWORD);
+            usernameField.setText(username);
+            passwordField.setText(password);
+            rememberMe.setChecked(true);
+        } else {
+            usernameField.setText("");
+            passwordField.setText("");
+            rememberMe.setChecked(false);
+        }
+    }
+
+    @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.login_menu, menu);
 		return super.onCreateOptionsMenu(menu);
@@ -160,7 +173,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	@Override
 	protected void onStart() {
 		super.onStart();
-        bindService( new Intent( this, InFocus.class ), focusConnection, Context.BIND_AUTO_CREATE );
+        bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, MainActivity.class);
 	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -324,59 +337,62 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
 	private OnClickListener onConnect = new OnClickListener() {
 		public void onClick(View v) {
-			if(usernameField.getText().length()==0 ||
-					passwordField.getText().length()==0 ||
-					core.getCount() == 0){
+            //TODO: quick fix for checking if we have internet before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
+            //Check that the phone has either mobile or wifi connection to query the bus oracle
+            ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
+                Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-				AlertDialog.Builder diag=new AlertDialog.Builder(LoginActivity.this);
-				diag.setMessage("Error, connection information not filled out properly");
-				diag.setCancelable(false);
+            connect();
+        }
+    };
 
-				AlertDialog dg = diag.create();
-				dg.setOwnerActivity(LoginActivity.this);
-				dg.setButton("Ok",  new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {}});
-				dg.show();							
-				return;
-			}
-			SharedPreferences.Editor settingsedit = settings.edit();
-			if(rememberMe.isChecked()){//save info
-				settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-				dbHelper.addUser(usernameField.getText().toString(), passwordField.getText().toString(), core.getSelectedItemId());
+    private void connect() {
+        if(usernameField.getText().length()==0 ||
+                passwordField.getText().length()==0 ||
+                core.getCount() == 0){
 
-			}else {
-				settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-				dbHelper.deleteUser(core.getSelectedItemId());
+            AlertDialog.Builder diag=new AlertDialog.Builder(LoginActivity.this);
+            diag.setMessage("Error, connection information not filled out properly");
+            diag.setCancelable(false);
 
-			}
-			settingsedit.commit();
-			//dbHelper.open();
-			Bundle res = dbHelper.getCore(core.getSelectedItemId());
-			
-			//TODO: quick fix for checking if we have internett before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
-			//Check that the phone has either mobile or wifi connection to querry teh bus oracle
-			ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-			if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
-				Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();
-				return;
-			}
-			
+            AlertDialog dg = diag.create();
+            dg.setOwnerActivity(LoginActivity.this);
+            dg.setButton("Ok",  new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {}});
+            dg.show();
+            return;
+        }
+        SharedPreferences.Editor settingsedit = settings.edit();
+        long selectedCore = core.getSelectedItemId();
+        if(rememberMe.isChecked()){//save info
+            settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
+            dbHelper.addUser(usernameField.getText().toString(), passwordField.getText().toString(), selectedCore);
 
-			//Make intent to send to the CoreConnect service, with connection data
-			Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
-			connectIntent.putExtra("id", core.getSelectedItemId());
-			connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
-			connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
-			connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
-			connectIntent.putExtra("ssl", res.getBoolean(QuasselDbHelper.KEY_SSL));
-			connectIntent.putExtra("username", usernameField.getText().toString().trim());
-			connectIntent.putExtra("password", passwordField.getText().toString());
-			
-			startService(connectIntent);
+        }else {
+            settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
+            dbHelper.deleteUser(selectedCore);
 
-			LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
-		}
-	};
+        }
+        settingsedit.commit();
+        Bundle res = dbHelper.getCore(selectedCore);
+
+        //Make intent to send to the CoreConnect service, with connection data
+        Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
+        connectIntent.putExtra("id", selectedCore);
+        connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
+        connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
+        connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
+        connectIntent.putExtra("ssl", res.getBoolean(QuasselDbHelper.KEY_SSL));
+        connectIntent.putExtra("username", usernameField.getText().toString().trim());
+        connectIntent.putExtra("password", passwordField.getText().toString());
+
+        startService(connectIntent);
+
+        LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
+    }
 
 	public void updateCoreSpinner() {
 		((SimpleCursorAdapter)core.getAdapter()).getCursor().requery();
