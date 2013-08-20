@@ -22,11 +22,14 @@
  */
 
 package com.iskrembilen.quasseldroid.gui;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
@@ -50,6 +53,7 @@ import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
+import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -200,6 +204,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+        bindService( new Intent( this, InFocus.class ), focusConnection, Context.BIND_AUTO_CREATE );
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, MainActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -228,6 +233,12 @@ public class MainActivity extends SherlockFragmentActivity {
 		BusProvider.getInstance().unregister(this);
 
 	}
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(focusConnection);
+    }
 
 	@Override
 	protected void onDestroy() {
@@ -375,4 +386,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	 public BufferOpenedEvent produceBufferOpenedEvent() {
 		 return new BufferOpenedEvent(openedBuffer);
 	 }
+
+    private ServiceConnection focusConnection = new ServiceConnection() {
+        public void onServiceConnected( ComponentName cn, IBinder service ) {}
+        public void onServiceDisconnected( ComponentName cn ) {}
+    };
 }

@@ -54,6 +54,7 @@ import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
@@ -159,12 +160,19 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 	@Override
 	protected void onStart() {
 		super.onStart();
+        bindService( new Intent( this, InFocus.class ), focusConnection, Context.BIND_AUTO_CREATE );
 		if(ThemeUtil.theme != currentTheme) {
 			Intent intent = new Intent(this, MainActivity.class);
 	        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 	        startActivity(intent);
 		}
 	}
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(focusConnection);
+    }
 	
 	@Override
 	protected void onDestroy() {
@@ -425,4 +433,9 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 		dismissLoginDialog();
 		Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();			
 	}
+
+    private ServiceConnection focusConnection = new ServiceConnection() {
+        public void onServiceConnected( ComponentName cn, IBinder service ) {}
+        public void onServiceDisconnected( ComponentName cn ) {}
+    };
 }

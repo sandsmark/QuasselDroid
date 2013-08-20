@@ -88,6 +88,12 @@
             android:summary=""
             android:title="Play sound on notification" />
 
+        <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="@string/preference_notification_sound_active"
+                android:summary=""
+                android:title="Sound only when unfocused" />
+
         <RingtonePreference
             android:key="@string/preference_notification_sound_file"
             android:ringtoneType="notification"
