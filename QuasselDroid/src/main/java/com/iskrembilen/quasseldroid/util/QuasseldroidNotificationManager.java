@@ -61,11 +61,20 @@ public class QuasseldroidNotificationManager {
 			if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), true))
 				defaults |= Notification.DEFAULT_VIBRATE;
 
-			if (preferences.getBoolean(context.getString(R.string.preference_notification_sound), true)) {
+            if(preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
+                    preferences.getBoolean(context.getString(R.string.has_focus), true) == false &&
+                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
 				Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
 				if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
 				else builder.setSound(ringtone);
 			}
+
+            else if(preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), true) == false &&
+                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
+                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                else builder.setSound(ringtone);
+            }
 		}
 		if(defaults != 0) builder.setDefaults(defaults);
 
@@ -124,11 +133,22 @@ public class QuasseldroidNotificationManager {
 		builder.setContentIntent(contentIntent);
 
 		if(bufferId != null) {
-			if(preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
-				Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
-				if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
-				else builder.setSound(ringtone);
-			}
+            if(preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
+                    preferences.getBoolean(context.getString(R.string.has_focus), true) == false &&
+                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+
+                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
+                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                else builder.setSound(ringtone);
+            }
+
+            else if(preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), true) == false &&
+                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+
+                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
+                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                else builder.setSound(ringtone);
+            }
 			if(preferences.getBoolean(context.getString(R.string.preference_notification_light), false))
 				defaults |= Notification.DEFAULT_LIGHTS;
 			if(preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), false))
