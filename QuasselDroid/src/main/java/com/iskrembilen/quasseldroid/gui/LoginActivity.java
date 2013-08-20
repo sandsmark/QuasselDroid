@@ -337,11 +337,15 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
 	private OnClickListener onConnect = new OnClickListener() {
 		public void onClick(View v) {
-            //TODO: quick fix for checking if we have internet before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
+            /*
+             * TODO: quick fix for checking if we have internet before connecting, should remove
+             * some force closes, not sure if we should do it in another place tho, mabye in CoreConn
+             */
             //Check that the phone has either mobile or wifi connection to query the bus oracle
             ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
-                Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "This application requires an internet connection",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 

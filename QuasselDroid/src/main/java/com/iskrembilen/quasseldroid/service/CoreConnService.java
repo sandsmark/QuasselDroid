@@ -689,7 +689,8 @@ public class CoreConnService extends Service {
             coreConn.closeConnection();
         }
 
-        if (reconnectCounter > 0) {
+        if (preferences.getBoolean(getString(R.string.preference_reconnect), false) &&
+                reconnectCounter > 0) {
             reconnectCounter--;
 
             BusProvider.getInstance().post(new InitProgressEvent(false, "Reconnecting..."));
