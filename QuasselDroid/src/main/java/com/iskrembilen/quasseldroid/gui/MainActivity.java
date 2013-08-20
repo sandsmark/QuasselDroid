@@ -308,9 +308,11 @@ public class MainActivity extends SherlockFragmentActivity {
 	}
 
     private void hideKeyboard(View view) {
-        view.requestFocus();
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+        if (view != null) {
+            view.requestFocus();
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+        }
     }
 
 	@Subscribe
