@@ -197,7 +197,6 @@ public class CoreConnService extends Service {
 		this.disconnectFromCore();
 		BusProvider.getInstance().unregister(this);
 		stopForeground(true);
-        notificationManager = null;
 	}
 
 	public Handler getHandler() {
