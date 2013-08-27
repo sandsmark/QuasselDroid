@@ -23,87 +23,48 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ExpandableListActivity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.util.TypedValue;
-import com.actionbarsherlock.view.ActionMode;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ExpandableListView.OnGroupCollapseListener;
 import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
-import com.iskrembilen.quasseldroid.events.InitProgressEvent;
-import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
-import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
-import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
-import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
-import com.iskrembilen.quasseldroid.events.SendMessageEvent;
-import com.iskrembilen.quasseldroid.gui.MainActivity; 
-import com.iskrembilen.quasseldroid.gui.LoginActivity;
-import com.iskrembilen.quasseldroid.gui.PreferenceView;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -611,7 +572,7 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
 	@Subscribe
 	public void onNetworksAvailable(NetworksAvailableEvent event) {
-		if(event.networks != null) {
+		if(event.networks != null && event.networks.size() > 0) {
 			event.networks.addObserver(bufferListAdapter);
 			bufferListAdapter.setNetworks(event.networks);			
 		}

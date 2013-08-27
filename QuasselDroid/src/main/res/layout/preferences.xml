@@ -26,7 +26,39 @@
             android:summary="How many lines to fetch on scroll"
             android:title="Dynamic backlog amount" />
 	</PreferenceCategory>>
-    
+
+    <PreferenceCategory android:title="Core Connection" >
+        <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="@string/preference_reconnect"
+                android:summary="Reconnect, when connection is lost"
+                android:title="Reconnect"
+                android:disableDependentsState="false"
+                />
+        <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="@string/preference_reconnect_wifi_only"
+                android:summary="Only reconnect, when using wifi"
+                android:title="Only reconnect on wifi"
+                android:dependency="@string/preference_reconnect"
+                />
+        <EditTextPreference
+                android:defaultValue="5"
+                android:key="@string/preference_reconnect_counter"
+                android:numeric="integer"
+                android:summary="How often to retry"
+                android:title="Reconnect counter"
+                android:dependency="@string/preference_reconnect"
+                />
+        <EditTextPreference
+                android:defaultValue="30"
+                android:key="@string/preference_reconnect_delay"
+                android:numeric="integer"
+                android:summary="How long to wait before every try"
+                android:title="Delay before reconnect (in seconds)"
+                android:dependency="@string/preference_reconnect"
+                />
+    </PreferenceCategory>
     <PreferenceCategory android:title="Quassel" >
         <ListPreference
             android:defaultValue="20"

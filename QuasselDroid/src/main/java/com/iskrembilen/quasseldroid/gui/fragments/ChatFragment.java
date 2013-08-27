@@ -1,33 +1,51 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.Network;
+import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent;
+import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
-import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
-import com.iskrembilen.quasseldroid.gui.MainActivity;
-import com.iskrembilen.quasseldroid.gui.LoginActivity;
-import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
@@ -35,38 +53,9 @@ import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
-import android.opengl.Visibility;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.Display;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.TextView.OnEditorActionListener;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 public class ChatFragment extends SherlockFragment {
 
@@ -284,25 +273,27 @@ public class ChatFragment extends SherlockFragment {
         Log.d(TAG, "Setting buffer and chat is visible: " + getUserVisibleHint());
 		this.bufferId = bufferId;
 		if(adapter != null && networks != null) {
-            if(adapter.buffer != null && bufferId != adapter.buffer.getInfo().id) {
-                updateMarkerLine();
-            }
-			adapter.clearBuffer();
-			Buffer buffer = networks.getBufferById(bufferId);
-			adapter.setBuffer(buffer, networks);
-			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
-			autoCompleteButton.setEnabled(true);
-			inputField.setEnabled(true);
-			buffer.setDisplayed(true);
-			BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
+            Buffer buffer = networks.getBufferById(bufferId);
+            if (buffer != null) {
+                if(adapter.buffer != null && bufferId != adapter.buffer.getInfo().id) {
+                    updateMarkerLine();
+                }
+                adapter.clearBuffer();
+                adapter.setBuffer(buffer, networks);
+                nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
+                autoCompleteButton.setEnabled(true);
+                inputField.setEnabled(true);
+                buffer.setDisplayed(true);
+                BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
-			//Move list to correect position
-			if (adapter.buffer.getTopMessageShown() == 0) {
-				backlogList.setSelection(adapter.getCount()-1);
-			}else{
-				adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
-			}
-		}
+                //Move list to correct position
+                if (adapter.buffer.getTopMessageShown() == 0) {
+                    backlogList.setSelection(adapter.getCount()-1);
+                }else{
+                    adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
+                }
+            }
+        }
 	}
 
 	public class BacklogAdapter extends BaseAdapter implements Observer {

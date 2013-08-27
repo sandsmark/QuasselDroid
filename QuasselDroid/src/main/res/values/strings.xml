@@ -13,6 +13,10 @@
     <string name="notification_disconnected">Disconnected from core</string>
     <string name="preference_initial_backlog_limit">backlogLimit</string>
     <string name="preference_dynamic_backlog">dynamicBacklog</string>
+    <string name="preference_reconnect">reconnect</string>
+    <string name="preference_reconnect_wifi_only">reconnectWifiOnly</string>
+    <string name="preference_reconnect_counter">reconnectCounter</string>
+    <string name="preference_reconnect_delay">reconnectDelay</string>
     <string name="preference_fontsize_channel_list">fontsizeChannelList</string>
     <string name="preference_notification_vibrate">notificationvibrate</string>
     <string name="preference_notification_light">notificationlight</string>
