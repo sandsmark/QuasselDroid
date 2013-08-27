@@ -28,6 +28,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
@@ -689,7 +691,8 @@ public class CoreConnService extends Service {
         }
 
         if (preferences.getBoolean(getString(R.string.preference_reconnect), false) &&
-                reconnectCounter > 0) {
+                reconnectCounter > 0 &&
+                checkWifiCondition()) {
             reconnectCounter--;
 
             BusProvider.getInstance().post(new InitProgressEvent(false, "Reconnecting..."));
@@ -704,6 +707,16 @@ public class CoreConnService extends Service {
         } else {
             connectionLost(message);
         }
+    }
+
+    private boolean checkWifiCondition() {
+        boolean checkForWifiConnection = preferences.getBoolean(
+                getString(R.string.preference_reconnect_wifi_only), false);
+
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        return !checkForWifiConnection || mWifi.isConnected();
     }
 
     private void connectionLost(String message) {
