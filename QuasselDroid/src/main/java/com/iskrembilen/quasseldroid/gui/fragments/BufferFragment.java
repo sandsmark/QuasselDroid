@@ -23,87 +23,50 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ExpandableListActivity;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.util.TypedValue;
-import com.actionbarsherlock.view.ActionMode;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ExpandableListView.OnGroupCollapseListener;
 import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
-import com.iskrembilen.quasseldroid.events.InitProgressEvent;
-import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
-import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
-import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
-import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
-import com.iskrembilen.quasseldroid.events.SendMessageEvent;
-import com.iskrembilen.quasseldroid.gui.MainActivity; 
-import com.iskrembilen.quasseldroid.gui.LoginActivity;
-import com.iskrembilen.quasseldroid.gui.PreferenceView;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.events.QueryUserEvent;
+import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -275,53 +238,53 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
 		bufferList.setOnItemLongClickListener(new OnItemLongClickListener() {
 
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				long packedPosition = bufferList.getExpandableListPosition(position);
-				int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-				int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                                           int position, long id) {
+                long packedPosition = bufferList.getExpandableListPosition(position);
+                int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
 
-				if(ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-					Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
-					actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
-					actionModeData.id = buffer.getInfo().id;
-					actionModeData.listItem = view;
-					if(buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
-					}else if (buffer.isActive()) {
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
-					}else{
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
-					}
-				} else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
-					Network network = bufferListAdapter.getGroup(groupPosition);
-					actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
-					actionModeData.id = network.getId();
-					actionModeData.listItem = view;
-					if(network.isConnected()) {
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(true);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(false);						
-					} else {
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(false);
-						actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(true);
-					}
-				}
-				return true;
-			}
-		});
+                if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
+                    Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
+                    actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
+                    actionModeData.id = buffer.getInfo().id;
+                    actionModeData.listItem = view;
+                    if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                    } else if (buffer.isActive()) {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                    } else {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                    }
+                } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                    Network network = bufferListAdapter.getGroup(groupPosition);
+                    actionModeData.actionMode = getSherlockActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
+                    actionModeData.id = network.getId();
+                    actionModeData.listItem = view;
+                    if (network.isConnected()) {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(false);
+                    } else {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(true);
+                    }
+                }
+                return true;
+            }
+        });
 	}
 
 	@Override
@@ -412,6 +375,7 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
 	private void openBuffer(Buffer buffer) {
 		this.openedBufferId = buffer.getInfo().id;
+        buffer.setTemporarilyHidden(false);
 		BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
 	}
 
@@ -629,4 +593,21 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 	public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
 		bufferListAdapter.notifyDataSetChanged();
 	}
+
+    /**
+     * Check if a buffer is already existing and switch to it
+     * If not a QueryUserEvent is created so the CoreConnService queries the user
+     * @param event
+     */
+    @Subscribe
+    public void onUserClicked(UserClickedEvent event) {
+        Buffer buffer = bufferListAdapter.networks.getBufferById(event.bufferId);
+        Network network = bufferListAdapter.networks.getNetworkById(buffer.getInfo().networkId);
+        buffer = network.getBuffers().getBuffer(event.nick);
+        if (buffer != null) {
+            openBuffer(buffer);
+        } else {
+            BusProvider.getInstance().post(new QueryUserEvent(event.bufferId, event.nick));
+        }
+    }
 }

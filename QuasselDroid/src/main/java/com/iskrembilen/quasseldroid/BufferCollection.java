@@ -25,7 +25,13 @@ package com.iskrembilen.quasseldroid;
 
 import android.util.Log;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 public class BufferCollection extends Observable implements Observer {
 
@@ -75,8 +81,20 @@ public class BufferCollection extends Observable implements Observer {
 
 	public Buffer getBuffer(int bufferId) {
 		return this.buffers.get(bufferId);
-
 	}
+
+    /**
+     * @param name Searches the buffer with name name
+     * @return A found Buffer or null
+     */
+    public Buffer getBuffer(String name) {
+        for (Buffer buffer : this.bufferList) {
+            if (buffer.getInfo().name.equals(name)) {
+                return buffer;
+            }
+        }
+        return null;
+    }
 
 	public boolean hasBuffer(int id) {
 		return buffers.containsKey(id);

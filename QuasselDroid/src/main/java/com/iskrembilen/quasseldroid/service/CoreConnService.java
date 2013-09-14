@@ -28,26 +28,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.graphics.Typeface;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
-import android.os.*;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.*;
+import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferInfo;
+import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
+import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
@@ -55,30 +61,26 @@ import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
+import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent;
-import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
+import com.iskrembilen.quasseldroid.events.ManageNetworkEvent;
 import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
+import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
+import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
-import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Observer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This Service holds the connection to the core from the phone, it handles all
@@ -132,6 +134,10 @@ public class CoreConnService extends Service {
 	private WakeLock wakeLock;
 
 	private WifiLock wifiLock;
+
+    // On a QueryUserEvent save those to be able to open the added buffer
+    private int networkToSwitchTo;
+    private String bufferNameToSwitchTo;
 
 
 	/**
@@ -257,6 +263,12 @@ public class CoreConnService extends Service {
 	public void sendMessage(int bufferId, String message) {
 		coreConn.sendMessage(bufferId, message);
 	}
+
+    public void queryUser(int bufferId, String nick) {
+        coreConn.sendMessage(bufferId, String.format("/query %s", nick));
+        networkToSwitchTo = networks.getBufferById(bufferId).getInfo().networkId;
+        bufferNameToSwitchTo = nick;
+    }
 	
 	public void unhideTempHiddenBuffer(int bufferId) {
 		coreConn.requestUnhideTempHiddenBuffer(bufferId);
@@ -371,6 +383,7 @@ public class CoreConnService extends Service {
 				 * new buffer
 				 */
 				networks.addBuffer((Buffer) msg.obj);
+                checkSwitchingTo((Buffer) msg.obj);
 				break;
 			case R.id.ADD_MULTIPLE_BUFFERS:
 				/**
@@ -494,6 +507,9 @@ public class CoreConnService extends Service {
 				 * Buffer has been marked as temporary hidden, update buffer
 				 */
 				networks.getBufferById(msg.arg1).setTemporarilyHidden((Boolean) msg.obj);
+                if (!(Boolean) msg.obj) {
+                    checkSwitchingTo(networks.getBufferById(msg.arg1));
+                }
 				break;
 
 			case R.id.SET_BUFFER_PERM_HIDDEN:
@@ -501,6 +517,9 @@ public class CoreConnService extends Service {
 				 * Buffer has been marked as permanently hidden, update buffer
 				 */
 				networks.getBufferById(msg.arg1).setPermanentlyHidden((Boolean) msg.obj);
+                if (!(Boolean) msg.obj) {
+                    checkSwitchingTo(networks.getBufferById(msg.arg1));
+                }
 				break;
 
 			case R.id.INVALID_CERTIFICATE:
@@ -681,6 +700,14 @@ public class CoreConnService extends Service {
 	public Network getNetworkById(int networkId) {
         return networks.getNetworkById(networkId);
     }
+
+    private void checkSwitchingTo(Buffer buffer) {
+        if (networkToSwitchTo == buffer.getInfo().networkId && bufferNameToSwitchTo.equals(buffer.getInfo().name)) {
+            BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
+        }
+        networkToSwitchTo = -1;
+        bufferNameToSwitchTo = "";
+    }
 	
 	@Produce
 	public ConnectionChangedEvent produceConnectionStatus() {
@@ -776,6 +803,11 @@ public class CoreConnService extends Service {
 		else 
 			networks.getBufferById(event.bufferId).removeFilterType(event.filterType);
 	}
+
+    @Subscribe
+    public void doQueryUserEvent(QueryUserEvent event) {
+        queryUser(event.bufferId, event.nick);
+    }
 	
 	@Produce
 	public InitProgressEvent produceInitDoneEvent() {
