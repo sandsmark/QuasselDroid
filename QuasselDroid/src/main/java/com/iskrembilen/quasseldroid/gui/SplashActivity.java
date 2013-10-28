@@ -19,6 +19,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
@@ -46,6 +47,7 @@ public class SplashActivity extends SherlockActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+        bindService( new Intent( this, InFocus.class ), focusConnection, Context.BIND_AUTO_CREATE );
 		BusProvider.getInstance().register(this);
 		new Handler().postDelayed(new Runnable(){
 
@@ -61,6 +63,7 @@ public class SplashActivity extends SherlockActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+        unbindService( focusConnection );
 		BusProvider.getInstance().unregister(this);
 	}
 
@@ -84,4 +87,9 @@ public class SplashActivity extends SherlockActivity {
 			activityToStart = LoginActivity.class;
 		}
 	}
+
+    private ServiceConnection focusConnection = new ServiceConnection() {
+        public void onServiceConnected( ComponentName cn, IBinder service ) {}
+        public void onServiceDisconnected( ComponentName cn ) {}
+    };
 }

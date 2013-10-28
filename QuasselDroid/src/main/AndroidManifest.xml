@@ -45,6 +45,8 @@
 
         <service android:name=".service.CoreConnService" >
         </service>
+        <service android:name=".service.InFocus" >
+        </service>
         <activity android:name=".gui.SplashActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

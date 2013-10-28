@@ -41,9 +41,10 @@ public class PreferenceView extends PreferenceActivity {
 	/**	 Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	setTheme(ThemeUtil.theme);
     	super.onCreate(savedInstanceState);
     	addPreferencesFromResource(R.layout.preferences);
-    	
+
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		listener =new OnSharedPreferenceChangeListener() {
 

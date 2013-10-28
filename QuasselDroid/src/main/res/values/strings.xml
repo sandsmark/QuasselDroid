@@ -17,6 +17,8 @@
     <string name="preference_notification_vibrate">notificationvibrate</string>
     <string name="preference_notification_light">notificationlight</string>
     <string name="preference_notification_sound">notificationsound</string>
+    <string name="preference_notification_sound_active">notificationsoundactive</string>
+    <string name="has_focus">hasfocus</string>
     <string name="preference_colored_text">allowcoloredtext</string>
     <string name="preference_theme">selectedtheme</string>
     <string name="preferences">Preferences</string>
