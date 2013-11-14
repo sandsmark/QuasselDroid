@@ -6,23 +6,13 @@ import java.util.GregorianCalendar;
 
 public class CoreInfo {
 
-	private int coreFeatures;
 	private String coreInfo;
 	private boolean supportSsl;
-	private Date coreDate;
-	private GregorianCalendar coreStartTime;
-	private String coreVersion;
 	private boolean configured;
 	private boolean loginEnabled;
 	private String msgType;
 	private int protocolVersion;
 	private boolean supportsCompression;
-	public int getCoreFeatures() {
-		return coreFeatures;
-	}
-	public void setCoreFeatures(int coreFeatures) {
-		this.coreFeatures = coreFeatures;
-	}
 	public String getCoreInfo() {
 		return coreInfo;
 	}
@@ -34,24 +24,6 @@ public class CoreInfo {
 	}
 	public void setSupportSsl(boolean supportSsl) {
 		this.supportSsl = supportSsl;
-	}
-	public Date getCoreDate() {
-		return coreDate;
-	}
-	public void setCoreDate(Date coreDate) {
-		this.coreDate = coreDate;
-	}
-	public GregorianCalendar getCoreStartTime() {
-		return coreStartTime;
-	}
-	public void setCoreStartTime(GregorianCalendar coreStartTime) {
-		this.coreStartTime = coreStartTime;
-	}
-	public String getCoreVersion() {
-		return coreVersion;
-	}
-	public void setCoreVersion(String coreVersion) {
-		this.coreVersion = coreVersion;
 	}
 	public boolean isConfigured() {
 		return configured;
