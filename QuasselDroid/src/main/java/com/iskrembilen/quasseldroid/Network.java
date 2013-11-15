@@ -60,7 +60,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setStatusBuffer(Buffer statusBuffer) {
 		this.statusBuffer = statusBuffer;
-		statusBuffer.getInfo().name = networkName;
 		this.setChanged();
 		notifyObservers();
 	}
@@ -81,8 +80,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setName(String networkName) {
 		this.networkName = networkName;
-		if(statusBuffer != null) //TODO: remember to handle when adding status buffer after connect
-			statusBuffer.getInfo().name = networkName;
 	}
 
 
