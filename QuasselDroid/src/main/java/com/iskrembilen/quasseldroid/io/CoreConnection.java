@@ -387,32 +387,16 @@ public final class CoreConnection {
 		inStream = new QDataInputStream(socket.getInputStream());
 		Map<String, QVariant<?>> reply = readQVariantMap();
 		coreInfo = new CoreInfo();
-		coreInfo.setCoreFeatures((Integer)reply.get("CoreFeatures").getData());
 		coreInfo.setCoreInfo((String)reply.get("CoreInfo").getData());
 		coreInfo.setSupportSsl((Boolean)reply.get("SupportSsl").getData());
-		coreInfo.setCoreDate(new Date((String)reply.get("CoreDate").getData()));
-		coreInfo.setCoreStartTime((GregorianCalendar)reply.get("CoreStartTime").getData());
-		String coreVersion = (String)reply.get("CoreVersion").getData(); //CoreVersion : v0.7.1 (git-<a href="http://git.quassel-irc.org/?p=quassel.git;a=commit;h=aa285964d0e486a681f56254dc123857c15c66fa">aa28596</a>)
-		coreVersion = coreVersion.substring(coreVersion.indexOf("v")+1, coreVersion.indexOf(" "));
-		coreInfo.setCoreVersion(coreVersion);
 		coreInfo.setConfigured((Boolean)reply.get("Configured").getData());
 		coreInfo.setLoginEnabled((Boolean)reply.get("LoginEnabled").getData());
 		coreInfo.setMsgType((String)reply.get("MsgType").getData());
 		coreInfo.setProtocolVersion(((Long)reply.get("ProtocolVersion").getData()).intValue());
 		coreInfo.setSupportsCompression((Boolean)reply.get("SupportsCompression").getData());
 		
-		Matcher matcher = Pattern.compile("(\\d+)\\W(\\d+)\\W", Pattern.CASE_INSENSITIVE).matcher(coreInfo.getCoreVersion());
-		Log.i(TAG, "Core version: " + coreInfo.getCoreVersion());
-		int version, release;
-		if (matcher.find()) {
-			version = Integer.parseInt(matcher.group(1));
-			release = Integer.parseInt(matcher.group(2));
-		} else {
-			throw new UnsupportedProtocolException("Can't match core version: " + coreInfo.getCoreVersion());
-		}
-		
-		//Check that the protocol version is atleast 10 and the version is above 0.6.0
-		if(coreInfo.getProtocolVersion()<10 || !(version>0 || (version==0 && release>=6)))
+		//Check that the protocol version is at least 10
+		if(coreInfo.getProtocolVersion()<10)
 			throw new UnsupportedProtocolException("Protocol version is old: "+coreInfo.getProtocolVersion());
 		/*for (String key : reply.keySet()) {
 			System.out.println("\t" + key + " : " + reply.get(key));
@@ -788,6 +772,7 @@ public final class CoreConnection {
 				Log.w(TAG, "Invalid username/password combination");
 				return "Invalid username/password combination.";
 			} catch (EmptyQVariantException e) {
+				e.printStackTrace();
 				return "IO error while connecting!";
 			}
 
