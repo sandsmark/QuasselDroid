@@ -432,7 +432,7 @@ public class ChatFragment extends SherlockFragment {
 				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
 				holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
-				holder.nickView.setTextColor(ThemeUtil.chatPartColor);
+				holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
 				break;
 			case Kill:
 				holder.nickView.setText("<--");
