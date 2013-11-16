@@ -31,9 +31,8 @@ public class UserCollection extends Observable implements Observer {
             }
         }
         updateUniqueUsersSortedByMode();
-        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
         user.addObserver(this);
-
+        update(null,null);
     }
 
     public void addUsers(ArrayList<Pair<IrcUser, String>> usersWithModes) {
@@ -50,7 +49,7 @@ public class UserCollection extends Observable implements Observer {
             user.first.addObserver(this);
         }
         updateUniqueUsersSortedByMode();
-        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+        update(null,null);
     }
 
     private boolean addUserToModeList(IrcMode mode, IrcUser user) {
@@ -234,13 +233,10 @@ public class UserCollection extends Observable implements Observer {
     @Override
     public void update(Observable observable, Object data) {
         for(IrcMode mode: IrcMode.values()){
-            if(users.get(mode).contains(observable)){
-                Collections.sort(users.get(mode));
-                if(uniqueUsers.get(mode).contains(observable))Collections.sort(uniqueUsers.get(mode));
-                this.setChanged();
-            }
+            Collections.sort(users.get(mode));
+            Collections.sort(uniqueUsers.get(mode));
+            this.setChanged();
         }
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
-
     }
 }
