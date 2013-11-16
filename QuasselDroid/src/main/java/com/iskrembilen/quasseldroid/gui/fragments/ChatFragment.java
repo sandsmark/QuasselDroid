@@ -324,11 +324,12 @@ public class ChatFragment extends SherlockFragment {
 			if ( buffer.getInfo().type == BufferInfo.Type.QueryBuffer ){
 				topic = buffer.getInfo().name;
 			} else if ( buffer.getInfo().type == BufferInfo.Type.StatusBuffer ){
-				topic = buffer.getInfo().name + " ("
-						+ networks.getNetworkById(buffer.getInfo().networkId).getServer() + ") | "
+				Network network = networks.getNetworkById(buffer.getInfo().networkId);
+				topic = network.getName() + " ("
+						+ network.getServer() + ") | "
 						+ getResources().getString(R.string.users) + ": "
-						+ networks.getNetworkById(buffer.getInfo().networkId).getCountUsers() + " | "
-						+ Helper.formatLatency(networks.getNetworkById(buffer.getInfo().networkId).getLatency(), getResources());
+						+ network.getCountUsers() + " | "
+						+ Helper.formatLatency(network.getLatency(), getResources());
 			} else{
 				 topic = buffer.getInfo().name + ": " + buffer.getTopic();
 			}

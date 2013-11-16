@@ -44,6 +44,8 @@ import android.content.res.Configuration;
 import android.content.Context;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
@@ -135,7 +137,12 @@ public class MainActivity extends SherlockFragmentActivity {
                 if(chatFragment != null) chatFragment.setMenuVisibility(true);
 
                 if(openedBuffer != -1) {
-                    getSupportActionBar().setTitle(NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name);
+                    NetworkCollection networks = NetworkCollection.getInstance();
+                    Buffer buffer = networks.getBufferById(openedBuffer);
+                    if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
+                        getSupportActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                    else
+                        getSupportActionBar().setTitle(buffer.getInfo().name);
                 } else {
                     getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
                     invalidateOptionsMenu();
