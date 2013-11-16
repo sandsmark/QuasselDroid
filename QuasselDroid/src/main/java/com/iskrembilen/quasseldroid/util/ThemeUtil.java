@@ -11,7 +11,7 @@ public class ThemeUtil {
 
 	public static int theme;
 	public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
-	public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor, chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor, chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatHighlightColor, chatSelfColor, chatTimestampColor;
+	public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor, chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor, chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatTopicColor, chatNetsplitQuitColor, chatNetsplitJoinColor, chatHighlightColor, chatSelfColor, chatTimestampColor;
 	public static int chatPlainResource;
 
 	public static void initTheme(Context context) {
@@ -48,6 +48,9 @@ public class ThemeUtil {
 			chatInfoColor = resources.getColor(R.color.chat_line_info_light);
 			chatErrorColor = resources.getColor(R.color.chat_line_error_light);
 			chatDayChangeColor = resources.getColor(R.color.chat_line_daychange_light);
+			chatTopicColor = resources.getColor(R.color.chat_line_topic_light);
+			chatNetsplitJoinColor = resources.getColor(R.color.chat_line_netsplitjoin_light);
+			chatNetsplitQuitColor = resources.getColor(R.color.chat_line_netsplitquit_light);
 			chatHighlightColor = resources.getColor(R.color.chat_line_highlight_light);
 			chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_light);
 
@@ -78,6 +81,9 @@ public class ThemeUtil {
 			chatInfoColor = resources.getColor(R.color.chat_line_info_dark);
 			chatErrorColor = resources.getColor(R.color.chat_line_error_dark);
 			chatDayChangeColor = resources.getColor(R.color.chat_line_daychange_dark);
+			chatTopicColor = resources.getColor(R.color.chat_line_topic_dark);
+			chatNetsplitJoinColor = resources.getColor(R.color.chat_line_netsplitjoin_dark);
+			chatNetsplitQuitColor = resources.getColor(R.color.chat_line_netsplitquit_dark);
 			chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
 			chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
 		} else {

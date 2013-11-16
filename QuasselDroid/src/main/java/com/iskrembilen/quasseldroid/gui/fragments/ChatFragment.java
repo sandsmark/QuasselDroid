@@ -31,6 +31,7 @@ import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
+import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
@@ -405,8 +406,14 @@ public class ChatFragment extends SherlockFragment {
 				holder.nickView.setTextColor(ThemeUtil.chatServerColor);
 				holder.msgView.setText(entry.content);
 				break;
+			case Topic:
+				holder.nickView.setText("*");
+				holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
+				holder.nickView.setTextColor(ThemeUtil.chatTopicColor);
+				holder.msgView.setText(entry.content);
+				break;
 			case Notice:
-				holder.nickView.setText(entry.getNick());
+				holder.nickView.setText("["+entry.getNick()+"]");
 				holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
 				holder.nickView.setTextColor(ThemeUtil.chatNoticeColor);
 				holder.msgView.setText(entry.content);
@@ -427,7 +434,7 @@ public class ChatFragment extends SherlockFragment {
 				holder.nickView.setText("<--");
 				holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
 				holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
-				holder.nickView.setTextColor(ThemeUtil.chatPartColor);
+				holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
 				break;
 			case Kill:
 				holder.nickView.setText("<--");
@@ -455,6 +462,18 @@ public class ChatFragment extends SherlockFragment {
 				holder.msgView.setText(entry.getNick()+" is now known as " + entry.content.toString());
 				holder.msgView.setTextColor(ThemeUtil.chatNickColor);
 				holder.nickView.setTextColor(ThemeUtil.chatNickColor);
+				break;
+			case NetsplitJoin:
+				holder.nickView.setText("=>");
+				holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
+				holder.msgView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+				holder.nickView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+				break;
+			case NetsplitQuit:
+				holder.nickView.setText("<=");
+				holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
+				holder.msgView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
+				holder.nickView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
 				break;
 			case DayChange:
 				holder.nickView.setText("-");
