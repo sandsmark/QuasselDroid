@@ -31,6 +31,7 @@ import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
+import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
@@ -460,6 +461,18 @@ public class ChatFragment extends SherlockFragment {
 				holder.msgView.setText(entry.getNick()+" is now known as " + entry.content.toString());
 				holder.msgView.setTextColor(ThemeUtil.chatNickColor);
 				holder.nickView.setTextColor(ThemeUtil.chatNickColor);
+				break;
+			case NetsplitJoin:
+				holder.nickView.setText("=>");
+				holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
+				holder.msgView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+				holder.nickView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+				break;
+			case NetsplitQuit:
+				holder.nickView.setText("<=");
+				holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
+				holder.msgView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
+				holder.nickView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
 				break;
 			case DayChange:
 				holder.nickView.setText("-");

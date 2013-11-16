@@ -30,6 +30,8 @@
 	<color name="chat_line_error_dark">#916409</color>
 	<color name="chat_line_daychange_dark">#916409</color>
 	<color name="chat_line_topic_dark">#633b5a</color>
+	<color name="chat_line_netsplitjoin_dark">#005538</color>
+	<color name="chat_line_netsplitquit_dark">#683A38</color>
 	<color name="chat_line_highlight_dark">#00583a</color>
 	<color name="chat_line_timestamp_dark">#707c70</color>
 	
@@ -49,6 +51,8 @@
 	<color name="chat_line_error_light">#916409</color>
 	<color name="chat_line_daychange_light">#916409</color>
 	<color name="chat_line_topic_light">#960096</color>
+	<color name="chat_line_netsplitjoin_light">#960096</color>
+	<color name="chat_line_netsplitquit_light">#960096</color>
 	<color name="chat_line_highlight_light">#ff8000</color>
 	<color name="chat_line_timestamp_light">#707c70</color>
 	
