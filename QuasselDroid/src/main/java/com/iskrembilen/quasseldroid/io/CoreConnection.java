@@ -322,22 +322,6 @@ public final class CoreConnection {
 	 * @param message content of message
 	 */
 	public void sendMessage(int buffer, String message) {
-		if (message.charAt(0) == '/') {
-			String t[] = message.split(" ");
-
-			message = t[0].toUpperCase();
-			if (t.length > 1){
-				StringBuilder tmpMsg = new StringBuilder(message);
-				for (int i=1; i<t.length; i++) {
-					tmpMsg.append(' ');
-					tmpMsg.append(t[i]);
-				}
-				message = tmpMsg.toString();
-			}
-		} else {
-			message = "/SAY " + message;
-		}
-
 		List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
 		retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariantType.Int));
 		retFunc.add(new QVariant<String>("2sendInput(BufferInfo,QString)", QVariantType.String));
