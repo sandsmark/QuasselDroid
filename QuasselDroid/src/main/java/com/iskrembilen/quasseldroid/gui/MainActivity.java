@@ -387,7 +387,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	public void onBufferOpened(BufferOpenedEvent event) {
 		if(event.bufferId != -1) {
 			openedBuffer = event.bufferId;
-            drawer.closeDrawers();
+			if(event.switchToBuffer){
+				drawer.closeDrawers();
+			}
 		}
 	}
 	
@@ -395,6 +397,15 @@ public class MainActivity extends SherlockFragmentActivity {
 	 public BufferOpenedEvent produceBufferOpenedEvent() {
 		 return new BufferOpenedEvent(openedBuffer);
 	 }
+	 
+	@Subscribe
+	public void onBufferRemoved(BufferRemovedEvent event) {
+		if(event.bufferId == openedBuffer) {
+			openedBuffer = -1;
+			BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
+			drawer.openDrawer(Gravity.LEFT);
+		}
+	}
 
     private ServiceConnection focusConnection = new ServiceConnection() {
         public void onServiceConnected( ComponentName cn, IBinder service ) {}

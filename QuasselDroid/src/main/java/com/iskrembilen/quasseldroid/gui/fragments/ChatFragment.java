@@ -613,9 +613,13 @@ public class ChatFragment extends SherlockFragment {
 	@Subscribe
 	public void onBufferOpened(BufferOpenedEvent event) {
         Log.d(TAG, "onBufferOpened event");
+        this.bufferId = event.bufferId;
 		if(event.bufferId != -1) {
-			this.bufferId = event.bufferId;
 			setBuffer(bufferId);
+		}else{
+			adapter.clearBuffer();
+			topicView.setText("");
+			topicViewFull.setText("");
 		}
         Log.d(TAG, "onBufferOpened done");
 	}

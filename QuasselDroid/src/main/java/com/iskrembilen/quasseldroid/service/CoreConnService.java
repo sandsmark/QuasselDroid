@@ -46,6 +46,7 @@ import android.widget.Toast;
 import com.iskrembilen.quasseldroid.*;
 import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
@@ -384,10 +385,13 @@ public class CoreConnService extends Service {
 				networks.addNetwork((Network)msg.obj);
 				break;
 			case R.id.NETWORK_REMOVED:
+				BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(msg.arg1).getStatusBuffer().getInfo().id));
 				networks.removeNetwork(msg.arg1);
 				break;
 			case R.id.SET_CONNECTION_STATE:
-				networks.getNetworkById(msg.arg1).setConnectionState((ConnectionState)msg.obj);
+				if(networks.getNetworkById(msg.arg1)!=null){
+					networks.getNetworkById(msg.arg1).setConnectionState((ConnectionState)msg.obj);
+				}
 				break;
 			case R.id.SET_STATUS_BUFFER:
 				networks.getNetworkById(msg.arg1).setStatusBuffer((Buffer) msg.obj);
@@ -627,7 +631,10 @@ public class CoreConnService extends Service {
 				networks.getNetworkById(msg.arg1).setNick((String)msg.obj);
 				break;
 			case R.id.REMOVE_BUFFER:
-				networks.getNetworkById(msg.arg1).removeBuffer(msg.arg2);
+				BusProvider.getInstance().post(new BufferRemovedEvent(msg.arg2));
+				if(networks.getNetworkById(msg.arg1)!=null){
+					networks.getNetworkById(msg.arg1).removeBuffer(msg.arg2);
+				}
 				break;
 			case R.id.SET_CORE_LATENCY:
                 latency = msg.arg1;
@@ -730,6 +737,7 @@ public class CoreConnService extends Service {
 	@Subscribe
 	public void doManageChannel(ManageChannelEvent event) {
 		if(event.action == ChannelAction.DELETE) {
+			BusProvider.getInstance().post(new BufferRemovedEvent(event.bufferId));
 			coreConn.requestRemoveBuffer(event.bufferId);
 		} else if(event.action == ChannelAction.PERM_HIDE) {
 			coreConn.requestPermHideBuffer(event.bufferId);
