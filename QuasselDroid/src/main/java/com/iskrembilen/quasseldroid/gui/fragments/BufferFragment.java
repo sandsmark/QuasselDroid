@@ -132,8 +132,6 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
 	private ActionModeData actionModeData = new ActionModeData();
 
-	private int offlineColor;
-
 	private int openedBufferId = -1;
 
 	public static BufferFragment newInstance() {
@@ -148,7 +146,6 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
 		}
 		setHasOptionsMenu(true);
-		offlineColor = getResources().getColor(R.color.buffer_offline_color);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
 		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
 
@@ -496,11 +493,16 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 				String nick = entry.getInfo().name;
 				if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
 					holder.bufferImage.setImageBitmap(userOfflineBitmap);
-					holder.bufferView.setTextColor(offlineColor);
+					if(entry.isActive()){
+						entry.setActive(false);
+					}
 				} else if(bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
 					holder.bufferImage.setImageBitmap(userAwayBitmap);
 				} else {
 					holder.bufferImage.setImageBitmap(userBitmap);
+					if(!entry.isActive()){
+						entry.setActive(true);
+					}
 				}
 
 				holder.bufferView.setText(nick);
