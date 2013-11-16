@@ -404,6 +404,12 @@ public class ChatFragment extends SherlockFragment {
 				holder.nickView.setTextColor(ThemeUtil.chatServerColor);
 				holder.msgView.setText(entry.content);
 				break;
+			case Topic:
+				holder.nickView.setText("*");
+				holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
+				holder.nickView.setTextColor(ThemeUtil.chatTopicColor);
+				holder.msgView.setText(entry.content);
+				break;
 			case Notice:
 				holder.nickView.setText(entry.getNick());
 				holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
