@@ -590,7 +590,7 @@ public final class CoreConnection {
 				//QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
 	
 				// Send data 
-				QMetaTypeRegistry.serialize(QMetaType.Type.QVariant, outStream, data);
+				outStream.write(baos.toByteArray());
 				bos.close();
 				baos.close();
 			} catch (IOException e) {
