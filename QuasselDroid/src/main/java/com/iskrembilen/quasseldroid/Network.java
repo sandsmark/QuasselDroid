@@ -60,6 +60,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 	public void setStatusBuffer(Buffer statusBuffer) {
 		this.statusBuffer = statusBuffer;
+        statusBuffer.addObserver(this);
 		this.setChanged();
 		notifyObservers();
 	}
