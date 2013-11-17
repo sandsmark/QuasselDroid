@@ -385,7 +385,6 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 			inflater = getLayoutInflater(null);
 			channelActiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_active);
 			channelInactiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_inactive);
-			userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
 			userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
 			userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
 			userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
