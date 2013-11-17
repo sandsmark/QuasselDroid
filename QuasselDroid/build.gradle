@@ -17,7 +17,10 @@ dependencies {
     compile files('libs/crittercism_v3_0_7_sdkonly.jar')
     compile project(':ActionBarSherlock')
 }
-
+if(project.hasProperty("Android.signing")
+        && new File(project.property("Android.signing") + ".gradle").exists()) {
+    apply from: project.property("Android.signing") + ".gradle";
+}
 android {
     compileSdkVersion 19
     buildToolsVersion "19.0.0"
@@ -27,21 +30,9 @@ android {
         targetSdkVersion 15
     }
 
-    signingConfigs {
-        release {
-            storeFile file(System.console().readLine("\n\$ Enter keystore path: "))
-            storePassword System.console().readLine("\n\$ Enter keystore password: ")
-            keyAlias System.console().readLine("\n\$ Enter key alias: ")
-            keyPassword System.console().readLine("\n\$ Enter key password: ")
-        }
-    }
-
     buildTypes {
         debug {
             packageNameSuffix ".debug"
-        }
-        release {
-            signingConfig signingConfigs.release
         }
     }
 }
