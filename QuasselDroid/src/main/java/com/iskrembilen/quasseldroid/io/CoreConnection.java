@@ -35,6 +35,7 @@ import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateExceptio
 import com.iskrembilen.quasseldroid.qtcomm.*;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
+import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -1496,6 +1497,23 @@ public final class CoreConnection {
 								msg.obj = buffer;
 								msg.sendToTarget();
 							}
+							
+                            if(message.type == IrcMessage.Type.NetsplitJoin){
+                                NetsplitHelper netsplitHelper=new NetsplitHelper(message.content.toString());
+                                for(String nick:netsplitHelper.getNicks()){
+                                    IrcUser user = new IrcUser();
+                                    user.nick = nick;
+                                    service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, message.bufferInfo.networkId, 0, user).sendToTarget();
+                                    sendInitRequest("IrcUser",message.bufferInfo.networkId+"/" + nick);
+                                }
+                            }
+
+                            if(message.type == IrcMessage.Type.NetsplitQuit){
+                                NetsplitHelper netsplitHelper=new NetsplitHelper(message.content.toString());
+                                for(String nick:netsplitHelper.getNicks()){
+                                    service.getHandler().obtainMessage(R.id.USER_QUIT, message.bufferInfo.networkId, 0, nick).sendToTarget();
+                                }
+                            }
 							
 							Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
 							msg.obj = message;

@@ -225,6 +225,14 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(!Quasseldroid.connected) {
 			returnToLogin();
 		}
+        NetworkCollection networks = NetworkCollection.getInstance();
+        if(openedBuffer != -1 && networks != null && networks.getBufferById(openedBuffer) == null){
+            openedBuffer = -1;
+            BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
+            drawer.closeDrawer(Gravity.RIGHT);
+            drawer.openDrawer(Gravity.LEFT);
+            return;
+        }
         if(isDrawerOpen && bufferFragment != null) {
             drawer.openDrawer(Gravity.LEFT);
             if(chatFragment != null) chatFragment.setUserVisibleHint(false);
@@ -403,6 +411,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		if(event.bufferId == openedBuffer) {
 			openedBuffer = -1;
 			BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
+            drawer.closeDrawer(Gravity.RIGHT);
 			drawer.openDrawer(Gravity.LEFT);
 		}
 	}
