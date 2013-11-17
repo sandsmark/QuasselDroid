@@ -461,6 +461,9 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 					}
 				} else if(bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
 					holder.bufferImage.setImageBitmap(userAwayBitmap);
+                    if(!entry.isActive()){
+                        entry.setActive(true);
+                    }
 				} else {
 					holder.bufferImage.setImageBitmap(userBitmap);
 					if(!entry.isActive()){
