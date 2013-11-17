@@ -290,19 +290,23 @@ public class ChatFragment extends SherlockFragment {
             }
 			adapter.clearBuffer();
 			Buffer buffer = networks.getBufferById(bufferId);
-			adapter.setBuffer(buffer, networks);
-			nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
-			autoCompleteButton.setEnabled(true);
-			inputField.setEnabled(true);
-			buffer.setDisplayed(true);
-			BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
+            if(buffer!=null){
+                adapter.setBuffer(buffer, networks);
+                nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
+                autoCompleteButton.setEnabled(true);
+                inputField.setEnabled(true);
+                buffer.setDisplayed(true);
+                BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
-			//Move list to correect position
-			if (adapter.buffer.getTopMessageShown() == 0) {
-				backlogList.setSelection(adapter.getCount()-1);
-			}else{
-				adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
-			}
+                //Move list to correect position
+                if (adapter.buffer.getTopMessageShown() == 0) {
+                    backlogList.setSelection(adapter.getCount()-1);
+                }else{
+                    adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
+                }
+            }else{
+                resetFragment();
+            }
 		}
 	}
 
@@ -582,7 +586,9 @@ public class ChatFragment extends SherlockFragment {
 	}	
 
 	private void onNickComplete() {
-		nickCompletionHelper.completeNick(inputField);
+        if(nickCompletionHelper!=null){
+           nickCompletionHelper.completeNick(inputField);
+        }
 	}
 
 	public static class ViewHolder {
@@ -636,9 +642,7 @@ public class ChatFragment extends SherlockFragment {
 		if(event.bufferId != -1) {
 			setBuffer(bufferId);
 		}else{
-			adapter.clearBuffer();
-			topicView.setText("");
-			topicViewFull.setText("");
+            resetFragment();
 		}
         Log.d(TAG, "onBufferOpened done");
 	}
@@ -653,5 +657,15 @@ public class ChatFragment extends SherlockFragment {
 	public void onCompleteNick(CompleteNickEvent event) {
 		onNickComplete();
 	}
+
+    private void resetFragment(){
+        adapter.clearBuffer();
+        topicView.setText("");
+        topicViewFull.setText("");
+        autoCompleteButton.setEnabled(false);
+        inputField.setText("");
+        inputField.setEnabled(false);
+        nickCompletionHelper=null;
+    }
 }
 
