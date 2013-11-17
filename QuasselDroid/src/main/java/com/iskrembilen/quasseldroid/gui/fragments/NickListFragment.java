@@ -286,6 +286,8 @@ public class NickListFragment extends SherlockFragment {
 
 	private void updateUsers() {
 		Buffer buffer = networks.getBufferById(bufferId);
-		adapter.setUsers(buffer.getUsers());				
+        if(buffer!=null){
+		    adapter.setUsers(buffer.getUsers());
+        }
 	}
 }
