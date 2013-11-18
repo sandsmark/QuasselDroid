@@ -3,7 +3,7 @@
 	<color name="logo_text_color">#0686fd</color>
 	
 	<color name="buffer_unread_color_light">#0000F5</color>
-	<color name="buffer_highlight_color_light">#FF8Cff</color>
+	<color name="buffer_highlight_color_light">#ff8000</color>
 	<color name="buffer_read_color_light">#000000</color>
 	<color name="buffer_parted_color_light">#C0C0C0</color>
 	<color name="buffer_activity_color_light">#008000</color>
