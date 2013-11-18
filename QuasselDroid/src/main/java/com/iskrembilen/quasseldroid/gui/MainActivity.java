@@ -34,6 +34,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.*;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.ViewDragHelper;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
@@ -61,6 +62,8 @@ import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
+
+import java.lang.reflect.Field;
 
 public class MainActivity extends SherlockFragmentActivity {
 
@@ -99,6 +102,26 @@ public class MainActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.main_layout);
 
         drawer = (DrawerLayout)findViewById(R.id.drawer);
+
+        try{
+            Field mLeftDragger = drawer.getClass().getDeclaredField("mLeftDragger");
+            mLeftDragger.setAccessible(true);
+            ViewDragHelper leftDraggerObj = (ViewDragHelper) mLeftDragger.get(drawer);
+            Field mLeftEdgeSize = leftDraggerObj.getClass().getDeclaredField("mEdgeSize");
+            mLeftEdgeSize.setAccessible(true);
+            int leftEdge = mLeftEdgeSize.getInt(leftDraggerObj);
+            mLeftEdgeSize.setInt(leftDraggerObj, leftEdge * 3);
+
+            Field mRightDragger = drawer.getClass().getDeclaredField("mRightDragger");
+            mRightDragger.setAccessible(true);
+            ViewDragHelper rightDraggerObj = (ViewDragHelper) mRightDragger.get(drawer);
+            Field mRightEdgeSize = rightDraggerObj.getClass().getDeclaredField("mEdgeSize");
+            mRightEdgeSize.setAccessible(true);
+            int rightEdge = mRightEdgeSize.getInt(rightDraggerObj);
+            mRightEdgeSize.setInt(rightDraggerObj, rightEdge * 3);
+        }catch(Exception e){
+            Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
+        }
 
         if(savedInstanceState != null) {
             Log.d(TAG, "MainActivity has savedInstanceState");
