@@ -651,7 +651,7 @@ public final class CoreConnection {
 	 * @param className The class name of the object we want.
 	 * @param objectName The name of the object we want.
 	 */
-	private void sendInitRequest(String className, String objectName) throws IOException {
+	public void sendInitRequest(String className, String objectName) throws IOException {
 		List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
 		packedFunc.add(new QVariant<Integer>(RequestType.InitRequest.getValue(), QVariantType.Int));
 		packedFunc.add(new QVariant<String>(className, QVariantType.String));
@@ -1203,10 +1203,10 @@ public final class CoreConnection {
 							//If not done then we can add it right here, if we try to send it we might crash because service don't have the network yet
 							if(!initComplete) { 
 								networks.get(Integer.parseInt(objectName)).onUserJoined(user);
+                                sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
 							} else {
 								service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
 							}
-							sendInitRequest("IrcUser", objectName+"/" + nick.split("!")[0]);
 						}  else if (className.equals("Network") && function.equals("setConnectionState")) {
 							Log.d(TAG, "Sync: Network -> setConnectionState");
 							int networkId = Integer.parseInt(objectName);
@@ -1230,7 +1230,6 @@ public final class CoreConnection {
 							Log.d(TAG, "Sync: Network -> addIrcChannel");
 							int networkId = Integer.parseInt(objectName);
 							String bufferName = (String) packedFunc.remove(0).getData();
-							System.out.println(bufferName);
 							boolean hasBuffer = false;
 							for(Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
 								if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
@@ -1251,7 +1250,6 @@ public final class CoreConnection {
 								Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
 								msg.sendToTarget();
 							}
-							sendInitRequest("IrcChannel", objectName+"/" + bufferName);	
 						} 
 						else if (className.equals("Network") && function.equals("setConnected")) {
 							Log.d(TAG, "Sync: Network -> setConnected");
