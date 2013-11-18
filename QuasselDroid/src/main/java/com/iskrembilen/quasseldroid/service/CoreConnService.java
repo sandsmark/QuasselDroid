@@ -370,7 +370,7 @@ public class CoreConnService extends Service {
 					}
 					buffer.addMessage(message);
 					
-					if (buffer.isTemporarilyHidden()) {
+					if (buffer.isTemporarilyHidden() && (message.type==IrcMessage.Type.Plain || message.type==IrcMessage.Type.Notice || message.type==IrcMessage.Type.Action)) {
 						unhideTempHiddenBuffer(buffer.getInfo().id);
 					}
 				} else {
