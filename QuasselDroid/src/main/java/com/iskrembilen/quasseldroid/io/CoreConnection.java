@@ -1026,18 +1026,20 @@ public final class CoreConnection {
 							String topic = (String)map.get("topic").getData();
 							String[] tmp = objectName.split("/", 2);
 							int networkId = Integer.parseInt(tmp[0]);
-							for(Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
-								if(buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
-									Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
-									msg.sendToTarget();
-									msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ACTIVE,buffer.getInfo().id, 0, true);
-									msg.sendToTarget();
-									break;
-								}
-							}
-							
-							
-							
+                            boolean found = false;
+                            for(Buffer buffer : buffers.values()) {
+                                if(buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
+                                    found = true;
+                                    Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                    msg.sendToTarget();
+                                    msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ACTIVE,buffer.getInfo().id, 0, true);
+                                    msg.sendToTarget();
+                                    break;
+                                }
+                            }
+                            if(!found) {
+                                Log.e(TAG, "Could not find buffer for IrcChannel initData");
+                            }
 						} 
 						else if (className.equals("BufferViewConfig")) {
 							Log.d(TAG, "InitData: BufferViewConfig");
