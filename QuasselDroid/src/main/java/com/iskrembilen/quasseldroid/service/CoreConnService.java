@@ -596,7 +596,6 @@ public class CoreConnService extends Service {
 				}
 				//Did not find buffer in the network, something is wrong
 				Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
-				throw new RuntimeException("joinIrcUser: Did not find buffer with name " + bufferName);
 			case R.id.USER_CHANGEDNICK:
 				if (networks.getNetworkById(msg.arg1) == null) {
 					Log.e(TAG, "Could not find network with id " + msg.arg1 + " for changing a user nick");
@@ -800,8 +799,12 @@ public class CoreConnService extends Service {
 	
 	@Subscribe
 	public void getGetBacklog(GetBacklogEvent event) {
-		Log.d(TAG, "Fetching more backlog");
-		coreConn.requestMoreBacklog(event.bufferId, event.backlogAmount);
+        if(event!=null){
+            Log.d(TAG, "Fetching more backlog");
+            coreConn.requestMoreBacklog(event.bufferId, event.backlogAmount);
+        }else{
+            Log.e(TAG, "Cannot request backlog, event was null!");
+        }
 	}
 	
 	@Subscribe

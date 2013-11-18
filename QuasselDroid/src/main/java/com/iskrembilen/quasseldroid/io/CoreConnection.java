@@ -920,7 +920,7 @@ public final class CoreConnection {
 									}
 								}
 								if(!foundChannel) 
-									throw new RuntimeException("A channel in a network has no coresponding buffer object " + chanName);
+									Log.e(TAG, "A channel in a network has no coresponding buffer object " + chanName);
 							}
 							
 							Log.i(TAG, "Sending network " + network.getName() + " to service");

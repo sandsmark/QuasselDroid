@@ -21,6 +21,8 @@
 
 package com.iskrembilen.quasseldroid.util;
 
+import android.util.Log;
+
 import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
 
 import java.io.IOException;
@@ -36,6 +38,8 @@ import java.nio.charset.CharsetDecoder;
  * 
  */
 public class StringReaderUtil {
+    private static final String TAG = StringReaderUtil.class.getSimpleName();
+
 	int buflen = -1;
 	ByteBuffer buf;
 	CharsetDecoder decoder;
@@ -71,7 +75,12 @@ public class StringReaderUtil {
 		stream.readFully(buf.array(), 0, len);
 		
 		//Decode it with correct encoding
-		decoder.decode(buf, charBuffer, false);
+        try{
+		    decoder.decode(buf, charBuffer, false);
+        }catch(IllegalArgumentException e){
+            e.printStackTrace();
+            Log.e(TAG, "Failed to decode buffer: " + buf);
+        }
 		
 		//Set where the current string ends, it is the position we are at after decoding into the buffer
 		charBuffer.limit(charBuffer.position());
