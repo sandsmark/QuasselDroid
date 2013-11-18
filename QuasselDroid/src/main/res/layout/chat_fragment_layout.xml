@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
     <FrameLayout
         android:id="@+id/chat_topic_frame"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@drawable/topic_view_border" >
+        android:background="@drawable/topic_view_border">
 
         <TextView
             android:id="@+id/chat_topic_view"
@@ -47,7 +47,7 @@
         android:id="@+id/R.id.chat_input_frame"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
+        android:layout_alignParentBottom="true">
 
         <EditText
             android:id="@+id/chat_input_view"
@@ -55,8 +55,7 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionSend"
             android:inputType="textMultiLine"
-            android:paddingLeft="36dp" >
-        </EditText>
+            android:paddingLeft="36dp"></EditText>
 
         <ImageButton
             android:id="@+id/chat_auto_complete_button"

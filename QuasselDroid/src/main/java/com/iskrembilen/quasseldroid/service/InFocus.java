@@ -6,9 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.os.IBinder;
 import android.os.Binder;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 
 import com.iskrembilen.quasseldroid.R;
@@ -57,9 +56,7 @@ public class InFocus extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 onFocus();
-            }
-
-            else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 onUnfocus();
             }
         }
@@ -73,7 +70,7 @@ public class InFocus extends Service {
     }
 
     @Override
-    public IBinder onBind( Intent intent ) {
+    public IBinder onBind(Intent intent) {
         return binder;
     }
 

@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/nicklist_holder_view"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal"
-              android:paddingLeft="5dp"
-              android:paddingTop="2dp"
-              android:paddingRight="2dp"
-              android:paddingBottom="2dp">
-<ImageView
+    android:id="@+id/nicklist_holder_view"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingLeft="5dp"
+    android:paddingTop="2dp"
+    android:paddingRight="2dp"
+    android:paddingBottom="2dp">
+
+    <ImageView
         android:id="@+id/nicklist_expander_image_view"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/nick_list_expander" />
+
     <ImageView
         android:id="@+id/nicklist_group_image_view"
         android:layout_width="wrap_content"

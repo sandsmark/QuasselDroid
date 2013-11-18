@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<item android:id="@+id/menu_manage_cores" android:title="@string/menu_manage_cores" android:showAsAction="ifRoom|withText" android:icon="?actionEditIcon">
-		
-		
-		<menu xmlns:android="http://schemas.android.com/apk/res/android">
-			<item android:id="@+id/menu_add_core" android:title="@string/menu_add_core"
-				android:icon="?actionEditIcon" />
-				
-			<item android:id="@+id/menu_edit_core" android:title="@string/menu_edit_core"
-				android:icon="?actionEditIcon" />
-			<item android:id="@+id/menu_delete_core" android:title="@string/menu_delete_core"
-				android:icon="?actionEditIcon"  />
-		</menu>
-	</item>
-	<item android:id="@+id/menu_preferences" android:title="@string/preferences"
-		android:icon="?actionSettingsIcon"/>
-		
-		
+    <item
+        android:id="@+id/menu_manage_cores"
+        android:title="@string/menu_manage_cores"
+        android:showAsAction="ifRoom|withText"
+        android:icon="?actionEditIcon">
+
+
+        <menu xmlns:android="http://schemas.android.com/apk/res/android">
+            <item
+                android:id="@+id/menu_add_core"
+                android:title="@string/menu_add_core"
+                android:icon="?actionEditIcon" />
+
+            <item
+                android:id="@+id/menu_edit_core"
+                android:title="@string/menu_edit_core"
+                android:icon="?actionEditIcon" />
+            <item
+                android:id="@+id/menu_delete_core"
+                android:title="@string/menu_delete_core"
+                android:icon="?actionEditIcon" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_preferences"
+        android:title="@string/preferences"
+        android:icon="?actionSettingsIcon" />
+
+
 </menu>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="crittercism_api_key"></string>
-	<item type="bool" name="use_crittercism">false</item>
-	
+    <string name="crittercism_api_key"></string>
+    <item type="bool" name="use_crittercism">false</item>
+
 </resources>

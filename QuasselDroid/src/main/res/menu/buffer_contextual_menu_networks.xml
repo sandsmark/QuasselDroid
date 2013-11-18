@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/context_menu_connect" android:title="@string/context_connect"></item><item android:id="@+id/context_menu_disconnect" android:title="@string/context_disconnect"></item>
-	
+    <item
+        android:id="@+id/context_menu_connect"
+        android:title="@string/context_connect"></item>
+    <item
+        android:id="@+id/context_menu_disconnect"
+        android:title="@string/context_disconnect"></item>
+
 </menu>

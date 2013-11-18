@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="36dp" >
+    android:paddingLeft="36dp">
 
     <TextView
         android:id="@+id/buffer_list_item_name"

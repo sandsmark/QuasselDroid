@@ -6,7 +6,7 @@
     android:paddingBottom="2dp"
     android:paddingLeft="25dp"
     android:paddingRight="2dp"
-    android:paddingTop="2dp" >
+    android:paddingTop="2dp">
 
     <ImageView
         android:id="@+id/nicklist_nick_image"

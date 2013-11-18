@@ -73,167 +73,167 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class BufferFragment extends SherlockFragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener{
+public class BufferFragment extends SherlockFragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener {
 
-	private static final String TAG = BufferFragment.class.getSimpleName();
+    private static final String TAG = BufferFragment.class.getSimpleName();
 
-	public static final String BUFFER_ID_EXTRA = "bufferid";
-	public static final String BUFFER_NAME_EXTRA = "buffername";
+    public static final String BUFFER_ID_EXTRA = "bufferid";
+    public static final String BUFFER_NAME_EXTRA = "buffername";
 
-	private static final String ITEM_POSITION_KEY = "itempos";
+    private static final String ITEM_POSITION_KEY = "itempos";
 
-	private static final String LIST_POSITION_KEY = "listpos";
+    private static final String LIST_POSITION_KEY = "listpos";
 
-	BufferListAdapter bufferListAdapter;
-	ExpandableListView bufferList;
+    BufferListAdapter bufferListAdapter;
+    ExpandableListView bufferList;
 
-	SharedPreferences preferences;
-	OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+    SharedPreferences preferences;
+    OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
-	private int restoreListPosition = 0;
-	private int restoreItemPosition = 0;
+    private int restoreListPosition = 0;
+    private int restoreItemPosition = 0;
 
-	private ActionModeData actionModeData = new ActionModeData();
+    private ActionModeData actionModeData = new ActionModeData();
 
-	private int openedBufferId = -1;
+    private int openedBufferId = -1;
 
-	public static BufferFragment newInstance() {
-		return new BufferFragment();
-	}
+    public static BufferFragment newInstance() {
+        return new BufferFragment();
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if(savedInstanceState != null) {
-			restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
-			restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
-		}
-		setHasOptionsMenu(true);
-		preferences = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
-		sharedPreferenceChangeListener =new OnSharedPreferenceChangeListener() {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            restoreListPosition = savedInstanceState.getInt(LIST_POSITION_KEY);
+            restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
+        }
+        setHasOptionsMenu(true);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
+        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
-			@Override
-			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-				if(key.equals(getResources().getString(R.string.preference_fontsize_channel_list))){
-					bufferListAdapter.notifyDataSetChanged();
-				}
-			}
-		};
-		preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
-	}
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(getResources().getString(R.string.preference_fontsize_channel_list))) {
+                    bufferListAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View root =  inflater.inflate(R.layout.buffer_list_fragment_layout, container, false);
-		bufferList = (ExpandableListView) root.findViewById(R.id.buffer_list);
-		return root;
-	}
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.buffer_list_fragment_layout, container, false);
+        bufferList = (ExpandableListView) root.findViewById(R.id.buffer_list);
+        return root;
+    }
 
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		bufferListAdapter = new BufferListAdapter(getSherlockActivity());
-		bufferList.setAdapter(bufferListAdapter);
-		bufferList.setDividerHeight(0);
-		bufferList.setOnChildClickListener(this);
-		bufferList.setOnGroupCollapseListener(this);
-		bufferList.setOnGroupExpandListener(this);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        bufferListAdapter = new BufferListAdapter(getSherlockActivity());
+        bufferList.setAdapter(bufferListAdapter);
+        bufferList.setDividerHeight(0);
+        bufferList.setOnChildClickListener(this);
+        bufferList.setOnGroupCollapseListener(this);
+        bufferList.setOnGroupExpandListener(this);
 
-		initActionMenu();
+        initActionMenu();
 
-	}
+    }
 
-	private void initActionMenu() {
-		actionModeData.actionModeCallbackNetwork = new ActionMode.Callback() {
+    private void initActionMenu() {
+        actionModeData.actionModeCallbackNetwork = new ActionMode.Callback() {
 
-			@Override
-			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-				MenuInflater inflater = mode.getMenuInflater();
-				inflater.inflate(R.menu.buffer_contextual_menu_networks, menu);
-				return true;
-			}
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.buffer_contextual_menu_networks, menu);
+                return true;
+            }
 
-			@Override
-			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-				return false;
-			}
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
 
-			@Override
-			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-				switch (item.getItemId()) {
-				case R.id.context_menu_connect:
-					BufferHelper.connectNetwork(actionModeData.id);
-					mode.finish();
-					return true;
-				case R.id.context_menu_disconnect:
-					BufferHelper.disconnectNetwork(actionModeData.id);
-					mode.finish();
-					return true;
-				default:
-					return false;
-				}
-			}
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.context_menu_connect:
+                        BufferHelper.connectNetwork(actionModeData.id);
+                        mode.finish();
+                        return true;
+                    case R.id.context_menu_disconnect:
+                        BufferHelper.disconnectNetwork(actionModeData.id);
+                        mode.finish();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
 
-			@Override
-			public void onDestroyActionMode(ActionMode mode) {
-				//				actionModeData.listItem.setActivated(false);
-				actionModeData.actionMode = null;
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                //				actionModeData.listItem.setActivated(false);
+                actionModeData.actionMode = null;
 
-			}
+            }
 
-		};
-		actionModeData.actionModeCallbackBuffer = new ActionMode.Callback() {
+        };
+        actionModeData.actionModeCallbackBuffer = new ActionMode.Callback() {
 
-			@Override
-			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-				MenuInflater inflater = mode.getMenuInflater();
-				inflater.inflate(R.menu.buffer_contextual_menu_channels, menu);
-				return true;
-			}
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.buffer_contextual_menu_channels, menu);
+                return true;
+            }
 
-			@Override
-			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-				return false; // Return false if nothing is done
-			}
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false; // Return false if nothing is done
+            }
 
-			@Override
-			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-				switch (item.getItemId()) {
-				case R.id.context_menu_join:
-					BufferHelper.joinChannel(actionModeData.id, bufferListAdapter.networks);
-					mode.finish();
-					return true;
-				case R.id.context_menu_part:
-					BufferHelper.partChannel(actionModeData.id, bufferListAdapter.networks);
-					mode.finish();
-					return true;
-				case R.id.context_menu_delete:
-					BufferHelper.showDeleteConfirmDialog(getSherlockActivity(), actionModeData.id);
-					mode.finish();
-					return true;
-				case R.id.context_menu_hide_temp:
-					BufferHelper.tempHideChannel(actionModeData.id);
-					mode.finish();
-					return true;
-				case R.id.context_menu_hide_perm:
-					BufferHelper.permHideChannel(actionModeData.id);
-					mode.finish();
-					return true;
-				default:
-					return false;
-				}
-			}
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.context_menu_join:
+                        BufferHelper.joinChannel(actionModeData.id, bufferListAdapter.networks);
+                        mode.finish();
+                        return true;
+                    case R.id.context_menu_part:
+                        BufferHelper.partChannel(actionModeData.id, bufferListAdapter.networks);
+                        mode.finish();
+                        return true;
+                    case R.id.context_menu_delete:
+                        BufferHelper.showDeleteConfirmDialog(getSherlockActivity(), actionModeData.id);
+                        mode.finish();
+                        return true;
+                    case R.id.context_menu_hide_temp:
+                        BufferHelper.tempHideChannel(actionModeData.id);
+                        mode.finish();
+                        return true;
+                    case R.id.context_menu_hide_perm:
+                        BufferHelper.permHideChannel(actionModeData.id);
+                        mode.finish();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
 
-			// Called when the user exits the action mode
-			@Override
-			public void onDestroyActionMode(ActionMode mode) {
-				//				actionModeData.listItem.setActivated(false);
-				actionModeData.actionMode = null;
-			}
-		};
+            // Called when the user exits the action mode
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                //				actionModeData.listItem.setActivated(false);
+                actionModeData.actionMode = null;
+            }
+        };
 
-		bufferList.setOnItemLongClickListener(new OnItemLongClickListener() {
+        bufferList.setOnItemLongClickListener(new OnItemLongClickListener() {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
@@ -282,325 +282,327 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                 return true;
             }
         });
-	}
+    }
 
-	@Override
-	public void onStart() {
-		super.onStart();
-		BusProvider.getInstance().register(this);
-	}
+    @Override
+    public void onStart() {
+        super.onStart();
+        BusProvider.getInstance().register(this);
+    }
 
-	@Override
-	public void onStop() {
-		super.onStop();
-		BusProvider.getInstance().unregister(this);
-	}
+    @Override
+    public void onStop() {
+        super.onStop();
+        BusProvider.getInstance().unregister(this);
+    }
 
-	@Override
-	public void onDestroy() {
-		preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
-		super.onDestroy();
-	}
+    @Override
+    public void onDestroy() {
+        preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        super.onDestroy();
+    }
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		// Save position of first visible item
-		restoreListPosition = bufferList.getFirstVisiblePosition();
-		outState.putInt(LIST_POSITION_KEY, restoreListPosition);
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save position of first visible item
+        restoreListPosition = bufferList.getFirstVisiblePosition();
+        outState.putInt(LIST_POSITION_KEY, restoreListPosition);
 
-		// Save scroll position of item
-		View itemView = bufferList.getChildAt(0);
-		restoreItemPosition = itemView == null ? 0 : itemView.getTop();
-		outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
+        // Save scroll position of item
+        View itemView = bufferList.getChildAt(0);
+        restoreItemPosition = itemView == null ? 0 : itemView.getTop();
+        outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
 
-	}
+    }
 
 
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.buffer_list_fragment_menu, menu);
-	}
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.buffer_list_fragment_menu, menu);
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_join_channel:
-			if(bufferListAdapter.networks == null) Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
-			else showJoinChannelDialog();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_join_channel:
+                if (bufferListAdapter.networks == null)
+                    Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
+                else showJoinChannelDialog();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
-	private void showJoinChannelDialog() {
-		List<Network> networkList = bufferListAdapter.networks.getNetworkList();
-		String[] networkArray = new String[networkList.size()];
+    private void showJoinChannelDialog() {
+        List<Network> networkList = bufferListAdapter.networks.getNetworkList();
+        String[] networkArray = new String[networkList.size()];
 
-		for(int i = 0; i < networkList.size(); i++) {
-			networkArray[i] = networkList.get(i).getName();
-		}
+        for (int i = 0; i < networkList.size(); i++) {
+            networkArray[i] = networkList.get(i).getName();
+        }
 
-		FragmentTransaction ft = getFragmentManager().beginTransaction();
-		Fragment prev = getFragmentManager().findFragmentByTag("dialog");
-		if (prev != null) {
-			ft.remove(prev);
-		}
-		ft.addToBackStack(null);
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
 
-		// Create and show the dialog.
-		DialogFragment newFragment = JoinChannelDialog.newInstance(networkArray);
-		newFragment.show(ft, "dialog");
-	}
+        // Create and show the dialog.
+        DialogFragment newFragment = JoinChannelDialog.newInstance(networkArray);
+        newFragment.show(ft, "dialog");
+    }
 
-	@Override
-	public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-		openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
-		return true;
-	}
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
+        return true;
+    }
 
-	@Override
-	public void onGroupExpand(int groupPosition) {
-		bufferListAdapter.getGroup(groupPosition).setOpen(true);
-	}
+    @Override
+    public void onGroupExpand(int groupPosition) {
+        bufferListAdapter.getGroup(groupPosition).setOpen(true);
+    }
 
-	@Override
-	public void onGroupCollapse(int groupPosition) {
-		bufferListAdapter.getGroup(groupPosition).setOpen(false);
-	}
+    @Override
+    public void onGroupCollapse(int groupPosition) {
+        bufferListAdapter.getGroup(groupPosition).setOpen(false);
+    }
 
-	private void openBuffer(Buffer buffer) {
-		this.openedBufferId = buffer.getInfo().id;
+    private void openBuffer(Buffer buffer) {
+        this.openedBufferId = buffer.getInfo().id;
         buffer.setTemporarilyHidden(false);
-		BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
-	}
+        BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
+    }
 
-	public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
-		private NetworkCollection networks;
-		private LayoutInflater inflater;
-		private Bitmap channelActiveBitmap, channelInactiveBitmap, userAwayBitmap, userOfflineBitmap, userBitmap;
+    public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
+        private NetworkCollection networks;
+        private LayoutInflater inflater;
+        private Bitmap channelActiveBitmap, channelInactiveBitmap, userAwayBitmap, userOfflineBitmap, userBitmap;
 
-		public BufferListAdapter(Context context) {
-			inflater = getLayoutInflater(null);
-			channelActiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_active);
-			channelInactiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_inactive);
-			userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
-			userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
-			userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
+        public BufferListAdapter(Context context) {
+            inflater = getLayoutInflater(null);
+            channelActiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_active);
+            channelInactiveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.irc_channel_inactive);
+            userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
+            userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
+            userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
 
 
-		}
+        }
 
-		public void setNetworks(NetworkCollection networks){
-			this.networks = networks;
-			if (networks == null)
-				return;
-			networks.addObserver(this);
-			notifyDataSetChanged();
-			if(bufferListAdapter != null) {
-				for(int group = 0; group < getGroupCount(); group++) {
-					if(getGroup(group).isOpen()) bufferList.expandGroup(group);
-					else bufferList.collapseGroup(group);
-				}
-				bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
-			}
-		}
+        public void setNetworks(NetworkCollection networks) {
+            this.networks = networks;
+            if (networks == null)
+                return;
+            networks.addObserver(this);
+            notifyDataSetChanged();
+            if (bufferListAdapter != null) {
+                for (int group = 0; group < getGroupCount(); group++) {
+                    if (getGroup(group).isOpen()) bufferList.expandGroup(group);
+                    else bufferList.collapseGroup(group);
+                }
+                bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
+            }
+        }
 
-		@Override
-		public void notifyDataSetChanged() {
-			super.notifyDataSetChanged();
-		}
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+        }
 
-		@Override
-		public void update(Observable observable, Object data) {
-			notifyDataSetChanged();
-			for(int group = 0; group < getGroupCount(); group++) {
-				if(getGroup(group).isOpen()) bufferList.expandGroup(group);
-				else bufferList.collapseGroup(group);
-			}
-		}
+        @Override
+        public void update(Observable observable, Object data) {
+            notifyDataSetChanged();
+            for (int group = 0; group < getGroupCount(); group++) {
+                if (getGroup(group).isOpen()) bufferList.expandGroup(group);
+                else bufferList.collapseGroup(group);
+            }
+        }
 
-		@Override
-		public Buffer getChild(int groupPosition, int childPosition) {
-			return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
-		}
+        @Override
+        public Buffer getChild(int groupPosition, int childPosition) {
+            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
+        }
 
-		@Override
-		public long getChildId(int groupPosition, int childPosition) {
-			return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
-		}
+        @Override
+        public long getChildId(int groupPosition, int childPosition) {
+            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
+        }
 
-		@Override
-		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-			ViewHolderChild holder = null;
-			if (convertView==null) {
-				convertView = inflater.inflate(R.layout.buffer_child_item, null);
-				holder = new ViewHolderChild();
-				holder.bufferView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.bufferImage = (ImageView)convertView.findViewById(R.id.buffer_list_item_image);
-				holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), ""+holder.bufferView.getTextSize())));
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolderChild)convertView.getTag();
-			}
-			Buffer entry = getChild(groupPosition, childPosition);
-			switch (entry.getInfo().type) {
-			case StatusBuffer:
-			case ChannelBuffer:
-				holder.bufferView.setText(entry.getInfo().name);
-				if(entry.isActive()) holder.bufferImage.setImageBitmap(channelActiveBitmap);
-				else holder.bufferImage.setImageBitmap(channelInactiveBitmap);
-				break;
-			case QueryBuffer:
-				String nick = entry.getInfo().name;
-				if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-					holder.bufferImage.setImageBitmap(userOfflineBitmap);
-					if(entry.isActive()){
-						entry.setActive(false);
-					}
-				} else if(bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-					holder.bufferImage.setImageBitmap(userAwayBitmap);
-                    if(!entry.isActive()){
-                        entry.setActive(true);
+        @Override
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+            ViewHolderChild holder = null;
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.buffer_child_item, null);
+                holder = new ViewHolderChild();
+                holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
+                holder.bufferImage = (ImageView) convertView.findViewById(R.id.buffer_list_item_image);
+                holder.bufferView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), "" + holder.bufferView.getTextSize())));
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolderChild) convertView.getTag();
+            }
+            Buffer entry = getChild(groupPosition, childPosition);
+            switch (entry.getInfo().type) {
+                case StatusBuffer:
+                case ChannelBuffer:
+                    holder.bufferView.setText(entry.getInfo().name);
+                    if (entry.isActive()) holder.bufferImage.setImageBitmap(channelActiveBitmap);
+                    else holder.bufferImage.setImageBitmap(channelInactiveBitmap);
+                    break;
+                case QueryBuffer:
+                    String nick = entry.getInfo().name;
+                    if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
+                        holder.bufferImage.setImageBitmap(userOfflineBitmap);
+                        if (entry.isActive()) {
+                            entry.setActive(false);
+                        }
+                    } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
+                        holder.bufferImage.setImageBitmap(userAwayBitmap);
+                        if (!entry.isActive()) {
+                            entry.setActive(true);
+                        }
+                    } else {
+                        holder.bufferImage.setImageBitmap(userBitmap);
+                        if (!entry.isActive()) {
+                            entry.setActive(true);
+                        }
                     }
-				} else {
-					holder.bufferImage.setImageBitmap(userBitmap);
-					if(!entry.isActive()){
-						entry.setActive(true);
-					}
-				}
 
-				holder.bufferView.setText(nick);
+                    holder.bufferView.setText(nick);
 
-				break;
-			case GroupBuffer:
-			case InvalidBuffer:
-				holder.bufferView.setText("XXXX " + entry.getInfo().name);
-			}				
+                    break;
+                case GroupBuffer:
+                case InvalidBuffer:
+                    holder.bufferView.setText("XXXX " + entry.getInfo().name);
+            }
 
-			BufferUtils.setBufferViewStatus(getSherlockActivity(), entry, holder.bufferView);
-			return convertView;
-		}
+            BufferUtils.setBufferViewStatus(getSherlockActivity(), entry, holder.bufferView);
+            return convertView;
+        }
 
-		@Override
-		public int getChildrenCount(int groupPosition) {
-			if (networks==null) {
-				return 0;
-			}else {
-				return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
-			}
-		}
+        @Override
+        public int getChildrenCount(int groupPosition) {
+            if (networks == null) {
+                return 0;
+            } else {
+                return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
+            }
+        }
 
-		@Override
-		public Network getGroup(int groupPosition) {
-			return networks.getNetwork(groupPosition);
-		}
+        @Override
+        public Network getGroup(int groupPosition) {
+            return networks.getNetwork(groupPosition);
+        }
 
-		@Override
-		public int getGroupCount() {
-			if (networks==null) {
-				return 0;
-			}else {
-				return networks.size();
-			}
-		}
+        @Override
+        public int getGroupCount() {
+            if (networks == null) {
+                return 0;
+            } else {
+                return networks.size();
+            }
+        }
 
-		@Override
-		public long getGroupId(int groupPosition) {
-			return networks.getNetwork(groupPosition).getId();
-		}
+        @Override
+        public long getGroupId(int groupPosition) {
+            return networks.getNetwork(groupPosition).getId();
+        }
 
-		@Override
-		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-			ViewHolderGroup holder = null;
-			if (convertView==null) {
-				convertView = inflater.inflate(R.layout.buffer_group_item, null);
-				holder = new ViewHolderGroup();
-				holder.statusView = (TextView)convertView.findViewById(R.id.buffer_list_item_name);
-				holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP , Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), "20")));
-				holder.statusView.setOnClickListener(new OnClickListener() {
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+            ViewHolderGroup holder = null;
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.buffer_group_item, null);
+                holder = new ViewHolderGroup();
+                holder.statusView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
+                holder.statusView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(preferences.getString(getString(R.string.preference_fontsize_channel_list), "20")));
+                holder.statusView.setOnClickListener(new OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						if(getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
-							openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
-						} else { //TODO: mabye show the chatActivity but have it be empty, logo or something
-							Toast.makeText(getSherlockActivity(), "Not Available", Toast.LENGTH_SHORT).show(); 
-						}
-					}
-				});
-				holder.statusView.setOnLongClickListener(null); //Apparently need this so long click propagates to parent
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolderGroup)convertView.getTag();
-			}
-			Network entry = getGroup(groupPosition);
-			holder.networkId = entry.getId();
-			holder.statusView.setText(entry.getName());
-			holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
-			BufferUtils.setBufferViewStatus(getSherlockActivity(), entry.getStatusBuffer(), holder.statusView);
-			return convertView;
-		}
+                    @Override
+                    public void onClick(View v) {
+                        if (getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
+                            openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
+                        } else { //TODO: mabye show the chatActivity but have it be empty, logo or something
+                            Toast.makeText(getSherlockActivity(), "Not Available", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                holder.statusView.setOnLongClickListener(null); //Apparently need this so long click propagates to parent
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolderGroup) convertView.getTag();
+            }
+            Network entry = getGroup(groupPosition);
+            holder.networkId = entry.getId();
+            holder.statusView.setText(entry.getName());
+            holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
+            BufferUtils.setBufferViewStatus(getSherlockActivity(), entry.getStatusBuffer(), holder.statusView);
+            return convertView;
+        }
 
-		@Override
-		public boolean hasStableIds() {
-			return true;
-		}
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
 
 
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
+        }
 
-		@Override
-		public boolean isChildSelectable(int groupPosition, int childPosition) {
-			return true;
-		}
+        public void clearBuffers() {
+            networks = null;
+            notifyDataSetChanged();
+        }
 
-		public void clearBuffers() {
-			networks = null;
-			notifyDataSetChanged();
-		}	
+        public void stopObserving() {
+            if (networks == null) return;
+            for (Network network : networks.getNetworkList())
+                network.deleteObserver(this);
+        }
 
-		public void stopObserving() {
-			if (networks == null) return;
-			for(Network network : networks.getNetworkList())
-				network.deleteObserver(this);
-		}
+    }
 
-	}
+    public static class ViewHolderChild {
+        public ImageView bufferImage;
+        public TextView bufferView;
+    }
 
-	public static class ViewHolderChild {
-		public ImageView bufferImage;
-		public TextView bufferView;
-	}
-	public static class ViewHolderGroup {
-		public TextView statusView;
-		public int networkId;
-	}
+    public static class ViewHolderGroup {
+        public TextView statusView;
+        public int networkId;
+    }
 
-	@Subscribe
-	public void onNetworksAvailable(NetworksAvailableEvent event) {
-		if(event.networks != null) {
-			event.networks.addObserver(bufferListAdapter);
-			bufferListAdapter.setNetworks(event.networks);			
-		}
-	}
+    @Subscribe
+    public void onNetworksAvailable(NetworksAvailableEvent event) {
+        if (event.networks != null) {
+            event.networks.addObserver(bufferListAdapter);
+            bufferListAdapter.setNetworks(event.networks);
+        }
+    }
 
-	class ActionModeData {
-		public int id;
-		public View listItem;
-		public ActionMode actionMode;
-		public ActionMode.Callback actionModeCallbackNetwork;
-		public ActionMode.Callback actionModeCallbackBuffer;
-	}
+    class ActionModeData {
+        public int id;
+        public View listItem;
+        public ActionMode actionMode;
+        public ActionMode.Callback actionModeCallbackNetwork;
+        public ActionMode.Callback actionModeCallbackBuffer;
+    }
 
-	@Subscribe
-	public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
-		bufferListAdapter.notifyDataSetChanged();
-	}
+    @Subscribe
+    public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
+        bufferListAdapter.notifyDataSetChanged();
+    }
 
     /**
      * Check if a buffer is already existing and switch to it
      * If not a QueryUserEvent is created so the CoreConnService queries the user
+     *
      * @param event
      */
     @Subscribe

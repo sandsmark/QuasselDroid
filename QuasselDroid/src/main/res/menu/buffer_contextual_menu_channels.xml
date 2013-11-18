@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/context_menu_part" android:title="@string/context_part" android:orderInCategory="1"></item>
-	<item android:id="@+id/context_menu_join" android:title="@string/context_join" android:orderInCategory="2"></item>
-	<item android:id="@+id/context_menu_hide_temp" android:title="@string/context_hide_temporarily" android:orderInCategory="3"></item>
-	<item android:id="@+id/context_menu_hide_perm" android:title="@string/context_hide_permanently" android:orderInCategory="4"></item>
-	<item android:id="@+id/context_menu_delete" android:title="@string/context_delete" android:orderInCategory="5"></item>
+    <item
+        android:id="@+id/context_menu_part"
+        android:title="@string/context_part"
+        android:orderInCategory="1"></item>
+    <item
+        android:id="@+id/context_menu_join"
+        android:title="@string/context_join"
+        android:orderInCategory="2"></item>
+    <item
+        android:id="@+id/context_menu_hide_temp"
+        android:title="@string/context_hide_temporarily"
+        android:orderInCategory="3"></item>
+    <item
+        android:id="@+id/context_menu_hide_perm"
+        android:title="@string/context_hide_permanently"
+        android:orderInCategory="4"></item>
+    <item
+        android:id="@+id/context_menu_delete"
+        android:title="@string/context_delete"
+        android:orderInCategory="5"></item>
 </menu>

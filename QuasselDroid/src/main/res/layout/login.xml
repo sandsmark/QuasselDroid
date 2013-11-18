@@ -2,13 +2,12 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:fillViewport="true" >
+    android:fillViewport="true">
 
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/RelativeLayout01"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:id="@+id/logo_layout"
@@ -16,7 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="20dip"
-            android:layout_marginTop="10dip" >
+            android:layout_marginTop="10dip">
 
             <ImageView
                 android:id="@+id/logo_img"
@@ -42,8 +41,7 @@
             android:layout_below="@+id/logo_layout"
             android:layout_centerInParent="true"
             android:layout_marginBottom="20dip"
-            android:minWidth="300dip" >
-        </Spinner>
+            android:minWidth="300dip"></Spinner>
 
         <TextView
             android:id="@+id/core_lable"
@@ -59,12 +57,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/serverSpinner"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="10dip" >
+            android:layout_marginBottom="10dip">
 
             <TableRow
                 android:id="@+id/TableRow01"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/usernameText"
@@ -85,7 +83,7 @@
             <TableRow
                 android:id="@+id/TableRow02"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/passwordText"
@@ -116,7 +114,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_below="@+id/remember_me_checkbox"
-            android:paddingTop="20dip" >
+            android:paddingTop="20dip">
 
             <Button
                 android:id="@+id/connect_button"

@@ -48,8 +48,8 @@
     <item name="LAST_SEEN_CHANGED" type="id"></item>
     <item name="INIT_PROGRESS" type="id"></item>
     <item name="INIT_DONE" type="id"></item>
-    <item name="CONNECTING" type="id"/>
-    <item name="NETWORK_REMOVED" type="id"/>
+    <item name="CONNECTING" type="id" />
+    <item name="NETWORK_REMOVED" type="id" />
     <item name="SET_CONNECTION_STATE" type="id"></item>
     <item name="SET_STATUS_BUFFER" type="id"></item>
     <item name="SET_CONNECTED" type="id"></item>

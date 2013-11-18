@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_preferences" android:title="@string/preferences"
-		android:icon="?actionSettingsIcon" android:orderInCategory="10" android:showAsAction="never"></item>
-	<item android:id="@+id/menu_disconnect" android:title="@string/menu_disconnect"
-		android:icon="?actionDisconnectIcon" android:orderInCategory="11" android:showAsAction="never"></item>
+    <item
+        android:id="@+id/menu_preferences"
+        android:title="@string/preferences"
+        android:icon="?actionSettingsIcon"
+        android:orderInCategory="10"
+        android:showAsAction="never"></item>
+    <item
+        android:id="@+id/menu_disconnect"
+        android:title="@string/menu_disconnect"
+        android:icon="?actionDisconnectIcon"
+        android:orderInCategory="11"
+        android:showAsAction="never"></item>
 </menu>

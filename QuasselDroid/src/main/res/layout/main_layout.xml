@@ -1,35 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
-    <android.support.v4.widget.DrawerLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/drawer"
+    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/main_content_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent"></FrameLayout>
 
         <FrameLayout
-                android:id="@+id/main_content_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-        </FrameLayout>
+            android:id="@+id/left_drawer"
+            android:layout_width="350dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:background="?android:attr/windowBackground"></FrameLayout>
 
         <FrameLayout
-                android:id="@+id/left_drawer"
-                android:layout_width="350dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="left"
-                android:background="?android:attr/windowBackground" >
-        </FrameLayout>
-
-        <FrameLayout
-                android:id="@+id/right_drawer"
-                android:layout_width="350dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="right"
-                android:background="?android:attr/windowBackground" >
-        </FrameLayout>
+            android:id="@+id/right_drawer"
+            android:layout_width="350dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:background="?android:attr/windowBackground"></FrameLayout>
     </android.support.v4.widget.DrawerLayout>
 
 </RelativeLayout>

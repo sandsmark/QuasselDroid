@@ -4,8 +4,9 @@
     android:id="@+id/chat_fragment_container"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
+    android:orientation="vertical">
+
+
     <fragment
         android:id="@+id/chat_fragment"
         android:name="com.iskrembilen.quasseldroid.gui.fragments.ChatFragment"

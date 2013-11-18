@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/menu_join_channel" android:title="@string/menu_join_channel" android:icon="?actionJoinChannelIcon" android:showAsAction="ifRoom|withText" android:orderInCategory="1"></item>
+    <item
+        android:id="@+id/menu_join_channel"
+        android:title="@string/menu_join_channel"
+        android:icon="?actionJoinChannelIcon"
+        android:showAsAction="ifRoom|withText"
+        android:orderInCategory="1"></item>
 </menu>

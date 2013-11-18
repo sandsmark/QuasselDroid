@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="Backlog Fetching" >
-		<CheckBoxPreference
+    <PreferenceCategory android:title="Backlog Fetching">
+
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_fetch_to_last_seen"
             android:summary="Fetch all unseen messages on connect. This can take a very long time!"
-            android:title="Unread messages per chat" 
-            android:disableDependentsState="true"
-            />
-		
-		<EditTextPreference
+            android:title="Unread messages per chat"
+            android:disableDependentsState="true" />
+
+        <EditTextPreference
             android:defaultValue="10"
             android:key="@string/preference_initial_backlog_limit"
             android:numeric="integer"
             android:summary="How many lines to fetch on connect"
             android:title="Initial backlog amount"
-            android:dependency="@string/preference_fetch_to_last_seen" 
-		/>
-        
+            android:dependency="@string/preference_fetch_to_last_seen" />
+
         <EditTextPreference
             android:defaultValue="20"
             android:key="@string/preference_dynamic_backlog"
             android:numeric="integer"
             android:summary="How many lines to fetch on scroll"
             android:title="Dynamic backlog amount" />
-	</PreferenceCategory>>
-    
-    <PreferenceCategory android:title="Quassel" >
+    </PreferenceCategory>
+    >
+
+    <PreferenceCategory android:title="Quassel">
+
         <ListPreference
             android:defaultValue="20"
             android:dialogTitle="Choose fontsize for the bufferlist"
@@ -65,7 +66,7 @@
             android:title="Use a wake-lock to inhibit sleep" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Notifications" >
+    <PreferenceCategory android:title="Notifications">
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -89,26 +90,24 @@
             android:title="Play sound on notification" />
 
         <CheckBoxPreference
-                android:defaultValue="false"
-                android:key="@string/preference_notification_sound_active"
-                android:summary=""
-                android:title="Sound only when unfocused" />
+            android:defaultValue="false"
+            android:key="@string/preference_notification_sound_active"
+            android:summary=""
+            android:title="Sound only when unfocused" />
 
         <RingtonePreference
             android:key="@string/preference_notification_sound_file"
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="Notification sound" >
-        </RingtonePreference>
+            android:title="Notification sound"></RingtonePreference>
 
         <RingtonePreference
             android:key="@string/preference_notification_connect_sound_file"
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="Connection sound" >
-        </RingtonePreference>
+            android:title="Connection sound"></RingtonePreference>
     </PreferenceCategory>
 
 </PreferenceScreen>
