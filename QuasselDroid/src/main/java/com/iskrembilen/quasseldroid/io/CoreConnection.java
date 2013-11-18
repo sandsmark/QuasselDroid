@@ -1504,7 +1504,6 @@ public final class CoreConnection {
                                     IrcUser user = new IrcUser();
                                     user.nick = nick;
                                     service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, message.bufferInfo.networkId, 0, user).sendToTarget();
-                                    sendInitRequest("IrcUser",message.bufferInfo.networkId+"/" + nick);
                                 }
                             }
 
