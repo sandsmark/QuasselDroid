@@ -79,7 +79,6 @@ import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Observer;
@@ -386,11 +385,6 @@ public class CoreConnService extends Service {
 				 */
 				networks.addBuffer((Buffer) msg.obj);
                 checkSwitchingTo((Buffer) msg.obj);
-                try{
-                    coreConn.sendInitRequest("IrcChannel", ((Buffer) msg.obj).getInfo().networkId+"/" + ((Buffer) msg.obj).getInfo().name);
-                }catch(IOException e){
-                    e.printStackTrace();
-                }
 				break;
 			case R.id.ADD_MULTIPLE_BUFFERS:
 				/**
@@ -471,11 +465,6 @@ public class CoreConnService extends Service {
 				 */
 				user = (IrcUser) msg.obj;
 				networks.getNetworkById(msg.arg1).onUserJoined(user);
-                try{
-                    coreConn.sendInitRequest("IrcUser", msg.arg1+"/" + user.nick.split("!")[0]);
-                }catch(IOException e){
-                    e.printStackTrace();
-                }
 				break;
 			case R.id.NEW_USER_INFO:
 				bundle = (Bundle) msg.obj;
