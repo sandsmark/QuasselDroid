@@ -146,10 +146,6 @@ public class MainActivity extends SherlockFragmentActivity {
             if (fragment.getClass() == ChatFragment.class) {
                 chatFragment = fragment;
             }
-        } else {
-            chatFragment = ChatFragment.newInstance();
-            nickFragment = NickListFragment.newInstance();
-            bufferFragment = BufferFragment.newInstance();
         }
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -196,7 +192,9 @@ public class MainActivity extends SherlockFragmentActivity {
                 if (drawerFragment != null) drawerFragment.setMenuVisibility(true);
                 if (chatFragment != null) chatFragment.setMenuVisibility(false);
 
-                hideKeyboard(bufferFragment.getView());
+                if (bufferFragment != null) {
+                    hideKeyboard(bufferFragment.getView());
+                }
 
                 getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
                 invalidateOptionsMenu();
@@ -370,6 +368,10 @@ public class MainActivity extends SherlockFragmentActivity {
         Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
         if (event.done) {
             if (currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
+                chatFragment = ChatFragment.newInstance();
+                nickFragment = NickListFragment.newInstance();
+                bufferFragment = BufferFragment.newInstance();
+
                 FragmentTransaction trans = manager.beginTransaction();
                 trans.replace(R.id.main_content_container, chatFragment);
 
