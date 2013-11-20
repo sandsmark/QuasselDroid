@@ -71,7 +71,7 @@ public class ChatFragment extends SherlockFragment {
     private TextView topicView;
     private TextView topicViewFull;
     private ImageButton autoCompleteButton;
-    private int dynamicBacklogAmout;
+    private int dynamicBacklogAmount;
     private NickCompletionHelper nickCompletionHelper;
     private int bufferId = -1;
 
@@ -200,7 +200,7 @@ public class ChatFragment extends SherlockFragment {
     @Override
     public void onStart() {
         super.onStart();
-        dynamicBacklogAmout = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
+        dynamicBacklogAmount = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
         autoCompleteButton.setEnabled(false);
         inputField.setEnabled(false);
         BusProvider.getInstance().register(this);
@@ -561,8 +561,8 @@ public class ChatFragment extends SherlockFragment {
         }
 
         public void getMoreBacklog() {
-            adapter.buffer.setBacklogPending(dynamicBacklogAmout);
-            BusProvider.getInstance().post(new GetBacklogEvent(adapter.getBufferId(), dynamicBacklogAmout));
+            adapter.buffer.setBacklogPending(true);
+            BusProvider.getInstance().post(new GetBacklogEvent(adapter.getBufferId(), dynamicBacklogAmount));
         }
 
         public void removeFilter(Type type) {

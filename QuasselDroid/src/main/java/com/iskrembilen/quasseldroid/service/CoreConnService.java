@@ -81,6 +81,7 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Observer;
 
 /**
@@ -315,6 +316,7 @@ public class CoreConnService extends Service {
 
             Buffer buffer;
             IrcMessage message;
+            List<IrcMessage> messageList;
             Bundle bundle;
             IrcUser user;
             String bufferName;
@@ -325,25 +327,29 @@ public class CoreConnService extends Service {
                      * New message on one buffer so update that buffer with the new
                      * message
                      */
-                    message = (IrcMessage) msg.obj;
-                    buffer = networks.getBufferById(message.bufferInfo.id);
+                    messageList = (List<IrcMessage>) msg.obj;
+                    if (!messageList.isEmpty()) {
+                        buffer = networks.getBufferById(messageList.get(0).bufferInfo.id);
 
-                    if (buffer == null) {
-                        Log.e(TAG, "A message buffer is null:" + message);
-                        return;
-                    }
+                        if (buffer == null) {
+                            Log.e(TAG, "A message buffer is null:" + messageList.get(0));
+                            return;
+                        }
 
-                    if (!buffer.hasMessage(message)) {
                         /**
                          * Check if we are highlighted in the message, TODO: Add
                          * support for custom highlight masks
                          */
-                        MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
-                        if (preferenceParseColors)
-                            MessageUtil.parseStyleCodes(CoreConnService.this, message);
-                        buffer.addBacklogMessage(message);
-                    } else {
-                        Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
+                        for (IrcMessage curMessage : messageList) {
+                            if (!buffer.hasMessage(curMessage)) {
+                                MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
+                                if (preferenceParseColors)
+                                    MessageUtil.parseStyleCodes(CoreConnService.this, curMessage);
+                            } else {
+                                Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
+                            }
+                        }
+                        buffer.addBacklogMessages(messageList);
                     }
                     break;
                 case R.id.NEW_MESSAGE_TO_SERVICE:
