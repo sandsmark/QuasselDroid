@@ -41,7 +41,8 @@
         android:layout_below="@+id/chat_topic_frame"
         android:divider="@null"
         android:dividerHeight="0dp"
-        android:transcriptMode="normal" />
+        android:transcriptMode="normal"
+        android:stackFromBottom="true" />
 
     <FrameLayout
         android:id="@+id/R.id.chat_input_frame"
