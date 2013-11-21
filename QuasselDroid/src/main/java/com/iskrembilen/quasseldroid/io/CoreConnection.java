@@ -1220,12 +1220,13 @@ public final class CoreConnection {
                                     }
                                 } else {
                                     // Send our the backlog messages to our listeners
-                                    //TODO: bundle them up before sending to save message objects
+                                    List<IrcMessage> messageList = new ArrayList<IrcMessage>();
                                     for (QVariant<?> message : data) {
-                                        Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
-                                        msg.obj = message.getData();
-                                        msg.sendToTarget();
+                                        messageList.add((IrcMessage) message.getData());
                                     }
+                                    Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
+                                    msg.obj = messageList;
+                                    msg.sendToTarget();
                                 }
 							/* 
 							 * The addIrcUser function in the Network class is called whenever a new

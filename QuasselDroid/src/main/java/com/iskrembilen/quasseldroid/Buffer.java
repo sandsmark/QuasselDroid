@@ -86,11 +86,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * Number of backlog entries that we have asked for but not yet recived, used to determine when we have recived all the backlog we requested
      * so we don't request the same backlog more then once
      */
-    private int backlogPending = 0;
-    /**
-     * Temp storage for backlog entries that will get placed in the buffer list when we have received all we requested.
-     */
-    private List<IrcMessage> backlogStash;
+    private boolean backlogPending = false;
 
 
     private boolean temporarilyHidden = false;
@@ -112,7 +108,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         this.info = info;
         backlog = new ArrayList<IrcMessage>();
         filteredBacklog = new ArrayList<IrcMessage>();
-        backlogStash = new ArrayList<IrcMessage>();
         filterTypes = new ArrayList<IrcMessage.Type>();
         users = new UserCollection();
         this.dbHelper = dbHelper;
@@ -196,30 +191,34 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
     /**
      * Use when you want to add a backlog message to the buffer, for new messages use the addNewMessage method
-     * Message will be put in stash untill all pending backlog entries are recived and then all will be added to the backlog at the same time.
      *
      * @param message the backlog message to add
      */
     public void addBacklogMessage(IrcMessage message) {
-        backlogStash.add(message);
+        newBufferEntry(message);
+        notifyObservers(R.id.BUFFERUPDATE_BACKLOG);
+    }
 
-        if (backlogPending == 0 || backlogPending <= backlogStash.size()) {
-            for (IrcMessage item : backlogStash) {
-                newBufferEntry(item);
-            }
-            backlogStash.clear();
-            backlogPending = 0;
+    /**
+     * Use when you want to add a list of backlog messages to the buffer, for new messages use the addNewMessage method
+     *
+     * @param messageList the backlog messages to add
+     */
+    public void addBacklogMessages(List<IrcMessage> messageList) {
+        for (IrcMessage message : messageList) {
+            newBufferEntry(message);
         }
+        backlogPending = false;
         notifyObservers(R.id.BUFFERUPDATE_BACKLOG);
     }
 
     /**
      * Set how much backlog has been requested and is pending for this buffer
      *
-     * @param amount the nr of backlog entries requested
+     * @param backlogPending whether backlog is pending
      */
-    public void setBacklogPending(int amount) {
-        backlogPending = amount;
+    public void setBacklogPending(boolean backlogPending) {
+        this.backlogPending = backlogPending;
     }
 
     /**
@@ -228,7 +227,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return true if buffer is waiting for backlog, otherwise false
      */
     public boolean hasPendingBacklog() {
-        return backlogPending > 0;
+        return backlogPending;
     }
 
     /**
