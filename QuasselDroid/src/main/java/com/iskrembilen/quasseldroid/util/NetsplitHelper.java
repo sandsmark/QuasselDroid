@@ -56,7 +56,7 @@ public class NetsplitHelper {
             }
         }
 
-        if (i == maxNetsplitNicks - 1) {
+        if (i == maxNetsplitNicks && nicks.size() > maxNetsplitNicks) {
             nickList += " (" + (nicks.size() - maxNetsplitNicks) + " more)";
         }
 
