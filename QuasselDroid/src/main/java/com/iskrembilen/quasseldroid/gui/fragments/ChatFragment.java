@@ -3,6 +3,7 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -605,6 +606,19 @@ public class ChatFragment extends SherlockFragment {
             //			Log.d(TAG, "loading: "+ Boolean.toString(loading) +"totalItemCount: "+totalItemCount+ "visibleItemCount: " +visibleItemCount+"firstVisibleItem: "+firstVisibleItem+ "visibleThreshold: "+visibleThreshold);
             if (adapter.buffer != null && !adapter.buffer.hasPendingBacklog() && (firstVisibleItem <= visibleThreshold)) {
                 adapter.getMoreBacklog();
+            }
+
+            // This nasty little hack is required for emulating ListView.TRANSCRIPT_MODE_NORMAL functionality on GB
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
+                if (visibleItemCount == 0 || visibleItemCount == totalItemCount || firstVisibleItem + visibleItemCount == totalItemCount) {
+                    if (view.getTranscriptMode() != AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL) {
+                        view.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+                    }
+                } else {
+                    if (view.getTranscriptMode() != AbsListView.TRANSCRIPT_MODE_DISABLED) {
+                        view.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+                    }
+                }
             }
         }
 
