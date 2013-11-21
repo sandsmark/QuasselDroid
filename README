@@ -15,6 +15,7 @@ for your convenience):
     - Android Support Library: http://developer.android.com/tools/extras/support-library.html
     - Crittercism: https://www.crittercism.com/developers/docs-android
     - ActionBarSherlock: http://actionbarsherlock.com/
+NB! Android Support Library requires the corresponding package to be installed in the SDK manager 
 
 Building:
 Building is done using gradle. Run "gradlew tasks" to see possible build tasks. Some useful tasks are
