@@ -245,6 +245,7 @@ public class MainActivity extends SherlockFragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "Activity onStart");
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
         if (ThemeUtil.theme != currentTheme) {
             Intent intent = new Intent(this, MainActivity.class);
@@ -285,12 +286,14 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "Stopping activity");
         super.onStop();
         unbindService(focusConnection);
     }
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "Destroying activity");
         preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         super.onDestroy();
     }

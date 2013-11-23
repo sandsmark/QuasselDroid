@@ -36,8 +36,7 @@
             android:name=".gui.PreferenceView"
             android:label="@string/app_name"></activity>
         <activity
-            android:name=".gui.MainActivity"
-            android:launchMode="singleTask"></activity>
+            android:name=".gui.MainActivity"></activity>
 
         <service android:name=".service.CoreConnService"></service>
         <service android:name=".service.InFocus"></service>

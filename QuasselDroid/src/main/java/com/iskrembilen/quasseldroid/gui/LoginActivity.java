@@ -64,6 +64,7 @@ import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
+import android.util.Log;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -414,7 +415,9 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
     public void onConnectionChanged(ConnectionChangedEvent event) {
         if (event.status == Status.Connecting) {
             dismissLoginDialog();
-            LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            LoginActivity.this.startActivity(intent);
             finish();
         } else if (event.status == Status.Disconnected) {
             dismissLoginDialog();

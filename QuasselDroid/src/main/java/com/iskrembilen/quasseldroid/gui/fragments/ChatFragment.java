@@ -86,6 +86,7 @@ public class ChatFragment extends SherlockFragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "Creating fragment");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         adapter = new BacklogAdapter(getSherlockActivity(), null);
@@ -200,6 +201,7 @@ public class ChatFragment extends SherlockFragment {
 
     @Override
     public void onStart() {
+        Log.d(TAG, "Starting fragment");
         super.onStart();
         dynamicBacklogAmount = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
         autoCompleteButton.setEnabled(false);

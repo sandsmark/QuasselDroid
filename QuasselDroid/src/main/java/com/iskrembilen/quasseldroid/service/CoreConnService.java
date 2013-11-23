@@ -293,6 +293,7 @@ public class CoreConnService extends Service {
         if (coreConn != null)
             coreConn.closeConnection();
         coreConn = null;
+        networks = null;
         notificationManager = null;
         stopSelf();
     }
