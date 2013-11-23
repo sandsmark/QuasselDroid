@@ -77,7 +77,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     /**
      * The topic for this buffer
      */
-    private String topic;
+    private String topic = "";
     /**
      * Is this buffer joined or parted.
      */
