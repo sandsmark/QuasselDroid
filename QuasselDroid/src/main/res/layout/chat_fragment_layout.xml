@@ -55,7 +55,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionSend"
-            android:inputType="textMultiLine"
+            android:inputType="textImeMultiLine"
             android:paddingLeft="36dp"></EditText>
 
         <ImageButton
