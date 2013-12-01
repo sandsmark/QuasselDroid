@@ -31,6 +31,11 @@
     <string name="preference_notification_sound_file">notificationsoundfile</string>
     <string name="preference_notification_connect_sound_file">notificationconnectsoundfile</string>
     <string name="preference_fetch_to_last_seen">getallunseenbacklog</string>
+    <string name="preference_reconnect">reconnect</string>
+    <string name="preference_reconnect_periodically">reconnect_periodically</string>
+    <string name="preference_reconnect_counter">reconnectCounter</string>
+    <string name="preference_reconnect_on_wifi_only">reconnect_on_wifi_only</string>
+    <string name="preference_reconnect_on_metered">reconnect_on_metered</string>
     <string name="context_part">Part</string>
     <string name="context_join">Join</string>
     <string name="context_delete">Delete</string>

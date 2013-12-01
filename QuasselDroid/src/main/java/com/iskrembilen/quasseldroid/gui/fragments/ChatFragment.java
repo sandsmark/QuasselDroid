@@ -41,6 +41,7 @@ import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
@@ -221,7 +222,7 @@ public class ChatFragment extends SherlockFragment {
     public void onStop() {
         Log.d(TAG, "Stopping fragment");
         super.onStop();
-        if (Quasseldroid.connected && getUserVisibleHint()) updateRead();
+        if (Quasseldroid.status == ConnectionChangedEvent.Status.Connected && getUserVisibleHint()) updateRead();
         adapter.clearBuffer();
         BusProvider.getInstance().unregister(this);
         setUserVisibleHint(false);
@@ -292,7 +293,7 @@ public class ChatFragment extends SherlockFragment {
                 buffer.setDisplayed(true);
                 BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
-                //Move list to correect position
+                //Move list to correct position
                 if (adapter.buffer.getTopMessageShown() == 0) {
                     backlogList.setSelection(adapter.getCount() - 1);
                 } else {

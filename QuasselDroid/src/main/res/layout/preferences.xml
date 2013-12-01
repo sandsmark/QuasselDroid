@@ -66,6 +66,49 @@
             android:title="Use a wake-lock to inhibit sleep" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Reconnection" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect"
+            android:summary="Reconnect, when connection is lost"
+            android:title="Reconnect"
+            android:disableDependentsState="false"
+            />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_on_wifi_only"
+            android:summary="Reconnect only if wifi is available"
+            android:title="Reconnect with wifi only"
+            android:dependency="@string/preference_reconnect" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_on_metered"
+            android:summary="Reconnect, when on a metered connection. A connection is classified as
+metered, when it is sensitive to heavy data usage. For example, tethering connections can be
+classified as metered by the user."
+            android:title="Reconnect on metered wifi connection"
+            android:dependency="@string/preference_reconnect_on_wifi_only"
+            />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_periodically"
+            android:summary="Normally, Quasseldroid reconnects, when the lost network connection is
+reestablished. Try this option, if the standard reconnection functionality isn't working for you,
+because your connection is lost by restarts of the core, a temporarily unreachable core, etc. With
+this option, Quasseldroid tries to reconnect periodically in an increasing interval."
+            android:title="Reconnect periodically"
+            android:dependency="@string/preference_reconnect"
+            />
+        <EditTextPreference
+            android:defaultValue="10"
+            android:key="@string/preference_reconnect_counter"
+            android:numeric="integer"
+            android:summary="How often to retry"
+            android:title="Reconnect counter"
+            android:dependency="@string/preference_reconnect_periodically"
+            />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Notifications">
 
         <CheckBoxPreference

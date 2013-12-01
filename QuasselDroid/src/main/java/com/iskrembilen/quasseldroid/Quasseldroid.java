@@ -10,12 +10,12 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
 public class Quasseldroid extends Application {
-    public static boolean connected;
+    public static Status status;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        connected = false;
+        status = Status.Disconnected;
         //Populate the preferences with default vaules if this has not been done before
         PreferenceManager.setDefaultValues(this, R.layout.preferences, true);
         //Load current theme
@@ -25,10 +25,6 @@ public class Quasseldroid extends Application {
 
     @Subscribe
     public void onConnectionChanged(ConnectionChangedEvent event) {
-        if (event.status == Status.Disconnected) {
-            connected = false;
-        } else {
-            connected = true;
-        }
+        status = event.status;
     }
 }
