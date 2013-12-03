@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
@@ -714,6 +715,14 @@ public class CoreConnService extends Service {
 
     public Network getNetworkById(int networkId) {
         return networks.getNetworkById(networkId);
+    }
+
+    public String getVersionName(){
+        try{
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        }catch(PackageManager.NameNotFoundException e){
+            return "";
+        }
     }
 
     private void checkSwitchingTo(Buffer buffer) {
