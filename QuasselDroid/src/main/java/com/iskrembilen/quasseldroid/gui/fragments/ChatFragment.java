@@ -443,10 +443,16 @@ public class ChatFragment extends SherlockFragment {
                     break;
                 case Kick:
                     holder.nickView.setText("<-*");
+                    String nick     = "",
+                           reason   = "";
                     int nickEnd = entry.content.toString().indexOf(" ");
-                    String nick = entry.content.toString().substring(0, nickEnd);
-                    String reason = entry.content.toString().substring(nickEnd + 1);
-                    holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
+                    if (nickEnd >= 0) {
+                        nick = entry.content.toString().substring(0, nickEnd);
+                        reason = " (" + entry.content.toString().substring(nickEnd + 1) + ")";
+                    } else {
+                        nick = entry.content.toString();
+                    }
+                    holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + reason);
                     holder.msgView.setTextColor(ThemeUtil.chatKickColor);
                     holder.nickView.setTextColor(ThemeUtil.chatKickColor);
                     break;
