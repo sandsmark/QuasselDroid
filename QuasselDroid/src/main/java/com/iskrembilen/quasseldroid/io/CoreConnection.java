@@ -396,14 +396,22 @@ public final class CoreConnection {
         updateInitProgress("Getting core info...");
         inStream = new QDataInputStream(socket.getInputStream());
         Map<String, QVariant<?>> reply = readQVariantMap();
-        coreInfo = new CoreInfo();
-        coreInfo.setCoreInfo((String) reply.get("CoreInfo").getData());
-        coreInfo.setSupportSsl((Boolean) reply.get("SupportSsl").getData());
-        coreInfo.setConfigured((Boolean) reply.get("Configured").getData());
-        coreInfo.setLoginEnabled((Boolean) reply.get("LoginEnabled").getData());
-        coreInfo.setMsgType((String) reply.get("MsgType").getData());
-        coreInfo.setProtocolVersion(((Long) reply.get("ProtocolVersion").getData()).intValue());
-        coreInfo.setSupportsCompression((Boolean) reply.get("SupportsCompression").getData());
+        if(reply.get("MsgType").toString().equals("ClientInitAck")){
+            coreInfo = new CoreInfo();
+            coreInfo.setCoreInfo((String) reply.get("CoreInfo").getData());
+            coreInfo.setSupportSsl((Boolean) reply.get("SupportSsl").getData());
+            coreInfo.setConfigured((Boolean) reply.get("Configured").getData());
+            coreInfo.setLoginEnabled((Boolean) reply.get("LoginEnabled").getData());
+            coreInfo.setMsgType((String) reply.get("MsgType").getData());
+            coreInfo.setProtocolVersion(((Long) reply.get("ProtocolVersion").getData()).intValue());
+            coreInfo.setSupportsCompression((Boolean) reply.get("SupportsCompression").getData());
+        }else{
+            if(reply.get("MsgType").toString().equals("ClientInitReject")){
+                throw new IOException((String) reply.get("Error").getData());
+            }else{
+                throw new IOException("Core sent unexpected \"" + reply.get("MsgType").toString() + "\" response!");
+            }
+        }
 
         //Check that the protocol version is at least 10
         if (coreInfo.getProtocolVersion() < 10)
