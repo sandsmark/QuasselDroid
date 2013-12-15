@@ -373,7 +373,16 @@ public class CoreConnService extends Service {
                          */
                         MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
                         MessageUtil.parseStyleCodes(CoreConnService.this, message);
-                        if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
+                        if (
+                                (message.isHighlighted() && !buffer.isDisplayed()) ||
+                                (
+                                    buffer.getInfo().type == BufferInfo.Type.QueryBuffer &&
+                                    !message.isSelf() &&
+                                    // Server messages with an empty sender in queries are "x is away: ..." messages
+                                    // (I've found no exception to that rule in my 13-million-message database)
+                                    !(message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
+                                )
+                            ) {
                             notificationManager.notifyHighlight(buffer.getInfo().id);
 
                         }
