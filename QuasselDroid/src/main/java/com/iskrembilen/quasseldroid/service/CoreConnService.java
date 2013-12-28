@@ -737,6 +737,8 @@ public class CoreConnService extends Service {
     public ConnectionChangedEvent produceConnectionStatus() {
         if (isConnected())
             return new ConnectionChangedEvent(Status.Connected);
+        else if (!initDone)
+            return new ConnectionChangedEvent(Status.Connecting);
         else
             return new ConnectionChangedEvent(Status.Disconnected);
     }

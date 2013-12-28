@@ -413,7 +413,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
     @Subscribe
     public void onConnectionChanged(ConnectionChangedEvent event) {
-        if (event.status == Status.Connecting) {
+        if (event.status == Status.Connecting || event.status == Status.Connected) {
             dismissLoginDialog();
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
