@@ -130,6 +130,7 @@ public class CoreConnService extends Service {
     private OnSharedPreferenceChangeListener preferenceListener;
 
     private int latency;
+    private boolean isConnecting = false;
     private boolean initDone = false;
     private String initReason = "";
 
@@ -448,6 +449,7 @@ public class CoreConnService extends Service {
                     /**
                      * CoreConn has connected to a core
                      */
+                    isConnecting = true;
                     notificationManager.notifyConnecting();
                     BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connecting));
                     break;
@@ -571,6 +573,7 @@ public class CoreConnService extends Service {
                      */
                     notificationManager.notifyConnected();
                     initDone = true;
+                    isConnecting = false;
                     BusProvider.getInstance().post(new InitProgressEvent(true, ""));
                     BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
                     break;
@@ -737,7 +740,7 @@ public class CoreConnService extends Service {
     public ConnectionChangedEvent produceConnectionStatus() {
         if (isConnected())
             return new ConnectionChangedEvent(Status.Connected);
-        else if (!initDone)
+        else if (isConnecting && !initDone)
             return new ConnectionChangedEvent(Status.Connecting);
         else
             return new ConnectionChangedEvent(Status.Disconnected);
