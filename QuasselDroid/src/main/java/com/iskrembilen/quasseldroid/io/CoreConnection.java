@@ -706,6 +706,11 @@ public final class CoreConnection {
         service.getHandler().obtainMessage(R.id.INIT_PROGRESS, message).sendToTarget();
     }
 
+    private void sendConnectingEvent() {
+        Log.i(TAG, "Sending Connecting event");
+        service.getHandler().obtainMessage(R.id.CONNECTING).sendToTarget();
+    }
+
     private void updateInitDone() {
         initComplete = true;
         service.getHandler().obtainMessage(R.id.INIT_DONE).sendToTarget();
@@ -805,6 +810,9 @@ public final class CoreConnection {
                 e.printStackTrace();
                 return "IO error while connecting!";
             }
+
+            // Connection is valid, send notification to activity:
+            sendConnectingEvent();
 
             List<QVariant<?>> packedFunc;
             final long startWait = System.currentTimeMillis();
