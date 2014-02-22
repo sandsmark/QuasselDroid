@@ -464,7 +464,11 @@ public class ChatFragment extends SherlockFragment {
                     break;
                 case Nick:
                     holder.nickView.setText("<->");
-                    holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
+                    if(entry.getNick().equals(entry.content.toString())){
+                        holder.msgView.setText("You are now known as " + entry.content.toString());
+                    }else{
+                        holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
+                    }
                     holder.msgView.setTextColor(ThemeUtil.chatNickColor);
                     holder.nickView.setTextColor(ThemeUtil.chatNickColor);
                     break;
