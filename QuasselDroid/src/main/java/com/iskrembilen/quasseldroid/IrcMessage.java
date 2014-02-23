@@ -130,6 +130,10 @@ public class IrcMessage implements Comparable<IrcMessage> {
         return getSender().split("!")[0];
     }
 
+    public String getHostmask() {
+        return getSender().split("!")[1];
+    }
+
     public void setFlag(Flag flag) {
         this.flags |= flag.value;
     }
