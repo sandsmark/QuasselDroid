@@ -419,25 +419,25 @@ public class ChatFragment extends SherlockFragment {
                     break;
                 case Join:
                     holder.nickView.setText("-->");
-                    holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has joined " + entry.content);
                     holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
                     holder.nickView.setTextColor(ThemeUtil.chatJoinColor);
                     break;
                 case Part:
                     holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has left (" + entry.content + ")");
                     holder.msgView.setTextColor(ThemeUtil.chatPartColor);
                     holder.nickView.setTextColor(ThemeUtil.chatPartColor);
                     break;
                 case Quit:
                     holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has quit (" + entry.content + ")");
                     holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
                     holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
                     break;
                 case Kill:
                     holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " was killed (" + entry.content + ")");
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") was killed (" + entry.content + ")");
                     holder.msgView.setTextColor(ThemeUtil.chatKillColor);
                     holder.nickView.setTextColor(ThemeUtil.chatKillColor);
                     break;
