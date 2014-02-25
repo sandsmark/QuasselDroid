@@ -236,7 +236,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
                 ((EditText) dialog.findViewById(R.id.dialog_name_field)).setText(res.getString(QuasselDbHelper.KEY_NAME));
                 ((EditText) dialog.findViewById(R.id.dialog_address_field)).setText(res.getString(QuasselDbHelper.KEY_ADDRESS));
                 ((EditText) dialog.findViewById(R.id.dialog_port_field)).setText(Integer.toString(res.getInt(QuasselDbHelper.KEY_PORT)));
-                ((CheckBox) dialog.findViewById(R.id.dialog_usessl_checkbox)).setChecked(res.getBoolean(QuasselDbHelper.KEY_SSL));
                 break;
         }
 
@@ -262,12 +261,10 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
                         EditText nameField = (EditText) dialog.findViewById(R.id.dialog_name_field);
                         EditText addressField = (EditText) dialog.findViewById(R.id.dialog_address_field);
                         EditText portField = (EditText) dialog.findViewById(R.id.dialog_port_field);
-                        CheckBox sslBox = (CheckBox) dialog.findViewById(R.id.dialog_usessl_checkbox);
                         if (v.getId() == R.id.cancel_button) {
                             nameField.setText("");
                             addressField.setText("");
                             portField.setText("");
-                            sslBox.setChecked(false);
                             dialog.dismiss();
 
 
@@ -275,19 +272,17 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
                             String name = nameField.getText().toString().trim();
                             String address = addressField.getText().toString().trim();
                             int port = Integer.parseInt(portField.getText().toString().trim());
-                            boolean useSSL = sslBox.isChecked();
 
                             //TODO: Ken: mabye add some better check on what state the dialog is used for, edit/add. Atleast use a string from the resources so its the same if you change it.
                             if ((String) dialog.getWindow().getAttributes().getTitle() == "Add new core") {
-                                dbHelper.addCore(name, address, port, useSSL);
+                                dbHelper.addCore(name, address, port);
                             } else if ((String) dialog.getWindow().getAttributes().getTitle() == "Edit core") {
-                                dbHelper.updateCore(core.getSelectedItemId(), name, address, port, useSSL);
+                                dbHelper.updateCore(core.getSelectedItemId(), name, address, port);
                             }
                             LoginActivity.this.updateCoreSpinner();
                             nameField.setText("");
                             addressField.setText("");
                             portField.setText("");
-                            sslBox.setChecked(false);
                             dialog.dismiss();
                             if ((String) dialog.getWindow().getAttributes().getTitle() == "Add new core") {
                                 Toast.makeText(LoginActivity.this, "Added core", Toast.LENGTH_LONG).show();
@@ -379,7 +374,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
             connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
             connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
             connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
-            connectIntent.putExtra("ssl", res.getBoolean(QuasselDbHelper.KEY_SSL));
             connectIntent.putExtra("username", usernameField.getText().toString().trim());
             connectIntent.putExtra("password", passwordField.getText().toString());
 

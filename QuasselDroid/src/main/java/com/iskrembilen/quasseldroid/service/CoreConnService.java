@@ -232,8 +232,7 @@ public class CoreConnService extends Service {
 
         acquireWakeLockIfEnabled();
 
-        coreConn = new CoreConnection(id, address, port, username, password, ssl,
-                this);
+        coreConn = new CoreConnection(id, address, port, username, password, this);
     }
 
     private void acquireWakeLockIfEnabled() {
