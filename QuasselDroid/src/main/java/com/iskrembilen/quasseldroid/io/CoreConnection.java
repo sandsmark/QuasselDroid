@@ -109,6 +109,8 @@ public final class CoreConnection {
     private LinkedList<List<QVariant<?>>> packageQueue;
     private String errorMessage;
 
+    private int bufferViewId;
+
     //Used to create the ID of new channels we join
     private int maxBufferId = 0;
 
@@ -179,7 +181,7 @@ public final class CoreConnection {
         List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
         retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
         retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
-        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
         retFunc.add(new QVariant<String>("requestRemoveBuffer", QVariantType.String));
         retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
 
@@ -195,7 +197,7 @@ public final class CoreConnection {
         List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
         retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
         retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
-        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
         retFunc.add(new QVariant<String>("requestRemoveBufferPermanently", QVariantType.String));
         retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
 
@@ -279,7 +281,7 @@ public final class CoreConnection {
         List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
         retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
         retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
-        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
         retFunc.add(new QVariant<String>("requestAddBuffer", QVariantType.String));
         retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
         retFunc.add(new QVariant<Integer>(networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount(), QVariantType.Int));
@@ -509,8 +511,7 @@ public final class CoreConnection {
             sendInitRequest("Network", Integer.toString(network.getId()));
         }
         sendInitRequest("BufferSyncer", "");
-        //sendInitRequest("BufferViewManager", ""); this is about where this should be, but don't know what it does
-        sendInitRequest("BufferViewConfig", "0");
+        sendInitRequest("BufferViewManager", "");
         SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(service);
 
         //Get backlog if user selected a fixed amount
@@ -1090,6 +1091,21 @@ public final class CoreConnection {
                                 if (!found) {
                                     Log.e(TAG, "Could not find buffer for IrcChannel initData");
                                 }
+                            } else if (className.equals("BufferViewManager")) {
+                                Log.d(TAG, "InitData: BufferViewManager");
+                                Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+                                List<QVariant<?>> bufferViewList = (List<QVariant<?>>) map.get("BufferViewIds").getData();
+
+                                int id = 0;
+                                if (bufferViewList.isEmpty()) {
+                                    Log.e(TAG, "BufferViewManager didn't return any views");
+                                } else {
+                                    QVariant firstBufferViewId = bufferViewList.get(0);
+                                    id = (Integer) firstBufferViewId.getData();
+                                }
+                                Log.d(TAG, "Requesting BufferViewConfig with id: " + id);
+                                sendInitRequest("BufferViewConfig", Integer.toString(id));
+                                bufferViewId = id;
                             } else if (className.equals("BufferViewConfig")) {
                                 Log.d(TAG, "InitData: BufferViewConfig");
                                 Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
