@@ -22,12 +22,14 @@
 package com.iskrembilen.quasseldroid.io;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.AbsListView;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
@@ -86,6 +88,8 @@ public final class CoreConnection {
     private Socket socket;
     private QDataOutputStream outStream;
     private QDataInputStream inStream;
+    private SwitchableDeflaterOutputStream deflater;
+    private SwitchableInflaterInputStream inflater;
 
     private Map<Integer, Buffer> buffers;
     private CoreInfo coreInfo;
@@ -96,7 +100,6 @@ public final class CoreConnection {
     private int port;
     private String username;
     private String password;
-    private boolean ssl;
 
     CoreConnService service;
     private Timer heartbeatTimer;
@@ -114,17 +117,19 @@ public final class CoreConnection {
     //Used to create the ID of new channels we join
     private int maxBufferId = 0;
 
+    private boolean usingSSL = false;
+    private boolean usingCompression = false;
+
     private ExecutorService outputExecutor;
 
 
     public CoreConnection(long coreId, String address, int port, String username,
-                          String password, Boolean ssl, CoreConnService parent) {
+                          String password, CoreConnService parent) {
         this.coreId = coreId;
         this.address = address;
         this.port = port;
         this.username = username;
         this.password = password;
-        this.ssl = ssl;
         this.service = parent;
 
         outputExecutor = Executors.newSingleThreadExecutor();
@@ -376,7 +381,67 @@ public final class CoreConnection {
         socket = (Socket) factory.createSocket(address, port);
         socket.setKeepAlive(true);
         outStream = new QDataOutputStream(socket.getOutputStream());
+        inStream = new QDataInputStream(socket.getInputStream());
         // END CREATE SOCKETS
+
+        updateInitProgress("Attempting new-style handshake...");
+
+        //Calculate and send magic value
+        long magic = 0x42b33f00;
+        magic = magic | 0x01;   //0x01 is encryption
+
+        //DeflaterOutputStream SYNC_FLUSH support is required for compression, but Eclair doesn't support that.
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
+            magic = magic | 0x02;   //0x02 is compression
+        } else {
+            Log.d(TAG, "Android version is too old, disabling compression.  Please update to 2.2 or later.");
+        }
+
+        outStream.writeUInt(magic, 32);
+
+        //Send supported protocols
+        outStream.writeUInt(0x01, 32);      //0x01 is Legacy Protocol
+        outStream.writeUInt(0x01 << 31, 32); //Bit 31 set to indicate end of list
+
+        //Attempt to read core's response
+        try {
+            long responseValue = inStream.readUInt(32);
+
+            //Check to make sure legacy protocol is in use
+            if ((responseValue & 0x01) == 0) {
+                throw new UnsupportedProtocolException("Core claims not to support legacy protocol!");
+            }
+
+            //Check if Encryption should be used
+            if (((responseValue >> 24) & 0x01) > 0) {
+                usingSSL = true;
+            }
+
+            //Check if Compression should be used
+            if (((responseValue >> 24) & 0x02) > 0) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
+                    usingCompression = true;
+                } else {
+                    throw new UnsupportedProtocolException("Core is forcing compression, but compression is unsupported!");
+                }
+            }
+        } catch (IOException e) {
+            //This means that the core supports only the legacy handshake, so reopen the connection
+            //and try again.
+            updateInitProgress("Legacy core detected, falling back to legacy handshake...");
+            socket = (Socket) factory.createSocket(address, port);
+            socket.setKeepAlive(true);
+            outStream = new QDataOutputStream(socket.getOutputStream());
+            inStream = new QDataInputStream(socket.getInputStream());
+        }
+
+        if (usingCompression) {
+            Log.d(TAG, "Using compression.");
+            deflater = new SwitchableDeflaterOutputStream(socket.getOutputStream());
+            inflater = new SwitchableInflaterInputStream(socket.getInputStream());
+            outStream = new QDataOutputStream(deflater);
+            inStream = new QDataInputStream(inflater);
+        }
 
         // START CLIENT INFO
         updateInitProgress("Sending client info...");
@@ -385,7 +450,7 @@ public final class CoreConnection {
         DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
         Date date = new Date();
         initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
-        initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariantType.Bool));
+        initial.put("UseSsl", new QVariant<Boolean>(true, QVariantType.Bool));
         initial.put("ClientVersion", new QVariant<String>("Quasseldroid " + service.getVersionName(), QVariantType.String));
         initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
         initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
@@ -396,7 +461,6 @@ public final class CoreConnection {
 
         // START CORE INFO
         updateInitProgress("Getting core info...");
-        inStream = new QDataInputStream(socket.getInputStream());
         Map<String, QVariant<?>> reply = readQVariantMap();
         if(reply.get("MsgType").toString().equals("ClientInitAck")){
             coreInfo = new CoreInfo();
@@ -415,33 +479,39 @@ public final class CoreConnection {
             }
         }
 
+        if (!usingSSL && coreInfo.isSupportSsl()) {
+            usingSSL = true;
+        }
+
         //Check that the protocol version is at least 10
         if (coreInfo.getProtocolVersion() < 10)
             throw new UnsupportedProtocolException("Protocol version is old: " + coreInfo.getProtocolVersion());
-        /*for (String key : reply.keySet()) {
-			System.out.println("\t" + key + " : " + reply.get(key));
-		}*/
         // END CORE INFO
 
         // START SSL CONNECTION
-        if (ssl) {
-            Log.d(TAG, "Using ssl");
+        if (usingSSL) {
+            Log.d(TAG, "Using SSL.");
             SSLContext sslContext = SSLContext.getInstance("TLS");
             TrustManager[] trustManagers = new TrustManager[]{new CustomTrustManager(this)};
             sslContext.init(null, trustManagers, null);
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
             SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, address, port, true);
-            sslSocket.setEnabledProtocols(new String[]{"SSLv3"});
 
             sslSocket.setUseClientMode(true);
-            updateInitProgress("Starting ssl handshake");
+            updateInitProgress("Starting SSL handshake...");
             sslSocket.startHandshake();
-            Log.d(TAG, "Ssl handshake complete");
-            inStream = new QDataInputStream(sslSocket.getInputStream());
-            outStream = new QDataOutputStream(sslSocket.getOutputStream());
+            Log.d(TAG, "SSL handshake complete.");
+
+            if (usingCompression) {
+                deflater.setOutputStream(sslSocket.getOutputStream());
+                inflater.setInputStream(sslSocket.getInputStream());
+            } else {
+                outStream = new QDataOutputStream(sslSocket.getOutputStream());
+                inStream = new QDataInputStream(sslSocket.getInputStream());
+            }
             socket = sslSocket;
         } else {
-            Log.w(TAG, "SSL DISABLED!");
+            Log.w(TAG, "Core does not support SSL!");
         }
         // FINISHED SSL CONNECTION
 
@@ -629,6 +699,9 @@ public final class CoreConnection {
 
                 // Send data
                 outStream.write(baos.toByteArray());
+                if (usingCompression) {
+                    deflater.flush();
+                }
                 bos.close();
                 baos.close();
             } catch (IOException e) {
