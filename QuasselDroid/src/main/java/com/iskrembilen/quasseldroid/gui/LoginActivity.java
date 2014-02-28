@@ -214,7 +214,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
                     Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
                 }
                 updateCoreSpinner();
-                //TODO: mabye add some confirm dialog when deleting a core
+                //TODO: maybe add some confirm dialog when deleting a core
                 break;
             case R.id.menu_preferences:
                 Intent i = new Intent(LoginActivity.this, PreferenceView.class);
@@ -273,7 +273,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
                             String address = addressField.getText().toString().trim();
                             int port = Integer.parseInt(portField.getText().toString().trim());
 
-                            //TODO: Ken: mabye add some better check on what state the dialog is used for, edit/add. Atleast use a string from the resources so its the same if you change it.
+                            //TODO: Ken: maybe add some better check on what state the dialog is used for, edit/add. At least use a string from the resources so its the same if you change it.
                             if ((String) dialog.getWindow().getAttributes().getTitle() == "Add new core") {
                                 dbHelper.addCore(name, address, port);
                             } else if ((String) dialog.getWindow().getAttributes().getTitle() == "Edit core") {
@@ -359,8 +359,8 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
             //dbHelper.open();
             Bundle res = dbHelper.getCore(core.getSelectedItemId());
 
-            //TODO: quick fix for checking if we have internett before connecting, should remove some force closes, not sure if we should do it in another place tho, mabye in CoreConn
-            //Check that the phone has either mobile or wifi connection to querry teh bus oracle
+            //TODO: quick fix for checking if we have internet before connecting, should remove some force closes, not sure if we should do it in another place tho, maybe in CoreConn
+            //Check that the phone has either mobile or wifi connection to query the bus oracle
             ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
                 Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();

@@ -257,7 +257,7 @@ public class ChatFragment extends SherlockFragment {
         if (adapter.buffer != null) {
             adapter.buffer.setDisplayed(false);
 
-            //Dont save position if list is at bottom
+            //Don't save position if list is at bottom
             if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
                 adapter.buffer.setTopMessageShown(0);
             } else {
@@ -292,7 +292,7 @@ public class ChatFragment extends SherlockFragment {
                 buffer.setDisplayed(true);
                 BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
-                //Move list to correect position
+                //Move list to correct position
                 if (adapter.buffer.getTopMessageShown() == 0) {
                     backlogList.setSelection(adapter.getCount() - 1);
                 } else {
@@ -347,7 +347,7 @@ public class ChatFragment extends SherlockFragment {
 
         @Override
         public IrcMessage getItem(int position) {
-            //TODO: QriorityQueue is fucked, we dont want to convert to array here, so change later
+            //TODO: PriorityQueue is fucked, we don't want to convert to array here, so change later
             return (IrcMessage) buffer.getBacklogEntry(position);
         }
 

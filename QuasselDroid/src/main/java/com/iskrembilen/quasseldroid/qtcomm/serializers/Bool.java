@@ -36,7 +36,7 @@ public class Bool implements QMetaTypeSerializer<Boolean> {
     }
 
     @Override
-    public Boolean unserialize(QDataInputStream stream, DataStreamVersion version)
+    public Boolean deserialize(QDataInputStream stream, DataStreamVersion version)
             throws IOException {
         return stream.readBoolean();
     }

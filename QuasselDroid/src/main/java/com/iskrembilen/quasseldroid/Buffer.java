@@ -83,7 +83,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      */
     private boolean active = false;
     /**
-     * Number of backlog entries that we have asked for but not yet recived, used to determine when we have recived all the backlog we requested
+     * Number of backlog entries that we have asked for but not yet received, used to determine when we have received all the backlog we requested
      * so we don't request the same backlog more then once
      */
     private boolean backlogPending = false;
@@ -383,7 +383,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     }
 
     /**
-     * Set this buffer as read TODO: we dont really know what this means atm
+     * Set this buffer as read TODO: we don't really know what this means atm
      */
     public void setRead() {
         if (backlog.isEmpty())
@@ -451,7 +451,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
     /**
      * Set the id for the message that is on the top of the screen when a user exits the chatActivity
-     * So we can restore the postion when we enters it again
+     * So we can restore the position when we enters it again
      *
      * @param topMessageShown the msgid for the message at the top
      */
@@ -495,7 +495,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     }
 
     /**
-     * Add a new IrcMesssage type that this buffer should filter(hidde type)
+     * Add a new IrcMessage type that this buffer should filter(hidden type)
      *
      * @param type
      */

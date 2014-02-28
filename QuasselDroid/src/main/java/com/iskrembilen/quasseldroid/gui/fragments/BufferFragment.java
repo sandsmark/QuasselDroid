@@ -526,7 +526,7 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                     public void onClick(View v) {
                         if (getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
                             openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
-                        } else { //TODO: mabye show the chatActivity but have it be empty, logo or something
+                        } else { //TODO: maybe show the chatActivity but have it be empty, logo or something
                             Toast.makeText(getSherlockActivity(), "Not Available", Toast.LENGTH_SHORT).show();
                         }
                     }

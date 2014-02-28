@@ -95,7 +95,7 @@ public class CoreConnService extends Service {
     private static final String TAG = CoreConnService.class.getSimpleName();
 
     /**
-     * Id for result code in the resultReciver that is going to notify the
+     * Id for result code in the resultReceiver that is going to notify the
      * activity currently on screen about the change
      */
     public static final int CONNECTION_DISCONNECTED = 0;
