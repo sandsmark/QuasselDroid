@@ -106,7 +106,6 @@ public final class CoreConnection {
     private ReadThread readThread;
 
     private boolean initComplete;
-    private int initBacklogBuffers;
     private int networkInitsLeft;
     private boolean networkInitComplete;
     private LinkedList<List<QVariant<?>>> packageQueue;
@@ -582,17 +581,7 @@ public final class CoreConnection {
         }
         sendInitRequest("BufferSyncer", "");
         sendInitRequest("BufferViewManager", "");
-        SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(service);
-
-        //Get backlog if user selected a fixed amount
-        if (!options.getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
-            int backlogAmount = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
-            initBacklogBuffers = 0;
-            for (Buffer buffer : buffers.values()) {
-                initBacklogBuffers += 1;
-                requestMoreBacklog(buffer.getInfo().id, backlogAmount);
-            }
-        }
+        //Backlog request is now after processing init data for BufferViewConfig
 
         TimerTask sendPingAction = new TimerTask() {
             public void run() {
@@ -1083,14 +1072,12 @@ public final class CoreConnection {
                                 // Parse out the last seen messages
                                 updateInitProgress("Receiving last seen and marker lines");
 
-
                                 List<QVariant<?>> lastSeen = (List<QVariant<?>>) ((Map<String, QVariant<?>>) packedFunc.get(0).getData()).get("LastSeenMsg").getData();
                                 for (int i = 0; i < lastSeen.size(); i += 2) {
                                     int bufferId = (Integer) lastSeen.get(i).getData();
                                     int msgId = (Integer) lastSeen.get(i + 1).getData();
                                     if (buffers.containsKey(bufferId)) { // We only care for buffers we have open
                                         if (PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
-                                            initBacklogBuffers += 1;
                                             requestBacklog(bufferId, msgId);
                                         }
                                         Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
@@ -1185,9 +1172,7 @@ public final class CoreConnection {
                                 List<QVariant<?>> tempList = (List<QVariant<?>>) map.get("TemporarilyRemovedBuffers").getData();
                                 List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
                                 List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
-                                updateInitProgress("Receiving buffer list information");
                                 BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
-
 
                                 //TODO: maybe send this in a bulk to the service so it wont sort and shit every time
                                 for (QVariant bufferId : tempList) {
@@ -1243,6 +1228,17 @@ public final class CoreConnection {
                                     order++;
                                 }
 
+                                //We now have everything we need to display the network and channel list
+                                updateInitDone();
+
+                                //Get backlog if user selected a fixed amount
+                                SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(service);
+                                if (!options.getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
+                                    int backlogAmount = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
+                                    for (Buffer buffer : buffers.values()) {
+                                        requestMoreBacklog(buffer.getInfo().id, backlogAmount);
+                                    }
+                                }
                             }
 						/*
 						 * There are several objects that we don't care about (at the moment).
@@ -1294,45 +1290,13 @@ public final class CoreConnection {
                                 List<QVariant<?>> data = (List<QVariant<?>>) (packedFunc.remove(0).getData());
                                 Collections.reverse(data); // Apparently, we receive them in the wrong order
 
-                                if (!initComplete) { //We are still initializing backlog for the first time
-                                    updateInitProgress("Receiving backlog");
-                                    boolean preferenceParseColors = PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_colored_text), false);
-                                    for (QVariant<?> message : data) {
-                                        IrcMessage msg = (IrcMessage) message.getData();
-                                        Buffer buffer = buffers.get(msg.bufferInfo.id);
-
-                                        if (buffer == null) {
-                                            Log.e(TAG, "A message buffer is null:" + msg);
-                                            continue;
-                                        }
-
-                                        if (!buffer.hasMessage(msg)) {
-                                            /**
-                                             * Check if we are highlighted in the message, TODO: Add
-                                             * support for custom highlight masks
-                                             */
-                                            MessageUtil.checkMessageForHighlight(networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
-                                            if (preferenceParseColors)
-                                                MessageUtil.parseStyleCodes(service, msg);
-                                            buffer.addBacklogMessage(msg);
-                                        } else {
-                                            Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
-                                        }
-                                    }
-                                    initBacklogBuffers -= 1;
-                                    if (initBacklogBuffers <= 0) {
-                                        updateInitDone();
-                                    }
-                                } else {
-                                    // Send our the backlog messages to our listeners
-                                    List<IrcMessage> messageList = new ArrayList<IrcMessage>();
-                                    for (QVariant<?> message : data) {
-                                        messageList.add((IrcMessage) message.getData());
-                                    }
-                                    Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
-                                    msg.obj = messageList;
-                                    msg.sendToTarget();
+                                List<IrcMessage> messageList = new ArrayList<IrcMessage>();
+                                for (QVariant<?> message : data) {
+                                    messageList.add((IrcMessage) message.getData());
                                 }
+                                Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
+                                msg.obj = messageList;
+                                msg.sendToTarget();
 							/* 
 							 * The addIrcUser function in the Network class is called whenever a new
 							 * IRC user appears on a given network. 
@@ -1677,7 +1641,7 @@ public final class CoreConnection {
                     }
                     long end = System.currentTimeMillis();
                     if (end - start > 500) {
-                        System.err.println("Slow parsing (" + (end - start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
+                        Log.w(TAG, "Slow parsing (" + (end - start) + "ms)!: Request type: " + type.name() + " Class name:" + className);
                     }
                 } catch (IOException e) {
                     CoreConnection.this.onDisconnected("Lost connection");
