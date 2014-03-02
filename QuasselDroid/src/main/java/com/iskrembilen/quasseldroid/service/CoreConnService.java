@@ -571,7 +571,6 @@ public class CoreConnService extends Service {
                     BusProvider.getInstance().post(new UnsupportedProtocolEvent());
                     break;
                 case R.id.INIT_PROGRESS:
-                    initDone = false;
                     initReason = (String) msg.obj;
                     BusProvider.getInstance().post(new InitProgressEvent(false, initReason));
                     break;

@@ -1219,7 +1219,7 @@ public final class CoreConnection {
                                         maxBufferId = id;
                                     }
                                     if (!buffers.containsKey(id)) {
-                                        System.err.println("got buffer info for non-existent buffer id: " + id);
+                                        Log.w(TAG, "Got buffer info for non-existent buffer id: " + id);
                                         continue;
                                     }
                                     Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
@@ -1242,7 +1242,6 @@ public final class CoreConnection {
 
                                     order++;
                                 }
-                                updateInitProgress("Receiving backlog");
 
                             }
 						/*
@@ -1296,6 +1295,7 @@ public final class CoreConnection {
                                 Collections.reverse(data); // Apparently, we receive them in the wrong order
 
                                 if (!initComplete) { //We are still initializing backlog for the first time
+                                    updateInitProgress("Receiving backlog");
                                     boolean preferenceParseColors = PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_colored_text), false);
                                     for (QVariant<?> message : data) {
                                         IrcMessage msg = (IrcMessage) message.getData();
