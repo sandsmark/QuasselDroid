@@ -37,7 +37,7 @@ public class QInteger implements QMetaTypeSerializer<Integer> {
     }
 
     @Override
-    public Integer unserialize(QDataInputStream stream, DataStreamVersion version)
+    public Integer deserialize(QDataInputStream stream, DataStreamVersion version)
             throws IOException {
         return stream.readInt();
     }

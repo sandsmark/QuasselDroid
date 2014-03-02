@@ -60,7 +60,7 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
     }
 
     @Override
-    public Map<T, V> unserialize(QDataInputStream stream,
+    public Map<T, V> deserialize(QDataInputStream stream,
                                  DataStreamVersion version) throws IOException, EmptyQVariantException {
 
         Map map = new HashMap<String, T>();
@@ -68,7 +68,7 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
         valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
         int len = (int) stream.readUInt(32);
         for (int i = 0; i < len; i++) {
-            map.put((T) keySerializer.unserialize(stream, version), (V) valueSerializer.unserialize(stream, version));
+            map.put((T) keySerializer.deserialize(stream, version), (V) valueSerializer.deserialize(stream, version));
         }
         return map;
     }

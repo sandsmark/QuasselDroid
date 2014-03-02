@@ -38,7 +38,7 @@ public class Void implements QMetaTypeSerializer<java.lang.Void> {
     }
 
     @Override
-    public java.lang.Void unserialize(QDataInputStream stream,
+    public java.lang.Void deserialize(QDataInputStream stream,
                                       DataStreamVersion version) throws IOException {
         return null;
     }

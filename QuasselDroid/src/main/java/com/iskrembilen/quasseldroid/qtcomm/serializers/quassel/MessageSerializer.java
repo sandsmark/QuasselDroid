@@ -49,16 +49,16 @@ public class MessageSerializer implements QMetaTypeSerializer<IrcMessage> {
     }
 
     @Override
-    public IrcMessage unserialize(QDataInputStream stream,
+    public IrcMessage deserialize(QDataInputStream stream,
                                   DataStreamVersion version) throws IOException, EmptyQVariantException {
         IrcMessage ret = new IrcMessage();
         ret.messageId = stream.readInt();
         ret.timestamp = new Date(stream.readUInt(32) * 1000);
         ret.type = IrcMessage.Type.getForValue((int) stream.readUInt(32));
         ret.flags = stream.readByte();
-        ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().unserialize(stream, version);
-        ret.setSender((String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version));
-        ret.content = SpannableString.valueOf((String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version));
+        ret.bufferInfo = (BufferInfo) QMetaTypeRegistry.instance().getTypeForName("BufferInfo").getSerializer().deserialize(stream, version);
+        ret.setSender((String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().deserialize(stream, version));
+        ret.content = SpannableString.valueOf((String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().deserialize(stream, version));
 
         return ret;
     }

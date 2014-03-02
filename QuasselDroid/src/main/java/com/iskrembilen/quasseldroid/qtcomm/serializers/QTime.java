@@ -44,7 +44,7 @@ public class QTime implements QMetaTypeSerializer<Calendar> {
     }
 
     @Override
-    public Calendar unserialize(QDataInputStream stream, DataStreamVersion version)
+    public Calendar deserialize(QDataInputStream stream, DataStreamVersion version)
             throws IOException {
         long millisSinceMidnight = stream.readUInt(32);
         int hour = (int) (millisSinceMidnight / 3600000L);
