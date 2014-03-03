@@ -151,7 +151,6 @@ public class CoreConnService extends Service {
     private int port;
     private String username;
     private String password;
-    private boolean ssl;
 
     private int reconnectCounter;
     private static String RECONNECT_COUNTER_DEFAULT = "10";
@@ -260,9 +259,6 @@ public class CoreConnService extends Service {
         port = connectData.getInt("port");
         username = connectData.getString("username");
         password = connectData.getString("password");
-        ssl = connectData.getBoolean("ssl");
-        Log.i(TAG, "Connecting to core: " + address + ":" + port
-                + " with username " + username);
         networks = NetworkCollection.getInstance();
         networks.clear();
 
