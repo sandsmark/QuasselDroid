@@ -197,7 +197,7 @@ public class QMetaTypeRegistry {
     }
 
     public static Object unserialize(Type type, QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
-        return instance().getTypeForId(type.getValue()).getSerializer().unserialize(stream, version);
+        return instance().getTypeForId(type.getValue()).getSerializer().deserialize(stream, version);
     }
 
     public static Object unserialize(Type type, QDataInputStream stream) throws IOException, EmptyQVariantException {

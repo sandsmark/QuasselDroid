@@ -16,7 +16,7 @@ public class Quasseldroid extends Application {
     public void onCreate() {
         super.onCreate();
         status = Status.Disconnected;
-        //Populate the preferences with default vaules if this has not been done before
+        //Populate the preferences with default values if this has not been done before
         PreferenceManager.setDefaultValues(this, R.layout.preferences, true);
         //Load current theme
         ThemeUtil.initTheme(this);

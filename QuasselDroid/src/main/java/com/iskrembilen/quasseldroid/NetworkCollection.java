@@ -60,7 +60,7 @@ public class NetworkCollection extends Observable implements Observer {
                 return;
             }
         }
-        throw new RuntimeException("Buffer + " + buffer.getInfo().name + " has no valide network id " + id);
+        throw new RuntimeException("Buffer + " + buffer.getInfo().name + " has no valid network id " + id);
     }
 
     public List<Network> getNetworkList() {

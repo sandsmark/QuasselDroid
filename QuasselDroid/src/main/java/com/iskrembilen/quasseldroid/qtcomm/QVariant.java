@@ -78,7 +78,7 @@ public class QVariant<T extends Object> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public QVariant<U> unserialize(QDataInputStream src, DataStreamVersion version) throws IOException, EmptyQVariantException {
+        public QVariant<U> deserialize(QDataInputStream src, DataStreamVersion version) throws IOException, EmptyQVariantException {
             int type = (int) src.readUInt(32);
             if (version.getValue() < DataStreamVersion.Qt_4_0.getValue()) {
                 //FIXME: Implement?
@@ -93,14 +93,14 @@ public class QVariant<T extends Object> {
 
             QVariant<U> ret = new QVariant<U>();
             if (type == QVariantType.UserType.value) {
-                String name = (String) QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().unserialize(src, version);
+                String name = (String) QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QByteArray.getValue()).getSerializer().deserialize(src, version);
                 name = name.trim();
                 ret.userTypeName = name;
 
                 try {
                     type = QMetaTypeRegistry.instance().getIdForName(name);
                 } catch (IllegalArgumentException e) {
-                    throw new IOException("Corrupt data, unable to unserialize this: '" + name + "'");
+                    throw new IOException("Corrupt data, unable to deserialize this: '" + name + "'");
                 }
             }
 
@@ -116,15 +116,15 @@ public class QVariant<T extends Object> {
 
             if (ret.type == QVariantType.Invalid) {// || is_null) { //includes data = null; FIXME: is this correct?
                 // Since we wrote something, we should read something
-                QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().unserialize(src, version);
+                QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QString.getValue()).getSerializer().deserialize(src, version);
                 ret.data = null;
                 return ret;
             }
             //Unchecked cast so we can read unknown qvariants at run time and then inspect the contents
             if (ret.type == QVariantType.UserType) {
-                ret.data = (U) QMetaTypeRegistry.instance().getTypeForName(ret.userTypeName).getSerializer().unserialize(src, version);
+                ret.data = (U) QMetaTypeRegistry.instance().getTypeForName(ret.userTypeName).getSerializer().deserialize(src, version);
             } else {
-                ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(type).getSerializer().unserialize(src, version);
+                ret.data = (U) QMetaTypeRegistry.instance().getTypeForId(type).getSerializer().deserialize(src, version);
             }
             return ret;
         }

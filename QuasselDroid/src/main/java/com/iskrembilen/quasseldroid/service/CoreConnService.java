@@ -30,6 +30,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -48,7 +50,6 @@ import android.widget.Toast;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcMessage.Flag;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
@@ -98,7 +99,7 @@ public class CoreConnService extends Service {
     private static final String TAG = CoreConnService.class.getSimpleName();
 
     /**
-     * Id for result code in the resultReciver that is going to notify the
+     * Id for result code in the resultReceiver that is going to notify the
      * activity currently on screen about the change
      */
     public static final int CONNECTION_DISCONNECTED = 0;
@@ -133,6 +134,7 @@ public class CoreConnService extends Service {
     private OnSharedPreferenceChangeListener preferenceListener;
 
     private int latency;
+    private boolean isConnecting = false;
     private boolean initDone = false;
     private String initReason = "";
 
@@ -342,7 +344,7 @@ public class CoreConnService extends Service {
         networks.clear();
 
         acquireWakeLockIfEnabled();
-        coreConn = new CoreConnection(coreId, address, port, username, password, ssl, this);
+        coreConn = new CoreConnection(coreId, address, port, username, password, this);
         startForeground(R.id.NOTIFICATION, notificationManager.getConnectingNotification());
     }
 
@@ -420,7 +422,16 @@ public class CoreConnService extends Service {
                          */
                         MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
                         MessageUtil.parseStyleCodes(CoreConnService.this, message);
-                        if ((message.isHighlighted() && !buffer.isDisplayed()) || (buffer.getInfo().type == BufferInfo.Type.QueryBuffer && ((message.flags & Flag.Self.getValue()) == 0))) {
+                        if (
+                                (message.isHighlighted() && !buffer.isDisplayed()) ||
+                                (
+                                    buffer.getInfo().type == BufferInfo.Type.QueryBuffer &&
+                                    !message.isSelf() &&
+                                    // Server messages with an empty sender in queries are "x is away: ..." messages
+                                    // (I've found no exception to that rule in my 13-million-message database)
+                                    !(message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
+                                )
+                            ) {
                             notificationManager.notifyHighlight(buffer.getInfo().id);
 
                         }
@@ -495,6 +506,7 @@ public class CoreConnService extends Service {
                     /**
                      * CoreConn has connected to a core
                      */
+                    isConnecting = true;
                     notificationManager.notifyConnecting();
                     BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connecting));
                     break;
@@ -611,8 +623,9 @@ public class CoreConnService extends Service {
                     notificationManager.notifyConnected();
                     BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connected));
                     initDone = true;
+                    isConnecting = false;
                     resetReconnectCounter();
-                    BusProvider.getInstance().post(new InitProgressEvent(true, ""));
+					BusProvider.getInstance().post(new InitProgressEvent(true, ""));
                     BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
                     break;
                 case R.id.USER_PARTED:
@@ -860,6 +873,14 @@ public class CoreConnService extends Service {
         return networks.getNetworkById(networkId);
     }
 
+    public String getVersionName(){
+        try{
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        }catch(PackageManager.NameNotFoundException e){
+            return "";
+        }
+    }
+
     private void checkSwitchingTo(Buffer buffer) {
         if (networkToSwitchTo == buffer.getInfo().networkId && bufferNameToSwitchTo.equals(buffer.getInfo().name)) {
             BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
@@ -872,6 +893,8 @@ public class CoreConnService extends Service {
     public ConnectionChangedEvent produceConnectionStatus() {
         if (isConnected())
             return new ConnectionChangedEvent(Status.Connected);
+        else if (isConnecting && !initDone)
+            return new ConnectionChangedEvent(Status.Connecting);
         else
             return new ConnectionChangedEvent(Status.Disconnected);
     }

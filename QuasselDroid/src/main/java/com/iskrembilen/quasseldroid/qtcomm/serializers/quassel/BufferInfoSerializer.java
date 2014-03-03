@@ -45,14 +45,14 @@ public class BufferInfoSerializer implements QMetaTypeSerializer<BufferInfo> {
     }
 
     @Override
-    public BufferInfo unserialize(QDataInputStream stream,
+    public BufferInfo deserialize(QDataInputStream stream,
                                   DataStreamVersion version) throws IOException, EmptyQVariantException {
         BufferInfo ret = new BufferInfo();
         ret.id = stream.readInt();
         ret.networkId = stream.readInt();
         ret.type = BufferInfo.Type.getType(stream.readShort());
         ret.groupId = stream.readUInt(32);
-        ret.name = (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().unserialize(stream, version);
+        ret.name = (String) QMetaTypeRegistry.instance().getTypeForName("QByteArray").getSerializer().deserialize(stream, version);
         return ret;
     }
 }

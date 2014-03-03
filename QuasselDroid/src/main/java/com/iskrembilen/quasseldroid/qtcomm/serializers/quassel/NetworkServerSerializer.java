@@ -38,14 +38,14 @@ public class NetworkServerSerializer implements QMetaTypeSerializer<NetworkServe
     @Override
     public void serialize(QDataOutputStream stream, NetworkServer data,
                           DataStreamVersion version) throws IOException {
-        throw new IOException("IMPLEMENT ME! TODO DAWG");
+        throw new IOException("NetworkServerSerializer.serialize() unimplemented!");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public NetworkServer unserialize(QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
+    public NetworkServer deserialize(QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
         Map<String, QVariant<?>> map = (Map<String, QVariant<?>>)
-                QMetaTypeRegistry.instance().getTypeForName("QVariantMap").getSerializer().unserialize(stream, version);
+                QMetaTypeRegistry.instance().getTypeForName("QVariantMap").getSerializer().deserialize(stream, version);
 
         return new NetworkServer((String) map.get("Host").getData(),
                 (Long) map.get("Port").getData(),

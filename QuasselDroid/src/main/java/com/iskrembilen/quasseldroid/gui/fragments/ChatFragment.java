@@ -258,7 +258,7 @@ public class ChatFragment extends SherlockFragment {
         if (adapter.buffer != null) {
             adapter.buffer.setDisplayed(false);
 
-            //Dont save position if list is at bottom
+            //Don't save position if list is at bottom
             if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
                 adapter.buffer.setTopMessageShown(0);
             } else {
@@ -348,7 +348,7 @@ public class ChatFragment extends SherlockFragment {
 
         @Override
         public IrcMessage getItem(int position) {
-            //TODO: QriorityQueue is fucked, we dont want to convert to array here, so change later
+            //TODO: PriorityQueue is fucked, we don't want to convert to array here, so change later
             return (IrcMessage) buffer.getBacklogEntry(position);
         }
 
@@ -420,34 +420,40 @@ public class ChatFragment extends SherlockFragment {
                     break;
                 case Join:
                     holder.nickView.setText("-->");
-                    holder.msgView.setText(entry.getNick() + " has joined " + entry.content);
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has joined " + entry.content);
                     holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
                     holder.nickView.setTextColor(ThemeUtil.chatJoinColor);
                     break;
                 case Part:
                     holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " has left (" + entry.content + ")");
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has left (" + entry.content + ")");
                     holder.msgView.setTextColor(ThemeUtil.chatPartColor);
                     holder.nickView.setTextColor(ThemeUtil.chatPartColor);
                     break;
                 case Quit:
                     holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " has quit (" + entry.content + ")");
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has quit (" + entry.content + ")");
                     holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
                     holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
                     break;
                 case Kill:
                     holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " was killed (" + entry.content + ")");
+                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") was killed (" + entry.content + ")");
                     holder.msgView.setTextColor(ThemeUtil.chatKillColor);
                     holder.nickView.setTextColor(ThemeUtil.chatKillColor);
                     break;
                 case Kick:
                     holder.nickView.setText("<-*");
+                    String nick     = "",
+                           reason   = "";
                     int nickEnd = entry.content.toString().indexOf(" ");
-                    String nick = entry.content.toString().substring(0, nickEnd);
-                    String reason = entry.content.toString().substring(nickEnd + 1);
-                    holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + " (" + reason + ")");
+                    if (nickEnd >= 0) {
+                        nick = entry.content.toString().substring(0, nickEnd);
+                        reason = " (" + entry.content.toString().substring(nickEnd + 1) + ")";
+                    } else {
+                        nick = entry.content.toString();
+                    }
+                    holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + reason);
                     holder.msgView.setTextColor(ThemeUtil.chatKickColor);
                     holder.nickView.setTextColor(ThemeUtil.chatKickColor);
                     break;
@@ -459,7 +465,11 @@ public class ChatFragment extends SherlockFragment {
                     break;
                 case Nick:
                     holder.nickView.setText("<->");
-                    holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
+                    if(entry.getNick().equals(entry.content.toString())){
+                        holder.msgView.setText("You are now known as " + entry.content.toString());
+                    }else{
+                        holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
+                    }
                     holder.msgView.setTextColor(ThemeUtil.chatNickColor);
                     holder.nickView.setTextColor(ThemeUtil.chatNickColor);
                     break;

@@ -18,27 +18,19 @@
  GNU Lesser General Public License along with this program.  If not, see
  <http://www.gnu.org/licenses/>.
  */
-package com.iskrembilen.quasseldroid.qtcomm.serializers;
 
-import com.iskrembilen.quasseldroid.qtcomm.DataStreamVersion;
-import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeSerializer;
+package com.iskrembilen.quasseldroid.io;
 
-import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.DeflaterOutputStream;
 
-public class Bool implements QMetaTypeSerializer<Boolean> {
+public class SwitchableDeflaterOutputStream extends DeflaterOutputStream{
 
-    @Override
-    public void serialize(QDataOutputStream stream, Boolean data,
-                          DataStreamVersion version) throws IOException {
-        stream.writeBoolean(data);
+    public SwitchableDeflaterOutputStream(OutputStream os) {
+        super(os, true);
     }
 
-    @Override
-    public Boolean deserialize(QDataInputStream stream, DataStreamVersion version)
-            throws IOException {
-        return stream.readBoolean();
+    public void setOutputStream(OutputStream os){
+        out = os;
     }
-
 }

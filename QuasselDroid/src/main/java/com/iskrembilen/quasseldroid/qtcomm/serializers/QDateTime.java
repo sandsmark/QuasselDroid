@@ -57,7 +57,7 @@ public class QDateTime implements QMetaTypeSerializer<Calendar> {
     }
 
     @Override
-    public Calendar unserialize(QDataInputStream stream,
+    public Calendar deserialize(QDataInputStream stream,
                                 DataStreamVersion version) throws IOException {
         long julianDay = stream.readUInt(32);
         long secondsSinceMidnight = stream.readUInt(32);

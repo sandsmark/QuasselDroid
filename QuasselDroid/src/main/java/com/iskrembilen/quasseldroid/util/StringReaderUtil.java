@@ -33,7 +33,7 @@ import java.nio.charset.CharsetDecoder;
 
 /**
  * Utility class for reading a String from the QDataInputStream.
- * Made to decrease the unserialization time for strings
+ * Made to decrease the deserialization time for strings
  * Uses a different method to create the string then the old new String(byte[], encoding)
  */
 public class StringReaderUtil {

@@ -35,7 +35,7 @@ public class QByteArray implements QMetaTypeSerializer<String> {
     StringReaderUtil stringReader = new StringReaderUtil("UTF-8");
 
     @Override
-    public String unserialize(QDataInputStream stream, DataStreamVersion version)
+    public String deserialize(QDataInputStream stream, DataStreamVersion version)
             throws IOException {
         int len = (int) stream.readUInt(32);
         if (len == 0xFFFFFFFF)

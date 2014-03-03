@@ -22,12 +22,14 @@
 package com.iskrembilen.quasseldroid.io;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.AbsListView;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
@@ -86,6 +88,8 @@ public final class CoreConnection {
     private Socket socket;
     private QDataOutputStream outStream;
     private QDataInputStream inStream;
+    private SwitchableDeflaterOutputStream deflater;
+    private SwitchableInflaterInputStream inflater;
 
     private Map<Integer, Buffer> buffers;
     private CoreInfo coreInfo;
@@ -96,7 +100,6 @@ public final class CoreConnection {
     private int port;
     private String username;
     private String password;
-    private boolean ssl;
 
     CoreConnService service;
     private Timer heartbeatTimer;
@@ -109,20 +112,24 @@ public final class CoreConnection {
     private LinkedList<List<QVariant<?>>> packageQueue;
     private String errorMessage;
 
+    private int bufferViewId;
+
     //Used to create the ID of new channels we join
     private int maxBufferId = 0;
+
+    private boolean usingSSL = false;
+    private boolean usingCompression = false;
 
     private ExecutorService outputExecutor;
 
 
     public CoreConnection(long coreId, String address, int port, String username,
-                          String password, Boolean ssl, CoreConnService parent) {
+                          String password, CoreConnService parent) {
         this.coreId = coreId;
         this.address = address;
         this.port = port;
         this.username = username;
         this.password = password;
-        this.ssl = ssl;
         this.service = parent;
 
         outputExecutor = Executors.newSingleThreadExecutor();
@@ -179,7 +186,7 @@ public final class CoreConnection {
         List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
         retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
         retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
-        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
         retFunc.add(new QVariant<String>("requestRemoveBuffer", QVariantType.String));
         retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
 
@@ -195,7 +202,7 @@ public final class CoreConnection {
         List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
         retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
         retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
-        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
         retFunc.add(new QVariant<String>("requestRemoveBufferPermanently", QVariantType.String));
         retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
 
@@ -279,7 +286,7 @@ public final class CoreConnection {
         List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
         retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
         retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
-        retFunc.add(new QVariant<String>("0", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
         retFunc.add(new QVariant<String>("requestAddBuffer", QVariantType.String));
         retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
         retFunc.add(new QVariant<Integer>(networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount(), QVariantType.Int));
@@ -293,9 +300,9 @@ public final class CoreConnection {
     }
 
     /**
-     * Requests moar backlog for a give buffer
+     * Requests more backlog for a give buffer
      *
-     * @param buffer Buffer id to request moar for
+     * @param buffer Buffer id to request more for
      */
     public void requestMoreBacklog(int buffer, int amount) {
         if (buffers.get(buffer).getUnfilteredSize() == 0) {
@@ -374,7 +381,67 @@ public final class CoreConnection {
         socket = (Socket) factory.createSocket(address, port);
         socket.setKeepAlive(true);
         outStream = new QDataOutputStream(socket.getOutputStream());
+        inStream = new QDataInputStream(socket.getInputStream());
         // END CREATE SOCKETS
+
+        updateInitProgress("Attempting new-style handshake...");
+
+        //Calculate and send magic value
+        long magic = 0x42b33f00;
+        magic = magic | 0x01;   //0x01 is encryption
+
+        //DeflaterOutputStream SYNC_FLUSH support is required for compression, but Eclair doesn't support that.
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
+            magic = magic | 0x02;   //0x02 is compression
+        } else {
+            Log.d(TAG, "Android version is too old, disabling compression.  Please update to 2.2 or later.");
+        }
+
+        outStream.writeUInt(magic, 32);
+
+        //Send supported protocols
+        outStream.writeUInt(0x01, 32);      //0x01 is Legacy Protocol
+        outStream.writeUInt(0x01 << 31, 32); //Bit 31 set to indicate end of list
+
+        //Attempt to read core's response
+        try {
+            long responseValue = inStream.readUInt(32);
+
+            //Check to make sure legacy protocol is in use
+            if ((responseValue & 0x01) == 0) {
+                throw new UnsupportedProtocolException("Core claims not to support legacy protocol!");
+            }
+
+            //Check if Encryption should be used
+            if (((responseValue >> 24) & 0x01) > 0) {
+                usingSSL = true;
+            }
+
+            //Check if Compression should be used
+            if (((responseValue >> 24) & 0x02) > 0) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
+                    usingCompression = true;
+                } else {
+                    throw new UnsupportedProtocolException("Core is forcing compression, but compression is unsupported!");
+                }
+            }
+        } catch (IOException e) {
+            //This means that the core supports only the legacy handshake, so reopen the connection
+            //and try again.
+            updateInitProgress("Legacy core detected, falling back to legacy handshake...");
+            socket = (Socket) factory.createSocket(address, port);
+            socket.setKeepAlive(true);
+            outStream = new QDataOutputStream(socket.getOutputStream());
+            inStream = new QDataInputStream(socket.getInputStream());
+        }
+
+        if (usingCompression) {
+            Log.d(TAG, "Using compression.");
+            deflater = new SwitchableDeflaterOutputStream(socket.getOutputStream());
+            inflater = new SwitchableInflaterInputStream(socket.getInputStream());
+            outStream = new QDataOutputStream(deflater);
+            inStream = new QDataInputStream(inflater);
+        }
 
         // START CLIENT INFO
         updateInitProgress("Sending client info...");
@@ -383,8 +450,8 @@ public final class CoreConnection {
         DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
         Date date = new Date();
         initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
-        initial.put("UseSsl", new QVariant<Boolean>(ssl, QVariantType.Bool));
-        initial.put("ClientVersion", new QVariant<String>("v0.6.1 (dist-<a href='http://git.quassel-irc.org/?p=quassel.git;a=commit;h=611ebccdb6a2a4a89cf1f565bee7e72bcad13ffb'>611ebcc</a>)", QVariantType.String));
+        initial.put("UseSsl", new QVariant<Boolean>(true, QVariantType.Bool));
+        initial.put("ClientVersion", new QVariant<String>("Quasseldroid " + service.getVersionName(), QVariantType.String));
         initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
         initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
         initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariantType.Int));
@@ -394,44 +461,57 @@ public final class CoreConnection {
 
         // START CORE INFO
         updateInitProgress("Getting core info...");
-        inStream = new QDataInputStream(socket.getInputStream());
         Map<String, QVariant<?>> reply = readQVariantMap();
-        coreInfo = new CoreInfo();
-        coreInfo.setCoreInfo((String) reply.get("CoreInfo").getData());
-        coreInfo.setSupportSsl((Boolean) reply.get("SupportSsl").getData());
-        coreInfo.setConfigured((Boolean) reply.get("Configured").getData());
-        coreInfo.setLoginEnabled((Boolean) reply.get("LoginEnabled").getData());
-        coreInfo.setMsgType((String) reply.get("MsgType").getData());
-        coreInfo.setProtocolVersion(((Long) reply.get("ProtocolVersion").getData()).intValue());
-        coreInfo.setSupportsCompression((Boolean) reply.get("SupportsCompression").getData());
+        if(reply.get("MsgType").toString().equals("ClientInitAck")){
+            coreInfo = new CoreInfo();
+            coreInfo.setCoreInfo((String) reply.get("CoreInfo").getData());
+            coreInfo.setSupportSsl((Boolean) reply.get("SupportSsl").getData());
+            coreInfo.setConfigured((Boolean) reply.get("Configured").getData());
+            coreInfo.setLoginEnabled((Boolean) reply.get("LoginEnabled").getData());
+            coreInfo.setMsgType((String) reply.get("MsgType").getData());
+            coreInfo.setProtocolVersion(((Long) reply.get("ProtocolVersion").getData()).intValue());
+            coreInfo.setSupportsCompression((Boolean) reply.get("SupportsCompression").getData());
+        }else{
+            if(reply.get("MsgType").toString().equals("ClientInitReject")){
+                throw new IOException((String) reply.get("Error").getData());
+            }else{
+                throw new IOException("Core sent unexpected \"" + reply.get("MsgType").toString() + "\" response!");
+            }
+        }
+
+        if (!usingSSL && coreInfo.isSupportSsl()) {
+            usingSSL = true;
+        }
 
         //Check that the protocol version is at least 10
         if (coreInfo.getProtocolVersion() < 10)
             throw new UnsupportedProtocolException("Protocol version is old: " + coreInfo.getProtocolVersion());
-        /*for (String key : reply.keySet()) {
-			System.out.println("\t" + key + " : " + reply.get(key));
-		}*/
         // END CORE INFO
 
         // START SSL CONNECTION
-        if (ssl) {
-            Log.d(TAG, "Using ssl");
+        if (usingSSL) {
+            Log.d(TAG, "Using SSL.");
             SSLContext sslContext = SSLContext.getInstance("TLS");
             TrustManager[] trustManagers = new TrustManager[]{new CustomTrustManager(this)};
             sslContext.init(null, trustManagers, null);
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
             SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, address, port, true);
-            sslSocket.setEnabledProtocols(new String[]{"SSLv3"});
 
             sslSocket.setUseClientMode(true);
-            updateInitProgress("Starting ssl handshake");
+            updateInitProgress("Starting SSL handshake...");
             sslSocket.startHandshake();
-            Log.d(TAG, "Ssl handshake complete");
-            inStream = new QDataInputStream(sslSocket.getInputStream());
-            outStream = new QDataOutputStream(sslSocket.getOutputStream());
+            Log.d(TAG, "SSL handshake complete.");
+
+            if (usingCompression) {
+                deflater.setOutputStream(sslSocket.getOutputStream());
+                inflater.setInputStream(sslSocket.getInputStream());
+            } else {
+                outStream = new QDataOutputStream(sslSocket.getOutputStream());
+                inStream = new QDataInputStream(sslSocket.getInputStream());
+            }
             socket = sslSocket;
         } else {
-            Log.w(TAG, "SSL DISABLED!");
+            Log.w(TAG, "Core does not support SSL!");
         }
         // FINISHED SSL CONNECTION
 
@@ -501,17 +581,16 @@ public final class CoreConnection {
             sendInitRequest("Network", Integer.toString(network.getId()));
         }
         sendInitRequest("BufferSyncer", "");
-        //sendInitRequest("BufferViewManager", ""); this is about where this should be, but don't know what it does
-        sendInitRequest("BufferViewConfig", "0");
+        sendInitRequest("BufferViewManager", "");
         SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(service);
 
         //Get backlog if user selected a fixed amount
         if (!options.getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
-            int backlogAmout = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
+            int backlogAmount = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
             initBacklogBuffers = 0;
             for (Buffer buffer : buffers.values()) {
                 initBacklogBuffers += 1;
-                requestMoreBacklog(buffer.getInfo().id, backlogAmout);
+                requestMoreBacklog(buffer.getInfo().id, backlogAmount);
             }
         }
 
@@ -616,10 +695,13 @@ public final class CoreConnection {
 
                 // Sanity check, check that we can decode our own stuff before sending it off
                 //QDataInputStream bis = new QDataInputStream(new ByteArrayInputStream(baos.toByteArray()));
-                //QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().unserialize(bis, DataStreamVersion.Qt_4_2);
+                //QMetaTypeRegistry.instance().getTypeForId(QMetaType.Type.QVariant.getValue()).getSerializer().deserialize(bis, DataStreamVersion.Qt_4_2);
 
                 // Send data
                 outStream.write(baos.toByteArray());
+                if (usingCompression) {
+                    deflater.flush();
+                }
                 bos.close();
                 baos.close();
             } catch (IOException e) {
@@ -654,7 +736,7 @@ public final class CoreConnection {
      * @throws EmptyQVariantException
      */
     private Map<String, QVariant<?>> readQVariantMap() throws IOException, EmptyQVariantException {
-        // Length of this packet (why do they send this? noone knows!).
+        // Length of this packet (why do they send this? no-one knows!).
         inStream.readUInt(32);
         QVariant<Map<String, QVariant<?>>> v = (QVariant<Map<String, QVariant<?>>>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
@@ -696,6 +778,11 @@ public final class CoreConnection {
     private void updateInitProgress(String message) {
         Log.i(TAG, message);
         service.getHandler().obtainMessage(R.id.INIT_PROGRESS, message).sendToTarget();
+    }
+
+    private void sendConnectingEvent() {
+        Log.i(TAG, "Sending Connecting event");
+        service.getHandler().obtainMessage(R.id.CONNECTING).sendToTarget();
     }
 
     private void updateInitDone() {
@@ -798,12 +885,15 @@ public final class CoreConnection {
                 return "IO error while connecting!";
             }
 
+            // Connection is valid, send notification to activity:
+            sendConnectingEvent();
+
             List<QVariant<?>> packedFunc;
             final long startWait = System.currentTimeMillis();
             while (running) {
                 try {
                     if (networkInitComplete && packageQueue.size() > 0) {
-                        Log.e(TAG, "Queue not empty, retrive element");
+                        Log.e(TAG, "Queue not empty, retrieve element");
                         packedFunc = packageQueue.poll();
                     } else {
                         packedFunc = readQVariantList();
@@ -816,7 +906,7 @@ public final class CoreConnection {
                     //Log.i(TAG, "Slow core is slow: " + (System.currentTimeMillis() - startWait) + "ms");
 
                     //We received a package, aka we are not disconnected, restart timer
-                    //Log.i(TAG, "Package reviced, reseting countdown");
+                    //Log.i(TAG, "Package received, resetting countdown");
                     checkAlive.cancel();
                     checkAlive.start();
 
@@ -956,7 +1046,7 @@ public final class CoreConnection {
                                         }
                                     }
                                     if (!foundChannel)
-                                        Log.e(TAG, "A channel in a network has no coresponding buffer object " + chanName);
+                                        Log.e(TAG, "A channel in a network has no corresponding buffer object " + chanName);
                                 }
 
                                 Log.i(TAG, "Sending network " + network.getName() + " to service");
@@ -1008,7 +1098,7 @@ public final class CoreConnection {
                                         msg.arg2 = msgId;
                                         msg.sendToTarget();
                                     } else {
-                                        Log.e(TAG, "Getting last seen message for buffer we dont have " + bufferId);
+                                        Log.e(TAG, "Getting last seen message for buffer we don't have " + bufferId);
                                     }
                                 }
                                 // Parse out the marker lines for buffers if the core supports them
@@ -1024,7 +1114,7 @@ public final class CoreConnection {
                                             msg.arg2 = msgId;
                                             msg.sendToTarget();
                                         } else {
-                                            Log.e(TAG, "Getting markerlinemessage for buffer we dont have " + bufferId);
+                                            Log.e(TAG, "Getting markerlinemessage for buffer we don't have " + bufferId);
                                         }
                                     }
                                 } else {
@@ -1074,6 +1164,21 @@ public final class CoreConnection {
                                 if (!found) {
                                     Log.e(TAG, "Could not find buffer for IrcChannel initData");
                                 }
+                            } else if (className.equals("BufferViewManager")) {
+                                Log.d(TAG, "InitData: BufferViewManager");
+                                Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+                                List<QVariant<?>> bufferViewList = (List<QVariant<?>>) map.get("BufferViewIds").getData();
+
+                                int id = 0;
+                                if (bufferViewList.isEmpty()) {
+                                    Log.e(TAG, "BufferViewManager didn't return any views");
+                                } else {
+                                    QVariant firstBufferViewId = bufferViewList.get(0);
+                                    id = (Integer) firstBufferViewId.getData();
+                                }
+                                Log.d(TAG, "Requesting BufferViewConfig with id: " + id);
+                                sendInitRequest("BufferViewConfig", Integer.toString(id));
+                                bufferViewId = id;
                             } else if (className.equals("BufferViewConfig")) {
                                 Log.d(TAG, "InitData: BufferViewConfig");
                                 Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
@@ -1084,10 +1189,10 @@ public final class CoreConnection {
                                 BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
 
 
-                                //TODO: mabye send this in a bulk to the service so it wont sort and shit every time
+                                //TODO: maybe send this in a bulk to the service so it wont sort and shit every time
                                 for (QVariant bufferId : tempList) {
                                     if (!buffers.containsKey(bufferId.getData())) {
-                                        Log.e(TAG, "TempList, dont't have buffer: " + bufferId.getData());
+                                        Log.e(TAG, "TempList, don't have buffer: " + bufferId.getData());
                                         continue;
                                     }
                                     Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
@@ -1098,7 +1203,7 @@ public final class CoreConnection {
 
                                 for (QVariant bufferId : permList) {
                                     if (!buffers.containsKey(bufferId.getData())) {
-                                        Log.e(TAG, "TempList, dont't have buffer: " + bufferId.getData());
+                                        Log.e(TAG, "TempList, don't have buffer: " + bufferId.getData());
                                         continue;
                                     }
                                     Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
@@ -1114,7 +1219,7 @@ public final class CoreConnection {
                                         maxBufferId = id;
                                     }
                                     if (!buffers.containsKey(id)) {
-                                        System.err.println("got buffer info for non-existant buffer id: " + id);
+                                        Log.w(TAG, "Got buffer info for non-existent buffer id: " + id);
                                         continue;
                                     }
                                     Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
@@ -1137,7 +1242,6 @@ public final class CoreConnection {
 
                                     order++;
                                 }
-                                updateInitProgress("Receiving backlog");
 
                             }
 						/*
@@ -1191,6 +1295,7 @@ public final class CoreConnection {
                                 Collections.reverse(data); // Apparently, we receive them in the wrong order
 
                                 if (!initComplete) { //We are still initializing backlog for the first time
+                                    updateInitProgress("Receiving backlog");
                                     boolean preferenceParseColors = PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_colored_text), false);
                                     for (QVariant<?> message : data) {
                                         IrcMessage msg = (IrcMessage) message.getData();
@@ -1416,7 +1521,7 @@ public final class CoreConnection {
 							 */
                             } else if (className.equals("BufferSyncer") && function.equals("markBufferAsRead")) {
                                 Log.d(TAG, "Sync: BufferSyncer -> markBufferAsRead");
-                                //TODO: this basicly does shit. So find out if it effects anything and what it should do
+                                //TODO: this basically does shit. So find out if it effects anything and what it should do
                                 //int buffer = (Integer) packedFunc.remove(0).getData();
                                 //buffers.get(buffer).setRead();
                             } else if (className.equals("BufferSyncer") && function.equals("removeBuffer")) {
@@ -1441,7 +1546,7 @@ public final class CoreConnection {
                                 Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
                                 if (!buffers.containsKey(bufferId)) {
-//                                System.err.println("got buffer info for non-existant buffer id: " + bufferId);
+//                                System.err.println("got buffer info for non-existent buffer id: " + bufferId);
                                     continue;
                                 }
                                 if (bufferId > maxBufferId) {

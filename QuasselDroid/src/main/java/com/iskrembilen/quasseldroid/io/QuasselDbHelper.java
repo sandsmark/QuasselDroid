@@ -13,11 +13,11 @@
 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License and the
- GNU Lesser General Public License along with this program.  If not, see
+ GNU Lesser General Public License along with this program. If not, see
  <http://www.gnu.org/licenses/>.
  */
 
@@ -39,7 +39,6 @@ public class QuasselDbHelper {
     public static final String KEY_NAME = "name";
     public static final String KEY_ADDRESS = "server";
     public static final String KEY_PORT = "port";
-    public static final String KEY_SSL = "ssl";
     public static final String KEY_CERTIFICATE = "certificate";
     public static final String KEY_BUFFERID = "bufferid";
     public static final String KEY_EVENT = "event";
@@ -57,11 +56,11 @@ public class QuasselDbHelper {
     public static final String CERTIFICATE_TABLE = "certificates";
     public static final String HIDDENEVENTS_TABLE = "hiddenevents";
     private static final String DATABASE_CREATE_TABLE1 =
-            "create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null, ssl integer not null);";
+            "create table cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null);";
     private static final String DATABASE_CREATE_TABLE2 = "create table certificates (certificate text, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE);";
     private static final String DATABASE_CREATE_TABLE3 = "create table hiddenevents (bufferid integer not null, event text not null);";
     private static final String DATABASE_CREATE_TABLE4 = "CREATE TABLE user(userid integer primary key autoincrement, username text not null, password text not null, coreid integer not null unique, foreign key(coreid) references cores(_id) ON DELETE CASCADE ON UPDATE CASCADE)";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String TAG = "DbHelper";
     private final Context context;
@@ -82,14 +81,21 @@ public class QuasselDbHelper {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
+            Log.d(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + ".");
             if (oldVersion <= 1) {
+                Log.w(TAG, "All existing data will be destroyed.");
                 db.execSQL("DROP TABLE IF EXISTS " + CORE_TABLE);
                 db.execSQL("DROP TABLE IF EXISTS " + CERTIFICATE_TABLE);
                 db.execSQL("DROP TABLE IF EXISTS " + HIDDENEVENTS_TABLE);
                 db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
                 onCreate(db);
+            } else if(oldVersion <= 2) {
+                db.execSQL("CREATE TEMPORARY TABLE cores_backup(_id, name, server, port);");
+                db.execSQL("INSERT INTO cores_backup SELECT _id,name,server,port FROM cores;");
+                db.execSQL("DROP TABLE cores;");
+                db.execSQL("CREATE TABLE cores (_id integer primary key autoincrement, name text not null, server text not null, port integer not null);");
+                db.execSQL("INSERT INTO cores SELECT _id,name,server,port FROM cores_backup;");
+                db.execSQL("DROP TABLE cores_backup;");
             }
         }
     }
@@ -110,13 +116,12 @@ public class QuasselDbHelper {
         dbHelper = null;
     }
 
-    public void addCore(String name, String address, int port, boolean useSSL) {
+    public void addCore(String name, String address, int port) {
         try {
             ContentValues initialValues = new ContentValues();
             initialValues.put(KEY_NAME, name);
             initialValues.put(KEY_ADDRESS, address);
             initialValues.put(KEY_PORT, port);
-            initialValues.put(KEY_SSL, useSSL ? 1 : 0);
             db.insert(CORE_TABLE, null, initialValues);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -146,27 +151,25 @@ public class QuasselDbHelper {
     }
 
     public Bundle getCore(long rowId) throws SQLException {
-        Cursor cursor = db.query(true, CORE_TABLE, new String[]{KEY_ADDRESS, KEY_PORT, KEY_NAME, KEY_SSL}, KEY_ID + "=" + rowId, null, null, null, null, null);
+        Cursor cursor = db.query(true, CORE_TABLE, new String[]{KEY_ADDRESS, KEY_PORT, KEY_NAME}, KEY_ID + "=" + rowId, null, null, null, null, null);
         Bundle b = new Bundle();
         if (cursor != null) {
             cursor.moveToFirst();
             b.putString(KEY_NAME, cursor.getString(cursor.getColumnIndex(KEY_NAME)));
             b.putInt(KEY_PORT, cursor.getInt(cursor.getColumnIndex(KEY_PORT)));
             b.putString(KEY_ADDRESS, cursor.getString(cursor.getColumnIndex(KEY_ADDRESS)));
-            b.putBoolean(KEY_SSL, cursor.getInt(cursor.getColumnIndex(KEY_SSL)) > 0);
             cursor.close();
         }
         return b;
     }
 
-    public void updateCore(long rowId, String name, String address, int port, boolean useSSL) {
+    public void updateCore(long rowId, String name, String address, int port) {
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, name);
         args.put(KEY_ADDRESS, address);
         args.put(KEY_PORT, port);
-        args.put(KEY_SSL, useSSL);
         db.update(CORE_TABLE, args, KEY_ID + "=" + rowId, null);
-        //TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we  get problems if names are the same
+        //TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we get problems if names are the same
     }
 
     public void storeCertificate(String certificateHash, long coreId) {
