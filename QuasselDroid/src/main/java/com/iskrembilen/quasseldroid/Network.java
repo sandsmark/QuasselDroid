@@ -90,6 +90,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
     public void setName(String networkName) {
         this.networkName = networkName;
+        setChanged();
+        notifyObservers();
     }
 
 
