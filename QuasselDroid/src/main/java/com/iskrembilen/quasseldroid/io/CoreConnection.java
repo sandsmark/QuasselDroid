@@ -1408,6 +1408,11 @@ public final class CoreConnection {
                                 int networkLatency = (Integer) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
                                 service.getHandler().obtainMessage(R.id.SET_NETWORK_LATENCY, networkId, networkLatency, null).sendToTarget();
+                            } else if (className.equals("Network") && function.equals("setCurrentServer")) {
+                                Log.d(TAG, "Sync: Network -> setCurrentServer");
+                                String currentServer = (String) packedFunc.remove(0).getData();
+                                int networkId = Integer.parseInt(objectName);
+                                service.getHandler().obtainMessage(R.id.SET_NETWORK_CURRENT_SERVER, networkId, 0, currentServer).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("partChannel")) {
                                 Log.d(TAG, "Sync: IrcUser -> partChannel");
                                 String[] tmp = objectName.split("/", 2);
