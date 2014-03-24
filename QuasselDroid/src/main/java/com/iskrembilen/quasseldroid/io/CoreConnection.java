@@ -1413,6 +1413,11 @@ public final class CoreConnection {
                                 String networkName = (String) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
                                 service.getHandler().obtainMessage(R.id.SET_NETWORK_NAME, networkId, 0, networkName).sendToTarget();
+                            } else if (className.equals("Network") && function.equals("setCurrentServer")) {
+                                Log.d(TAG, "Sync: Network -> setCurrentServer");
+                                String currentServer = (String) packedFunc.remove(0).getData();
+                                int networkId = Integer.parseInt(objectName);
+                                service.getHandler().obtainMessage(R.id.SET_NETWORK_CURRENT_SERVER, networkId, 0, currentServer).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("partChannel")) {
                                 Log.d(TAG, "Sync: IrcUser -> partChannel");
                                 String[] tmp = objectName.split("/", 2);
