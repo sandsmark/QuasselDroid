@@ -57,6 +57,7 @@
     <item name="REMOVE_BUFFER" type="id"></item>
     <item name="SET_CORE_LATENCY" type="id"></item>
     <item name="SET_NETWORK_LATENCY" type="id"></item>
+    <item name="SET_NETWORK_NAME" type="id"></item>
     <item name="RENAME_BUFFER" type="id"></item>
     <item name="SET_USER_REALNAME" type="id"></item>
     <item name="SET_USER_SERVER" type="id"></item>
