@@ -92,6 +92,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
         this.networkName = networkName;
         setChanged();
         notifyObservers();
+
+        updateTopic();
     }
 
 
@@ -171,6 +173,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
         userList.add(user);
         nickUserMap.put(user.nick, user);
         user.addObserver(this);
+
+        updateTopic();
     }
 
 
@@ -188,6 +192,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
                 return;
             }
         }
+
+        updateTopic();
     }
 
 
@@ -207,6 +213,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
                 break;
             }
         }
+
+        updateTopic();
     }
 
 
@@ -259,6 +267,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
     public void setLatency(int latency) {
         this.latency = latency;
+
+        updateTopic();
     }
 
     public int getLatency() {
@@ -267,6 +277,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
     public void setServer(String server) {
         this.server = server;
+
+        updateTopic();
     }
 
     public String getServer() {
@@ -275,6 +287,12 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
     public int getCountUsers() {
         return userList.size();
+    }
+
+    private void updateTopic(){
+        if(statusBuffer!=null){
+            statusBuffer.setTopic("");
+        }
     }
 
 }
