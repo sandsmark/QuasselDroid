@@ -415,8 +415,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @param topic the topic to set
      */
     public void setTopic(String topic) {
-        //TODO: notify observers
         this.topic = topic;
+        this.setChanged();
+        notifyObservers(R.id.BUFFERUPDATE_TOPICCHANGED);
     }
 
     /**

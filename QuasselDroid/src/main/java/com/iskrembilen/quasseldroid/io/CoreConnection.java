@@ -1498,6 +1498,25 @@ public final class CoreConnection {
                                 bundle.putString("channel", channel);
 
                                 service.getHandler().obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
+                            } else if (className.equals("IrcChannel") && function.equals("setTopic")) {
+                                Log.d(TAG, "Sync: IrcChannel -> setTopic");
+                                String[] tmp = objectName.split("/", 2);
+                                int networkId = Integer.parseInt(tmp[0]);
+                                String bufferName = tmp[1];
+
+                                String topic = (String) packedFunc.remove(0).getData();
+                                boolean found = false;
+                                for (Buffer buffer : buffers.values()) {
+                                    if (buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
+                                        found = true;
+                                        Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                        msg.sendToTarget();
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    Log.e(TAG, "Could not find buffer for IrcChannel setTopic");
+                                }
                             } else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
                                 Log.d(TAG, "Sync: BufferSyncer -> setLastSeenMsg");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
