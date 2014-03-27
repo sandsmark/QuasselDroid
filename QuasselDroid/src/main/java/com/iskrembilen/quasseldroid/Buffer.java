@@ -112,10 +112,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         users = new UserCollection();
         this.dbHelper = dbHelper;
 
-        //Default active to true if channel is a query buffer, they are "always" active
-        //TODO: in quassel query are shown as offline if no shared channel, fix later
-        if (info.type == BufferInfo.Type.QueryBuffer) active = true;
-
         loadFilters();
     }
 
