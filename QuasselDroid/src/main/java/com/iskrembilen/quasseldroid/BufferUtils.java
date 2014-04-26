@@ -38,7 +38,7 @@ public class BufferUtils {
 
     public static void setBufferViewStatus(Context context, Buffer entry, TextView bufferView) {
         //Check here if there are any unread messages in the buffer, and then set this color if there is
-        if (entry == null || !entry.isActive()) {
+        if (entry == null) {
             bufferView.setTextColor(ThemeUtil.bufferPartedColor);
         } else if (entry.hasUnseenHighlight()) {
             bufferView.setTextColor(ThemeUtil.bufferHighlightColor);
@@ -46,6 +46,8 @@ public class BufferUtils {
             bufferView.setTextColor(ThemeUtil.bufferUnreadColor);
         } else if (entry.hasUnreadActivity()) {
             bufferView.setTextColor(ThemeUtil.bufferActivityColor);
+        } else if (!entry.isActive()) {
+            bufferView.setTextColor(ThemeUtil.bufferPartedColor);
         } else {
             bufferView.setTextColor(ThemeUtil.bufferReadColor);
         }
