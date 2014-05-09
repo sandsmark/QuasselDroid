@@ -171,7 +171,14 @@ public class ChatFragment extends SherlockFragment {
                 }
                 if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.getAction() == KeyEvent.ACTION_DOWN) {
                     EditText text = (EditText) v;
-                    text.setText(InputHistoryHelper.getPreviousHistoryEntry());
+                    if (InputHistoryHelper.isViewingHistory()) {
+                        // Currently viewing history, so progress back down towards "entry zero"
+                        text.setText(InputHistoryHelper.getPreviousHistoryEntry());
+                    } else if (!text.getText().toString().equals("")) {
+                        // Not viewing history, so push the current input text into the history and clear the input
+                        InputHistoryHelper.addHistoryEntry(text.getText().toString());
+                        text.setText("");
+                    }
                     text.setSelection(text.getText().length());
                     return true;
                 }
