@@ -3,7 +3,7 @@ buildscript {
         maven { url 'http://repo1.maven.org/maven2' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.11.+'
     }
 }
 apply plugin: 'android'
@@ -24,16 +24,16 @@ if(project.hasProperty("Android.signing")
 }
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.0"
-
+    buildToolsVersion '19.1.0'
     defaultConfig {
         minSdkVersion 7
         targetSdkVersion 19
     }
-
     buildTypes {
         debug {
             packageNameSuffix ".debug"
         }
+    }
+    productFlavors {
     }
 }
