@@ -366,8 +366,6 @@ public class MainActivity extends SherlockFragmentActivity {
                 return true;
             case R.id.menu_disconnect:
                 BusProvider.getInstance().post(new DisconnectCoreEvent());
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

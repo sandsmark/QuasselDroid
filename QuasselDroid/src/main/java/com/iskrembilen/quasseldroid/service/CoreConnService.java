@@ -329,6 +329,8 @@ public class CoreConnService extends Service {
         networks = null;
         stopForeground(false);
         initDone = false;
+        isConnecting = false;
+        BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
         reconnectCounter = Integer.valueOf(preferences.getString(
             getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
     }
