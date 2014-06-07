@@ -262,9 +262,7 @@ public class MainActivity extends SherlockFragmentActivity {
         BusProvider.getInstance().register(this);
         if (Quasseldroid.status == Status.Disconnected) {
             returnToLogin();
-        } else if (Quasseldroid.status == Status.Connecting) {
-            showInitProgress();
-        } else {
+        } else if (Quasseldroid.status != Status.Connecting) {
             if (isDrawerOpen && bufferFragment != null) {
                 drawer.openDrawer(Gravity.LEFT);
                 if (chatFragment != null) {

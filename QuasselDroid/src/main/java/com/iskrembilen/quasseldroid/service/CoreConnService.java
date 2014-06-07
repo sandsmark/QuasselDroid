@@ -212,7 +212,6 @@ public class CoreConnService extends Service {
         BusProvider.getInstance().register(this);
         registerReceiver(receiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         resetReconnectCounter();
-        startForeground(R.id.NOTIFICATION, notificationManager.getDisconnectedNotification());
     }
 
     @Override
@@ -327,7 +326,7 @@ public class CoreConnService extends Service {
             coreConn.closeConnection();
         coreConn = null;
         networks = null;
-        stopForeground(false);
+        stopForeground(true);
         initDone = false;
         isConnecting = false;
         BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
@@ -766,8 +765,7 @@ public class CoreConnService extends Service {
         }
     }
 
-    private void reconnect(String message)
-    {
+    private void reconnect(String message) {
         if (coreConn != null) {
             coreConn.closeConnection();
         }

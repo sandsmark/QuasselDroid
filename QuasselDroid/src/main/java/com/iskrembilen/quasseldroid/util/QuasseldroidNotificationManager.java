@@ -81,7 +81,7 @@ public class QuasseldroidNotificationManager {
         builder.setContentIntent(contentIntent);
 
         // Send the notification.
-        notifyManager.notify(R.id.NOTIFICATION, builder.build());
+        notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
     }
 
     public void notifyConnected() {
@@ -100,7 +100,7 @@ public class QuasseldroidNotificationManager {
         launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
         builder.setContentIntent(contentIntent);
-        return builder.build();
+        return builder.getNotification();
 
     }
 
@@ -153,10 +153,10 @@ public class QuasseldroidNotificationManager {
         if (defaults != 0) builder.setDefaults(defaults);
 
         // Send the notification.
-        notifyManager.notify(R.id.NOTIFICATION, builder.build());
+        notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
     }
 
-    public Notification getDisconnectedNotification() {
+    public void notifyDisconnected() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.stat_disconnected)
                 .setContentTitle(context.getText(R.string.app_name))
@@ -172,12 +172,6 @@ public class QuasseldroidNotificationManager {
         // Set the info for the views that show in the notification panel.
         builder.setContentIntent(contentIntent);
         //Send the notification.
-        return builder.build();
-
-    }
-
-    public void notifyDisconnected() {
-        //Send the notification.
-        notifyManager.notify(R.id.NOTIFICATION, getDisconnectedNotification());
+        notifyManager.notify(R.id.NOTIFICATION_DISCONNECTED, builder.getNotification());
     }
 }
