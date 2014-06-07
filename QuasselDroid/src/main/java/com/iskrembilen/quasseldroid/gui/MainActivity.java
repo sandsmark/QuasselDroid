@@ -244,8 +244,9 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onStart() {
+        Log.d(TAG, "Starting activity");
         super.onStart();
-        Log.d(TAG, "Activity onStart");
+
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
         if (ThemeUtil.theme != currentTheme) {
             Intent intent = new Intent(this, MainActivity.class);
@@ -256,6 +257,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "Resuming activity");
         super.onResume();
         BusProvider.getInstance().register(this);
         if (Quasseldroid.status == Status.Disconnected) {
@@ -290,17 +292,17 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onPause() {
-        super.onPause();
+        Log.d(TAG, "Pausing activity");
         isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
         BusProvider.getInstance().unregister(this);
-
+        super.onPause();
     }
 
     @Override
     protected void onStop() {
         Log.d(TAG, "Stopping activity");
-        super.onStop();
         unbindService(focusConnection);
+        super.onStop();
     }
 
     @Override
@@ -427,6 +429,7 @@ public class MainActivity extends SherlockFragmentActivity {
     @Subscribe
     public void onConnectionChanged(ConnectionChangedEvent event) {
         if (event.status == Status.Disconnected) {
+            Log.d(TAG, "Connection status is disconnected");
             if (event.reason != "") {
                 removeDialog(R.id.DIALOG_CONNECTING);
                 Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
@@ -437,6 +440,7 @@ public class MainActivity extends SherlockFragmentActivity {
     }
 
     private void returnToLogin() {
+        Log.d(TAG, "Returning to login");
         finish();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
