@@ -320,6 +320,12 @@ public class ChatFragment extends SherlockFragment {
         public void setBuffer(Buffer buffer, NetworkCollection networks) {
             this.buffer = buffer;
             buffer.addObserver(this);
+            setTopic();
+            notifyDataSetChanged();
+            backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
+        }
+
+        public void setTopic(){
             String topic = "";
             if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
                 topic = buffer.getInfo().name;
@@ -335,8 +341,6 @@ public class ChatFragment extends SherlockFragment {
             }
             topicView.setText(topic);
             topicViewFull.setText(topic);
-            notifyDataSetChanged();
-            backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
         }
 
 
@@ -530,6 +534,10 @@ public class ChatFragment extends SherlockFragment {
                     int topId = getListTopMessageId();
                     notifyDataSetChanged();
                     setListTopMessage(topId);
+                    break;
+                case R.id.BUFFERUPDATE_TOPICCHANGED:
+                    setTopic();
+                    notifyDataSetChanged();
                     break;
                 default:
                     notifyDataSetChanged();

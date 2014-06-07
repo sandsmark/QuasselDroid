@@ -1400,6 +1400,16 @@ public final class CoreConnection {
                                 int networkLatency = (Integer) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
                                 service.getHandler().obtainMessage(R.id.SET_NETWORK_LATENCY, networkId, networkLatency, null).sendToTarget();
+                            } else if (className.equals("Network") && function.equals("setNetworkName")) {
+                                Log.d(TAG, "Sync: Network -> setNetworkName");
+                                String networkName = (String) packedFunc.remove(0).getData();
+                                int networkId = Integer.parseInt(objectName);
+                                service.getHandler().obtainMessage(R.id.SET_NETWORK_NAME, networkId, 0, networkName).sendToTarget();
+                            } else if (className.equals("Network") && function.equals("setCurrentServer")) {
+                                Log.d(TAG, "Sync: Network -> setCurrentServer");
+                                String currentServer = (String) packedFunc.remove(0).getData();
+                                int networkId = Integer.parseInt(objectName);
+                                service.getHandler().obtainMessage(R.id.SET_NETWORK_CURRENT_SERVER, networkId, 0, currentServer).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("partChannel")) {
                                 Log.d(TAG, "Sync: IrcUser -> partChannel");
                                 String[] tmp = objectName.split("/", 2);
@@ -1490,6 +1500,25 @@ public final class CoreConnection {
                                 bundle.putString("channel", channel);
 
                                 service.getHandler().obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
+                            } else if (className.equals("IrcChannel") && function.equals("setTopic")) {
+                                Log.d(TAG, "Sync: IrcChannel -> setTopic");
+                                String[] tmp = objectName.split("/", 2);
+                                int networkId = Integer.parseInt(tmp[0]);
+                                String bufferName = tmp[1];
+
+                                String topic = (String) packedFunc.remove(0).getData();
+                                boolean found = false;
+                                for (Buffer buffer : buffers.values()) {
+                                    if (buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
+                                        found = true;
+                                        Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                        msg.sendToTarget();
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    Log.e(TAG, "Could not find buffer for IrcChannel setTopic");
+                                }
                             } else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
                                 Log.d(TAG, "Sync: BufferSyncer -> setLastSeenMsg");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();

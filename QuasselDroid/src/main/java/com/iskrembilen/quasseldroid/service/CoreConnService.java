@@ -721,6 +721,12 @@ public class CoreConnService extends Service {
                 case R.id.SET_NETWORK_LATENCY:
                     networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
                     break;
+                case R.id.SET_NETWORK_NAME:
+                    networks.getNetworkById(msg.arg1).setName((String) msg.obj);
+					break;
+                case R.id.SET_NETWORK_CURRENT_SERVER:
+                    networks.getNetworkById(msg.arg1).setServer((String) msg.obj);
+                    break;
                 case R.id.RENAME_BUFFER:
                     networks.getBufferById(msg.arg1).setName((String) msg.obj);
                     break;

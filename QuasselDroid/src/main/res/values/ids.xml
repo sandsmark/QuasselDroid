@@ -36,6 +36,7 @@
     <item name="BUFFERUPDATE_BACKLOG" type="id"></item>
     <item name="BUFFERUPDATE_NEWMESSAGE" type="id"></item>
     <item name="BUFFERUPDATE_USERSCHANGED" type="id"></item>
+    <item name="BUFFERUPDATE_TOPICCHANGED" type="id"></item>
     <item name="DISCONNECTED" type="id"></item>
     <item name="SET_BUFFER_PERM_HIDDEN" type="id"></item>
     <item name="SET_BUFFER_TEMP_HIDDEN" type="id"></item>
@@ -57,6 +58,8 @@
     <item name="REMOVE_BUFFER" type="id"></item>
     <item name="SET_CORE_LATENCY" type="id"></item>
     <item name="SET_NETWORK_LATENCY" type="id"></item>
+    <item name="SET_NETWORK_NAME" type="id"></item>
+    <item name="SET_NETWORK_CURRENT_SERVER" type="id"></item>
     <item name="RENAME_BUFFER" type="id"></item>
     <item name="SET_USER_REALNAME" type="id"></item>
     <item name="SET_USER_SERVER" type="id"></item>
