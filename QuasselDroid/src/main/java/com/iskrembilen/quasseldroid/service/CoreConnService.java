@@ -329,6 +329,7 @@ public class CoreConnService extends Service {
         stopForeground(true);
         initDone = false;
         isConnecting = false;
+        notificationManager = null;
         BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
         reconnectCounter = Integer.valueOf(preferences.getString(
             getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
@@ -337,6 +338,10 @@ public class CoreConnService extends Service {
     public void connectToCore() {
         Log.i(TAG, "Connecting to core: " + address + ":" + port
         + " with username " + username);
+        if(coreConn != null) {
+            disconnectFromCore();
+        }
+        notificationManager = new QuasseldroidNotificationManager(this);
         networks = NetworkCollection.getInstance();
         networks.clear();
 
