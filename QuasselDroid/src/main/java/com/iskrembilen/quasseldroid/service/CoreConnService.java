@@ -50,6 +50,7 @@ import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
@@ -277,6 +278,11 @@ public class CoreConnService extends Service {
         coreConn.requestUnhideTempHiddenBuffer(bufferId);
         networks.getBufferById(bufferId).setTemporarilyHidden(false);
     }
+    
+    public void unhidePermHiddenBuffer(int bufferId) {
+        coreConn.requestUnhidePermHiddenBuffer(bufferId);
+        networks.getBufferById(bufferId).setPermanentlyHidden(false);
+    }
 
     public Buffer getBuffer(int bufferId, Observer obs) {
         Buffer buffer = networks.getBufferById(bufferId);
@@ -286,6 +292,10 @@ public class CoreConnService extends Service {
     }
 
     public NetworkCollection getNetworkList(Observer obs) {
+        return networks;
+    }
+    
+    public NetworkCollection getCurrentNetworkList() {
         return networks;
     }
 
