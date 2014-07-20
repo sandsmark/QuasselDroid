@@ -509,7 +509,11 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
         @Override
         public long getGroupId(int groupPosition) {
-            return networks.getNetwork(groupPosition).getId();
+            if(networks.size() > 0) {
+                return networks.getNetwork(groupPosition).getId();
+            } else {
+                return 0;
+            }
         }
 
         @Override
