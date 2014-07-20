@@ -277,6 +277,10 @@ public class CoreConnService extends Service {
         coreConn.requestUnhideTempHiddenBuffer(bufferId);
         networks.getBufferById(bufferId).setTemporarilyHidden(false);
     }
+    
+    public void unhidePermHiddenBuffer(int bufferId) {
+        coreConn.requestUnhidePermHiddenBuffer(bufferId);
+    }
 
     public Buffer getBuffer(int bufferId, Observer obs) {
         Buffer buffer = networks.getBufferById(bufferId);
@@ -285,7 +289,7 @@ public class CoreConnService extends Service {
         return buffer;
     }
 
-    public NetworkCollection getNetworkList(Observer obs) {
+    public NetworkCollection getNetworkList() {
         return networks;
     }
 

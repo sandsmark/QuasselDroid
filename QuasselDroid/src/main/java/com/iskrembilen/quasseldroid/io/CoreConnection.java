@@ -298,6 +298,26 @@ public final class CoreConnection {
             onDisconnected("Lost connection");
         }
     }
+    
+    /**
+     * Requests to unhide a permanently hidden buffer
+     */
+    public void requestUnhidePermHiddenBuffer(int bufferId) {
+        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+        retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<String>("BufferViewConfig", QVariantType.String));
+        retFunc.add(new QVariant<String>(Integer.toString(bufferViewId), QVariantType.String));
+        retFunc.add(new QVariant<String>("requestAddBuffer", QVariantType.String));
+        retFunc.add(new QVariant<Integer>(bufferId, "BufferId"));
+        retFunc.add(new QVariant<Integer>(networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount(), QVariantType.Int));
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while requesting backlog", e);
+            onDisconnected("Lost connection");
+        }
+    }
 
     /**
      * Requests more backlog for a give buffer
@@ -365,6 +385,20 @@ public final class CoreConnection {
             Log.e(TAG, "IOException while sending message", e);
             onDisconnected("Lost connection");
         }
+        
+        
+        /* Check to unhide hidden buffer upon attempting to join */
+    	if (message.startsWith("/join ")) {
+    		Network currentNetwork = networks.get(buffers.get(buffer).getInfo().networkId);
+    		Buffer targetBuffer = currentNetwork.getBuffers().getBuffer(message.split(" ")[1]);
+    		if (targetBuffer != null) {
+	    		if (targetBuffer.isPermanentlyHidden()) {
+                    requestUnhidePermHiddenBuffer(targetBuffer.getInfo().id);
+	        	} else if(targetBuffer.isTemporarilyHidden()) {
+                    requestUnhideTempHiddenBuffer(targetBuffer.getInfo().id);
+                }
+    		}          
+    	}
     }
 
 
