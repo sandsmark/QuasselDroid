@@ -131,7 +131,11 @@ public class IrcMessage implements Comparable<IrcMessage> {
     }
 
     public String getHostmask() {
-        return getSender().split("!")[1];
+        try {
+            return getSender().split("!")[1];
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return "";
+        }
     }
 
     public void setFlag(Flag flag) {
