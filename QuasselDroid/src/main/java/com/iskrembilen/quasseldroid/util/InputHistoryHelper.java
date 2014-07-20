@@ -43,4 +43,8 @@ public class InputHistoryHelper {
         if (currentIndex == -1)
             tempStore = text;
     }
+
+    public static boolean isViewingHistory() {
+        return (currentIndex >= 0);
+    }
 }
