@@ -41,6 +41,7 @@ import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
+import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
 import com.iskrembilen.quasseldroid.events.ManageChannelEvent.ChannelAction;
@@ -228,7 +229,7 @@ public class ChatFragment extends SherlockFragment {
     public void onStop() {
         Log.d(TAG, "Stopping fragment");
         super.onStop();
-        if (Quasseldroid.connected && getUserVisibleHint()) updateRead();
+        if (Quasseldroid.status == ConnectionChangedEvent.Status.Connected && getUserVisibleHint()) updateRead();
         adapter.clearBuffer();
         BusProvider.getInstance().unregister(this);
         setUserVisibleHint(false);

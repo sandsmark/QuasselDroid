@@ -106,7 +106,6 @@ public final class CoreConnection {
     private ReadThread readThread;
 
     private boolean initComplete;
-    private int initBacklogBuffers;
     private int networkInitsLeft;
     private boolean networkInitComplete;
     private LinkedList<List<QVariant<?>>> packageQueue;
@@ -621,9 +620,7 @@ public final class CoreConnection {
         //Get backlog if user selected a fixed amount
         if (!options.getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
             int backlogAmount = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
-            initBacklogBuffers = 0;
             for (Buffer buffer : buffers.values()) {
-                initBacklogBuffers += 1;
                 requestMoreBacklog(buffer.getInfo().id, backlogAmount);
             }
         }
@@ -1124,7 +1121,6 @@ public final class CoreConnection {
                                     int msgId = (Integer) lastSeen.get(i + 1).getData();
                                     if (buffers.containsKey(bufferId)) { // We only care for buffers we have open
                                         if (PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
-                                            initBacklogBuffers += 1;
                                             requestBacklog(bufferId, msgId);
                                         }
                                         Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
@@ -1276,7 +1272,7 @@ public final class CoreConnection {
 
                                     order++;
                                 }
-
+                                updateInitDone();
                             }
 						/*
 						 * There are several objects that we don't care about (at the moment).
@@ -1352,10 +1348,6 @@ public final class CoreConnection {
                                         } else {
                                             Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
                                         }
-                                    }
-                                    initBacklogBuffers -= 1;
-                                    if (initBacklogBuffers <= 0) {
-                                        updateInitDone();
                                     }
                                 } else {
                                     // Send our the backlog messages to our listeners

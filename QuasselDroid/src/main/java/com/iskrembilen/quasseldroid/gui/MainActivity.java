@@ -169,10 +169,12 @@ public class MainActivity extends SherlockFragmentActivity {
                 if (openedBuffer != -1) {
                     NetworkCollection networks = NetworkCollection.getInstance();
                     Buffer buffer = networks.getBufferById(openedBuffer);
-                    if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
-                        getSupportActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
-                    else
-                        getSupportActionBar().setTitle(buffer.getInfo().name);
+                    if (buffer != null) {
+                        if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
+                            getSupportActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                        else
+                            getSupportActionBar().setTitle(buffer.getInfo().name);
+                    }
                 } else {
                     getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
                     invalidateOptionsMenu();
@@ -242,8 +244,9 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onStart() {
+        Log.d(TAG, "Starting activity");
         super.onStart();
-        Log.d(TAG, "Activity onStart");
+
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
         if (ThemeUtil.theme != currentTheme) {
             Intent intent = new Intent(this, MainActivity.class);
@@ -254,11 +257,22 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "Resuming activity");
         super.onResume();
         BusProvider.getInstance().register(this);
-        if (!Quasseldroid.connected) {
+        if (Quasseldroid.status == Status.Disconnected) {
             returnToLogin();
+        } else if (Quasseldroid.status != Status.Connecting) {
+            if (isDrawerOpen && bufferFragment != null) {
+                drawer.openDrawer(Gravity.LEFT);
+                if (chatFragment != null) {
+                    chatFragment.setUserVisibleHint(false);
+                }
+            } else {
+                drawer.closeDrawer(Gravity.LEFT);
+            }
         }
+
         NetworkCollection networks = NetworkCollection.getInstance();
         if (openedBuffer != -1 && networks != null && networks.getBufferById(openedBuffer) == null) {
             openedBuffer = -1;
@@ -276,17 +290,17 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onPause() {
-        super.onPause();
+        Log.d(TAG, "Pausing activity");
         isDrawerOpen = drawer.isDrawerOpen(Gravity.LEFT);
         BusProvider.getInstance().unregister(this);
-
+        super.onPause();
     }
 
     @Override
     protected void onStop() {
         Log.d(TAG, "Stopping activity");
-        super.onStop();
         unbindService(focusConnection);
+        super.onStop();
     }
 
     @Override
@@ -350,8 +364,6 @@ public class MainActivity extends SherlockFragmentActivity {
                 return true;
             case R.id.menu_disconnect:
                 BusProvider.getInstance().post(new DisconnectCoreEvent());
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -376,7 +388,10 @@ public class MainActivity extends SherlockFragmentActivity {
                 bufferFragment = BufferFragment.newInstance();
 
                 FragmentTransaction trans = manager.beginTransaction();
-                trans.replace(R.id.main_content_container, chatFragment);
+                if (currentFragment != null) {
+                    trans.remove(currentFragment);
+                }
+                trans.add(R.id.main_content_container, chatFragment);
 
                 //Initialize the buffer drawer
                 trans.add(R.id.left_drawer, bufferFragment);
@@ -387,13 +402,9 @@ public class MainActivity extends SherlockFragmentActivity {
                 trans.add(R.id.right_drawer, nickFragment);
                 trans.commit();
             }
-        } else {
-            if (currentFragment == null) {
-                FragmentTransaction fragmentTransaction = manager.beginTransaction();
-                ConnectingFragment fragment = ConnectingFragment.newInstance();
-                fragmentTransaction.add(R.id.main_content_container, fragment, "connect");
-                fragmentTransaction.commit();
-            }
+        } else if (currentFragment == null || currentFragment.getClass() != ConnectingFragment.class) {
+            Log.d(TAG, "Showing progress");
+            showInitProgress();
         }
     }
 
@@ -414,6 +425,7 @@ public class MainActivity extends SherlockFragmentActivity {
     @Subscribe
     public void onConnectionChanged(ConnectionChangedEvent event) {
         if (event.status == Status.Disconnected) {
+            Log.d(TAG, "Connection status is disconnected");
             if (event.reason != "") {
                 removeDialog(R.id.DIALOG_CONNECTING);
                 Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
@@ -424,10 +436,24 @@ public class MainActivity extends SherlockFragmentActivity {
     }
 
     private void returnToLogin() {
+        Log.d(TAG, "Returning to login");
         finish();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    private void showInitProgress() {
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = manager.beginTransaction();
+        ConnectingFragment fragment = ConnectingFragment.newInstance();
+        fragmentTransaction.replace(R.id.main_content_container, fragment, "init");
+        if (bufferFragment != null)
+            fragmentTransaction.remove(bufferFragment);
+        if (nickFragment != null)
+            fragmentTransaction.remove(nickFragment);
+        drawer.closeDrawers();
+        fragmentTransaction.commit();
     }
 
     @Subscribe

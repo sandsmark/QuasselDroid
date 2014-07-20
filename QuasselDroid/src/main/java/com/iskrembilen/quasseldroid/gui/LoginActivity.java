@@ -92,6 +92,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "Creating activity");
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.theme;
@@ -156,18 +157,21 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "Resuming activity");
         super.onResume();
         BusProvider.getInstance().register(this);
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "Pausing activity");
         super.onPause();
         BusProvider.getInstance().unregister(this);
     }
 
     @Override
     protected void onStart() {
+        Log.d(TAG, "Starting activity");
         super.onStart();
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
         if (ThemeUtil.theme != currentTheme) {
@@ -179,12 +183,14 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "Stoping activity");
         super.onStop();
         unbindService(focusConnection);
     }
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "Destroying activity");
         super.onDestroy();
         if (dbHelper != null) {
             dbHelper.close();
