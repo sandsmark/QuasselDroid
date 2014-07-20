@@ -39,8 +39,6 @@ import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
-import com.iskrembilen.quasseldroid.NetworkCollection;
-import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
@@ -389,14 +387,16 @@ public final class CoreConnection {
         }
         
         
-        /*Check to unhide permanently hidden buffer upon attempting to join*/
+        /* Check to unhide hidden buffer upon attempting to join */
     	if (message.startsWith("/join ")) {
-    		Network currentNetwork = service.getNetworkById(service.getCurrentNetworkList().getBufferById(buffer).getInfo().networkId);		
+    		Network currentNetwork = networks.get(buffers.get(buffer).getInfo().networkId);
     		Buffer targetBuffer = currentNetwork.getBuffers().getBuffer(message.split(" ")[1]);
     		if (targetBuffer != null) {
 	    		if (targetBuffer.isPermanentlyHidden()) {
-	        		service.unhidePermHiddenBuffer(targetBuffer.getInfo().id);
-	        	}
+                    requestUnhidePermHiddenBuffer(targetBuffer.getInfo().id);
+	        	} else if(targetBuffer.isTemporarilyHidden()) {
+                    requestUnhideTempHiddenBuffer(targetBuffer.getInfo().id);
+                }
     		}          
     	}
     }
