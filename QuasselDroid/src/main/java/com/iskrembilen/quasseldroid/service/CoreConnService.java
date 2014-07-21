@@ -857,7 +857,7 @@ public class CoreConnService extends Service {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(preferenceReconnect && !preferenceReconnectPeriodically && coreConn == null && !isConnected()) {
+            if(!requestedDisconnect && preferenceReconnect && !preferenceReconnectPeriodically && coreConn == null && !isConnected()) {
                 ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
                 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -940,6 +940,7 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doDisconnectCore(DisconnectCoreEvent event) {
+        requestedDisconnect = true;
         disconnectFromCore();
     }
 
