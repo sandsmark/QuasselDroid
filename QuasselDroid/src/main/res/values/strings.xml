@@ -48,6 +48,11 @@
     <string name="dialog_delete_buffer_message">Are you sure you want to delete this buffer permanently? This action cannot be undone.</string>
     <string name="dialog_delete_buffer_yes">Yes</string>
     <string name="dialog_delete_buffer_no">No</string>
+    <string name="dialog_join_channel_ok">Join</string>
+    <string name="dialog_join_channel_cancel">Cancel</string>
+
+
+
 
     <plurals name="notification_highlighted_on_x_buffers">
         <item quantity="one">You have highlights on %1$d buffer</item>
