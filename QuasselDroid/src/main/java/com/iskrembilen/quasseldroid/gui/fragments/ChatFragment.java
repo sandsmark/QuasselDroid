@@ -1,7 +1,5 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -20,7 +18,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -31,7 +28,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -85,7 +81,6 @@ public class ChatFragment extends SherlockFragment {
     SharedPreferences preferences;
     private boolean connected;
     private NetworkCollection networks;
-    private ActionMode actionMode;
 
     public static ChatFragment newInstance() {
         return new ChatFragment();
@@ -132,20 +127,6 @@ public class ChatFragment extends SherlockFragment {
         backlogList.setAdapter(adapter);
         backlogList.setOnScrollListener(new BacklogScrollListener(5));
         backlogList.setSelection(backlogList.getChildCount());
-        backlogList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (actionMode != null) {
-                    return false;
-                }
-
-                // Start the CAB using the ActionMode.Callback defined above
-                actionMode = getSherlockActivity().startActionMode(actionModeCallback);
-                actionMode.setTag(view.getTag());
-                view.setSelected(true);
-                return true;
-            }
-        });
 
         autoCompleteButton.setOnClickListener(new OnClickListener() {
 
@@ -226,40 +207,6 @@ public class ChatFragment extends SherlockFragment {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.chat_contextual_menu, menu);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.context_menu_copy:
-                    ClipboardManager clipboard = (ClipboardManager)getSherlockActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("msg text",((ViewHolder)actionMode.getTag()).msgView.getText());
-                    clipboard.setPrimaryClip(clip);
-                    mode.finish();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            actionMode = null;
-        }
-    };
 
     @Override
     public void onStart() {
