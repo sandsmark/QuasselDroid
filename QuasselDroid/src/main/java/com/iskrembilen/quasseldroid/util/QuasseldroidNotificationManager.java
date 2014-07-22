@@ -25,6 +25,8 @@ public class QuasseldroidNotificationManager {
     private SharedPreferences preferences;
     private List<Integer> highlightedBuffers;
     NotificationManager notifyManager;
+    private boolean connected = false;
+    private Notification pendingHighlightNotification;
 
     public QuasseldroidNotificationManager(Context context) {
         this.context = context;
@@ -48,40 +50,45 @@ public class QuasseldroidNotificationManager {
 
     private void notifyConnected(boolean withPhysicalNotifications) {
         int defaults = 0;
+        connected = true;
+        if(pendingHighlightNotification != null) {
+            notifyManager.notify(R.id.NOTIFICATION, pendingHighlightNotification);
+            pendingHighlightNotification = null;
+        } else {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                    .setSmallIcon(R.drawable.stat_normal)
+                    .setContentTitle(context.getText(R.string.app_name))
+                    .setContentText(context.getText(R.string.notification_connected))
+                    .setOngoing(true)
+                    .setWhen(System.currentTimeMillis());
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.stat_normal)
-                .setContentTitle(context.getText(R.string.app_name))
-                .setContentText(context.getText(R.string.notification_connected))
-                .setOngoing(true)
-                .setWhen(System.currentTimeMillis());
+            if (withPhysicalNotifications && preferences.getBoolean(context.getString(R.string.preference_notify_connect), false)) {
+                if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), true))
+                    defaults |= Notification.DEFAULT_VIBRATE;
 
-        if (withPhysicalNotifications && preferences.getBoolean(context.getString(R.string.preference_notify_connect), false)) {
-            if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), true))
-                defaults |= Notification.DEFAULT_VIBRATE;
-
-            if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
-                    preferences.getBoolean(context.getString(R.string.has_focus), true) == false &&
-                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
-                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
-                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
-                else builder.setSound(ringtone);
-            } else if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), true) == false &&
-                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
-                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
-                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
-                else builder.setSound(ringtone);
+                if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
+                        preferences.getBoolean(context.getString(R.string.has_focus), true) == false &&
+                        preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+                    Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
+                    if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                    else builder.setSound(ringtone);
+                } else if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), true) == false &&
+                        preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+                    Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_connect_sound_file), ""));
+                    if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                    else builder.setSound(ringtone);
+                }
             }
+            if (defaults != 0) builder.setDefaults(defaults);
+
+            Intent launch = new Intent(context, MainActivity.class);
+            launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
+            builder.setContentIntent(contentIntent);
+
+            // Send the notification.
+            notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
         }
-        if (defaults != 0) builder.setDefaults(defaults);
-
-        Intent launch = new Intent(context, MainActivity.class);
-        launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
-        builder.setContentIntent(contentIntent);
-
-        // Send the notification.
-        notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
     }
 
     public void notifyConnected() {
@@ -153,10 +160,15 @@ public class QuasseldroidNotificationManager {
         if (defaults != 0) builder.setDefaults(defaults);
 
         // Send the notification.
-        notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
+        if(!connected) {
+            pendingHighlightNotification = builder.getNotification();
+        } else {
+            notifyManager.notify(R.id.NOTIFICATION, builder.getNotification());
+        }
     }
 
     public void notifyDisconnected() {
+        connected = false;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.stat_disconnected)
                 .setContentTitle(context.getText(R.string.app_name))

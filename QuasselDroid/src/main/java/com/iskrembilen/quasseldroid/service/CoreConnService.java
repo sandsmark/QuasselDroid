@@ -323,6 +323,10 @@ public class CoreConnService extends Service {
         return buffer;
     }
 
+    public QuasseldroidNotificationManager getNotificicationManager() {
+        return notificationManager;
+    }
+
     public NetworkCollection getNetworkList() {
         return networks;
     }
@@ -402,7 +406,7 @@ public class CoreConnService extends Service {
                          */
                         for (IrcMessage curMessage : messageList) {
                             if (!buffer.hasMessage(curMessage)) {
-                                MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
+                                MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
                                 if (preferenceParseColors)
                                     MessageUtil.parseStyleCodes(CoreConnService.this, curMessage);
                             } else {
@@ -429,21 +433,9 @@ public class CoreConnService extends Service {
                          * Check if we are highlighted in the message, TODO: Add
                          * support for custom highlight masks
                          */
-                        MessageUtil.checkMessageForHighlight(networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
+                        MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
                         MessageUtil.parseStyleCodes(CoreConnService.this, message);
-                        if (
-                                (message.isHighlighted() && !buffer.isDisplayed()) ||
-                                (
-                                    buffer.getInfo().type == BufferInfo.Type.QueryBuffer &&
-                                    !message.isSelf() &&
-                                    // Server messages with an empty sender in queries are "x is away: ..." messages
-                                    // (I've found no exception to that rule in my 13-million-message database)
-                                    !(message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
-                                )
-                            ) {
-                            notificationManager.notifyHighlight(buffer.getInfo().id);
 
-                        }
                         buffer.addMessage(message);
 
                         if (buffer.isTemporarilyHidden() && (message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Notice || message.type == IrcMessage.Type.Action)) {

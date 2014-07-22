@@ -257,13 +257,15 @@ public class ChatFragment extends SherlockFragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+        if(adapter != null && adapter.buffer != null) {
+            adapter.buffer.setDisplayed(isVisibleToUser);
+        }
         Log.d(TAG, "ChatFragment visible hint: " + isVisibleToUser);
     }
 
     private void updateRead() {
         Log.d(TAG, "Updating buffer read, chat is visible: " + getUserVisibleHint());
         if (adapter.buffer != null) {
-            adapter.buffer.setDisplayed(false);
 
             //Don't save position if list is at bottom
             if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
@@ -297,7 +299,7 @@ public class ChatFragment extends SherlockFragment {
                 nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                 autoCompleteButton.setEnabled(true);
                 inputField.setEnabled(true);
-                buffer.setDisplayed(true);
+                if(getUserVisibleHint() == true) buffer.setDisplayed(true);
                 BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
                 //Move list to correct position

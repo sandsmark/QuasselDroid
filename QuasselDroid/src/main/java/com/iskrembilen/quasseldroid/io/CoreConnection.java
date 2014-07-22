@@ -1341,7 +1341,7 @@ public final class CoreConnection {
                                              * Check if we are highlighted in the message, TODO: Add
                                              * support for custom highlight masks
                                              */
-                                            MessageUtil.checkMessageForHighlight(networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
+                                            MessageUtil.checkMessageForHighlight(service.getNotificicationManager(), networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
                                             if (preferenceParseColors)
                                                 MessageUtil.parseStyleCodes(service, msg);
                                             buffer.addBacklogMessage(msg);

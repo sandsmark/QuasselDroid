@@ -11,6 +11,7 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.R;
 
@@ -27,7 +28,7 @@ public class MessageUtil {
      * @param buffer  the buffer the message belongs to
      * @param message the message to check
      */
-    public static void checkMessageForHighlight(String nick, Buffer buffer, IrcMessage message) {
+    public static void checkMessageForHighlight(QuasseldroidNotificationManager notificationManager, String nick, Buffer buffer, IrcMessage message) {
         if (message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Action) {
             if (nick == null) {
                 Log.e(TAG, "Nick is null in check message for highlight");
@@ -39,6 +40,21 @@ public class MessageUtil {
                 message.setFlag(IrcMessage.Flag.Highlight);
                 // FIXME: move to somewhere proper
             }
+        }
+
+        if (
+            ((message.isHighlighted()) ||
+                (
+                    buffer.getInfo().type == BufferInfo.Type.QueryBuffer &&
+                        !message.isSelf() &&
+                        // Server messages with an empty sender in queries are "x is away: ..." messages
+                        // (I've found no exception to that rule in my 13-million-message database)
+                        !(message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
+                )
+            ) && (!buffer.isDisplayed() && buffer.getLastSeenMessage() < message.messageId)
+            ) {
+            notificationManager.notifyHighlight(buffer.getInfo().id);
+
         }
     }
 
