@@ -7,12 +7,17 @@
     <color name="buffer_read_color_light">#000000</color>
     <color name="buffer_parted_color_light">#C0C0C0</color>
     <color name="buffer_activity_color_light">#008000</color>
+    <color name="buffer_perm_hidden_color_light">#82ff0008</color>
+    <color name="buffer_temp_hidden_color_light">#84fffc00</color>
 
     <color name="buffer_unread_color_dark">#ff7b00</color>
     <color name="buffer_highlight_color_dark">#ff00bf</color>
     <color name="buffer_read_color_dark">#debc85</color>
     <color name="buffer_parted_color_dark">#a0a0a4</color>
     <color name="buffer_activity_color_dark">#008000</color>
+    <color name="buffer_perm_hidden_color_dark">#82ff0008</color>
+    <color name="buffer_temp_hidden_color_dark">#84fffc00</color>
+
 
     <color name="chat_line_self_dark">#009966</color>
     <color name="chat_line_plain_dark">#debc85</color>

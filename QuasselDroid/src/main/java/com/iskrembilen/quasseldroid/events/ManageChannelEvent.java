@@ -2,7 +2,7 @@ package com.iskrembilen.quasseldroid.events;
 
 public class ManageChannelEvent {
     public enum ChannelAction {
-        TEMP_HIDE, PERM_HIDE, DELETE, MARK_AS_READ, HIGHLIGHTS_READ;
+        TEMP_HIDE, PERM_HIDE, DELETE, MARK_AS_READ, HIGHLIGHTS_READ, UNHIDE;
     }
 
     public final int bufferId;

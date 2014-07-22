@@ -75,8 +75,16 @@ public class BufferCollection extends Observable implements Observer {
         return filteredList.size();
     }
 
+    public int getUnfilteredBufferCount() {
+        return bufferList.size();
+    }
+
     public Buffer getPos(int pos) {
         return filteredList.get(pos);
+    }
+
+    public Buffer getUnfilteredPos(int pos) {
+        return bufferList.get(pos);
     }
 
     public Buffer getBuffer(int bufferId) {

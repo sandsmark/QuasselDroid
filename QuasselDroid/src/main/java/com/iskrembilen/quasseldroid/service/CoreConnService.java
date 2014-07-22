@@ -958,6 +958,13 @@ public class CoreConnService extends Service {
             coreConn.requestPermHideBuffer(event.bufferId);
         } else if (event.action == ChannelAction.TEMP_HIDE) {
             coreConn.requestTempHideBuffer(event.bufferId);
+        } else if (event.action == ChannelAction.UNHIDE) {
+            Buffer buffer = networks.getBufferById(event.bufferId);
+            if(buffer != null && buffer.isPermanentlyHidden()) {
+                coreConn.requestUnhidePermHiddenBuffer(event.bufferId);
+            } else if(buffer != null && buffer.isTemporarilyHidden()) {
+                coreConn.requestUnhideTempHiddenBuffer(event.bufferId);
+            }
         } else if (event.action == ChannelAction.MARK_AS_READ) {
             coreConn.requestMarkBufferAsRead(event.bufferId);
         } else if (event.action == ChannelAction.HIGHLIGHTS_READ) {

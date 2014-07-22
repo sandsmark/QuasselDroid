@@ -43,6 +43,9 @@
     <string name="context_disconnect">Disconnect</string>
     <string name="context_hide_temporarily">Hide Temporarily</string>
     <string name="context_hide_permanently">Hide Permanently</string>
+    <string name="context_show_hidden">Show Hidden</string>
+    <string name="context_hide_hidden">Hide Hidden</string>
+    <string name="context_unhide">Unhide</string>
     <string name="notification_you_have_been_highlighted">You have been highlighted</string>
     <string name="dialog_delete_buffer_title">Remove buffer permanently?</string>
     <string name="dialog_delete_buffer_message">Are you sure you want to delete this buffer permanently? This action cannot be undone.</string>

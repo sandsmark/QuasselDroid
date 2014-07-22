@@ -10,7 +10,7 @@ import com.iskrembilen.quasseldroid.R;
 public class ThemeUtil {
 
     public static int theme;
-    public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
+    public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor, bufferPermHiddenColor, bufferTempHiddenColor;
     public static int chatPlainColor, chatNoticeColor, chatActionColor, chatNickColor, chatModeColor, chatJoinColor, chatPartColor, chatQuitColor, chatKickColor, chatKillColor, chatServerColor, chatInfoColor, chatErrorColor, chatDayChangeColor, chatTopicColor, chatNetsplitQuitColor, chatNetsplitJoinColor, chatHighlightColor, chatSelfColor, chatTimestampColor;
     public static int chatPlainResource;
 
@@ -32,6 +32,10 @@ public class ThemeUtil {
             bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_light);
             bufferActivityColor = resources.getColor(R.color.buffer_activity_color_light);
             bufferReadColor = resources.getColor(R.color.buffer_read_color_light);
+            bufferPermHiddenColor = resources.getColor(R.color.buffer_perm_hidden_color_light);
+            bufferTempHiddenColor = resources.getColor(R.color.buffer_temp_hidden_color_light);
+
+
 
             chatSelfColor = resources.getColor(R.color.chat_line_self_light);
             chatPlainColor = resources.getColor(R.color.chat_line_plain_light);
@@ -64,6 +68,8 @@ public class ThemeUtil {
             bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_dark);
             bufferActivityColor = resources.getColor(R.color.buffer_activity_color_dark);
             bufferReadColor = resources.getColor(R.color.buffer_read_color_dark);
+            bufferPermHiddenColor = resources.getColor(R.color.buffer_perm_hidden_color_dark);
+            bufferTempHiddenColor = resources.getColor(R.color.buffer_temp_hidden_color_dark);
 
             chatSelfColor = resources.getColor(R.color.chat_line_self_dark);
             chatPlainColor = resources.getColor(R.color.chat_line_plain_dark);

@@ -33,6 +33,10 @@ public class BufferHelper {
         BusProvider.getInstance().post(new ManageChannelEvent(bufferId, ChannelAction.PERM_HIDE));
     }
 
+    public static void unhideChannel(int bufferId) {
+        BusProvider.getInstance().post(new ManageChannelEvent(bufferId, ChannelAction.UNHIDE));
+    }
+
     public static void connectNetwork(int networkId) {
         BusProvider.getInstance().post(new ManageNetworkEvent(networkId, NetworkAction.CONNECT));
     }

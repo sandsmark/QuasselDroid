@@ -67,6 +67,7 @@ import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -92,6 +93,7 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
+    private boolean showHiddenBuffers = false;
 
     private ActionModeData actionModeData = new ActionModeData();
 
@@ -220,6 +222,10 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                         BufferHelper.permHideChannel(actionModeData.id);
                         mode.finish();
                         return true;
+                    case R.id.context_menu_unhide:
+                        BufferHelper.unhideChannel(actionModeData.id);
+                        mode.finish();
+                        return true;
                     default:
                         return false;
                 }
@@ -251,20 +257,27 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     } else if (buffer.isActive()) {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     } else {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                    }
+                    if(buffer.isPermanentlyHidden()) {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
+                    } else if(buffer.isTemporarilyHidden()){
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
+                    } else {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(false);
                     }
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                     Network network = bufferListAdapter.getGroup(groupPosition);
@@ -324,12 +337,32 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (showHiddenBuffers) {
+            menu.findItem(R.id.context_menu_show_hidden).setVisible(false);
+            menu.findItem(R.id.context_menu_hide_hidden).setVisible(true);
+        } else {
+            menu.findItem(R.id.context_menu_show_hidden).setVisible(true);
+            menu.findItem(R.id.context_menu_hide_hidden).setVisible(false);
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_join_channel:
                 if (bufferListAdapter.networks == null)
                     Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
                 else showJoinChannelDialog();
+                return true;
+            case R.id.context_menu_hide_hidden:
+                showHiddenBuffers = false;
+                bufferListAdapter.notifyDataSetChanged();
+                return true;
+            case R.id.context_menu_show_hidden:
+                showHiddenBuffers = true;
+                bufferListAdapter.notifyDataSetChanged();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -389,8 +422,6 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
             userOfflineBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_offline);
             userAwayBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user_away);
             userBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.im_user);
-
-
         }
 
         public void setNetworks(NetworkCollection networks) {
@@ -424,12 +455,20 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
 
         @Override
         public Buffer getChild(int groupPosition, int childPosition) {
-            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
+            if(showHiddenBuffers) {
+                return  networks.getNetwork(groupPosition).getBuffers().getUnfilteredPos(childPosition);
+            } else {
+                return  networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
+            }
         }
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
+            if(showHiddenBuffers) {
+                return  networks.getNetwork(groupPosition).getBuffers().getUnfilteredPos(childPosition).getInfo().id;
+            } else {
+                return  networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
+            }
         }
 
         @Override
@@ -479,18 +518,24 @@ public class BufferFragment extends SherlockFragment implements OnGroupExpandLis
                 case InvalidBuffer:
                     holder.bufferView.setText("XXXX " + entry.getInfo().name);
             }
-
+            if(entry.isPermanentlyHidden()){
+                convertView.setBackgroundColor(ThemeUtil.bufferPermHiddenColor);
+            } else if (entry.isTemporarilyHidden()) {
+                convertView.setBackgroundColor(ThemeUtil.bufferTempHiddenColor);
+            } else {
+                convertView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            }
             BufferUtils.setBufferViewStatus(getSherlockActivity(), entry, holder.bufferView);
             return convertView;
         }
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            if (networks == null) {
-                return 0;
-            } else {
-                return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
+            if (networks != null) {
+                if(showHiddenBuffers) return networks.getNetwork(groupPosition).getBuffers().getUnfilteredBufferCount();
+                else return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
             }
+            return 0;
         }
 
         @Override
