@@ -352,6 +352,7 @@ public class MainActivity extends SherlockFragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                drawer.closeDrawer(Gravity.RIGHT);
                 if (drawer.isDrawerOpen(Gravity.LEFT)) {
                     drawer.closeDrawer(Gravity.LEFT);
                 } else {
