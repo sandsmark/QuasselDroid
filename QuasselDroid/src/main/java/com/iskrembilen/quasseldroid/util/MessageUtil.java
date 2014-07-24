@@ -51,7 +51,7 @@ public class MessageUtil {
                         // (I've found no exception to that rule in my 13-million-message database)
                         !(message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
                 )
-            ) && (!buffer.isDisplayed() && buffer.getLastSeenMessage() < message.messageId)
+            ) && (!buffer.isDisplayed() && buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
             ) {
             notificationManager.notifyHighlight(buffer.getInfo().id);
 
