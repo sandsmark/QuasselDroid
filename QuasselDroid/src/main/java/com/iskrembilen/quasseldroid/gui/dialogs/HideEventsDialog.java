@@ -2,19 +2,28 @@ package com.iskrembilen.quasseldroid.gui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
+<<<<<<< HEAD:QuasselDroid/src/main/java/com/iskrembilen/quasseldroid/gui/dialogs/HideEventsDialog.java
+=======
+import java.util.ArrayList;
+
+>>>>>>> Updated UI:QuasselDroid/src/main/java/com/iskrembilen/quasseldroid/gui/fragments/HideEventsDialog.java
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 
+<<<<<<< HEAD:QuasselDroid/src/main/java/com/iskrembilen/quasseldroid/gui/dialogs/HideEventsDialog.java
 import java.util.ArrayList;
 
+=======
+>>>>>>> Updated UI:QuasselDroid/src/main/java/com/iskrembilen/quasseldroid/gui/fragments/HideEventsDialog.java
 public class HideEventsDialog extends DialogFragment {
 
     public static HideEventsDialog newInstance(Buffer buffer) {

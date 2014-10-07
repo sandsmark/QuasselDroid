@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -7,14 +8,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+<<<<<<< HEAD
+=======
+import com.squareup.otto.Subscribe;
+
+>>>>>>> Updated UI
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.squareup.otto.Subscribe;
 
+<<<<<<< HEAD
 import java.io.Serializable;
 
 public class ConnectingFragment extends Fragment implements Serializable {
+=======
+public class ConnectingFragment extends Fragment {
+>>>>>>> Updated UI
 
     private TextView progressTextView;
 

@@ -1,7 +1,14 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.Fragment;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.support.v4.app.Fragment;
+=======
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+>>>>>>> Updated UI
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +16,16 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+<<<<<<< HEAD
 import com.idunnololz.widgets.AnimatedExpandableListView;
+=======
+import com.squareup.otto.Subscribe;
+
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
+>>>>>>> Updated UI
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.IrcUser;
@@ -21,6 +37,7 @@ import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+<<<<<<< HEAD
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
@@ -30,16 +47,26 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class NickListFragment extends Fragment implements Serializable {
+=======
+
+public class NickListFragment extends Fragment {
+    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
+    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
+    private final String TAG = NickListFragment.class.getSimpleName();
+>>>>>>> Updated UI
     private NicksAdapter adapter;
     private AnimatedExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
+<<<<<<< HEAD
     private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
     private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
     private final String TAG = NickListFragment.class.getSimpleName();
     public String topic;
 
     private BacklogObserver observer = new BacklogObserver();
+=======
+>>>>>>> Updated UI
 
     public static NickListFragment newInstance() {
         return new NickListFragment();
@@ -103,11 +130,53 @@ public class NickListFragment extends Fragment implements Serializable {
         BusProvider.getInstance().post(new UserClickedEvent(bufferId, nick));
     }
 
+<<<<<<< HEAD
     public void setNetworks(NetworkCollection networks) {
         this.networks = networks;
     }
 
     public class NicksAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
+=======
+    @Subscribe
+    public void onNetworksAvailable(NetworksAvailableEvent event) {
+        if (event.networks != null) {
+            this.networks = event.networks;
+            if (bufferId != -1) {
+                updateUsers();
+            }
+        }
+    }
+
+    @Subscribe
+    public void onBufferOpened(BufferOpenedEvent event) {
+        if (event.bufferId != -1) {
+            this.bufferId = event.bufferId;
+            if (networks != null) {
+                updateUsers();
+            }
+        }
+    }
+
+    private void updateUsers() {
+        Buffer buffer = networks.getBufferById(bufferId);
+        if (buffer != null) {
+            adapter.setUsers(buffer.getUsers());
+        }
+    }
+
+    public static class ViewHolderChild {
+        public TextView nickView;
+        public ImageView userImage;
+    }
+
+    public static class ViewHolderGroup {
+        public TextView nameView;
+        public ImageView expanderView;
+        public LinearLayout groupHolderView;
+    }
+
+    public class NicksAdapter extends BaseExpandableListAdapter implements Observer {
+>>>>>>> Updated UI
 
         private LayoutInflater inflater;
         private UserCollection users;
@@ -151,12 +220,20 @@ public class NickListFragment extends Fragment implements Serializable {
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
+<<<<<<< HEAD
             return groupPosition * Integer.MAX_VALUE + childPosition;
+=======
+            return getCombinedChildId(groupPosition, childPosition);
+            //return groupPosition * 100 + childPosition;
+>>>>>>> Updated UI
         }
 
         @Override
         public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             ViewHolderChild holder = null;
+
+            int availablecolor = getResources().getColor(R.color.buffer_read_color);
+            int awaycolor = getResources().getColor(R.color.buffer_parted_color);
 
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.widget_nick_single, null);
@@ -167,6 +244,7 @@ public class NickListFragment extends Fragment implements Serializable {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             final IrcUser entry = getChild(groupPosition, childPosition);
+<<<<<<< HEAD
             final IrcMode mode = getGroup(groupPosition).first;
             convertView.setBackgroundColor(ThemeUtil.getNickBg(mode));
 
@@ -175,6 +253,18 @@ public class NickListFragment extends Fragment implements Serializable {
                 holder.nickView.setTextColor(ThemeUtil.color.bufferParted);
             } else {
                 holder.nickView.setTextColor(ThemeUtil.color.bufferRead);
+=======
+            IrcMode mode = getGroup(groupPosition).first;
+
+            Spannable spannable = new SpannableString(((mode.icon.trim().equalsIgnoreCase("")) ? "" :mode.icon + " ") + entry.nick);
+            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(mode.colorResource)), 0, mode.icon.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            holder.nickView.setText(spannable);
+
+            if (entry.away) {
+                holder.nickView.setTextColor(awaycolor);
+            } else {
+                holder.nickView.setTextColor(availablecolor);
+>>>>>>> Updated UI
             }
 
             holder.nickView.setOnClickListener(new View.OnClickListener() {
@@ -220,6 +310,7 @@ public class NickListFragment extends Fragment implements Serializable {
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded,
                                  View convertView, ViewGroup parent) {
+<<<<<<< HEAD
             ViewHolderGroup holder = null;
 
             if (convertView == null) {
@@ -248,6 +339,9 @@ public class NickListFragment extends Fragment implements Serializable {
                 holder.countView.setText(group.first.icon + " " + group.second.size());
             }
             return convertView;
+=======
+            return inflater.inflate(R.layout.nicklist_group_item, null);
+>>>>>>> Updated UI
         }
 
         @Override
@@ -260,6 +354,7 @@ public class NickListFragment extends Fragment implements Serializable {
             return false;
         }
     }
+<<<<<<< HEAD
 
 
     public static class ViewHolderChild {
@@ -332,4 +427,6 @@ public class NickListFragment extends Fragment implements Serializable {
             }
         }
     }
+=======
+>>>>>>> Updated UI
 }

@@ -25,6 +25,7 @@ package com.iskrembilen.quasseldroid.gui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,12 +37,17 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+<<<<<<< HEAD
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.Gravity;
+=======
+import android.support.v4.app.FragmentActivity;
+import android.view.ContextThemeWrapper;
+>>>>>>> Updated UI
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +57,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -73,7 +80,11 @@ import com.squareup.otto.Subscribe;
 import java.util.Observable;
 import java.util.Observer;
 
+<<<<<<< HEAD
 public class LoginActivity extends ActionBarActivity implements Observer, LoginProgressDialog.Callbacks {
+=======
+public class LoginActivity extends FragmentActivity implements Observer, LoginProgressDialog.Callbacks {
+>>>>>>> Updated UI
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -166,6 +177,10 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
 
     public void showCoreContextMenu(Context context, View v) {
+<<<<<<< HEAD
+=======
+        Context wrapper = new ContextThemeWrapper(context, R.style.PopupMenu_Quasseldroid_Light);
+>>>>>>> Updated UI
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
@@ -190,18 +205,29 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 return false;
             }
         });
+<<<<<<< HEAD
         popup.inflate(R.menu.context_core);
+=======
+        popup.inflate(R.menu.core_menu);
+>>>>>>> Updated UI
         if (core.getCount()==0) {
             popup.getMenu().getItem(1).setEnabled(false);
             popup.getMenu().getItem(2).setEnabled(false);
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> Updated UI
         popup.show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+<<<<<<< HEAD
         getMenuInflater().inflate(R.menu.base_menu, menu);
+=======
+        getMenuInflater().inflate(R.menu.login_menu, menu);
+>>>>>>> Updated UI
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -289,12 +315,22 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     @Override
     protected Dialog onCreateDialog(int id) {
         final Dialog dialog;
+<<<<<<< HEAD
         String certificateMessage = getResources().getString(R.string.message_ssl_new);
         int intention = 1;
+=======
+        String certificateMessage = null;
+        int intention = -1;
+>>>>>>> Updated UI
         switch (id) {
             case R.id.DIALOG_EDIT_CORE:
                 intention = 0;
             case R.id.DIALOG_ADD_CORE:
+<<<<<<< HEAD
+=======
+                if (intention == -1)
+                    intention = 1;
+>>>>>>> Updated UI
                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                 final View root = getLayoutInflater().inflate(R.layout.dialog_add_core, null);
                 nameField = (EditText) root.findViewById(R.id.dialog_name_field);
@@ -336,16 +372,30 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
             case R.id.DIALOG_CHANGED_CERTIFICATE:
                 certificateMessage = getResources().getString(R.string.message_ssl_changed);
             case R.id.DIALOG_NEW_CERTIFICATE:
+<<<<<<< HEAD
                 builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setMessage(certificateMessage + "\n" + hashedCert)
                         .setCancelable(false)
                         .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+=======
+                if (certificateMessage == null) {
+                    certificateMessage = getResources().getString(R.string.message_ssl_new);
+                }
+                builder = new AlertDialog.Builder(LoginActivity.this);
+                builder.setMessage(certificateMessage + "\n" + hashedCert)
+                        .setCancelable(false)
+                        .setPositiveButton(getResources().getString(R.string.dialog_delete_buffer_yes), new DialogInterface.OnClickListener() {
+>>>>>>> Updated UI
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.storeCertificate(hashedCert, core.getSelectedItemId());
                                 onConnect.onClick(null);
                             }
                         })
+<<<<<<< HEAD
                         .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+=======
+                        .setNegativeButton(getResources().getString(R.string.dialog_delete_buffer_no), new DialogInterface.OnClickListener() {
+>>>>>>> Updated UI
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -354,16 +404,27 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 break;
             case R.id.DIALOG_DELETE_CORE:
                 builder = new AlertDialog.Builder(LoginActivity.this);
+<<<<<<< HEAD
                 builder.setTitle(getResources().getString(R.string.dialog_title_delete_buffer))
                         .setMessage(getResources().getString(R.string.dialog_message_delete_buffer))
                         .setCancelable(false)
                         .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+=======
+                builder.setTitle(getResources().getString(R.string.dialog_delete_buffer_title))
+                        .setMessage(getResources().getString(R.string.dialog_delete_buffer_message))
+                        .setCancelable(false)
+                        .setPositiveButton(getResources().getString(R.string.dialog_delete_buffer_yes), new DialogInterface.OnClickListener() {
+>>>>>>> Updated UI
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.deleteCore(core.getSelectedItemId());
                                 updateCoreSpinner();
                             }
                         })
+<<<<<<< HEAD
                         .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+=======
+                        .setNegativeButton(getResources().getString(R.string.dialog_delete_buffer_no), new DialogInterface.OnClickListener() {
+>>>>>>> Updated UI
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -431,7 +492,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
             startService(connectIntent);
 
-            LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
+            LoginProgressDialog.newInstance().show(getFragmentManager(), "dialog");
         }
     };
 
@@ -445,7 +506,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     }
 
     private void dismissLoginDialog() {
-        DialogFragment dialog = ((DialogFragment) getSupportFragmentManager().findFragmentByTag("dialog"));
+        DialogFragment dialog = ((DialogFragment) getFragmentManager().findFragmentByTag("dialog"));
         if (dialog != null) {
             dialog.dismiss();
         }

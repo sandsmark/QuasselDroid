@@ -10,7 +10,11 @@
         android:id="@+id/logo_img"
         android:layout_width="70dp"
         android:layout_height="70dp"
+<<<<<<< HEAD:QuasselDroid/src/main/res/layout/layout_splash.xml
         android:src="@mipmap/icon" />
+=======
+        android:src="@drawable/logo" />
+>>>>>>> Updated UI:QuasselDroid/src/main/res/layout/splash.xml
 
     <TextView
         android:id="@+id/introText"

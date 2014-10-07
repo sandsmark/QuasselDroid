@@ -23,6 +23,10 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,9 +38,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+<<<<<<< HEAD
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+=======
+import android.support.v4.app.ActionBarDrawerToggle;
+>>>>>>> Updated UI
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarActivity;
@@ -83,6 +91,7 @@ import com.squareup.otto.Subscribe;
 
 import java.lang.reflect.Field;
 
+<<<<<<< HEAD
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -90,6 +99,16 @@ public class MainActivity extends ActionBarActivity {
     public static final String BUFFER_STATE = "buffer_state";
     private static final String DRAWER_SELECTION = "drawer_selection";
     private static final String DRAWER_STATE = "drawer_state";
+=======
+public class MainActivity extends Activity {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    public static final String BUFFER_ID_EXTRA = "bufferid";
+    public static final String BUFFER_NAME_EXTRA = "buffername";
+    private static final long BACK_THRESHOLD = 4000;
+    private static final String OPENED_DRAWER = "opened_drawer";
+>>>>>>> Updated UI
 
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -103,7 +122,14 @@ public class MainActivity extends ActionBarActivity {
     private int currentTheme;
     private Boolean showLag = false;
 
+<<<<<<< HEAD
     private int lag = 0;
+=======
+    private Fragment chatFragment;
+    private Fragment bufferFragment;
+    private Fragment nickFragment;
+    private Fragment detailFragment;
+>>>>>>> Updated UI
 
     private int openedBuffer = -1;
     private int openedDrawer = Gravity.NO_GRAVITY;
@@ -150,7 +176,28 @@ public class MainActivity extends ActionBarActivity {
             Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
         }
 
+<<<<<<< HEAD
         extensibleDrawerToggle = new ExtensibleDrawerToggle(drawer, new ActionBarDrawerToggle(
+=======
+        if (savedInstanceState != null) {
+            Log.d(TAG, "MainActivity has savedInstanceState");
+            openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
+            if (drawer != null) openDrawer(savedInstanceState.getInt(OPENED_DRAWER));
+
+            FragmentManager manager = getFragmentManager();
+            bufferFragment = manager.findFragmentById(R.id.left_drawer);
+            nickFragment = manager.findFragmentById(R.id.right_drawer);
+            Fragment fragment = manager.findFragmentById(R.id.main_content_container);
+            if (fragment.getClass() == ChatFragment.class) {
+                chatFragment = fragment;
+            }
+        }
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+
+        drawerToggle = new ActionBarDrawerToggle(
+>>>>>>> Updated UI
                 this,                   /* host Activity */
                 drawer,                 /* DrawerLayout object */
                 actionbar.wrappedToolbar,   /* nav drawer icon to replace 'Up' caret */
@@ -161,7 +208,13 @@ public class MainActivity extends ActionBarActivity {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View drawerView) {
+<<<<<<< HEAD
                 manager.setWindowProperties(manager.getOpenDrawers(drawer));
+=======
+                setTitleAndMenu();
+                invalidateOptionsMenu();
+
+>>>>>>> Updated UI
                 if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
                     BusProvider.getInstance().post(new UpdateReadBufferEvent());
                 }
@@ -171,6 +224,7 @@ public class MainActivity extends ActionBarActivity {
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
+<<<<<<< HEAD
                 manager.closeDrawerOpposite(drawerView);
                 manager.setWindowProperties(manager.getOpenDrawers(drawer));
                 setTitleAndMenu();
@@ -182,6 +236,12 @@ public class MainActivity extends ActionBarActivity {
 
         if (savedInstanceState==null) {
             manager.init();
+=======
+                setTitleAndMenu();
+                invalidateOptionsMenu();
+            }
+        };
+>>>>>>> Updated UI
 
             manager.lockDrawer(Gravity.START, true);
             manager.lockDrawer(Gravity.END, true);
@@ -189,16 +249,34 @@ public class MainActivity extends ActionBarActivity {
             manager.initMainFragment();
         }
 
+<<<<<<< HEAD
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         showLag = preferences.getBoolean(getString(R.string.preference_lag), false);
+=======
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+>>>>>>> Updated UI
 
         sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+<<<<<<< HEAD
                 if (key.equals(getResources().getString(R.string.preference_lag))) {
                     showLag = preferences.getBoolean(getString(R.string.preference_lag), false);
                     updateSubtitle();
+=======
+                if (key.equals(getResources().getString(R.string.preference_show_lag))) {
+                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+                    if (!showLag) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            setActionBarSubtitle("");
+                        } else {
+                            getActionBar().setTitle(getResources().getString(R.string.app_name));
+
+                        }
+                    }
+>>>>>>> Updated UI
                 }
             }
         };
@@ -206,12 +284,17 @@ public class MainActivity extends ActionBarActivity {
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
     }
 
+<<<<<<< HEAD
     @Subscribe
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
         if (event.bufferId==openedBuffer) {
             topic = NetworkCollection.getInstance().getBufferById(openedBuffer).getTopic();
             updateSubtitle();
         }
+=======
+    private void setActionBarSubtitle(String subtitle) {
+        getActionBar().setSubtitle(subtitle);
+>>>>>>> Updated UI
     }
 
     @Override
@@ -328,7 +411,13 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+<<<<<<< HEAD
         Log.d(TAG,"Saving state: BUFFER="+openedBuffer+"; DRAWER="+manager.getOpenDrawers(extensibleDrawerToggle.drawer));
+=======
+        Log.d(TAG, "Saving instance state");
+        outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
+        outState.putInt(OPENED_DRAWER, getOpenDrawers());
+>>>>>>> Updated UI
         super.onSaveInstanceState(outState);
         storeState(outState);
     }
@@ -343,7 +432,11 @@ public class MainActivity extends ActionBarActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         Log.d(TAG, "Configuration changed");
         super.onConfigurationChanged(newConfig);
+<<<<<<< HEAD
         extensibleDrawerToggle.drawerToggle.onConfigurationChanged(newConfig);
+=======
+        drawerToggle.onConfigurationChanged(newConfig);
+>>>>>>> Updated UI
     }
 
     @Override
@@ -354,7 +447,11 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+<<<<<<< HEAD
         getMenuInflater().inflate(R.menu.activity_main, menu);
+=======
+        getMenuInflater().inflate(R.menu.base_menu, menu);
+>>>>>>> Updated UI
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -374,10 +471,27 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onInitProgressed(InitProgressEvent event) {
+<<<<<<< HEAD
         FragmentManager fm = getSupportFragmentManager();
         Fragment currentFragment = fm.findFragmentById(R.id.main_content_container);
         if (event.done) {
             manager.initMainFragment();
+=======
+        FragmentManager manager = getFragmentManager();
+        Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
+        if (event.done) {
+            if (currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
+                chatFragment = ChatFragment.newInstance();
+                nickFragment = NickListFragment.newInstance();
+                detailFragment = DetailFragment.newInstance();
+                bufferFragment = BufferFragment.newInstance();
+
+                FragmentTransaction trans = manager.beginTransaction();
+                if (currentFragment != null) {
+                    trans.remove(currentFragment);
+                }
+                trans.add(R.id.main_content_container, chatFragment);
+>>>>>>> Updated UI
 
             loadBufferAndDrawerState();
 
@@ -441,7 +555,18 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void showInitProgress() {
+<<<<<<< HEAD
         manager.setPanelFragment(Gravity.NO_GRAVITY, new ConnectingFragment());
+=======
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = manager.beginTransaction();
+        ConnectingFragment fragment = ConnectingFragment.newInstance();
+        fragmentTransaction.replace(R.id.main_content_container, fragment, "init");
+        if (bufferFragment != null)
+            fragmentTransaction.remove(bufferFragment);
+        if (nickFragment != null)
+            fragmentTransaction.remove(nickFragment);
+>>>>>>> Updated UI
         drawer.closeDrawers();
     }
 
@@ -451,6 +576,7 @@ public class MainActivity extends ActionBarActivity {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
                 drawer.closeDrawers();
+<<<<<<< HEAD
                 ((BufferFragment)manager.bufferFragment).finishActionMode();
 
                 setTitleAndMenu();
@@ -507,6 +633,26 @@ public class MainActivity extends ActionBarActivity {
                     actionbar.setTitle(buffer.getInfo().name);
                     topic = buffer.getTopic();
                     manager.lockDrawer(Gravity.END, true);
+=======
+
+                FragmentManager manager = getFragmentManager();
+                FragmentTransaction trans = manager.beginTransaction();
+                NetworkCollection networks = NetworkCollection.getInstance();
+
+                Fragment current = manager.findFragmentById(R.id.right_drawer);
+
+                if (current != null) {
+                    if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
+                        trans.replace(R.id.right_drawer, detailFragment);
+                    } else {
+                        trans.replace(R.id.right_drawer, nickFragment);
+                    }
+                }
+                trans.commit();
+
+                setTitleAndMenu();
+                invalidateOptionsMenu();
+>>>>>>> Updated UI
             }
         }
         updateSubtitle();
@@ -790,6 +936,7 @@ public class MainActivity extends ActionBarActivity {
         }
     };
 
+<<<<<<< HEAD
     private void hideKeyboard(View view) {
         if (view != null) {
             view.requestFocus();
@@ -799,3 +946,79 @@ public class MainActivity extends ActionBarActivity {
     }
 
 }
+=======
+    private void setTitleAndMenu() {
+        int side = getOpenDrawers();
+        if (side == 0) {
+            if (openedBuffer != -1) {
+                NetworkCollection networks = NetworkCollection.getInstance();
+                Buffer buffer = networks.getBufferById(openedBuffer);
+                if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
+                    getActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                else
+                    getActionBar().setTitle(buffer.getInfo().name);
+            } else {
+                getActionBar().setTitle(getResources().getString(R.string.app_name));
+            }
+            if (chatFragment != null) chatFragment.setUserVisibleHint(true);
+            setMenuVisible(chatFragment);
+        } else if (side == 1) {
+            setMenuVisible(bufferFragment);
+            if (chatFragment != null) chatFragment.setUserVisibleHint(false);
+            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+        } else if (side == 2) {
+            setMenuVisible(nickFragment);
+            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+        } else {
+            setMenuVisible(null);
+            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+        }
+    }
+
+    private int getOpenDrawers() {
+        if (drawer == null)
+            return 0;
+        int openDrawers = 0;
+        if (drawer.isDrawerOpen(Gravity.LEFT)) openDrawers += 1;
+        if (drawer.isDrawerOpen(Gravity.RIGHT)) openDrawers += 2;
+        return openDrawers;
+    }
+    private void closeDrawer(int side) {
+        switch (side) {
+            case 1:
+                drawer.closeDrawer(Gravity.LEFT);
+                break;
+            case 2:
+                drawer.closeDrawer(Gravity.RIGHT);
+                break;
+            case 3:
+                drawer.closeDrawer(Gravity.LEFT);
+                drawer.closeDrawer(Gravity.RIGHT);
+                break;
+        }
+    }
+    private void openDrawer(int side) {
+        switch (side) {
+            case 1:
+            case 3:
+                drawer.openDrawer(Gravity.LEFT);
+                closeDrawer(2);
+                break;
+            case 2:
+                drawer.openDrawer(Gravity.RIGHT);
+                closeDrawer(1);
+                break;
+        }
+    }
+
+    private void setMenuVisible(Fragment fragment) {
+        if (chatFragment != null) chatFragment.setMenuVisibility(false);
+        if (bufferFragment != null) bufferFragment.setMenuVisibility(false);
+        if (nickFragment != null) nickFragment.setMenuVisibility(false);
+        if (fragment != null) fragment.setMenuVisibility(true);
+    }
+}
+>>>>>>> Updated UI

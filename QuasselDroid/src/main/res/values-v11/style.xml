@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+<<<<<<< HEAD:QuasselDroid/src/main/res/values-v11/style.xml
+=======
+    <style name="ActivatedItemBackground">
+        <!--<item name="android:background">@drawable/selectable_background_quasseldroid</item>-->
+    </style>
+
+>>>>>>> Updated UI:QuasselDroid/src/main/res/values-v11/styles.xml
     <style name="ListChoiceBackgroundIndicator">
         <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>
     </style>

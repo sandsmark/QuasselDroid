@@ -14,6 +14,7 @@
         android:hint="@string/hint_core_name"
         android:singleLine="true" />
 
+<<<<<<< HEAD
     <EditText
         android:id="@+id/dialog_address_field"
         android:layout_width="match_parent"
@@ -21,6 +22,29 @@
         android:inputType="textUri"
         android:hint="@string/hint_core_address"
         android:singleLine="true" />
+=======
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:singleLine="true"
+                    android:text="Server port" />
+
+                <EditText
+                    android:id="@+id/dialog_port_field"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:inputType="number"
+                    android:maxLength="5"
+                    android:singleLine="true"
+                    android:text="4242" />
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+>>>>>>> Updated UI
 
     <EditText
         android:id="@+id/dialog_port_field"

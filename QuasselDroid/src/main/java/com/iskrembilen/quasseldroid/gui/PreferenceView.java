@@ -56,6 +56,7 @@ public class PreferenceView extends ActionBarActivity {
         setTheme(ThemeUtil.theme);
 
         super.onCreate(savedInstanceState);
+<<<<<<< HEAD
 
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new QuasselPreferenceFragment()).commit();
@@ -86,5 +87,8 @@ public class PreferenceView extends ActionBarActivity {
     public void onDestroy() {
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).unregisterOnSharedPreferenceChangeListener(sharedPreferenceListener);
+=======
+        addPreferencesFromResource(R.layout.preferences);
+>>>>>>> Updated UI
     }
 }

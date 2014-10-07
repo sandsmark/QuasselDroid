@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+<<<<<<< HEAD
 import android.app.Activity;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,6 +31,17 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.view.ActionMode;
+=======
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.ActionMode;
+>>>>>>> Updated UI
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,10 +53,24 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
+<<<<<<< HEAD
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.idunnololz.widgets.AnimatedExpandableListView;
+=======
+import android.widget.ExpandableListView.OnGroupCollapseListener;
+import android.widget.ExpandableListView.OnGroupExpandListener;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.squareup.otto.Subscribe;
+
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
+>>>>>>> Updated UI
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
@@ -60,6 +86,7 @@ import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+<<<<<<< HEAD
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
@@ -74,6 +101,15 @@ public class BufferFragment extends Fragment implements Serializable {
     public static final String BUFFER_NAME_EXTRA = "buffername";
 
     private static final String TAG = BufferFragment.class.getSimpleName();
+=======
+
+public class BufferFragment extends Fragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener {
+
+    public static final String BUFFER_ID_EXTRA = "bufferid";
+    public static final String BUFFER_NAME_EXTRA = "buffername";
+    private static final String TAG = BufferFragment.class.getSimpleName();
+    private static final String ITEM_POSITION_KEY = "itempos";
+>>>>>>> Updated UI
 
     private static final String ITEM_POSITION_KEY = "itempos";
     private static final String LIST_POSITION_KEY = "listpos";
@@ -83,7 +119,6 @@ public class BufferFragment extends Fragment implements Serializable {
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
-    private boolean showHiddenBuffers = false;
 
     private ActionModeData actionModeData = new ActionModeData();
 
@@ -103,6 +138,20 @@ public class BufferFragment extends Fragment implements Serializable {
             restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
         }
         setHasOptionsMenu(true);
+<<<<<<< HEAD
+=======
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
+
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(getResources().getString(R.string.preference_fontsize_channel_list))) {
+                    bufferListAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+>>>>>>> Updated UI
     }
 
     @Override
@@ -152,7 +201,11 @@ public class BufferFragment extends Fragment implements Serializable {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 MenuInflater inflater = mode.getMenuInflater();
+<<<<<<< HEAD
                 inflater.inflate(R.menu.context_buffer_network, menu);
+=======
+                inflater.inflate(R.menu.buffer_contextual_menu_networks, menu);
+>>>>>>> Updated UI
 
                 bufferList.setItemChecked(actionModeData.index, true);
 
@@ -193,7 +246,11 @@ public class BufferFragment extends Fragment implements Serializable {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 MenuInflater inflater = mode.getMenuInflater();
+<<<<<<< HEAD
                 inflater.inflate(R.menu.context_buffer_channel, menu);
+=======
+                inflater.inflate(R.menu.buffer_contextual_menu_channels, menu);
+>>>>>>> Updated UI
 
                 bufferList.setItemChecked(actionModeData.index, true);
 
@@ -216,16 +273,26 @@ public class BufferFragment extends Fragment implements Serializable {
                         break;
                     case R.id.context_menu_delete:
                         BufferHelper.showDeleteConfirmDialog(getActivity(), actionModeData.id);
+<<<<<<< HEAD
                         break;
+=======
+                        mode.finish();
+                        return true;
+>>>>>>> Updated UI
                     case R.id.context_menu_hide_temp:
                         BufferHelper.tempHideChannel(actionModeData.id);
                         break;
                     case R.id.context_menu_hide_perm:
                         BufferHelper.permHideChannel(actionModeData.id);
+<<<<<<< HEAD
                         break;
                     case R.id.context_menu_unhide:
                         BufferHelper.unhideChannel(actionModeData.id);
                         break;
+=======
+                        mode.finish();
+                        return true;
+>>>>>>> Updated UI
                     default:
                         return false;
                 }
@@ -246,29 +313,42 @@ public class BufferFragment extends Fragment implements Serializable {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
                                            int position, long id) {
+                ((ExpandableListView) parent).setItemChecked(position, true);
+
                 long packedPosition = bufferList.getExpandableListPosition(position);
                 int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
                 int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
 
                 if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
                     Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
+<<<<<<< HEAD
 
                     actionModeData.index = bufferList.getFlatListPosition(packedPosition);
                     actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackBuffer);
+=======
+                    actionModeData.index = bufferList.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
+
+                    actionModeData.actionMode = getActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
+>>>>>>> Updated UI
                     actionModeData.id = buffer.getInfo().id;
                     actionModeData.listItem = view;
                     if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     } else if (buffer.isActive()) {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     } else {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
+<<<<<<< HEAD
                     }
 
                     if(buffer.isPermanentlyHidden()) {
@@ -282,13 +362,19 @@ public class BufferFragment extends Fragment implements Serializable {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
                     } else {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+=======
+>>>>>>> Updated UI
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     }
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                     Network network = bufferListAdapter.getGroup(groupPosition);
+<<<<<<< HEAD
                     actionModeData.index = bufferList.getFlatListPosition(packedPosition);
                     actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackNetwork);
+=======
+                    actionModeData.actionMode = getActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
+>>>>>>> Updated UI
                     actionModeData.id = network.getId();
                     actionModeData.listItem = view;
                     if (network.isConnected()) {
@@ -342,6 +428,7 @@ public class BufferFragment extends Fragment implements Serializable {
     }
 
     @Override
+<<<<<<< HEAD
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         if (showHiddenBuffers) {
@@ -352,6 +439,8 @@ public class BufferFragment extends Fragment implements Serializable {
     }
 
     @Override
+=======
+>>>>>>> Updated UI
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_join_channel:
@@ -359,10 +448,13 @@ public class BufferFragment extends Fragment implements Serializable {
                     Toast.makeText(getActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
                 else showJoinChannelDialog();
                 return true;
+<<<<<<< HEAD
             case R.id.context_menu_toggle_hidden:
                 showHiddenBuffers = !showHiddenBuffers;
                 bufferListAdapter.notifyDataSetChanged();
                 return true;
+=======
+>>>>>>> Updated UI
         }
         return super.onOptionsItemSelected(item);
     }
@@ -423,9 +515,45 @@ public class BufferFragment extends Fragment implements Serializable {
         }
     }
 
+<<<<<<< HEAD
     public static class ViewHolderChild {
         public TextView bufferView;
         public View stateView;
+=======
+    @Subscribe
+    public void onNetworksAvailable(NetworksAvailableEvent event) {
+        if (event.networks != null) {
+            event.networks.addObserver(bufferListAdapter);
+            bufferListAdapter.setNetworks(event.networks);
+        }
+    }
+
+    @Subscribe
+    public void onBufferListFontSizeChanged(BufferListFontSizeChangedEvent event) {
+        bufferListAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Check if a buffer is already existing and switch to it
+     * If not a QueryUserEvent is created so the CoreConnService queries the user
+     *
+     * @param event
+     */
+    @Subscribe
+    public void onUserClicked(UserClickedEvent event) {
+        Buffer buffer = bufferListAdapter.networks.getBufferById(event.bufferId);
+        Network network = bufferListAdapter.networks.getNetworkById(buffer.getInfo().networkId);
+        buffer = network.getBuffers().getBuffer(event.nick);
+        if (buffer != null) {
+            openBuffer(buffer);
+        } else {
+            BusProvider.getInstance().post(new QueryUserEvent(event.bufferId, event.nick));
+        }
+    }
+
+    public static class ViewHolderChild {
+        public TextView bufferView;
+>>>>>>> Updated UI
         public View parent;
     }
 
@@ -434,6 +562,7 @@ public class BufferFragment extends Fragment implements Serializable {
         public int networkId;
     }
 
+<<<<<<< HEAD
     public void setNetworks(NetworkCollection networks) {
         if (bufferListAdapter!=null) bufferListAdapter.setNetworks(networks);
     }
@@ -446,6 +575,14 @@ public class BufferFragment extends Fragment implements Serializable {
         public BufferListAdapter(Activity activity) {
             this.inflater = LayoutInflater.from(activity);
             this.activity = activity;
+=======
+    public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
+        private NetworkCollection networks;
+        private LayoutInflater inflater;
+
+        public BufferListAdapter(Context context) {
+            inflater = LayoutInflater.from(context);
+>>>>>>> Updated UI
         }
 
         public void setNetworks(NetworkCollection networks) {
@@ -456,6 +593,7 @@ public class BufferFragment extends Fragment implements Serializable {
                 return;
             networks.addObserver(this);
 
+<<<<<<< HEAD
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -471,6 +609,8 @@ public class BufferFragment extends Fragment implements Serializable {
             });
         }
 
+=======
+>>>>>>> Updated UI
         @Override
         public void update(Observable observable, Object data) {
             activity.runOnUiThread(new Runnable() {
@@ -487,12 +627,20 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public Buffer getChild(int groupPosition, int childPosition) {
+<<<<<<< HEAD
             return networks.getNetwork(groupPosition).getBuffers().getPos(showHiddenBuffers,childPosition);
+=======
+            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
+>>>>>>> Updated UI
         }
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
+<<<<<<< HEAD
             return getChild(groupPosition,childPosition).getInfo().id;
+=======
+            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
+>>>>>>> Updated UI
         }
 
         @Override
@@ -503,7 +651,10 @@ public class BufferFragment extends Fragment implements Serializable {
                 holder = new ViewHolderChild();
                 holder.parent = convertView;
                 holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
+<<<<<<< HEAD
                 holder.stateView = convertView.findViewById(R.id.buffer_status);
+=======
+>>>>>>> Updated UI
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderChild) convertView.getTag();
@@ -515,13 +666,20 @@ public class BufferFragment extends Fragment implements Serializable {
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
+<<<<<<< HEAD
                         holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateActive);
                     } else {
                         holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateParted);
+=======
+                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_active));
+                    } else {
+                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_gone));
+>>>>>>> Updated UI
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
+<<<<<<< HEAD
                     if (!networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
                         holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateParted);
                         if (entry.isActive()) {
@@ -529,11 +687,24 @@ public class BufferFragment extends Fragment implements Serializable {
                         }
                     } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
                         holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateAway);
+=======
+                    if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
+                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_gone));
+                        if (entry.isActive()) {
+                            entry.setActive(false);
+                        }
+                    } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
+                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_away));
+>>>>>>> Updated UI
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
+<<<<<<< HEAD
                         holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateActive);
+=======
+                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_active));
+>>>>>>> Updated UI
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -547,22 +718,32 @@ public class BufferFragment extends Fragment implements Serializable {
                     holder.bufferView.setText("XXXX " + entry.getInfo().name);
             }
 
+<<<<<<< HEAD
             if(entry.isPermanentlyHidden()){
                 holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStatePerm);
             } else if (entry.isTemporarilyHidden()) {
                 holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateTemp);
             }
 
+=======
+>>>>>>> Updated UI
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
             return convertView;
         }
 
         @Override
+<<<<<<< HEAD
         public int getRealChildrenCount(int groupPosition) {
             if (networks != null) {
                 return networks.getNetwork(groupPosition).getBuffers().getBufferCount(showHiddenBuffers);
+=======
+        public int getChildrenCount(int groupPosition) {
+            if (networks == null) {
+                return 0;
+            } else {
+                return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
+>>>>>>> Updated UI
             }
-            return 0;
         }
 
         @Override
