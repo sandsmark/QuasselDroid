@@ -30,13 +30,14 @@ it, but I haven't gotten it to work just yet).
 
 
 Authors (in chronological order of appearance):
-Frederik M. J. Vestre (freqmod)
+
+  - Frederik M. J. Vestre (freqmod)  
     (Initial qdatastream deserialization attempts)
-Martin "Java Sucks" Sandsmark (sandsmark)
+  - Martin "Java Sucks" Sandsmark (sandsmark)  
     (Protocol implementation, (de)serializers, project (de)moralizer)
-Magnus Fjell (magnuf)
+  - Magnus Fjell (magnuf)  
     (GUI, Android stuff)
-Ken Børge Viktil (Kenji)
+  - Ken Børge Viktil (Kenji)  
     (GUI, Android stuff)
 
 
