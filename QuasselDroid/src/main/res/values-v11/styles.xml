@@ -2,7 +2,7 @@
 <resources>
 
     <style name="ActivatedItemBackground">
-        <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
+        <!--<item name="android:background">@drawable/selectable_background_quasseldroid</item>-->
     </style>
 
     <style name="ListChoiceBackgroundIndicator">

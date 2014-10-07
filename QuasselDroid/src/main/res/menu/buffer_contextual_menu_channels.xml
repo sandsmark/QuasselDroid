@@ -17,10 +17,6 @@
         android:title="@string/context_hide_permanently"
         android:orderInCategory="4"></item>
     <item
-        android:id="@+id/context_menu_unhide"
-        android:title="@string/context_unhide"
-        android:orderInCategory="4"></item>
-    <item
         android:id="@+id/context_menu_delete"
         android:title="@string/context_delete"
         android:orderInCategory="5"></item>

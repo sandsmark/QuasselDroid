@@ -1,86 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="logo_text_color">#0686fd</color>
+    
+    <color name="primary_text">#555555</color>
+    <color name="secondary_text">#333333</color>
 
-    <color name="buffer_unread_color_light">#0000F5</color>
-    <color name="buffer_highlight_color_light">#ff8000</color>
-    <color name="buffer_read_color_light">#000000</color>
-    <color name="buffer_parted_color_light">#C0C0C0</color>
-    <color name="buffer_activity_color_light">#008000</color>
-    <color name="buffer_perm_hidden_color_light">#82ff0008</color>
-    <color name="buffer_temp_hidden_color_light">#84fffc00</color>
+    <color name="buffer_highlight_color">#d4a12a</color>
+    <color name="buffer_unread_color">#3862d6</color>
+    <color name="buffer_activity_color">#71b330</color>
 
-    <color name="buffer_unread_color_dark">#ff7b00</color>
-    <color name="buffer_highlight_color_dark">#ff00bf</color>
-    <color name="buffer_read_color_dark">#debc85</color>
-    <color name="buffer_parted_color_dark">#a0a0a4</color>
-    <color name="buffer_activity_color_dark">#008000</color>
-    <color name="buffer_perm_hidden_color_dark">#82ff0008</color>
-    <color name="buffer_temp_hidden_color_dark">#84fffc00</color>
+    <color name="buffer_read_color">#333333</color>
+    <color name="buffer_parted_color">#C0C0C0</color>
 
+    <color name="buffer_active_color">#4D54E6</color>
+    <color name="buffer_away_color">#ff4181ff</color>
+    <color name="buffer_offline_color">#DDDDDD</color>
 
-    <color name="chat_line_self_dark">#009966</color>
-    <color name="chat_line_plain_dark">#debc85</color>
-    <color name="chat_line_notice_dark">#916409</color>
-    <color name="chat_line_action_dark">#007a80</color>
-    <color name="chat_line_nick_dark">#633b5a</color>
-    <color name="chat_line_mode_dark">#346E9E</color>
-    <color name="chat_line_join_dark">#005538</color>
-    <color name="chat_line_part_dark">#633b5a</color>
-    <color name="chat_line_quit_dark">#683A38</color>
-    <color name="chat_line_kick_dark">#633b5a</color>
-    <color name="chat_line_kill_dark">#633b5a</color>
-    <color name="chat_line_server_dark">#916409</color>
-    <color name="chat_line_info_dark">#916409</color>
-    <color name="chat_line_error_dark">#916409</color>
-    <color name="chat_line_daychange_dark">#916409</color>
-    <color name="chat_line_topic_dark">#633b5a</color>
-    <color name="chat_line_netsplitjoin_dark">#005538</color>
-    <color name="chat_line_netsplitquit_dark">#683A38</color>
-    <color name="chat_line_highlight_dark">#00583a</color>
-    <color name="chat_line_timestamp_dark">#707c70</color>
+    <color name="nick_owner_color">#FF5D34</color>
+    <color name="nick_admin_color">#E89E39</color>
+    <color name="nick_operator_color">#FFDD32</color>
+    <color name="nick_halfop_color">#AFE839</color>
+    <color name="nick_voice_color">#32FF56</color>
+    <color name="nick_user_color">#4462FF</color>
 
-    <color name="chat_line_self_light">#000000</color>
-    <color name="chat_line_plain_light">#000000</color>
-    <color name="chat_line_notice_light">#916409</color>
-    <color name="chat_line_action_light">#0000ff</color>
-    <color name="chat_line_nick_light">#960096</color>
-    <color name="chat_line_mode_light">#960096</color>
-    <color name="chat_line_join_light">#960096</color>
-    <color name="chat_line_part_light">#960096</color>
-    <color name="chat_line_quit_light">#960096</color>
-    <color name="chat_line_kick_light">#960096</color>
-    <color name="chat_line_kill_light">#960096</color>
-    <color name="chat_line_server_light">#916409</color>
-    <color name="chat_line_info_light">#916409</color>
-    <color name="chat_line_error_light">#916409</color>
-    <color name="chat_line_daychange_light">#916409</color>
-    <color name="chat_line_topic_light">#960096</color>
-    <color name="chat_line_netsplitjoin_light">#960096</color>
-    <color name="chat_line_netsplitquit_light">#960096</color>
-    <color name="chat_line_highlight_light">#ff8000</color>
-    <color name="chat_line_timestamp_light">#707c70</color>
+    <color name="chat_line_self">#333333</color>
+    <color name="chat_line_plain">#333333</color>
+    <color name="chat_line_notice">#555555</color>
+    <color name="chat_line_action">#555555</color>
+    <color name="chat_line_nick">#555555</color>
+    <color name="chat_line_mode">#555555</color>
+    <color name="chat_line_join">#555555</color>
+    <color name="chat_line_part">#555555</color>
+    <color name="chat_line_quit">#555555</color>
+    <color name="chat_line_kick">#555555</color>
+    <color name="chat_line_kill">#555555</color>
+    <color name="chat_line_server">#555555</color>
+    <color name="chat_line_info">#555555</color>
+    <color name="chat_line_error">#d63838</color>
+    <color name="chat_line_daychange">#916409</color>
+    <color name="chat_line_topic">#555555</color>
+    <color name="chat_line_netsplitjoin">#555555</color>
+    <color name="chat_line_netsplitquit">#555555</color>
+    <color name="chat_line_highlight">#ff8000</color>
+    <color name="chat_line_timestamp">#707c70</color>
+    <color name="chat_bg_action">#0A000000</color>
 
-    <color name="buffer_offline_color">#666</color>
-    <color name="ircmessage_white">#fff</color>
-    <color name="ircmessage_black">#000</color>
-    <color name="ircmessage_blue">#0A0A85</color>
-    <color name="ircmessage_green">#0f0</color>
-    <color name="ircmessage_red">#f00</color>
-    <color name="ircmessage_brown">#800000</color>
-    <color name="ircmessage_purple">#800080</color>
-    <color name="ircmessage_orange">#808000</color>
-    <color name="ircmessage_yellow">#FFFF00</color>
-    <color name="ircmessage_light_green">#BFFF00</color>
-    <color name="ircmessage_teal">#008080</color>
-    <color name="ircmessage_light_cyan">#00FFFF</color>
-    <color name="ircmessage_light_blue">#4169E1</color>
-    <color name="ircmessage_pink">#F984EF</color>
-    <color name="ircmessage_gray">#888</color>
+    
+    <color name="ircmessage_white">#FFFFFF</color>
+    <color name="ircmessage_black">#000000</color>
+    <color name="ircmessage_blue">#3838d6</color>
+    <color name="ircmessage_green">#38d638</color>
+    <color name="ircmessage_red">#d63838</color>
+    <color name="ircmessage_brown">#8a5724</color>
+    <color name="ircmessage_purple">#d638d6</color>
+    <color name="ircmessage_orange">#d69438</color>
+    <color name="ircmessage_yellow">#dede23</color>
+    <color name="ircmessage_light_green">#ffa8d639</color>
+    <color name="ircmessage_teal">#ff32baba</color>
+    <color name="ircmessage_light_cyan">#ff3cdede</color>
+    <color name="ircmessage_light_blue">#ff399eeb</color>
+    <color name="ircmessage_pink">#d638cc</color>
+    <color name="ircmessage_gray">#888888</color>
 
     <color name="pager_indicator_text_color">#96AA39</color>
     <color name="pager_indicator_color">#3B3B3B</color>
-    <color name="topic_border_color">#3B3B3B</color>
-
 
 </resources>

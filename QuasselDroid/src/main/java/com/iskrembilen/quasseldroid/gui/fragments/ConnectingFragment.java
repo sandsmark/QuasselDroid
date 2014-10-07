@@ -1,18 +1,19 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.squareup.otto.Subscribe;
+
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.squareup.otto.Subscribe;
 
-public class ConnectingFragment extends SherlockFragment {
+public class ConnectingFragment extends Fragment {
 
     private TextView progressTextView;
 

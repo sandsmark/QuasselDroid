@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:id="@+id/backlog_item_linearlayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
@@ -12,28 +12,24 @@
         <TextView
             android:id="@+id/backlog_time_view"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/backlog_nick_view"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip" />
+            android:layout_margin="4dp"
+            android:text="17:46" />
 
         <TextView
             android:id="@+id/backlog_msg_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:autoLink="web"
             android:bufferType="spannable"
-            android:textIsSelectable="true"/>
+            android:text="kuschku especially since I&apos;m at a bigger University now, and one class here costs as much as my whole semester at the community college" />
+
     </LinearLayout>
 
     <TextView
         android:id="@+id/backlog_list_separator"
         android:layout_width="fill_parent"
-        android:layout_height="0sp"
-        android:background="#ff0000" />
+        android:layout_height="1dp" />
 
 </LinearLayout>

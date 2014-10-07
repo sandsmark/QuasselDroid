@@ -47,18 +47,5 @@ public class PreferenceView extends PreferenceActivity {
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.layout.preferences);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        listener = new OnSharedPreferenceChangeListener() {
-
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getResources().getString(R.string.preference_theme))) {
-                    ThemeUtil.setTheme(PreferenceView.this, sharedPreferences.getString(key, ""));
-                }
-
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
     }
 }

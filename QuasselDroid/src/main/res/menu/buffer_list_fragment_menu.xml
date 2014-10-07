@@ -6,10 +6,4 @@
         android:icon="?actionJoinChannelIcon"
         android:showAsAction="ifRoom|withText"
         android:orderInCategory="1"></item>
-    <item
-        android:id="@+id/context_menu_show_hidden"
-        android:title="@string/context_show_hidden"></item>
-    <item
-        android:id="@+id/context_menu_hide_hidden"
-        android:title="@string/context_hide_hidden"></item>
 </menu>

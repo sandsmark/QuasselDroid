@@ -1,43 +1,44 @@
 package com.iskrembilen.quasseldroid.gui;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.crittercism.app.Crittercism;
+import com.squareup.otto.Subscribe;
+
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Subscribe;
 
-public class SplashActivity extends SherlockActivity {
+public class SplashActivity extends Activity {
     // Set the display time, in milliseconds (or extract it out as a configurable parameter)
     private final int SPLASH_DISPLAY_LENGTH = 500;
     private final String TAG = SplashActivity.class.getSimpleName();
     private Class<?> activityToStart;
+    private ServiceConnection focusConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName cn, IBinder service) {
+        }
+
+        public void onServiceDisconnected(ComponentName cn) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
-        //Init crittercism
-        boolean isDebugBuild = (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE));
-        if (!isDebugBuild && getResources().getBoolean(R.bool.use_crittercism)) {
-            Log.i(TAG, "Enabling Crittercism");
-            Crittercism.init(getApplicationContext(), getResources().getString(R.string.crittercism_api_key));
-        }
+
         setContentView(R.layout.splash);
-        getSupportActionBar().hide();
+        getActionBar().hide();
     }
 
     @Override
@@ -83,12 +84,4 @@ public class SplashActivity extends SherlockActivity {
             activityToStart = LoginActivity.class;
         }
     }
-
-    private ServiceConnection focusConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName cn, IBinder service) {
-        }
-
-        public void onServiceDisconnected(ComponentName cn) {
-        }
-    };
 }

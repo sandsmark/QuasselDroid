@@ -3,8 +3,8 @@
 
     <item
         android:id="@+id/menu_hide_events"
-        android:icon="?actionEditIcon"
-        android:showAsAction="ifRoom|withText"
+        android:icon="@drawable/ic_action_labels"
+        android:showAsAction="always"
         android:title="@string/menu_hide_events"
         android:orderInCategory="1"></item>
 

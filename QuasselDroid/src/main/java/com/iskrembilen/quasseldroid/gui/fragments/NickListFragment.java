@@ -1,6 +1,10 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.Fragment;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +15,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.squareup.otto.Subscribe;
+
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.IrcUser;
@@ -22,20 +31,15 @@ import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.squareup.otto.Subscribe;
 
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
-public class NickListFragment extends SherlockFragment {
+public class NickListFragment extends Fragment {
+    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
+    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
+    private final String TAG = NickListFragment.class.getSimpleName();
     private NicksAdapter adapter;
     private ExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
-    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
-    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
-    private final String TAG = NickListFragment.class.getSimpleName();
 
     public static NickListFragment newInstance() {
         return new NickListFragment();
@@ -88,6 +92,44 @@ public class NickListFragment extends SherlockFragment {
         BusProvider.getInstance().post(new UserClickedEvent(bufferId, nick));
     }
 
+    @Subscribe
+    public void onNetworksAvailable(NetworksAvailableEvent event) {
+        if (event.networks != null) {
+            this.networks = event.networks;
+            if (bufferId != -1) {
+                updateUsers();
+            }
+        }
+    }
+
+    @Subscribe
+    public void onBufferOpened(BufferOpenedEvent event) {
+        if (event.bufferId != -1) {
+            this.bufferId = event.bufferId;
+            if (networks != null) {
+                updateUsers();
+            }
+        }
+    }
+
+    private void updateUsers() {
+        Buffer buffer = networks.getBufferById(bufferId);
+        if (buffer != null) {
+            adapter.setUsers(buffer.getUsers());
+        }
+    }
+
+    public static class ViewHolderChild {
+        public TextView nickView;
+        public ImageView userImage;
+    }
+
+    public static class ViewHolderGroup {
+        public TextView nameView;
+        public ImageView expanderView;
+        public LinearLayout groupHolderView;
+    }
+
     public class NicksAdapter extends BaseExpandableListAdapter implements Observer {
 
         private LayoutInflater inflater;
@@ -133,8 +175,8 @@ public class NickListFragment extends SherlockFragment {
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            //TODO: This will cause bugs when you have more than 99 children in a group
-            return groupPosition * 100 + childPosition;
+            return getCombinedChildId(groupPosition, childPosition);
+            //return groupPosition * 100 + childPosition;
         }
 
         @Override
@@ -143,21 +185,28 @@ public class NickListFragment extends SherlockFragment {
 
             ViewHolderChild holder = null;
 
+            int availablecolor = getResources().getColor(R.color.buffer_read_color);
+            int awaycolor = getResources().getColor(R.color.buffer_parted_color);
+
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.nicklist_item, null);
                 holder = new ViewHolderChild();
                 holder.nickView = (TextView) convertView.findViewById(R.id.nicklist_nick_view);
-                holder.userImage = (ImageView) convertView.findViewById(R.id.nicklist_nick_image);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             final IrcUser entry = getChild(groupPosition, childPosition);
-            holder.nickView.setText(entry.nick);
+            IrcMode mode = getGroup(groupPosition).first;
+
+            Spannable spannable = new SpannableString(((mode.icon.trim().equalsIgnoreCase("")) ? "" :mode.icon + " ") + entry.nick);
+            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(mode.colorResource)), 0, mode.icon.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            holder.nickView.setText(spannable);
+
             if (entry.away) {
-                holder.userImage.setImageResource(R.drawable.im_user_away);
+                holder.nickView.setTextColor(awaycolor);
             } else {
-                holder.userImage.setImageResource(R.drawable.im_user);
+                holder.nickView.setTextColor(availablecolor);
             }
 
             holder.nickView.setOnClickListener(new View.OnClickListener() {
@@ -203,41 +252,7 @@ public class NickListFragment extends SherlockFragment {
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded,
                                  View convertView, ViewGroup parent) {
-            ViewHolderGroup holder = null;
-
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.nicklist_group_item, null);
-                holder = new ViewHolderGroup();
-                holder.nameView = (TextView) convertView.findViewById(R.id.nicklist_group_name_view);
-                holder.imageView = (ImageView) convertView.findViewById(R.id.nicklist_group_image_view);
-                holder.expanderView = (ImageView) convertView.findViewById(R.id.nicklist_expander_image_view);
-                holder.groupHolderView = (LinearLayout) convertView.findViewById(R.id.nicklist_holder_view);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolderGroup) convertView.getTag();
-            }
-            Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
-            if (group.second.size() < 1) {
-                holder.nameView.setVisibility(View.GONE);
-                holder.imageView.setVisibility(View.GONE);
-                holder.expanderView.setVisibility(View.GONE);
-                holder.groupHolderView.setPadding(0, 0, 0, 0);
-
-
-            } else {
-                if (group.second.size() > 1) {
-                    holder.nameView.setText(group.second.size() + " " + group.first.modeName + group.first.pluralization);
-                } else {
-                    holder.nameView.setText(group.second.size() + " " + group.first.modeName);
-                }
-                holder.nameView.setVisibility(View.VISIBLE);
-                holder.imageView.setVisibility(View.VISIBLE);
-                holder.expanderView.setVisibility(View.VISIBLE);
-                holder.imageView.setImageResource(group.first.iconResource);
-                holder.groupHolderView.setPadding(5, 2, 2, 2);
-                holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition) ? EXPANDED_STATE : NOT_EXPANDED_STATE);
-            }
-            return convertView;
+            return inflater.inflate(R.layout.nicklist_group_item, null);
         }
 
         @Override
@@ -248,46 +263,6 @@ public class NickListFragment extends SherlockFragment {
         @Override
         public boolean isChildSelectable(int groupPosition, int childPosition) {
             return false;
-        }
-    }
-
-
-    public static class ViewHolderChild {
-        public TextView nickView;
-        public ImageView userImage;
-    }
-
-    public static class ViewHolderGroup {
-        public TextView nameView;
-        public ImageView imageView;
-        public ImageView expanderView;
-        public LinearLayout groupHolderView;
-    }
-
-    @Subscribe
-    public void onNetworksAvailable(NetworksAvailableEvent event) {
-        if (event.networks != null) {
-            this.networks = event.networks;
-            if (bufferId != -1) {
-                updateUsers();
-            }
-        }
-    }
-
-    @Subscribe
-    public void onBufferOpened(BufferOpenedEvent event) {
-        if (event.bufferId != -1) {
-            this.bufferId = event.bufferId;
-            if (networks != null) {
-                updateUsers();
-            }
-        }
-    }
-
-    private void updateUsers() {
-        Buffer buffer = networks.getBufferById(bufferId);
-        if (buffer != null) {
-            adapter.setUsers(buffer.getUsers());
         }
     }
 }

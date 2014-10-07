@@ -3,45 +3,21 @@
     style="@style/ActivatedItemBackground"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingLeft="20dp">
-
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:orientation="vertical">
-
-        <View
-            android:id="@+id/view1"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <ImageView
-            android:id="@+id/buffer_list_item_image"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_gravity="center"
-            android:layout_weight="5"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/irc_channel_active" />
-
-        <View
-            android:id="@+id/view2"
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-    </LinearLayout>
+    android:orientation="horizontal" >
 
     <TextView
         android:id="@+id/buffer_list_item_name"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_height="match_parent"
+        android:layout_gravity="left|fill_vertical"
+        android:layout_weight="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:duplicateParentState="false"
-        android:text="# quasseldroid"
-        android:textSize="21sp"
-        android:textStyle="bold" />
+        android:gravity="left|center_vertical"
+        android:text="#quasseldroid"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

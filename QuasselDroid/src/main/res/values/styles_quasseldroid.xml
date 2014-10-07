@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- File created by the Android Action Bar Style Generator
+
+     Copyright (C) 2011 The Android Open Source Project
+     Copyright (C) 2012 readyState Software Ltd
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+
+    <style name="Theme.Quasseldroid" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_quasseldroid</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Quasseldroid</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Quasseldroid</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Quasseldroid</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Quasseldroid</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_quasseldroid</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_quasseldroid</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Quasseldroid</item>
+
+                <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Quasseldroid.Widget</item>
+
+        <item name="android:actionOverflowButtonStyle">@style/QuasselDroid.OverFlow</item>
+
+    </style>
+
+    <style name="ActionBar.Solid.Quasseldroid" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@drawable/ab_solid_quasseldroid</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_quasseldroid</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_quasseldroid</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Quasseldroid</item>
+        <item name="android:icon">@drawable/icon_flat</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Quasseldroid" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_quasseldroid</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Quasseldroid</item>
+    </style>
+
+    <style name="PopupMenu.Quasseldroid.Light" parent="@android:style/Widget.Holo.ListPopupWindow">
+    </style>
+
+    <style name="PopupMenu.Quasseldroid" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+    </style>
+
+    <style name="DropDownListView.Quasseldroid" parent="@android:style/Widget.Holo.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_quasseldroid</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Quasseldroid" parent="@android:style/Widget.Holo.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_quasseldroid</item>
+    </style>
+
+    <style name="DropDownNav.Quasseldroid" parent="@android:style/Widget.Holo.Spinner">
+        <item name="android:background">@drawable/spinner_background_ab_quasseldroid</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_quasseldroid</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_quasseldroid</item>
+    </style>
+    
+    <style name="ProgressBar.Quasseldroid" parent="@android:style/Widget.Holo.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_quasseldroid</item>
+    </style>
+    
+    <style name="ActionButton.CloseMode.Quasseldroid" parent="@android:style/Widget.Holo.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_quasseldroid</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Quasseldroid.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Quasseldroid.Light</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
+    </style>
+
+    <style name="QuasselDroid.OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_overflow</item>
+    </style>
+
+</resources>

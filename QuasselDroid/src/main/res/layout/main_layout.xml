@@ -15,14 +15,14 @@
 
         <FrameLayout
             android:id="@+id/left_drawer"
-            android:layout_width="350dp"
+            android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="left"
             android:background="?android:attr/windowBackground"></FrameLayout>
 
         <FrameLayout
             android:id="@+id/right_drawer"
-            android:layout_width="350dp"
+            android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="right"
             android:background="?android:attr/windowBackground"></FrameLayout>

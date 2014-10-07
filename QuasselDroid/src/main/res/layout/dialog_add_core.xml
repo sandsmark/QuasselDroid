@@ -74,34 +74,6 @@
                     android:text="4242" />
             </TableRow>
         </TableLayout>
-
-        <LinearLayout
-            android:id="@+id/LinearLayout01"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="5dp">
-
-            <Button
-                android:id="@+id/cancel_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_weight="1"
-                android:minHeight="45dp"
-                android:minWidth="80dp"
-                android:text="Cancel" />
-
-            <Button
-                android:id="@+id/save_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_weight="1"
-                android:minHeight="45dp"
-                android:minWidth="80dp"
-                android:text="Save" />
-        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

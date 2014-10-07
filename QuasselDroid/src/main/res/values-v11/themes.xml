@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <style name="ThemeBase.Light" parent="Theme.Sherlock.Light.DarkActionBar"></style>
-
-    <style name="ThemeBase.Dark" parent="Theme.Sherlock"></style>
-
-</resources>

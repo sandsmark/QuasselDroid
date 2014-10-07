@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="290dip"
-    android:layout_height="fill_parent"
-    android:padding="5dip">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:padding="8dp"
         android:scrollbars="vertical">
 
         <TableLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:stretchColumns="1">
+            android:orientation="vertical">
 
             <TableRow
                 android:id="@+id/TableRow01"
@@ -23,23 +22,29 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Network" />
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="Network"
+                    android:layout_marginRight="4dp"
+                    android:gravity="left|fill_vertical" />
 
                 <Spinner
                     android:id="@+id/dialog_join_channel_network_spinner"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:layout_weight="1" />
             </TableRow>
 
             <TableRow>
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
                     android:singleLine="true"
-                    android:text="Channel" />
+                    android:text="Channel"
+                    android:layout_marginRight="4dp"
+                    android:gravity="left|fill_vertical" />
 
                 <EditText
                     android:id="@+id/dialog_join_channel_channel_name_field"
@@ -48,10 +53,10 @@
                     android:layout_column="1"
                     android:layout_weight="1"
                     android:inputType="textUri"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:layout_marginLeft="4dp"/>
             </TableRow>
         </TableLayout>
-
     </LinearLayout>
 
 </ScrollView>

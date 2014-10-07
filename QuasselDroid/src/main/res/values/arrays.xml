@@ -2,22 +2,18 @@
 <resources>
 
     <string-array name="entries_fontsize_preference">
-        <item>Small</item>
-        <item>Normal</item>
-        <item>Big</item>
+        <item>@string/fontsize_tiny</item>
+        <item>@string/fontsize_small</item>
+        <item>@string/fontsize_normal</item>
+        <item>@string/fontsize_big</item>
+        <item>@string/fontsize_huge</item>
     </string-array>
     <string-array name="entryvalues_fontsize_preference">
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-    </string-array>
-    <string-array name="entries_theme_preference">
-        <item>Light</item>
-        <item>Dark</item>
-    </string-array>
-    <string-array name="entryvalues_theme_preference">
-        <item>light</item>
-        <item>dark</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
     </string-array>
 
 </resources>

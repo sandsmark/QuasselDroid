@@ -23,6 +23,10 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,20 +39,16 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.NetworkCollection;
@@ -66,6 +66,7 @@ import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
+import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -76,15 +77,14 @@ import com.squareup.otto.Subscribe;
 
 import java.lang.reflect.Field;
 
-public class MainActivity extends SherlockFragmentActivity {
+public class MainActivity extends Activity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String BUFFER_ID_EXTRA = "bufferid";
     public static final String BUFFER_NAME_EXTRA = "buffername";
     private static final long BACK_THRESHOLD = 4000;
-    private static final String DRAWER_BUFFER_OPEN = "bufferdrawer";
-    private static final String DRAWER_NICKS_OPEN = "nicksdrawer";
+    private static final String OPENED_DRAWER = "opened_drawer";
 
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -98,6 +98,7 @@ public class MainActivity extends SherlockFragmentActivity {
     private Fragment chatFragment;
     private Fragment bufferFragment;
     private Fragment nickFragment;
+    private Fragment detailFragment;
 
     private int openedBuffer = -1;
     private boolean isDrawerOpen = false;
@@ -137,9 +138,9 @@ public class MainActivity extends SherlockFragmentActivity {
         if (savedInstanceState != null) {
             Log.d(TAG, "MainActivity has savedInstanceState");
             openedBuffer = savedInstanceState.getInt(BUFFER_ID_EXTRA);
-            isDrawerOpen = savedInstanceState.getBoolean(DRAWER_BUFFER_OPEN);
-            if (savedInstanceState.getBoolean(DRAWER_NICKS_OPEN)) drawer.openDrawer(Gravity.RIGHT);
-            FragmentManager manager = getSupportFragmentManager();
+            if (drawer != null) openDrawer(savedInstanceState.getInt(OPENED_DRAWER));
+
+            FragmentManager manager = getFragmentManager();
             bufferFragment = manager.findFragmentById(R.id.left_drawer);
             nickFragment = manager.findFragmentById(R.id.right_drawer);
             Fragment fragment = manager.findFragmentById(R.id.main_content_container);
@@ -161,27 +162,9 @@ public class MainActivity extends SherlockFragmentActivity {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View drawerView) {
-                Log.d(TAG, "drawer closed");
-                Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
-                if (drawerFragment != null) drawerFragment.setMenuVisibility(false);
-                if (chatFragment != null) {
-                    chatFragment.setMenuVisibility(true);
-                    chatFragment.setUserVisibleHint(true);
-                }
+                setTitleAndMenu();
+                invalidateOptionsMenu();
 
-                if (openedBuffer != -1) {
-                    NetworkCollection networks = NetworkCollection.getInstance();
-                    Buffer buffer = networks.getBufferById(openedBuffer);
-                    if (buffer != null) {
-                        if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
-                            getSupportActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
-                        else
-                            getSupportActionBar().setTitle(buffer.getInfo().name);
-                    }
-                } else {
-                    getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-                    invalidateOptionsMenu();
-                }
                 if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
                     BusProvider.getInstance().post(new UpdateReadBufferEvent());
                 }
@@ -189,18 +172,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
-                Fragment drawerFragment = getSupportFragmentManager().findFragmentById(drawerView.getId());
-                if (drawerFragment != null) drawerFragment.setMenuVisibility(true);
-                if (chatFragment != null) {
-                    chatFragment.setMenuVisibility(false);
-                    chatFragment.setUserVisibleHint(false);
-                }
-
-                if (bufferFragment != null) {
-                    hideKeyboard(bufferFragment.getView());
-                }
-
-                getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+                setTitleAndMenu();
                 invalidateOptionsMenu();
             }
         };
@@ -208,8 +180,8 @@ public class MainActivity extends SherlockFragmentActivity {
         // Set the drawer toggle as the DrawerListener
         drawer.setDrawerListener(drawerToggle);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
 
         sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
@@ -221,7 +193,7 @@ public class MainActivity extends SherlockFragmentActivity {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                             setActionBarSubtitle("");
                         } else {
-                            getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+                            getActionBar().setTitle(getResources().getString(R.string.app_name));
 
                         }
                     }
@@ -233,7 +205,7 @@ public class MainActivity extends SherlockFragmentActivity {
     }
 
     private void setActionBarSubtitle(String subtitle) {
-        getSupportActionBar().setSubtitle(subtitle);
+        getActionBar().setSubtitle(subtitle);
     }
 
     @Override
@@ -312,8 +284,7 @@ public class MainActivity extends SherlockFragmentActivity {
     protected void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "Saving instance state");
         outState.putInt(BUFFER_ID_EXTRA, openedBuffer);
-        outState.putBoolean(DRAWER_BUFFER_OPEN, drawer.isDrawerOpen(Gravity.LEFT));
-        outState.putBoolean(DRAWER_NICKS_OPEN, drawer.isDrawerOpen(Gravity.RIGHT));
+        outState.putInt(OPENED_DRAWER, getOpenDrawers());
         super.onSaveInstanceState(outState);
     }
 
@@ -325,16 +296,6 @@ public class MainActivity extends SherlockFragmentActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastBackPressed < BACK_THRESHOLD) super.onBackPressed();
-        else {
-            Toast.makeText(this, getString(R.string.pressed_back_toast), Toast.LENGTH_SHORT).show();
-            lastBackPressed = currentTime;
-        }
-    }
-
-    @Override
     public boolean onSearchRequested() {
         BusProvider.getInstance().post(new CompleteNickEvent());
         return false; //Activity ate the request
@@ -342,7 +303,7 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.base_menu, menu);
+        getMenuInflater().inflate(R.menu.base_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -378,12 +339,13 @@ public class MainActivity extends SherlockFragmentActivity {
 
     @Subscribe
     public void onInitProgressed(InitProgressEvent event) {
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = getFragmentManager();
         Fragment currentFragment = manager.findFragmentById(R.id.main_content_container);
         if (event.done) {
             if (currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
                 chatFragment = ChatFragment.newInstance();
                 nickFragment = NickListFragment.newInstance();
+                detailFragment = DetailFragment.newInstance();
                 bufferFragment = BufferFragment.newInstance();
 
                 FragmentTransaction trans = manager.beginTransaction();
@@ -443,7 +405,7 @@ public class MainActivity extends SherlockFragmentActivity {
     }
 
     private void showInitProgress() {
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = getFragmentManager();
         FragmentTransaction fragmentTransaction = manager.beginTransaction();
         ConnectingFragment fragment = ConnectingFragment.newInstance();
         fragmentTransaction.replace(R.id.main_content_container, fragment, "init");
@@ -461,6 +423,24 @@ public class MainActivity extends SherlockFragmentActivity {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
                 drawer.closeDrawers();
+
+                FragmentManager manager = getFragmentManager();
+                FragmentTransaction trans = manager.beginTransaction();
+                NetworkCollection networks = NetworkCollection.getInstance();
+
+                Fragment current = manager.findFragmentById(R.id.right_drawer);
+
+                if (current != null) {
+                    if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
+                        trans.replace(R.id.right_drawer, detailFragment);
+                    } else {
+                        trans.replace(R.id.right_drawer, nickFragment);
+                    }
+                }
+                trans.commit();
+
+                setTitleAndMenu();
+                invalidateOptionsMenu();
             }
         }
     }
@@ -487,4 +467,78 @@ public class MainActivity extends SherlockFragmentActivity {
         public void onServiceDisconnected(ComponentName cn) {
         }
     };
+
+    private void setTitleAndMenu() {
+        int side = getOpenDrawers();
+        if (side == 0) {
+            if (openedBuffer != -1) {
+                NetworkCollection networks = NetworkCollection.getInstance();
+                Buffer buffer = networks.getBufferById(openedBuffer);
+                if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
+                    getActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                else
+                    getActionBar().setTitle(buffer.getInfo().name);
+            } else {
+                getActionBar().setTitle(getResources().getString(R.string.app_name));
+            }
+            if (chatFragment != null) chatFragment.setUserVisibleHint(true);
+            setMenuVisible(chatFragment);
+        } else if (side == 1) {
+            setMenuVisible(bufferFragment);
+            if (chatFragment != null) chatFragment.setUserVisibleHint(false);
+            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+        } else if (side == 2) {
+            setMenuVisible(nickFragment);
+            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+        } else {
+            setMenuVisible(null);
+            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+        }
+    }
+
+    private int getOpenDrawers() {
+        if (drawer == null)
+            return 0;
+        int openDrawers = 0;
+        if (drawer.isDrawerOpen(Gravity.LEFT)) openDrawers += 1;
+        if (drawer.isDrawerOpen(Gravity.RIGHT)) openDrawers += 2;
+        return openDrawers;
+    }
+    private void closeDrawer(int side) {
+        switch (side) {
+            case 1:
+                drawer.closeDrawer(Gravity.LEFT);
+                break;
+            case 2:
+                drawer.closeDrawer(Gravity.RIGHT);
+                break;
+            case 3:
+                drawer.closeDrawer(Gravity.LEFT);
+                drawer.closeDrawer(Gravity.RIGHT);
+                break;
+        }
+    }
+    private void openDrawer(int side) {
+        switch (side) {
+            case 1:
+            case 3:
+                drawer.openDrawer(Gravity.LEFT);
+                closeDrawer(2);
+                break;
+            case 2:
+                drawer.openDrawer(Gravity.RIGHT);
+                closeDrawer(1);
+                break;
+        }
+    }
+
+    private void setMenuVisible(Fragment fragment) {
+        if (chatFragment != null) chatFragment.setMenuVisibility(false);
+        if (bufferFragment != null) bufferFragment.setMenuVisibility(false);
+        if (nickFragment != null) nickFragment.setMenuVisibility(false);
+        if (fragment != null) fragment.setMenuVisibility(true);
+    }
 }

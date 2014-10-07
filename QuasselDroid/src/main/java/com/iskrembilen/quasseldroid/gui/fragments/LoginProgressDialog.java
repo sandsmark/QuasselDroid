@@ -2,18 +2,14 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-import com.actionbarsherlock.app.SherlockDialogFragment;
+import com.iskrembilen.quasseldroid.R;
 
-public class LoginProgressDialog extends SherlockDialogFragment {
-    public interface Callbacks {
-        public void onCanceled();
-
-    }
-
+public class LoginProgressDialog extends DialogFragment {
     private Callbacks callbacks;
 
     public static LoginProgressDialog newInstance() {
@@ -32,8 +28,8 @@ public class LoginProgressDialog extends SherlockDialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        ProgressDialog prog = new ProgressDialog(getSherlockActivity());
-        prog.setMessage("Connecting...");
+        ProgressDialog prog = new ProgressDialog(getActivity());
+        prog.setMessage(getResources().getString(R.string.notification_connecting));
         setCancelable(true);
         return prog;
     }
@@ -42,5 +38,10 @@ public class LoginProgressDialog extends SherlockDialogFragment {
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
         callbacks.onCanceled();
+    }
+
+    public interface Callbacks {
+        public void onCanceled();
+
     }
 }

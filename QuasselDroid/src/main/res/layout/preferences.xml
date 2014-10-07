@@ -32,22 +32,13 @@
     <PreferenceCategory android:title="Quassel">
 
         <ListPreference
-            android:defaultValue="20"
+            android:defaultValue="14"
             android:dialogTitle="Choose fontsize for the bufferlist"
             android:entries="@array/entries_fontsize_preference"
             android:entryValues="@array/entryvalues_fontsize_preference"
             android:key="@string/preference_fontsize_channel_list"
             android:summary="The fontsize of the bufferlist"
             android:title="Bufferlist fontsize" />
-
-        <ListPreference
-            android:defaultValue="light"
-            android:dialogTitle="Choose application theme"
-            android:entries="@array/entries_theme_preference"
-            android:entryValues="@array/entryvalues_theme_preference"
-            android:key="@string/preference_theme"
-            android:summary="The application theme"
-            android:title="Theme" />
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -91,7 +82,7 @@ classified as metered by the user."
             android:title="Reconnect on metered wifi connection"
             android:dependency="@string/preference_reconnect_on_wifi_only"
             />
-        <!--<CheckBoxPreference
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_reconnect_periodically"
             android:summary="Normally, Quasseldroid reconnects, when the lost network connection is
@@ -108,7 +99,7 @@ this option, Quasseldroid tries to reconnect periodically in an increasing inter
             android:summary="How often to retry"
             android:title="Reconnect counter"
             android:dependency="@string/preference_reconnect_periodically"
-            />-->
+            />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Notifications">

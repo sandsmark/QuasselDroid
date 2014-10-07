@@ -1,17 +1,28 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannedString;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -27,10 +38,12 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import com.squareup.otto.Subscribe;
+
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
@@ -55,19 +68,15 @@ import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
+import com.iskrembilen.quasseldroid.util.SenderColorHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Subscribe;
 
-import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
+public class ChatFragment extends Fragment {
 
-public class ChatFragment extends SherlockFragment {
-
-    private static final String TAG = ChatFragment.class.getSimpleName();
     public static final String BUFFER_ID = "bufferid";
+    private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String BUFFER_NAME = "buffername";
-
+    SharedPreferences preferences;
     private BacklogAdapter adapter;
     private ListView backlogList;
     private EditText inputField;
@@ -77,8 +86,6 @@ public class ChatFragment extends SherlockFragment {
     private int dynamicBacklogAmount;
     private NickCompletionHelper nickCompletionHelper;
     private int bufferId = -1;
-
-    SharedPreferences preferences;
     private boolean connected;
     private NetworkCollection networks;
 
@@ -91,8 +98,8 @@ public class ChatFragment extends SherlockFragment {
         Log.d(TAG, "Creating fragment");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        adapter = new BacklogAdapter(getSherlockActivity(), null);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getSherlockActivity());
+        adapter = new BacklogAdapter(getActivity(), null);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         if (savedInstanceState != null && savedInstanceState.containsKey(BUFFER_ID)) {
             bufferId = savedInstanceState.getInt(BUFFER_ID);
         }
@@ -144,7 +151,7 @@ public class ChatFragment extends SherlockFragment {
                         ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)))) {
                     String inputText = inputField.getText().toString();
 
-                    if (!"".equals(inputText)) {
+                    if (!"" .equals(inputText)) {
                         BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, inputText));
                         InputHistoryHelper.addHistoryEntry(inputText);
                         inputField.setText("");
@@ -172,14 +179,7 @@ public class ChatFragment extends SherlockFragment {
                 }
                 if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.getAction() == KeyEvent.ACTION_DOWN) {
                     EditText text = (EditText) v;
-                    if (InputHistoryHelper.isViewingHistory()) {
-                        // Currently viewing history, so progress back down towards "entry zero"
-                        text.setText(InputHistoryHelper.getPreviousHistoryEntry());
-                    } else if (!text.getText().toString().equals("")) {
-                        // Not viewing history, so push the current input text into the history and clear the input
-                        InputHistoryHelper.addHistoryEntry(text.getText().toString());
-                        text.setText("");
-                    }
+                    text.setText(InputHistoryHelper.getPreviousHistoryEntry());
                     text.setSelection(text.getText().length());
                     return true;
                 }
@@ -201,7 +201,7 @@ public class ChatFragment extends SherlockFragment {
         switch (item.getItemId()) {
             case R.id.menu_hide_events:
                 if (adapter.buffer == null)
-                    Toast.makeText(getSherlockActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
                 else showHideEventsDialog();
                 return true;
         }
@@ -257,15 +257,13 @@ public class ChatFragment extends SherlockFragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        if(adapter != null && adapter.buffer != null) {
-            adapter.buffer.setDisplayed(isVisibleToUser);
-        }
         Log.d(TAG, "ChatFragment visible hint: " + isVisibleToUser);
     }
 
     private void updateRead() {
         Log.d(TAG, "Updating buffer read, chat is visible: " + getUserVisibleHint());
         if (adapter.buffer != null) {
+            adapter.buffer.setDisplayed(false);
 
             //Don't save position if list is at bottom
             if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
@@ -299,7 +297,7 @@ public class ChatFragment extends SherlockFragment {
                 nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                 autoCompleteButton.setEnabled(true);
                 inputField.setEnabled(true);
-                if(getUserVisibleHint() == true) buffer.setDisplayed(true);
+                buffer.setDisplayed(true);
                 BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
                 //Move list to correct position
@@ -314,6 +312,67 @@ public class ChatFragment extends SherlockFragment {
         }
     }
 
+    private void onNickComplete() {
+        if (nickCompletionHelper != null) {
+            nickCompletionHelper.completeNick(inputField);
+        }
+    }
+
+    @Subscribe
+    public void onNetworksAvailable(NetworksAvailableEvent event) {
+        Log.d(TAG, "onNetworksAvailable event");
+        if (event.networks != null) {
+            this.networks = event.networks;
+            if (bufferId != -1) {
+                setBuffer(bufferId);
+            }
+        }
+        Log.d(TAG, "onNetworksAvailable done");
+    }
+
+    @Subscribe
+    public void onBufferOpened(BufferOpenedEvent event) {
+        Log.d(TAG, "onBufferOpened event");
+        this.bufferId = event.bufferId;
+        if (event.bufferId != -1) {
+            setBuffer(bufferId);
+        } else {
+            resetFragment();
+        }
+        Log.d(TAG, "onBufferOpened done");
+    }
+
+    @Subscribe
+    public void onUpdateBufferRead(UpdateReadBufferEvent event) {
+        Log.d(TAG, "onUpdateBufferRead event");
+        updateRead();
+    }
+
+    @Subscribe
+    public void onCompleteNick(CompleteNickEvent event) {
+        onNickComplete();
+    }
+
+    private void resetFragment() {
+        adapter.clearBuffer();
+        topicView.setText("");
+        topicViewFull.setText("");
+        autoCompleteButton.setEnabled(false);
+        inputField.setText("");
+        inputField.setEnabled(false);
+        nickCompletionHelper = null;
+    }
+
+    public static class ViewHolder {
+        public TextView timeView;
+        public TextView msgView;
+        public TextView separatorView;
+        public LinearLayout item_layout;
+        public View parent;
+
+        public int messageID;
+    }
+
     public class BacklogAdapter extends BaseAdapter implements Observer {
 
         //private ArrayList<IrcMessage> backlog;
@@ -322,7 +381,7 @@ public class ChatFragment extends SherlockFragment {
 
 
         public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
-            inflater = getLayoutInflater(null);
+            inflater = LayoutInflater.from(context);
 
         }
 
@@ -334,7 +393,7 @@ public class ChatFragment extends SherlockFragment {
             backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
         }
 
-        public void setTopic(){
+        public void setTopic() {
             String topic = "";
             if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
                 topic = buffer.getInfo().name;
@@ -346,7 +405,7 @@ public class ChatFragment extends SherlockFragment {
                         + network.getCountUsers() + " | "
                         + Helper.formatLatency(network.getLatency(), getResources());
             } else {
-                topic = buffer.getInfo().name + ": " + buffer.getTopic();
+                topic = buffer.getTopic();
             }
             topicView.setText(topic);
             topicViewFull.setText(topic);
@@ -377,9 +436,9 @@ public class ChatFragment extends SherlockFragment {
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.backlog_item, null);
                 holder = new ViewHolder();
+                holder.parent = convertView;
                 holder.timeView = (TextView) convertView.findViewById(R.id.backlog_time_view);
                 holder.timeView.setTextColor(ThemeUtil.chatTimestampColor);
-                holder.nickView = (TextView) convertView.findViewById(R.id.backlog_nick_view);
                 holder.msgView = (TextView) convertView.findViewById(R.id.backlog_msg_view);
                 holder.separatorView = (TextView) convertView.findViewById(R.id.backlog_list_separator);
                 holder.item_layout = (LinearLayout) convertView.findViewById(R.id.backlog_item_linearlayout);
@@ -395,70 +454,99 @@ public class ChatFragment extends SherlockFragment {
                 holder.separatorView.getLayoutParams().height = 0;
             }
 
+            int fontsize = Integer.valueOf(preferences.getString(getString(R.string.preference_fontsize_channel_list), "14"));
+            holder.msgView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontsize);
+            holder.timeView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontsize);
+
             IrcMessage entry = this.getItem(position);
             holder.messageID = entry.messageId;
             holder.timeView.setText(entry.getTime());
 
+            if (!preferences.getBoolean(getString(R.string.preference_colored_text), false)) {
+                entry.content = new SpannableString(entry.content.toString());
+            }
+
+            Spannable spannable;
+            String rawText;
+
             switch (entry.type) {
                 case Action:
-                    holder.nickView.setText("-*-");
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatActionColor);
-                    holder.msgView.setText(entry.getNick() + " " + entry.content);
+                    holder.msgView.setTypeface(Typeface.DEFAULT);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+
+
+                    int color;
+                    if (entry.isSelf()) {
+                        color = ThemeUtil.chatSelfColor;
+                    } else {
+                        color = entry.senderColor;
+                    }
+
+                    Spannable nickSpan = new SpannableString(entry.getNick());
+                    entry.content.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.content.length(), 0);
+                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nickSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", entry.content));
                     break;
                 case Error:
-                    holder.nickView.setText("*");
-                    holder.msgView.setTextColor(ThemeUtil.chatErrorColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatErrorColor);
                     holder.msgView.setText(entry.content);
+                    holder.msgView.setTextColor(ThemeUtil.chatErrorColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Server:
                 case Info:
-                    holder.nickView.setText("*");
-                    holder.msgView.setTextColor(ThemeUtil.chatServerColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatServerColor);
                     holder.msgView.setText(entry.content);
+                    holder.msgView.setTextColor(ThemeUtil.chatServerColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Topic:
-                    holder.nickView.setText("*");
-                    holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatTopicColor);
                     holder.msgView.setText(entry.content);
+                    holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Notice:
-                    holder.nickView.setText("[" + entry.getNick() + "]");
-                    holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNoticeColor);
                     holder.msgView.setText(entry.content);
+                    holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Join:
-                    holder.nickView.setText("-->");
-                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has joined " + entry.content);
+                    spannable = new SpannableString(String.format("%s joined", entry.getNick()));
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatJoinColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Part:
-                    holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has left (" + entry.content + ")");
+                    spannable = new SpannableString(String.format("%s left: ", entry.getNick()));
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatPartColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatPartColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Quit:
-                    holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") has quit (" + entry.content + ")");
+                    spannable = new SpannableString(String.format("%s quit: ", entry.getNick()));
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatQuitColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kill:
-                    holder.nickView.setText("<--");
-                    holder.msgView.setText(entry.getNick() + " (" + entry.getHostmask() + ") was killed (" + entry.content + ")");
+                    spannable = new SpannableString(String.format("%s was killed: ", entry.getNick()));
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatKillColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatKillColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kick:
-                    holder.nickView.setText("<-*");
-                    String nick     = "",
-                           reason   = "";
+                    String nick = "";
+                    String reason = "";
+
                     int nickEnd = entry.content.toString().indexOf(" ");
                     if (nickEnd >= 0) {
                         nick = entry.content.toString().substring(0, nickEnd);
@@ -466,55 +554,93 @@ public class ChatFragment extends SherlockFragment {
                     } else {
                         nick = entry.content.toString();
                     }
-                    holder.msgView.setText(entry.getNick() + " has kicked " + nick + " from " + entry.bufferInfo.name + reason);
+
+                    rawText = String.format("%s has kicked %s from %s: %s", entry.getNick(), nick, entry.bufferInfo.name, reason);
+
+                    int color_nick;
+                    if (nick.equalsIgnoreCase(entry.getSender())) {
+                        color_nick = entry.senderColor;
+                    } else {
+                        color_nick = SenderColorHelper.getSenderColor(nick);
+                    }
+
+                    spannable = new SpannableString(rawText);
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(color_nick), rawText.indexOf(nick), rawText.indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatKickColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatKickColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Mode:
-                    holder.nickView.setText("***");
-                    holder.msgView.setText("Mode " + entry.content.toString() + " by " + entry.getNick());
+                    int color_affected_nick;
+                    String affected_nick = entry.content.toString().substring(entry.content.toString().lastIndexOf(" "), entry.content.length()).trim();
+                    rawText = String.format(String.format("Mode %s by %s", entry.content.toString(), entry.getNick()));
+                    spannable = new SpannableString(rawText);
+
+                    if (affected_nick.equalsIgnoreCase(entry.getSender())) {
+                        color_affected_nick = entry.senderColor;
+                    } else {
+                        color_affected_nick = SenderColorHelper.getSenderColor(affected_nick);
+                    }
+
+                    spannable.setSpan(new ForegroundColorSpan(color_affected_nick), rawText.indexOf(affected_nick), rawText.indexOf(affected_nick) + affected_nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+
+                    holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatModeColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatModeColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Nick:
-                    holder.nickView.setText("<->");
-                    if(entry.getNick().equals(entry.content.toString())){
-                        holder.msgView.setText("You are now known as " + entry.content.toString());
-                    }else{
-                        holder.msgView.setText(entry.getNick() + " is now known as " + entry.content.toString());
+                    if (entry.getNick().equals(entry.content.toString())) {
+                        rawText = String.format("You changed your nick to %s", entry.content.toString());
+                        spannable = new SpannableString(rawText);
+                        holder.msgView.setText(spannable);
+                    } else {
+                        rawText = String.format("%s is now known as %s", entry.getNick(), entry.content.toString());
+                        spannable = new SpannableString(rawText);
+                        spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+
+                        int color_new = SenderColorHelper.getSenderColor(entry.content.toString());
+
+                        spannable.setSpan(new ForegroundColorSpan(color_new), rawText.indexOf(entry.content.toString()), rawText.indexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        holder.msgView.setText(spannable);
                     }
                     holder.msgView.setTextColor(ThemeUtil.chatNickColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNickColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitJoin:
-                    holder.nickView.setText("=>");
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
                     holder.msgView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitQuit:
-                    holder.nickView.setText("<=");
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
                     holder.msgView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
+                    nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case DayChange:
-                    holder.nickView.setText("-");
-                    holder.msgView.setText("{Day changed to " + entry.content.toString() + "}");
+                    holder.msgView.setText(Html.fromHtml(String.format("<i> Day changed to %s</i>", entry.content.toString())));
                     holder.msgView.setTextColor(ThemeUtil.chatDayChangeColor);
-                    holder.nickView.setTextColor(ThemeUtil.chatDayChangeColor);
+                    holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                 case Plain:
                 default:
                     if (entry.isSelf()) {
-                        holder.nickView.setTextColor(ThemeUtil.chatSelfColor);
+                        color = ThemeUtil.chatSelfColor;
                     } else {
-                        holder.nickView.setTextColor(entry.senderColor);
+                        color = entry.senderColor;
                     }
                     holder.msgView.setTextColor(ThemeUtil.chatPlainColor);
                     holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    holder.nickView.setText("<" + entry.getNick() + ">");
-                    holder.msgView.setText(entry.content);
+                    nickSpan = new SpannableString(entry.getNick());
+                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText((SpannedString) TextUtils.concat(nickSpan, " ", entry.content));
+                    holder.parent.setBackgroundColor(Color.TRANSPARENT);
                     break;
             }
             if (entry.isHighlighted()) {
@@ -608,22 +734,6 @@ public class ChatFragment extends SherlockFragment {
         }
     }
 
-    private void onNickComplete() {
-        if (nickCompletionHelper != null) {
-            nickCompletionHelper.completeNick(inputField);
-        }
-    }
-
-    public static class ViewHolder {
-        public TextView timeView;
-        public TextView nickView;
-        public TextView msgView;
-        public TextView separatorView;
-        public LinearLayout item_layout;
-
-        public int messageID;
-    }
-
     private class BacklogScrollListener implements OnScrollListener {
 
         private int visibleThreshold;
@@ -638,19 +748,6 @@ public class ChatFragment extends SherlockFragment {
             if (adapter.buffer != null && !adapter.buffer.hasPendingBacklog() && (firstVisibleItem <= visibleThreshold)) {
                 adapter.getMoreBacklog();
             }
-
-            // This nasty little hack is required for emulating ListView.TRANSCRIPT_MODE_NORMAL functionality on GB
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
-                if (visibleItemCount == 0 || visibleItemCount == totalItemCount || firstVisibleItem + visibleItemCount == totalItemCount) {
-                    if (view.getTranscriptMode() != AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL) {
-                        view.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-                    }
-                } else {
-                    if (view.getTranscriptMode() != AbsListView.TRANSCRIPT_MODE_DISABLED) {
-                        view.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-                    }
-                }
-            }
         }
 
         @Override
@@ -658,50 +755,4 @@ public class ChatFragment extends SherlockFragment {
             // Not interesting for us to use
         }
     }
-
-    @Subscribe
-    public void onNetworksAvailable(NetworksAvailableEvent event) {
-        Log.d(TAG, "onNetworksAvailable event");
-        if (event.networks != null) {
-            this.networks = event.networks;
-            if (bufferId != -1) {
-                setBuffer(bufferId);
-            }
-        }
-        Log.d(TAG, "onNetworksAvailable done");
-    }
-
-    @Subscribe
-    public void onBufferOpened(BufferOpenedEvent event) {
-        Log.d(TAG, "onBufferOpened event");
-        this.bufferId = event.bufferId;
-        if (event.bufferId != -1) {
-            setBuffer(bufferId);
-        } else {
-            resetFragment();
-        }
-        Log.d(TAG, "onBufferOpened done");
-    }
-
-    @Subscribe
-    public void onUpdateBufferRead(UpdateReadBufferEvent event) {
-        Log.d(TAG, "onUpdateBufferRead event");
-        updateRead();
-    }
-
-    @Subscribe
-    public void onCompleteNick(CompleteNickEvent event) {
-        onNickComplete();
-    }
-
-    private void resetFragment() {
-        adapter.clearBuffer();
-        topicView.setText("");
-        topicViewFull.setText("");
-        autoCompleteButton.setEnabled(false);
-        inputField.setText("");
-        inputField.setEnabled(false);
-        nickCompletionHelper = null;
-    }
 }
-

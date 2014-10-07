@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/ActivatedItemBackground"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="36dp">
+    android:orientation="horizontal"
+    android:paddingLeft="36dp"
+    android:background="@drawable/bg_list_item" >
 
     <TextView
         android:id="@+id/buffer_list_item_name"
         style="@style/ListChoiceBackgroundIndicator"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dip"
+        android:layout_height="match_parent"
+        android:layout_gravity="left|fill_vertical"
+        android:layout_weight="1"
+        android:padding="12dp"
         android:duplicateParentState="false"
-        android:textSize="21sp"
-        android:textStyle="bold" />
+        android:gravity="left|center_vertical"
+        android:text="#quasseldroid"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 </LinearLayout>

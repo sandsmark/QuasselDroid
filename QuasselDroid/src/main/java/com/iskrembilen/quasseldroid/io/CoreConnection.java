@@ -1036,6 +1036,9 @@ public final class CoreConnection {
                                     user.awayMessage = (String) map.get("awayMessage").getData();
                                     user.ircOperator = (String) map.get("ircOperator").getData();
                                     user.nick = (String) map.get("nick").getData();
+                                    if (map.containsKey("realName")) {
+                                        user.realName = (String) map.get("realName").getData();
+                                    }
                                     user.channels = (List<String>) map.get("channels").getData();
 
                                     ircUsers.add(user);
