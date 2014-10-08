@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/chat_fragment"
-        android:name="de.kuschku.quasseldroid.gui.fragments.ChatFragment"
+        android:name="com.iskrembilen.quasseldroid.gui.fragments.ChatFragment"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         tools:layout="@layout/chat_fragment_layout" />

@@ -26,7 +26,8 @@
                     android:id="@+id/TextView01"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Name" />
+                    android:text="Name"
+                    android:gravity="right" />
 
                 <EditText
                     android:id="@+id/dialog_name_field"
@@ -42,7 +43,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
-                    android:text="Server address" />
+                    android:text="Server address"
+                    android:gravity="right" />
 
                 <EditText
                     android:id="@+id/dialog_address_field"
@@ -61,7 +63,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0"
                     android:singleLine="true"
-                    android:text="Server port" />
+                    android:text="Server port"
+                    android:gravity="right" />
 
                 <EditText
                     android:id="@+id/dialog_port_field"

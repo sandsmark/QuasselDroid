@@ -536,6 +536,7 @@ public class CoreConnService extends Service {
                         user.ircOperator = bundle.getString("ircOperator");
                         user.channels = (ArrayList<String>) bundle.getSerializable("channels");
                         user.notifyObservers();
+                        user.notify(R.id.NEW_USER_INFO);
                     } else {
                         Log.e(TAG, "User not found for new user info");
                         //TODO: why is it not found...
@@ -751,7 +752,8 @@ public class CoreConnService extends Service {
                     if (networkRealName != null) {
                         IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
                         if (userRealName != null) {
-                            userRealName.realName = bundle.getString("realname");
+                            userRealName.realName = bundle.getString("realName");
+                            userRealName.notify(R.id.SET_USER_REALNAME);
                         }
                     }
                     break;
@@ -762,6 +764,18 @@ public class CoreConnService extends Service {
                         IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
                         if (userAway != null) {
                             userAway.away = bundle.getBoolean("away");
+                            userAway.notify(R.id.SET_USER_AWAY);
+                        }
+                    }
+                    break;
+                case R.id.SET_USER_AWAY_MESSAGE:
+                    bundle = (Bundle) msg.obj;
+                    Network networkAwayMessage = networks.getNetworkById(msg.arg1);
+                    if (networkAwayMessage != null) {
+                        IrcUser userAwayMessage = networkAwayMessage.getUserByNick(bundle.getString("nick"));
+                        if (userAwayMessage != null) {
+                            userAwayMessage.awayMessage = bundle.getString("awayMessage");
+                            userAwayMessage.notify(R.id.SET_USER_AWAY_MESSAGE);
                         }
                     }
                     break;

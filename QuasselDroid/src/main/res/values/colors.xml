@@ -2,8 +2,8 @@
 <resources>
     <color name="logo_text_color">#0686fd</color>
     
-    <color name="primary_text">#555555</color>
-    <color name="secondary_text">#333333</color>
+    <color name="primary_text">#333333</color>
+    <color name="secondary_text">#555555</color>
 
     <color name="buffer_highlight_color">#d4a12a</color>
     <color name="buffer_unread_color">#3862d6</color>

@@ -1,22 +1,38 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannedString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.util.NetsplitHelper;
+import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
+import com.iskrembilen.quasseldroid.util.SenderColorHelper;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -41,6 +57,11 @@ public class NickListFragment extends Fragment {
     private int bufferId = -1;
     private NetworkCollection networks;
 
+    private TextView name;
+    private TextView topic;
+
+    private BacklogObserver observer = new BacklogObserver();
+
     public static NickListFragment newInstance() {
         return new NickListFragment();
     }
@@ -59,6 +80,8 @@ public class NickListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
         list = (ExpandableListView) root.findViewById(R.id.userList);
+        name = (TextView) root.findViewById(R.id.channel_name);
+        topic = (TextView) root.findViewById(R.id.channel_topic);
         return root;
     }
 
@@ -66,7 +89,6 @@ public class NickListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         list.setAdapter(adapter);
-
     }
 
     @Override
@@ -97,7 +119,9 @@ public class NickListFragment extends Fragment {
         if (event.networks != null) {
             this.networks = event.networks;
             if (bufferId != -1) {
+                observer.setBuffer(networks.getBufferById(bufferId));
                 updateUsers();
+                updateDetails();
             }
         }
     }
@@ -107,8 +131,19 @@ public class NickListFragment extends Fragment {
         if (event.bufferId != -1) {
             this.bufferId = event.bufferId;
             if (networks != null) {
+                observer.setBuffer(networks.getBufferById(bufferId));
                 updateUsers();
+                updateDetails();
             }
+        }
+    }
+
+    private void updateDetails() {
+        Buffer buffer = networks.getBufferById(bufferId);
+        if (buffer != null) {
+            name.setText(buffer.getInfo().name);
+            topic.setText(buffer.getTopic());
+            observer.setBuffer(buffer);
         }
     }
 
@@ -263,6 +298,29 @@ public class NickListFragment extends Fragment {
         @Override
         public boolean isChildSelectable(int groupPosition, int childPosition) {
             return false;
+        }
+    }
+
+    public class BacklogObserver implements Observer {
+        private Buffer buffer;
+
+        public void setBuffer(Buffer buffer) {
+            if (this.buffer!=null) this.buffer.deleteObserver(this);
+            this.buffer = buffer;
+            if (this.buffer!=null) this.buffer.addObserver(this);
+        }
+
+        @Override
+        public void update(Observable observable, Object data) {
+            if (data == null) {
+                return;
+            }
+            switch ((Integer) data) {
+                case R.id.BUFFERUPDATE_TOPICCHANGED:
+                    updateDetails();
+                    break;
+                default:
+            }
         }
     }
 }

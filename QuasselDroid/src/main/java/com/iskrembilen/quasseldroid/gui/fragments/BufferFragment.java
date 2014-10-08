@@ -147,6 +147,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 inflater.inflate(R.menu.buffer_contextual_menu_networks, menu);
 
                 bufferList.setItemChecked(actionModeData.index, true);
+                actionModeData.listItem.setActivated(true);
 
                 return true;
             }
@@ -174,7 +175,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                //				actionModeData.listItem.setActivated(false);
+                actionModeData.listItem.setActivated(false);
                 actionModeData.actionMode = null;
                 bufferList.setItemChecked(actionModeData.index, false);
             }

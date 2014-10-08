@@ -22,6 +22,7 @@
     <item name="USER_QUIT" type="id"></item>
     <item name="USER_JOINED" type="id"></item>
     <item name="USER_CHANGEDNICK" type="id"></item>
+    <item name="USER_CHANGED" type="id"></item>
     <item name="USER_ADD_MODE" type="id"></item>
     <item name="USER_REMOVE_MODE" type="id"></item>
     <item name="CHANNEL_TOPIC_CHANGED" type="id"></item>
@@ -64,5 +65,5 @@
     <item name="SET_USER_REALNAME" type="id"></item>
     <item name="SET_USER_SERVER" type="id"></item>
     <item name="SET_USER_AWAY" type="id"></item>
-
+    <item name="SET_USER_AWAY_MESSAGE" type="id"></item>
 </resources>

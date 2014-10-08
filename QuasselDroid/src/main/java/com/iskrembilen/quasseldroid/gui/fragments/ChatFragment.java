@@ -37,6 +37,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.squareup.otto.Subscribe;
 
@@ -80,8 +81,6 @@ public class ChatFragment extends Fragment {
     private BacklogAdapter adapter;
     private ListView backlogList;
     private EditText inputField;
-    private TextView topicView;
-    private TextView topicViewFull;
     private ImageButton autoCompleteButton;
     private int dynamicBacklogAmount;
     private NickCompletionHelper nickCompletionHelper;
@@ -112,23 +111,6 @@ public class ChatFragment extends Fragment {
         View root = inflater.inflate(R.layout.chat_fragment_layout, container, false);
         backlogList = (ListView) root.findViewById(R.id.chat_backlog_list_view);
         inputField = (EditText) root.findViewById(R.id.chat_input_view);
-        topicView = (TextView) root.findViewById(R.id.chat_topic_view);
-        topicViewFull = (TextView) root.findViewById(R.id.chat_topic_view_full);
-        OnClickListener topicListener = new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (topicView.isShown()) {
-                    topicView.setVisibility(View.GONE);
-                    topicViewFull.setVisibility(View.VISIBLE);
-                } else {
-                    topicViewFull.setVisibility(View.GONE);
-                    topicView.setVisibility(View.VISIBLE);
-                }
-            }
-        };
-        topicView.setOnClickListener(topicListener);
-        topicViewFull.setOnClickListener(topicListener);
         autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
 
         backlogList.setAdapter(adapter);
@@ -355,8 +337,6 @@ public class ChatFragment extends Fragment {
 
     private void resetFragment() {
         adapter.clearBuffer();
-        topicView.setText("");
-        topicViewFull.setText("");
         autoCompleteButton.setEnabled(false);
         inputField.setText("");
         inputField.setEnabled(false);
@@ -388,29 +368,9 @@ public class ChatFragment extends Fragment {
         public void setBuffer(Buffer buffer, NetworkCollection networks) {
             this.buffer = buffer;
             buffer.addObserver(this);
-            setTopic();
             notifyDataSetChanged();
             backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
         }
-
-        public void setTopic() {
-            String topic = "";
-            if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-                topic = buffer.getInfo().name;
-            } else if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer) {
-                Network network = networks.getNetworkById(buffer.getInfo().networkId);
-                topic = network.getName() + " ("
-                        + network.getServer() + ") | "
-                        + getResources().getString(R.string.users) + ": "
-                        + network.getCountUsers() + " | "
-                        + Helper.formatLatency(network.getLatency(), getResources());
-            } else {
-                topic = buffer.getTopic();
-            }
-            topicView.setText(topic);
-            topicViewFull.setText(topic);
-        }
-
 
         @Override
         public int getCount() {
@@ -671,7 +631,6 @@ public class ChatFragment extends Fragment {
                     setListTopMessage(topId);
                     break;
                 case R.id.BUFFERUPDATE_TOPICCHANGED:
-                    setTopic();
                     notifyDataSetChanged();
                     break;
                 default:

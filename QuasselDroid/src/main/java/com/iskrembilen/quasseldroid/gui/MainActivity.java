@@ -103,8 +103,6 @@ public class MainActivity extends Activity {
     private int openedBuffer = -1;
     private boolean isDrawerOpen = false;
 
-    private long lastBackPressed = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity created");
@@ -363,6 +361,9 @@ public class MainActivity extends Activity {
                 trans.add(R.id.right_drawer, nickFragment);
                 trans.commit();
             }
+
+            setTitleAndMenu();
+            invalidateOptionsMenu();
         } else if (currentFragment == null || currentFragment.getClass() != ConnectingFragment.class) {
             Log.d(TAG, "Showing progress");
             showInitProgress();
@@ -430,14 +431,18 @@ public class MainActivity extends Activity {
 
                 Fragment current = manager.findFragmentById(R.id.right_drawer);
 
-                if (current != null) {
-                    if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
-                        trans.replace(R.id.right_drawer, detailFragment);
-                    } else {
-                        trans.replace(R.id.right_drawer, nickFragment);
+                try {
+                    if (current != null) {
+                        if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
+                            if (detailFragment!=null) trans.replace(R.id.right_drawer, detailFragment);
+                        } else {
+                            if (nickFragment!=null) trans.replace(R.id.right_drawer, nickFragment);
+                        }
                     }
+                    trans.commit();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                trans.commit();
 
                 setTitleAndMenu();
                 invalidateOptionsMenu();

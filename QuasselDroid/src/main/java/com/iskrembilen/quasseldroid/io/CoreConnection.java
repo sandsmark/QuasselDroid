@@ -1483,6 +1483,14 @@ public final class CoreConnection {
                                 bundle.putString("nick", tmp[1]);
                                 bundle.putBoolean("away", (Boolean) packedFunc.remove(0).getData());
                                 service.getHandler().obtainMessage(R.id.SET_USER_AWAY, networkId, 0, bundle).sendToTarget();
+                            } else if (className.equals("IrcUser") && function.equals("setAwayMessage")) {
+                                Log.d(TAG, "Sync: IrcUser -> setAwayMessage");
+                                String[] tmp = objectName.split("/", 2);
+                                int networkId = Integer.parseInt(tmp[0]);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("nick", tmp[1]);
+                                bundle.putString("awayMessage", (String) packedFunc.remove(0).getData());
+                                service.getHandler().obtainMessage(R.id.SET_USER_AWAY_MESSAGE, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("setRealName")) {
                                 Log.d(TAG, "Sync: IrcUser -> setRealName");
                                 String[] tmp = objectName.split("/", 2);
