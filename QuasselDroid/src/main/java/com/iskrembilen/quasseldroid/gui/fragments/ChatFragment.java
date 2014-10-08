@@ -563,7 +563,7 @@ public class ChatFragment extends Fragment {
 
                         int color_new = SenderColorHelper.getSenderColor(entry.content.toString());
 
-                        spannable.setSpan(new ForegroundColorSpan(color_new), rawText.indexOf(entry.content.toString()), rawText.indexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        spannable.setSpan(new ForegroundColorSpan(color_new), rawText.lastIndexOf(entry.content.toString()), rawText.lastIndexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                         holder.msgView.setText(spannable);
                     }
                     holder.msgView.setTextColor(ThemeUtil.chatNickColor);
