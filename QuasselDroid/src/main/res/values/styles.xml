@@ -5,4 +5,6 @@
 
     <style name="ListChoiceBackgroundIndicator"></style>
 
+    <style name="SpinnerButton" parent="@android:style/Widget.Holo.Light.Spinner" />
+
 </resources>

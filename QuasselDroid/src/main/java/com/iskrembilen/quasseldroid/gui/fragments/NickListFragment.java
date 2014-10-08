@@ -1,7 +1,9 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -58,7 +62,9 @@ public class NickListFragment extends Fragment {
     private NetworkCollection networks;
 
     private TextView name;
-    private TextView topic;
+    private Button topic;
+
+    private String[] data = new String[2];
 
     private BacklogObserver observer = new BacklogObserver();
 
@@ -81,7 +87,13 @@ public class NickListFragment extends Fragment {
         View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
         list = (ExpandableListView) root.findViewById(R.id.userList);
         name = (TextView) root.findViewById(R.id.channel_name);
-        topic = (TextView) root.findViewById(R.id.channel_topic);
+        topic = (Button) root.findViewById(R.id.channel_topic);
+        topic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TopicDialog.newInstance(data[0],data[1]).show(getFragmentManager(),TAG);
+            }
+        });
         return root;
     }
 
@@ -144,6 +156,7 @@ public class NickListFragment extends Fragment {
             name.setText(buffer.getInfo().name);
             topic.setText(buffer.getTopic());
             observer.setBuffer(buffer);
+            data = new String[] {buffer.getInfo().name,buffer.getTopic()};
         }
     }
 
