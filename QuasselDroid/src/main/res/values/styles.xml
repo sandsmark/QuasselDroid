@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ActivatedItemBackground"></style>
+    <style name="ActivatedItemBackground">
+        <item name="android:background">@drawable/selectable_background_quasseldroid</item>
+    </style>
 
     <style name="ListChoiceBackgroundIndicator"></style>
-
-    <style name="SpinnerButton" parent="@android:style/Widget.Holo.Light.Spinner" />
 
 </resources>

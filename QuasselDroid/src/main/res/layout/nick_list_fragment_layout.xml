@@ -20,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="May JLee bless this ship, and all who sail in her"
-            android:textColor="@color/secondary_text"
             android:id="@+id/channel_topic"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="8dp"
             android:layout_marginRight="8dp"
             android:singleLine="true"
-            style="@style/SpinnerButton" />
+            style="?attr/spinnerButtonStyle"
+            android:textColor="?attr/secondaryTextAppearance" />
 
     <View
         android:layout_width="match_parent"

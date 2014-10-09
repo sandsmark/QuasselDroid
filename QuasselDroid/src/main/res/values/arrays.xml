@@ -16,4 +16,13 @@
         <item>18</item>
     </string-array>
 
+    <string-array name="entries_theme_preference">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+    <string-array name="entryvalues_theme_preference">
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
 </resources>

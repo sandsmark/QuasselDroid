@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -233,8 +234,8 @@ public class NickListFragment extends Fragment {
 
             ViewHolderChild holder = null;
 
-            int availablecolor = getResources().getColor(R.color.buffer_read_color);
-            int awaycolor = getResources().getColor(R.color.buffer_parted_color);
+            int availablecolor = ThemeUtil.bufferReadColor;
+            int awaycolor = ThemeUtil.bufferPartedColor;
 
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.nicklist_item, null);
@@ -248,7 +249,7 @@ public class NickListFragment extends Fragment {
             IrcMode mode = getGroup(groupPosition).first;
 
             Spannable spannable = new SpannableString(((mode.icon.trim().equalsIgnoreCase("")) ? "" :mode.icon + " ") + entry.nick);
-            spannable.setSpan(new ForegroundColorSpan(getResources().getColor(mode.colorResource)), 0, mode.icon.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            spannable.setSpan(new ForegroundColorSpan(ThemeUtil.getNickColor(mode)), 0, mode.icon.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             holder.nickView.setText(spannable);
 
             if (entry.away) {

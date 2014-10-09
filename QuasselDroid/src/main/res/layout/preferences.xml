@@ -32,6 +32,15 @@
     <PreferenceCategory android:title="Quassel">
 
         <ListPreference
+            android:defaultValue="light"
+            android:dialogTitle="Choose application theme"
+            android:entries="@array/entries_theme_preference"
+            android:entryValues="@array/entryvalues_theme_preference"
+            android:key="@string/preference_theme"
+            android:summary="The application theme"
+            android:title="Theme" />
+
+        <ListPreference
             android:defaultValue="14"
             android:dialogTitle="Choose fontsize for the bufferlist"
             android:entries="@array/entries_fontsize_preference"

@@ -438,7 +438,7 @@ public class ChatFragment extends Fragment {
 
                     int color;
                     if (entry.isSelf()) {
-                        color = ThemeUtil.chatSelfColor;
+                        color = ThemeUtil.chatPlainColor;
                     } else {
                         color = entry.senderColor;
                     }
@@ -458,24 +458,24 @@ public class ChatFragment extends Fragment {
                 case Server:
                 case Info:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.chatServerColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Topic:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.chatTopicColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Notice:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.chatNoticeColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Join:
                     spannable = new SpannableString(String.format("%s joined", entry.getNick()));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.chatJoinColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
@@ -483,7 +483,7 @@ public class ChatFragment extends Fragment {
                     spannable = new SpannableString(String.format("%s left: ", entry.getNick()));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
-                    holder.msgView.setTextColor(ThemeUtil.chatPartColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
@@ -491,7 +491,7 @@ public class ChatFragment extends Fragment {
                     spannable = new SpannableString(String.format("%s quit: ", entry.getNick()));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
-                    holder.msgView.setTextColor(ThemeUtil.chatQuitColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
@@ -499,7 +499,7 @@ public class ChatFragment extends Fragment {
                     spannable = new SpannableString(String.format("%s was killed: ", entry.getNick()));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
-                    holder.msgView.setTextColor(ThemeUtil.chatKillColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
@@ -528,7 +528,7 @@ public class ChatFragment extends Fragment {
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     spannable.setSpan(new ForegroundColorSpan(color_nick), rawText.indexOf(nick), rawText.indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.chatKickColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
@@ -548,7 +548,7 @@ public class ChatFragment extends Fragment {
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
                     holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.chatModeColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Nick:
@@ -566,30 +566,30 @@ public class ChatFragment extends Fragment {
                         spannable.setSpan(new ForegroundColorSpan(color_new), rawText.lastIndexOf(entry.content.toString()), rawText.lastIndexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                         holder.msgView.setText(spannable);
                     }
-                    holder.msgView.setTextColor(ThemeUtil.chatNickColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitJoin:
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
-                    holder.msgView.setTextColor(ThemeUtil.chatNetsplitJoinColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitQuit:
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
-                    holder.msgView.setTextColor(ThemeUtil.chatNetsplitQuitColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case DayChange:
                     holder.msgView.setText(Html.fromHtml(String.format("<i> Day changed to %s</i>", entry.content.toString())));
-                    holder.msgView.setTextColor(ThemeUtil.chatDayChangeColor);
+                    holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                 case Plain:
                 default:
                     if (entry.isSelf()) {
-                        color = ThemeUtil.chatSelfColor;
+                        color = ThemeUtil.chatPlainColor;
                     } else {
                         color = entry.senderColor;
                     }

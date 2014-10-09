@@ -49,6 +49,7 @@ import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -482,25 +483,25 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_active));
+                        holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
                     } else {
-                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_gone));
+                        holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_gone));
+                        holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_away));
+                        holder.parent.setBackground(ThemeUtil.drawable_buffer_away);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        holder.parent.setBackground(getResources().getDrawable(R.drawable.border_left_active));
+                        holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }

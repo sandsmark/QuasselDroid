@@ -188,12 +188,7 @@ public class MainActivity extends Activity {
                 if (key.equals(getResources().getString(R.string.preference_show_lag))) {
                     showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
                     if (!showLag) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                            setActionBarSubtitle("");
-                        } else {
-                            getActionBar().setTitle(getResources().getString(R.string.app_name));
-
-                        }
+                        setActionBarSubtitle(null);
                     }
                 }
 

@@ -1,6 +1,7 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Fragment;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -25,6 +26,7 @@ import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
