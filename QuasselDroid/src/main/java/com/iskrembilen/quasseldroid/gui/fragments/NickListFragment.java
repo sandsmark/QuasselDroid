@@ -1,46 +1,18 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannedString;
-import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.Pair;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.util.NetsplitHelper;
-import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
-import com.iskrembilen.quasseldroid.util.SenderColorHelper;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Subscribe;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMode;
@@ -51,21 +23,24 @@ import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
+import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
+
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 public class NickListFragment extends Fragment {
-    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
-    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
-    private final String TAG = NickListFragment.class.getSimpleName();
     private NicksAdapter adapter;
     private ExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
-
-    private TextView name;
-    private Button topic;
-
-    private String[] data = new String[2];
+    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
+    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
+    private final String TAG = NickListFragment.class.getSimpleName();
+    public String topic;
 
     private BacklogObserver observer = new BacklogObserver();
 
@@ -87,14 +62,6 @@ public class NickListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
         list = (ExpandableListView) root.findViewById(R.id.userList);
-        name = (TextView) root.findViewById(R.id.channel_name);
-        topic = (Button) root.findViewById(R.id.channel_topic);
-        topic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TopicDialog.newInstance(data[0],data[1]).show(getFragmentManager(),TAG);
-            }
-        });
         return root;
     }
 
@@ -102,6 +69,7 @@ public class NickListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         list.setAdapter(adapter);
+
     }
 
     @Override
@@ -127,63 +95,10 @@ public class NickListFragment extends Fragment {
         BusProvider.getInstance().post(new UserClickedEvent(bufferId, nick));
     }
 
-    @Subscribe
-    public void onNetworksAvailable(NetworksAvailableEvent event) {
-        if (event.networks != null) {
-            this.networks = event.networks;
-            if (bufferId != -1) {
-                observer.setBuffer(networks.getBufferById(bufferId));
-                updateUsers();
-                updateDetails();
-            }
-        }
-    }
-
-    @Subscribe
-    public void onBufferOpened(BufferOpenedEvent event) {
-        if (event.bufferId != -1) {
-            this.bufferId = event.bufferId;
-            if (networks != null) {
-                observer.setBuffer(networks.getBufferById(bufferId));
-                updateUsers();
-                updateDetails();
-            }
-        }
-    }
-
-    private void updateDetails() {
-        Buffer buffer = networks.getBufferById(bufferId);
-        if (buffer != null) {
-            name.setText(buffer.getInfo().name);
-            topic.setText(buffer.getTopic());
-            observer.setBuffer(buffer);
-            data = new String[] {buffer.getInfo().name,buffer.getTopic()};
-        }
-    }
-
-    private void updateUsers() {
-        Buffer buffer = networks.getBufferById(bufferId);
-        if (buffer != null) {
-            adapter.setUsers(buffer.getUsers());
-        }
-    }
-
-    public static class ViewHolderChild {
-        public TextView nickView;
-        public ImageView userImage;
-    }
-
-    public static class ViewHolderGroup {
-        public TextView nameView;
-        public ImageView expanderView;
-        public LinearLayout groupHolderView;
-    }
-
     public class NicksAdapter extends BaseExpandableListAdapter implements Observer {
 
         private LayoutInflater inflater;
         private UserCollection users;
-
 
         public NicksAdapter() {
             inflater = getActivity().getLayoutInflater();
@@ -224,8 +139,7 @@ public class NickListFragment extends Fragment {
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            return getCombinedChildId(groupPosition, childPosition);
-            //return groupPosition * 100 + childPosition;
+            return groupPosition * Integer.MAX_VALUE + childPosition;
         }
 
         @Override
@@ -233,9 +147,6 @@ public class NickListFragment extends Fragment {
                                  boolean isLastChild, View convertView, ViewGroup parent) {
 
             ViewHolderChild holder = null;
-
-            int availablecolor = ThemeUtil.bufferReadColor;
-            int awaycolor = ThemeUtil.bufferPartedColor;
 
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.nicklist_item, null);
@@ -246,16 +157,14 @@ public class NickListFragment extends Fragment {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             final IrcUser entry = getChild(groupPosition, childPosition);
-            IrcMode mode = getGroup(groupPosition).first;
+            final IrcMode mode = getGroup(groupPosition).first;
+            convertView.setBackgroundColor(ThemeUtil.getNickBg(mode));
 
-            Spannable spannable = new SpannableString(((mode.icon.trim().equalsIgnoreCase("")) ? "" :mode.icon + " ") + entry.nick);
-            spannable.setSpan(new ForegroundColorSpan(ThemeUtil.getNickColor(mode)), 0, mode.icon.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            holder.nickView.setText(spannable);
-
+            holder.nickView.setText(entry.nick);
             if (entry.away) {
-                holder.nickView.setTextColor(awaycolor);
+                holder.nickView.setTextColor(ThemeUtil.bufferPartedColor);
             } else {
-                holder.nickView.setTextColor(availablecolor);
+                holder.nickView.setTextColor(ThemeUtil.bufferReadColor);
             }
 
             holder.nickView.setOnClickListener(new View.OnClickListener() {
@@ -301,7 +210,34 @@ public class NickListFragment extends Fragment {
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded,
                                  View convertView, ViewGroup parent) {
-            return inflater.inflate(R.layout.nicklist_group_item, null);
+            ViewHolderGroup holder = null;
+
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.nicklist_group_item, null);
+                holder = new ViewHolderGroup();
+                holder.nameView = (TextView) convertView.findViewById(R.id.nicklist_group_name_view);
+                holder.countView = (TextView) convertView.findViewById(R.id.nicklist_group_count_view);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolderGroup) convertView.getTag();
+            }
+            Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
+            convertView.setBackgroundColor(ThemeUtil.getNickBg(group.first));
+            holder.nameView.setTextColor(ThemeUtil.getNickColor(group.first));
+            holder.countView.setTextColor(ThemeUtil.getNickColor(group.first));
+
+            if (group.second.size() < 1) {
+                convertView.setVisibility(View.GONE);
+                holder.nameView.setVisibility(View.GONE);
+                holder.countView.setVisibility(View.GONE);
+            } else {
+                convertView.setVisibility(View.VISIBLE);
+                holder.nameView.setVisibility(View.VISIBLE);
+                holder.countView.setVisibility(View.VISIBLE);
+                holder.nameView.setText(group.first.modeName);
+                holder.countView.setText(group.first.icon + " " + group.second.size());
+            }
+            return convertView;
         }
 
         @Override
@@ -315,15 +251,64 @@ public class NickListFragment extends Fragment {
         }
     }
 
+
+    public static class ViewHolderChild {
+        public TextView nickView;
+    }
+
+    public static class ViewHolderGroup {
+        public TextView nameView;
+        public TextView countView;
+    }
+
+    @Subscribe
+    public void onNetworksAvailable(NetworksAvailableEvent event) {
+        if (event.networks != null) {
+            this.networks = event.networks;
+            if (bufferId != -1) {
+                observer.setBuffer(networks.getBufferById(bufferId));
+                updateUsers();
+                updateDetails();
+            }
+        }
+    }
+
+    @Subscribe
+    public void onBufferOpened(BufferOpenedEvent event) {
+        if (event.bufferId != -1) {
+            this.bufferId = event.bufferId;
+            if (networks != null) {
+                observer.setBuffer(networks.getBufferById(bufferId));
+                updateUsers();
+                updateDetails();
+            }
+        }
+    }
+
+    private void updateUsers() {
+        Buffer buffer = networks.getBufferById(bufferId);
+        if (buffer != null) {
+            adapter.setUsers(buffer.getUsers());
+        }
+    }
+
+    public void updateDetails() {
+        Buffer buffer = networks.getBufferById(bufferId);
+        if (buffer != null) {
+            topic = buffer.getTopic();
+            MainActivity mainActivity = ((MainActivity)getActivity());
+            mainActivity.subTitleSpan = new SpannableString(topic);
+            observer.setBuffer(buffer);
+        }
+    }
+
     public class BacklogObserver implements Observer {
         private Buffer buffer;
-
         public void setBuffer(Buffer buffer) {
             if (this.buffer!=null) this.buffer.deleteObserver(this);
             this.buffer = buffer;
             if (this.buffer!=null) this.buffer.addObserver(this);
         }
-
         @Override
         public void update(Observable observable, Object data) {
             if (data == null) {

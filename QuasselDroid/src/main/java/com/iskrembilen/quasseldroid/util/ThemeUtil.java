@@ -15,6 +15,7 @@ public class ThemeUtil {
     public static int chatPlainResource, chatPlainColor, chatActionColor, chatErrorColor, chatHighlightColor, chatTimestampColor, chatActionBg;
     public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
     public static int nick_owner, nick_admin, nick_operator, nick_halfop, nick_voice, nick_user;
+    public static int nick_owner_bg, nick_admin_bg, nick_operator_bg, nick_halfop_bg, nick_voice_bg, nick_user_bg;
     public static Drawable drawable_buffer_away, drawable_buffer_active, drawable_buffer_gone, drawable_bg_list_item;
 
     public static void initTheme(Context context) {
@@ -28,63 +29,40 @@ public class ThemeUtil {
         if (themeName.equals("light")) {
             theme = R.style.Theme_Quasseldroid_Light;
 
-            chatPlainResource = R.color.chat_line_plain_light;
+            chatPlainResource = R.color.chat_line_plain;
 
-            bufferPartedColor = resources.getColor(R.color.buffer_parted_color_light);
-            bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color_light);
-            bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_light);
-            bufferActivityColor = resources.getColor(R.color.buffer_activity_color_light);
-            bufferReadColor = resources.getColor(R.color.buffer_read_color_light);
+            bufferPartedColor = resources.getColor(R.color.buffer_parted_color);
+            bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color);
+            bufferUnreadColor = resources.getColor(R.color.buffer_unread_color);
+            bufferActivityColor = resources.getColor(R.color.buffer_activity_color);
+            bufferReadColor = resources.getColor(R.color.buffer_read_color);
 
-            chatPlainColor = resources.getColor(R.color.chat_line_plain_light);
-            chatActionColor = resources.getColor(R.color.chat_line_action_light);
-            chatErrorColor = resources.getColor(R.color.chat_line_error_light);
-            chatHighlightColor = resources.getColor(R.color.chat_line_highlight_light);
-            chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_light);
+            chatPlainColor = resources.getColor(R.color.chat_line_plain);
+            chatActionColor = resources.getColor(R.color.chat_line_action);
+            chatErrorColor = resources.getColor(R.color.chat_line_error);
+            chatHighlightColor = resources.getColor(R.color.chat_line_highlight);
+            chatTimestampColor = resources.getColor(R.color.chat_line_timestamp);
 
-            chatActionBg = resources.getColor(R.color.chat_bg_action_light);
+            chatActionBg = resources.getColor(R.color.chat_bg_action);
 
-            nick_owner = resources.getColor(R.color.nick_owner_color_light);
-            nick_admin = resources.getColor(R.color.nick_admin_color_light);
-            nick_operator = resources.getColor(R.color.nick_operator_color_light);
-            nick_halfop = resources.getColor(R.color.nick_halfop_color_light);
-            nick_voice = resources.getColor(R.color.nick_voice_color_light);
-            nick_user = resources.getColor(R.color.nick_user_color_light);
+            nick_owner = resources.getColor(R.color.nick_owner_color);
+            nick_admin = resources.getColor(R.color.nick_admin_color);
+            nick_operator = resources.getColor(R.color.nick_operator_color);
+            nick_halfop = resources.getColor(R.color.nick_halfop_color);
+            nick_voice = resources.getColor(R.color.nick_voice_color);
+            nick_user = resources.getColor(R.color.nick_user_color);
 
-            drawable_buffer_active = resources.getDrawable(R.drawable.buffer_bg_active_light);
-            drawable_buffer_away = resources.getDrawable(R.drawable.buffer_bg_away_light);
-            drawable_buffer_gone = resources.getDrawable(R.drawable.buffer_bg_gone_light);
-            drawable_bg_list_item = resources.getDrawable(R.drawable.bg_list_item_light);
-        } else if (themeName.equals("dark")) {
-            theme = R.style.Theme_Quasseldroid;
+            nick_owner_bg = resources.getColor(R.color.nick_owner_bg);
+            nick_admin_bg = resources.getColor(R.color.nick_admin_bg);
+            nick_operator_bg = resources.getColor(R.color.nick_operator_bg);
+            nick_halfop_bg = resources.getColor(R.color.nick_halfop_bg);
+            nick_voice_bg = resources.getColor(R.color.nick_voice_bg);
+            nick_user_bg = resources.getColor(R.color.nick_user_bg);
 
-            chatPlainResource = R.color.chat_line_plain_dark;
-
-            bufferPartedColor = resources.getColor(R.color.buffer_parted_color_dark);
-            bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color_dark);
-            bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_dark);
-            bufferActivityColor = resources.getColor(R.color.buffer_activity_color_dark);
-            bufferReadColor = resources.getColor(R.color.buffer_read_color_dark);
-
-            chatPlainColor = resources.getColor(R.color.chat_line_plain_dark);
-            chatActionColor = resources.getColor(R.color.chat_line_action_dark);
-            chatErrorColor = resources.getColor(R.color.chat_line_error_dark);
-            chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
-            chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
-
-            nick_owner = resources.getColor(R.color.nick_owner_color_dark);
-            nick_admin = resources.getColor(R.color.nick_admin_color_dark);
-            nick_operator = resources.getColor(R.color.nick_operator_color_dark);
-            nick_halfop = resources.getColor(R.color.nick_halfop_color_dark);
-            nick_voice = resources.getColor(R.color.nick_voice_color_dark);
-            nick_user = resources.getColor(R.color.nick_user_color_dark);
-
-            chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
-
-            drawable_buffer_active = resources.getDrawable(R.drawable.buffer_bg_active_dark);
-            drawable_buffer_away = resources.getDrawable(R.drawable.buffer_bg_away_dark);
-            drawable_buffer_gone = resources.getDrawable(R.drawable.buffer_bg_gone_dark);
-            drawable_bg_list_item = resources.getDrawable(R.drawable.bg_list_item_dark);
+            drawable_buffer_active = resources.getDrawable(R.drawable.buffer_bg_active);
+            drawable_buffer_away = resources.getDrawable(R.drawable.buffer_bg_away);
+            drawable_buffer_gone = resources.getDrawable(R.drawable.buffer_bg_gone);
+            drawable_bg_list_item = resources.getDrawable(R.drawable.bg_list_item);
         } else {
             setTheme(context, "light");
         }
@@ -104,6 +82,25 @@ public class ThemeUtil {
                 return nick_voice;
             case USER:
                 return nick_user;
+            default:
+                return 0;
+        }
+    }
+
+    public static final int getNickBg(IrcMode mode) {
+        switch (mode) {
+            case OWNER:
+                return nick_owner_bg;
+            case ADMIN:
+                return nick_admin_bg;
+            case OPERATOR:
+                return nick_operator_bg;
+            case HALF_OPERATOR:
+                return nick_halfop_bg;
+            case VOICE:
+                return nick_voice_bg;
+            case USER:
+                return nick_user_bg;
             default:
                 return 0;
         }

@@ -36,39 +36,13 @@
         <item name="android:actionOverflowButtonStyle">@style/QuasselDroid.OverFlow</item>
 
         <item name="spinnerButtonStyle">@style/SpinnerButton.Light</item>
-        <item name="listItemBg">@drawable/bg_list_item_light</item>
+        <item name="listItemBg">@drawable/bg_list_item</item>
         <item name="primaryTextAppearance">@android:color/primary_text_light</item>
         <item name="secondaryTextAppearance">@android:color/secondary_text_light</item>
 
-        <item name="bufferBgActive">@drawable/buffer_bg_active_light</item>
-        <item name="bufferBgAway">@drawable/buffer_bg_away_light</item>
-        <item name="bufferBgGone">@drawable/buffer_bg_gone_light</item>
-    </style>
-
-    <style name="Theme.Quasseldroid" parent="@android:style/Theme.Holo">
-        <item name="android:actionBarItemBackground">@drawable/selectable_background_quasseldroid</item>
-        <item name="android:popupMenuStyle">@style/PopupMenu.Quasseldroid</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
-        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Quasseldroid</item>
-        <item name="android:actionDropDownStyle">@style/DropDownNav.Quasseldroid</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Solid.Quasseldroid</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_quasseldroid</item>
-        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_quasseldroid</item>
-        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Quasseldroid</item>
-
-        <!-- Light.DarkActionBar specific -->
-        <item name="android:actionBarWidgetTheme">@style/Theme.Quasseldroid.Widget</item>
-
-        <item name="android:actionOverflowButtonStyle">@style/QuasselDroid.OverFlow</item>
-
-        <item name="spinnerButtonStyle">@style/SpinnerButton</item>
-        <item name="listItemBg">@drawable/bg_list_item_dark</item>
-        <item name="primaryTextAppearance">@android:color/primary_text_dark</item>
-        <item name="secondaryTextAppearance">@android:color/secondary_text_dark</item>
-
-        <item name="bufferBgActive">@drawable/buffer_bg_active_dark</item>
-        <item name="bufferBgAway">@drawable/buffer_bg_away_dark</item>
-        <item name="bufferBgGone">@drawable/buffer_bg_gone_dark</item>
+        <item name="bufferBgActive">@drawable/buffer_bg_active</item>
+        <item name="bufferBgAway">@drawable/buffer_bg_away</item>
+        <item name="bufferBgGone">@drawable/buffer_bg_gone</item>
     </style>
 
     <style name="ActionBar.Solid.Quasseldroid" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">

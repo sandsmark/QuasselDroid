@@ -3,6 +3,23 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:id="@+id/nicklist_holder_view" >
+    android:id="@+id/nicklist_group_view" >
 
+    <TextView
+        android:id="@+id/nicklist_group_name_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_weight="1"
+        android:layout_gravity="left|center_vertical"
+        android:text="OPS"
+        android:padding="8dp" />
+    <TextView
+        android:id="@+id/nicklist_group_count_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_gravity="center_vertical|right"
+        android:text="20 ●"
+        android:padding="8dp" />
 </LinearLayout>

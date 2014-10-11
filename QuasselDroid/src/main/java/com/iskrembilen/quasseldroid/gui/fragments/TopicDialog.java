@@ -24,15 +24,13 @@ public class TopicDialog extends DialogFragment {
     private static final String TAG = TopicDialog.class.getSimpleName();
 
     private String topic;
-    private String title;
 
     private TextView topicField;
 
-    public static TopicDialog newInstance(String title, String topic) {
+    public static TopicDialog newInstance(String topic) {
         TopicDialog fragment = new TopicDialog();
         Bundle args = new Bundle();
         args.putString("topic", topic);
-        args.putString("title", title);
         fragment.setArguments(args);
 
         return fragment;
@@ -42,13 +40,11 @@ public class TopicDialog extends DialogFragment {
     public void onActivityCreated(Bundle arg0) {
         super.onActivityCreated(arg0);
         topic = getArguments().getString("topic");
-        title = getArguments().getString("title");
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         topic = getArguments().getString("topic");
-        title = getArguments().getString("title");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -57,9 +53,8 @@ public class TopicDialog extends DialogFragment {
         TextView topicField = (TextView) dialog.findViewById(R.id.dialog_topic_text);
         topicField.setText(topic);
 
-        Log.d(TAG,title+topic);
 
-        builder.setView(dialog).setTitle(title);
+        builder.setView(dialog).setTitle("Channel Topic");
         return builder.create();
     }
 }

@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -34,6 +35,8 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -41,12 +44,17 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -68,12 +76,16 @@ import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
+import com.iskrembilen.quasseldroid.gui.fragments.TopicDialog;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.CustomDrawerToggle;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
+
+import org.w3c.dom.Text;
 
 import java.lang.reflect.Field;
 
@@ -90,15 +102,23 @@ public class MainActivity extends Activity {
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
     private DrawerLayout drawer;
-    private ActionBarDrawerToggle drawerToggle;
+    private CustomDrawerToggle drawerToggle;
 
     private int currentTheme;
     private Boolean showLag = false;
+
+    private int lag = 0;
 
     private Fragment chatFragment;
     private Fragment bufferFragment;
     private Fragment nickFragment;
     private Fragment detailFragment;
+
+    private TextView title;
+    private TextView subTitle;
+    private boolean showSubtitle = false;
+    public CharSequence subTitleSpan;
+    private View actionTitleArea;
 
     private int openedBuffer = -1;
     private boolean isDrawerOpen = false;
@@ -112,26 +132,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main_layout);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer);
-
-        try {
-            Field mLeftDragger = drawer.getClass().getDeclaredField("mLeftDragger");
-            mLeftDragger.setAccessible(true);
-            ViewDragHelper leftDraggerObj = (ViewDragHelper) mLeftDragger.get(drawer);
-            Field mLeftEdgeSize = leftDraggerObj.getClass().getDeclaredField("mEdgeSize");
-            mLeftEdgeSize.setAccessible(true);
-            int leftEdge = mLeftEdgeSize.getInt(leftDraggerObj);
-            mLeftEdgeSize.setInt(leftDraggerObj, leftEdge * 3);
-
-            Field mRightDragger = drawer.getClass().getDeclaredField("mRightDragger");
-            mRightDragger.setAccessible(true);
-            ViewDragHelper rightDraggerObj = (ViewDragHelper) mRightDragger.get(drawer);
-            Field mRightEdgeSize = rightDraggerObj.getClass().getDeclaredField("mEdgeSize");
-            mRightEdgeSize.setAccessible(true);
-            int rightEdge = mRightEdgeSize.getInt(rightDraggerObj);
-            mRightEdgeSize.setInt(rightDraggerObj, rightEdge * 3);
-        } catch (Exception e) {
-            Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
-        }
 
         if (savedInstanceState != null) {
             Log.d(TAG, "MainActivity has savedInstanceState");
@@ -150,13 +150,42 @@ public class MainActivity extends Activity {
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
 
-        drawerToggle = new ActionBarDrawerToggle(
+        getActionBar().setHomeButtonEnabled(false);
+        getActionBar().setDisplayHomeAsUpEnabled(false);
+        getActionBar().setDisplayShowTitleEnabled(true);
+        View actionBar = getLayoutInflater().inflate(R.layout.actionbar_messageview, null);
+
+        getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        actionBar.findViewById(R.id.actionTitleArea).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                showDetailPopup();
+            }
+        });
+        actionTitleArea = actionBar.findViewById(R.id.actionTitleArea);
+        actionBar.findViewById(R.id.actionButton).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (getOpenDrawers()!=1) {
+                    openDrawer(Gravity.LEFT);
+                } else {
+                    closeDrawer(Gravity.LEFT);
+                }
+            }
+        });
+        actionBar.findViewById(R.id.actionButton).setClickable(true);
+        this.title = ((TextView)actionBar.findViewById(R.id.title));
+        this.subTitle = ((TextView)actionBar.findViewById(R.id.subtitle));
+
+        final ImageView upIndicator = (ImageView) actionBar.findViewById(R.id.upIndicator);
+
+        drawerToggle = new CustomDrawerToggle(
                 this,                   /* host Activity */
                 drawer,                 /* DrawerLayout object */
                 R.drawable.ic_drawer,   /* nav drawer icon to replace 'Up' caret */
                 R.string.drawer_open,   /* "open drawer" description */
                 R.string.drawer_close   /* "close drawer" description */
         ) {
+
+            public Canvas canvas;
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View drawerView) {
@@ -173,13 +202,19 @@ public class MainActivity extends Activity {
                 setTitleAndMenu();
                 invalidateOptionsMenu();
             }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, slideOffset);
+                super.mSlider.invalidateSelf();
+                upIndicator.setImageDrawable(drawerToggle.mSlider.getCurrent());
+            }
         };
 
-        // Set the drawer toggle as the DrawerListener
+
         drawer.setDrawerListener(drawerToggle);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setCustomView(actionBar);
 
         sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
@@ -187,9 +222,7 @@ public class MainActivity extends Activity {
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getResources().getString(R.string.preference_show_lag))) {
                     showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
-                    if (!showLag) {
-                        setActionBarSubtitle(null);
-                    }
+                    updateSubtitle();
                 }
 
             }
@@ -197,8 +230,26 @@ public class MainActivity extends Activity {
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
     }
 
-    private void setActionBarSubtitle(String subtitle) {
-        getActionBar().setSubtitle(subtitle);
+    private void showDetailPopup() {
+        String topic = ((NickListFragment)nickFragment).topic;
+        if (topic!=null) {
+            TopicDialog.newInstance(topic).show(getFragmentManager(),TAG);
+        }
+    }
+
+    private void setActionBarSubtitle(CharSequence content) {
+        //getActionBar().setSubtitle(subtitle);
+        if (content==null || content.toString().trim().equalsIgnoreCase("")) {
+            this.subTitle.setVisibility(View.GONE);
+            this.subTitle.setText(null);
+        } else {
+            this.subTitle.setVisibility(View.VISIBLE);
+            this.subTitle.setText(content);
+        }
+    }
+
+    public void setActionBarTitle(CharSequence content) {
+        this.title.setText(content);
     }
 
     @Override
@@ -367,15 +418,21 @@ public class MainActivity extends Activity {
 
     @Subscribe
     public void onLatencyChanged(LatencyChangedEvent event) {
-        if (showLag) {
-            if (event.latency > 0) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    setActionBarSubtitle(Helper.formatLatency(event.latency, getResources()));
-                } else {
-                    setTitle(getResources().getString(R.string.app_name) + " - "
-                            + Helper.formatLatency(event.latency, getResources()));
-                }
-            }
+        if (event.latency > 0) {
+            lag = event.latency;
+            updateSubtitle();
+        }
+    }
+
+    public void updateSubtitle() {
+        if (showLag && showSubtitle && subTitleSpan!=null && subTitleSpan.toString().trim()!="") {
+            setActionBarSubtitle(TextUtils.concat(Helper.formatLatency(lag, getResources()), " — ", subTitleSpan));
+        } else if (showLag) {
+            setActionBarSubtitle(Helper.formatLatency(lag, getResources()));
+        } else if (showSubtitle) {
+            setActionBarSubtitle(subTitleSpan);
+        } else {
+            setActionBarSubtitle(null);
         }
     }
 
@@ -430,8 +487,15 @@ public class MainActivity extends Activity {
                     if (current != null) {
                         if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
                             if (detailFragment!=null) trans.replace(R.id.right_drawer, detailFragment);
-                        } else {
+                            drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
+                            closeDrawer(Gravity.RIGHT);
+                        } else if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.ChannelBuffer) {
                             if (nickFragment!=null) trans.replace(R.id.right_drawer, nickFragment);
+                            drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
+                            closeDrawer(Gravity.RIGHT);
+                        } else {
+                            drawer.setDrawerLockMode(drawer.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
+                            closeDrawer(Gravity.RIGHT);
                         }
                     }
                     trans.commit();
@@ -468,34 +532,67 @@ public class MainActivity extends Activity {
         }
     };
 
-    private void setTitleAndMenu() {
+    public void setTitleAndMenu() {
         int side = getOpenDrawers();
-        if (side == 0) {
+        switch (side) {
+        case 0:
+            showSubtitle=true;
+            actionTitleArea.setClickable(true);
             if (openedBuffer != -1) {
                 NetworkCollection networks = NetworkCollection.getInstance();
                 Buffer buffer = networks.getBufferById(openedBuffer);
-                if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer)
-                    getActionBar().setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
-                else
-                    getActionBar().setTitle(buffer.getInfo().name);
+                if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer) {
+                    setActionBarTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                    showSubtitle = false;
+                } else {
+                    setActionBarTitle(buffer.getInfo().name);
+                    subTitleSpan=buffer.getTopic();
+                }
             } else {
-                getActionBar().setTitle(getResources().getString(R.string.app_name));
+                setActionBarTitle(getResources().getString(R.string.app_name));
             }
             if (chatFragment != null) chatFragment.setUserVisibleHint(true);
+            updateSubtitle();
             setMenuVisible(chatFragment);
-        } else if (side == 1) {
+            break;
+        case 1:
+            showSubtitle = false;
+            actionTitleArea.setClickable(false);
             setMenuVisible(bufferFragment);
             if (chatFragment != null) chatFragment.setUserVisibleHint(false);
-            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            setActionBarTitle(getResources().getString(R.string.app_name));
+            updateSubtitle();
             if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
-        } else if (side == 2) {
+            break;
+        case 2:
+            showSubtitle=true;
+            actionTitleArea.setClickable(true);
+            if (openedBuffer != -1) {
+                NetworkCollection networks = NetworkCollection.getInstance();
+                Buffer buffer = networks.getBufferById(openedBuffer);
+                if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer) {
+                    setActionBarTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                    showSubtitle = false;
+                } else {
+                    setActionBarTitle(buffer.getInfo().name);
+                    subTitleSpan=buffer.getTopic();
+                }
+            } else {
+                setActionBarTitle(getResources().getString(R.string.app_name));
+            }
+            if (chatFragment != null) chatFragment.setUserVisibleHint(true);
+            updateSubtitle();
             setMenuVisible(nickFragment);
-            getActionBar().setTitle(getResources().getString(R.string.app_name));
             if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
-        } else {
+            break;
+        default:
+            showSubtitle = false;
+            actionTitleArea.setClickable(false);
             setMenuVisible(null);
-            getActionBar().setTitle(getResources().getString(R.string.app_name));
+            setActionBarTitle(getResources().getString(R.string.app_name));
+            updateSubtitle();
             if (bufferFragment != null && drawer != null) hideKeyboard(bufferFragment.getView());
+            break;
         }
     }
 
@@ -541,4 +638,5 @@ public class MainActivity extends Activity {
         if (nickFragment != null) nickFragment.setMenuVisibility(false);
         if (fragment != null) fragment.setMenuVisibility(true);
     }
+
 }
