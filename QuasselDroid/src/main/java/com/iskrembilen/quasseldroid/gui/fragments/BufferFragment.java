@@ -120,7 +120,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.buffer_list_fragment_layout, container, false);
+        View root = inflater.inflate(R.layout.fragment_buffers, container, false);
         bufferList = (ExpandableListView) root.findViewById(R.id.buffer_list);
         return root;
     }
@@ -145,7 +145,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 MenuInflater inflater = mode.getMenuInflater();
-                inflater.inflate(R.menu.buffer_contextual_menu_networks, menu);
+                inflater.inflate(R.menu.context_buffer_network, menu);
 
                 bufferList.setItemChecked(actionModeData.index, true);
 
@@ -185,7 +185,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 MenuInflater inflater = mode.getMenuInflater();
-                inflater.inflate(R.menu.buffer_contextual_menu_channels, menu);
+                inflater.inflate(R.menu.context_buffer_channel, menu);
 
                 bufferList.setItemChecked(actionModeData.index, true);
 
@@ -325,7 +325,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.buffer_list_fragment_menu, menu);
+        inflater.inflate(R.menu.fragment_buffer, menu);
     }
 
     @Override
@@ -469,7 +469,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             ViewHolderChild holder = null;
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.buffer_child_item, null);
+                convertView = inflater.inflate(R.layout.widget_buffer_single, null);
                 holder = new ViewHolderChild();
                 holder.parent = convertView;
                 holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
@@ -551,7 +551,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
             ViewHolderGroup holder = null;
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.buffer_group_item, null);
+                convertView = inflater.inflate(R.layout.widget_buffer_group, null);
                 holder = new ViewHolderGroup();
                 holder.statusView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
                 holder.statusView.setOnClickListener(new OnClickListener() {

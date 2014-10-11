@@ -25,7 +25,7 @@ public class ConnectingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.connecting_fragment_layout, container, false);
+        View root = inflater.inflate(R.layout.fragment_loading, container, false);
         progressTextView = (TextView) root.findViewById(R.id.buffer_list_progress_text);
         return root;
     }

@@ -101,7 +101,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.theme;
-        setContentView(R.layout.login);
+        setContentView(R.layout.layout_login);
 
         settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);
         dbHelper = new QuasselDbHelper(this);
@@ -189,7 +189,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
                 return false;
             }
         });
-        popup.inflate(R.menu.core_menu);
+        popup.inflate(R.menu.context_core);
         if (core.getCount()==0) {
             popup.getMenu().getItem(1).setEnabled(false);
             popup.getMenu().getItem(2).setEnabled(false);
@@ -199,7 +199,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.login_menu, menu);
+        getMenuInflater().inflate(R.menu.base_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

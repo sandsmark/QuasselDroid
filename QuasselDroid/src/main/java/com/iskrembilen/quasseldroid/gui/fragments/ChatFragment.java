@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -37,7 +38,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 import com.squareup.otto.Subscribe;
 
@@ -46,10 +46,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcMessage.Type;
-import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
@@ -65,7 +63,6 @@ import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
@@ -108,7 +105,7 @@ public class ChatFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.chat_fragment_layout, container, false);
+        View root = inflater.inflate(R.layout.fragment_chat, container, false);
         backlogList = (ListView) root.findViewById(R.id.chat_backlog_list_view);
         inputField = (EditText) root.findViewById(R.id.chat_input_view);
         autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
@@ -116,6 +113,30 @@ public class ChatFragment extends Fragment {
         backlogList.setAdapter(adapter);
         backlogList.setOnScrollListener(new BacklogScrollListener(5));
         backlogList.setSelection(backlogList.getChildCount());
+        backlogList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            private int lastItem;
+            private long lastTime;
+
+            private static final int DOUBLE_CLICK_TIMESPAN = 200;
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                final long currentTime = System.currentTimeMillis();
+                if (lastItem==i) {
+                    if ((currentTime-lastTime)<DOUBLE_CLICK_TIMESPAN) {
+                        IrcMessage msg = adapter.getItem(i);
+                        inputField.getText().append(" "+msg.getNick());
+                        nickCompletionHelper.completeNick(inputField);
+                        lastTime = 0;
+                    } else {
+                        lastTime = currentTime;
+                    }
+                } else {
+                    lastItem = i;
+                    lastTime = currentTime;
+                }
+            }
+        });
 
         autoCompleteButton.setOnClickListener(new OnClickListener() {
 
@@ -133,7 +154,7 @@ public class ChatFragment extends Fragment {
                         ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)))) {
                     String inputText = inputField.getText().toString();
 
-                    if (!"" .equals(inputText)) {
+                    if (!"" .equals(inputText.trim())) {
                         BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, inputText));
                         InputHistoryHelper.addHistoryEntry(inputText);
                         inputField.setText("");
@@ -146,36 +167,13 @@ public class ChatFragment extends Fragment {
             }
         });
 
-        inputField.setOnKeyListener(new View.OnKeyListener() {
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    onNickComplete();
-                    return true;
-                }
-                if (keyCode == KeyEvent.KEYCODE_DPAD_UP && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    EditText text = (EditText) v;
-                    InputHistoryHelper.tempStoreCurrentEntry(text.getText().toString());
-                    text.setText(InputHistoryHelper.getNextHistoryEntry());
-                    text.setSelection(text.getText().length());
-                    return true;
-                }
-                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    EditText text = (EditText) v;
-                    text.setText(InputHistoryHelper.getPreviousHistoryEntry());
-                    text.setSelection(text.getText().length());
-                    return true;
-                }
-                return false;
-            }
-        });
-
         return root;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.chat_fragment_menu, menu);
+        inflater.inflate(R.menu.fragment_chat, menu);
     }
 
     @Override
@@ -355,7 +353,6 @@ public class ChatFragment extends Fragment {
 
     public class BacklogAdapter extends BaseAdapter implements Observer {
 
-        //private ArrayList<IrcMessage> backlog;
         private LayoutInflater inflater;
         private Buffer buffer;
 
@@ -381,7 +378,7 @@ public class ChatFragment extends Fragment {
         @Override
         public IrcMessage getItem(int position) {
             //TODO: PriorityQueue is fucked, we don't want to convert to array here, so change later
-            return (IrcMessage) buffer.getBacklogEntry(position);
+            return buffer.getBacklogEntry(position);
         }
 
         @Override
@@ -394,7 +391,7 @@ public class ChatFragment extends Fragment {
             ViewHolder holder = null;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.backlog_item, null);
+                convertView = inflater.inflate(R.layout.widget_backlog, null);
                 holder = new ViewHolder();
                 holder.parent = convertView;
                 holder.timeView = (TextView) convertView.findViewById(R.id.backlog_time_view);

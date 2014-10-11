@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Ookawa Hikari | 18 F | Munich"
-        android:textColor="?attr/secondaryTextAppearance"
+        android:textColor="?attr/textColorSecondary"
         android:autoLink="web"
         android:id="@+id/detail_about"
         android:layout_marginLeft="8dp"
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?attr/secondaryTextAppearance"
+            android:textColor="?attr/textColorSecondary"
             android:text="Status"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"/>

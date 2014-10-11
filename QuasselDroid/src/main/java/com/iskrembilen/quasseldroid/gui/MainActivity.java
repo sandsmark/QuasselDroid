@@ -36,16 +36,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.ViewDragHelper;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -84,10 +78,6 @@ import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Field;
 
 public class MainActivity extends Activity {
 
@@ -129,7 +119,7 @@ public class MainActivity extends Activity {
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.theme;
-        setContentView(R.layout.main_layout);
+        setContentView(R.layout.layout_main);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer);
 
@@ -153,7 +143,7 @@ public class MainActivity extends Activity {
         getActionBar().setHomeButtonEnabled(false);
         getActionBar().setDisplayHomeAsUpEnabled(false);
         getActionBar().setDisplayShowTitleEnabled(true);
-        View actionBar = getLayoutInflater().inflate(R.layout.actionbar_messageview, null);
+        View actionBar = getLayoutInflater().inflate(R.layout.widget_actionbar, null);
 
         getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         actionBar.findViewById(R.id.actionTitleArea).setOnClickListener(new View.OnClickListener() {
@@ -171,7 +161,9 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        drawer.setDrawerLockMode(drawer.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
         actionBar.findViewById(R.id.actionButton).setClickable(true);
+        actionTitleArea.setClickable(false);
         this.title = ((TextView)actionBar.findViewById(R.id.title));
         this.subTitle = ((TextView)actionBar.findViewById(R.id.subtitle));
 
@@ -227,14 +219,18 @@ public class MainActivity extends Activity {
 
             }
         };
+
+        setTitleAndMenu();
+
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
     }
 
     private void showDetailPopup() {
-        String topic = ((NickListFragment)nickFragment).topic;
-        if (topic!=null) {
+        String topic = null;
+        if (nickFragment!=null)
+            topic = ((NickListFragment)nickFragment).topic;
+        if (topic!=null)
             TopicDialog.newInstance(topic).show(getFragmentManager(),TAG);
-        }
     }
 
     private void setActionBarSubtitle(CharSequence content) {

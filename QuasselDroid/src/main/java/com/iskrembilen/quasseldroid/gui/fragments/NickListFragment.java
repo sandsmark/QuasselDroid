@@ -1,7 +1,6 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Fragment;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.util.Pair;
@@ -10,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -60,7 +57,7 @@ public class NickListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
+        View root = inflater.inflate(R.layout.fragment_nicks, container, false);
         list = (ExpandableListView) root.findViewById(R.id.userList);
         return root;
     }
@@ -149,7 +146,7 @@ public class NickListFragment extends Fragment {
             ViewHolderChild holder = null;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.nicklist_item, null);
+                convertView = inflater.inflate(R.layout.widget_nick_single, null);
                 holder = new ViewHolderChild();
                 holder.nickView = (TextView) convertView.findViewById(R.id.nicklist_nick_view);
                 convertView.setTag(holder);
@@ -213,7 +210,7 @@ public class NickListFragment extends Fragment {
             ViewHolderGroup holder = null;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.nicklist_group_item, null);
+                convertView = inflater.inflate(R.layout.widget_nick_group, null);
                 holder = new ViewHolderGroup();
                 holder.nameView = (TextView) convertView.findViewById(R.id.nicklist_group_name_view);
                 holder.countView = (TextView) convertView.findViewById(R.id.nicklist_group_count_view);

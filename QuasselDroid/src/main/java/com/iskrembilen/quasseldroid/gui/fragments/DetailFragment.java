@@ -1,35 +1,24 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Fragment;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -59,7 +48,7 @@ public class DetailFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.detail_fragment_layout, container, false);
+        View root = inflater.inflate(R.layout.fragment_detail, container, false);
         nick = (TextView) root.findViewById(R.id.detail_nick);
         realname = (TextView) root.findViewById(R.id.detail_about);
         status = (TextView) root.findViewById(R.id.detail_status);

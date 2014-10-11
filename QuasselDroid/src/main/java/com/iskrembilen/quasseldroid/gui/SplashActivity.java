@@ -37,7 +37,7 @@ public class SplashActivity extends Activity {
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.splash);
+        setContentView(R.layout.layout_splash);
         getActionBar().hide();
     }
 

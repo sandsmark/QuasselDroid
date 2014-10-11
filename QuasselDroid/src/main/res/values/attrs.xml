@@ -6,13 +6,15 @@
     <attr name="actionDisconnectIcon" format="reference" />
     <attr name="actionEditIcon" format="reference" />
     <attr name="actionUserListIcon" format="reference" />
+
     <attr name="spinnerButtonStyle" format="reference" />
-    <attr name="listItemBg" format="reference" />
-    <attr name="primaryTextAppearance" format="reference" />
-    <attr name="secondaryTextAppearance" format="reference" />
 
-    <attr name="bufferBgActive" format="reference" />
-    <attr name="bufferBgAway" format="reference" />
-    <attr name="bufferBgGone" format="reference" />
+    <attr name="ic_action_overflow" format="reference" />
 
+    <attr name="backgroundColor" format="reference" />
+    <attr name="dividerColor" format="reference" />
+
+    <attr name="textColorPrimary" format="reference" />
+    <attr name="textColorSecondary" format="reference" />
+    <attr name="textColorTertiary" format="reference" />
 </resources>

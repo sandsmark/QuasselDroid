@@ -75,7 +75,7 @@
                         android:layout_height="48dp"
                         android:layout_gravity="center_vertical"
                         style="?android:attr/borderlessButtonStyle"
-                        android:src="@drawable/ic_action_overflow_dark"
+                        android:src="?attr/ic_action_overflow"
                         />
 
                 </TableRow>
