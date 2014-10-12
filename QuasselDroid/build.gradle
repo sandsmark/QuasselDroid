@@ -17,17 +17,22 @@ dependencies {
     compile files('libs/crittercism_v3_0_7_sdkonly.jar')
     compile 'com.android.support:support-v4:19.0.+'
 }
-
+if(project.hasProperty("Android.signing")
+        && new File(project.property("Android.signing") + ".gradle").exists()) {
+    apply from: project.property("Android.signing") + ".gradle";
+}
 android {
     compileSdkVersion 19
     buildToolsVersion '19.1.0'
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 15
         targetSdkVersion 19
     }
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
         }
+    }
+    productFlavors {
     }
 }
