@@ -6,4 +6,4 @@ gen/*
 local.properties
 .gradle/*
 .idea/*
-signing.properties
+gradle.properties
