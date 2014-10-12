@@ -65,19 +65,19 @@
     <color name="buffer_away_color_dark">#3949ab</color>
     <color name="buffer_offline_color_dark">#5c6bc0</color>
 
-    <color name="nick_owner_dark">#ff7a3e0c</color>
-    <color name="nick_admin_dark">#ff180e47</color>
-    <color name="nick_operator_dark">#ff590806</color>
-    <color name="nick_halfop_dark">#ff732600</color>
-    <color name="nick_voice_dark">#ff1a3610</color>
-    <color name="nick_user_dark">#ff022c4d</color>
+    <color name="nick_owner_dark">#ff785a42</color>
+    <color name="nick_admin_dark">#ff2d2945</color>
+    <color name="nick_operator_dark">#ff572e2e</color>
+    <color name="nick_halfop_dark">#ff734b39</color>
+    <color name="nick_voice_dark">#ff283623</color>
+    <color name="nick_user_dark">#ff2a3e4d</color>
 
     <color name="chat_line_plain_dark">@android:color/primary_text_dark</color>
     <color name="chat_line_action_dark">@android:color/secondary_text_dark</color>
     <color name="chat_line_error_dark">#d63838</color>
     <color name="chat_line_highlight_dark">#ff8000</color>
     <color name="chat_line_timestamp_dark">@android:color/tertiary_text_dark</color>
-    <color name="chat_bg_action_dark">#10000000</color>
+    <color name="chat_bg_action_dark">#18ffffff</color>
 
     <color name="divider_color_dark">#333333</color>
     <color name="background_color_dark">#a0000000</color>

@@ -46,6 +46,7 @@ public class ThemeUtil {
             chatErrorColor = resources.getColor(R.color.chat_line_error_light);
             chatActionColor = resources.getColor(R.color.chat_line_action_light);
             chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_light);
+            chatHighlightColor = resources.getColor(R.color.chat_line_highlight_light);
 
             chatActionBg = resources.getColor(R.color.chat_bg_action_light);
 
@@ -60,7 +61,7 @@ public class ThemeUtil {
             drawable_buffer_gone = resources.getDrawable(R.drawable.widget_buffer_gone_light);
 
             nick_bgs = new int[] {
-                    resources.getColor(R.color.nick_admin_light),
+                    resources.getColor(R.color.nick_owner_light),
                     resources.getColor(R.color.nick_admin_light),
                     resources.getColor(R.color.nick_operator_light),
                     resources.getColor(R.color.nick_halfop_light),
@@ -74,6 +75,7 @@ public class ThemeUtil {
             chatErrorColor = resources.getColor(R.color.chat_line_error_dark);
             chatActionColor = resources.getColor(R.color.chat_line_action_dark);
             chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
+            chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
 
             chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
 
@@ -88,7 +90,7 @@ public class ThemeUtil {
             drawable_buffer_gone = resources.getDrawable(R.drawable.widget_buffer_gone_dark);
 
             nick_bgs = new int[] {
-                    resources.getColor(R.color.nick_admin_dark),
+                    resources.getColor(R.color.nick_owner_dark),
                     resources.getColor(R.color.nick_admin_dark),
                     resources.getColor(R.color.nick_operator_dark),
                     resources.getColor(R.color.nick_halfop_dark),
