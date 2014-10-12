@@ -29,6 +29,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ActionMode;
@@ -519,25 +520,40 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                            holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
+                        else
+                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
                     } else {
-                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                            holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
+                        else
+                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                            holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
+                        else
+                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_away);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                            holder.parent.setBackground(ThemeUtil.drawable_buffer_away);
+                        else
+                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_away);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                            holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
+                        else
+                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -552,9 +568,15 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             }
 
             if(entry.isPermanentlyHidden()){
-                convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_perm);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    convertView.setBackground(ThemeUtil.drawable_buffer_hidden_perm);
+                else
+                    convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_perm);
             } else if (entry.isTemporarilyHidden()) {
-                convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_temp);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    convertView.setBackground(ThemeUtil.drawable_buffer_hidden_temp);
+                else
+                    convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_temp);
             }
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
