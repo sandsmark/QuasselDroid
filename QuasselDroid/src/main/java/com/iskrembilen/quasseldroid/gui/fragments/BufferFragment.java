@@ -454,6 +454,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         public int networkId;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
