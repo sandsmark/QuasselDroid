@@ -87,6 +87,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
+    private boolean showHiddenBuffers = false;
 
     private ActionModeData actionModeData = new ActionModeData();
 
@@ -220,6 +221,10 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                         BufferHelper.permHideChannel(actionModeData.id);
                         mode.finish();
                         return true;
+                    case R.id.context_menu_unhide:
+                        BufferHelper.unhideChannel(actionModeData.id);
+                        mode.finish();
+                        return true;
                     default:
                         return false;
                 }
@@ -256,20 +261,29 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     } else if (buffer.isActive()) {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
                     } else {
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                    }
+
+                    if(buffer.isPermanentlyHidden()) {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
+                    } else if(buffer.isTemporarilyHidden()){
                         actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
+                    } else {
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(false);
                     }
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                     Network network = bufferListAdapter.getGroup(groupPosition);
@@ -329,12 +343,26 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (showHiddenBuffers) {
+            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.context_hide_hidden);
+        } else {
+            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.context_show_hidden);
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_join_channel:
                 if (bufferListAdapter.networks == null)
                     Toast.makeText(getActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
                 else showJoinChannelDialog();
+                return true;
+            case R.id.context_menu_toggle_hidden:
+                showHiddenBuffers = !showHiddenBuffers;
+                bufferListAdapter.notifyDataSetChanged();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -457,12 +485,20 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
         @Override
         public Buffer getChild(int groupPosition, int childPosition) {
-            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
+            if(showHiddenBuffers) {
+                return networks.getNetwork(groupPosition).getBuffers().getUnfilteredPos(childPosition);
+            } else {
+                return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
+            }
         }
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
+            if(showHiddenBuffers) {
+                return networks.getNetwork(groupPosition).getBuffers().getUnfilteredPos(childPosition).getInfo().id;
+            } else {
+                return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
+            }
         }
 
         @Override
@@ -515,17 +551,25 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                     holder.bufferView.setText("XXXX " + entry.getInfo().name);
             }
 
+            if(entry.isPermanentlyHidden()){
+                convertView.setBackground(ThemeUtil.drawable_buffer_hidden_perm);
+            } else if (entry.isTemporarilyHidden()) {
+                convertView.setBackground(ThemeUtil.drawable_buffer_hidden_temp);
+            }
+
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
             return convertView;
         }
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            if (networks == null) {
-                return 0;
-            } else {
-                return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
+            if (networks != null) {
+                if (showHiddenBuffers)
+                    return networks.getNetwork(groupPosition).getBuffers().getUnfilteredBufferCount();
+                else
+                    return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
             }
+            return 0;
         }
 
         @Override

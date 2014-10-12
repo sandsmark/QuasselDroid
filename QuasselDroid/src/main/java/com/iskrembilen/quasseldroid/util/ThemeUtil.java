@@ -17,7 +17,7 @@ public class ThemeUtil {
     public static int def_color;
     public static int[] nick_bgs;
     public static int[] nick_colors;
-    public static Drawable drawable_buffer_away, drawable_buffer_active, drawable_buffer_gone;
+    public static Drawable drawable_buffer_away, drawable_buffer_active, drawable_buffer_gone, drawable_buffer_hidden_temp, drawable_buffer_hidden_perm;
 
     public static void initTheme(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -56,6 +56,8 @@ public class ThemeUtil {
             bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_light);
             bufferActivityColor = resources.getColor(R.color.buffer_activity_color_light);
 
+            drawable_buffer_hidden_perm = resources.getDrawable(R.drawable.widget_buffer_hidden_perm_light);
+            drawable_buffer_hidden_temp = resources.getDrawable(R.drawable.widget_buffer_hidden_temp_light);
             drawable_buffer_active = resources.getDrawable(R.drawable.widget_buffer_active_light);
             drawable_buffer_away = resources.getDrawable(R.drawable.widget_buffer_away_light);
             drawable_buffer_gone = resources.getDrawable(R.drawable.widget_buffer_gone_light);
@@ -85,6 +87,8 @@ public class ThemeUtil {
             bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_dark);
             bufferActivityColor = resources.getColor(R.color.buffer_activity_color_dark);
 
+            drawable_buffer_hidden_perm = resources.getDrawable(R.drawable.widget_buffer_hidden_perm_dark);
+            drawable_buffer_hidden_temp = resources.getDrawable(R.drawable.widget_buffer_hidden_temp_dark);
             drawable_buffer_active = resources.getDrawable(R.drawable.widget_buffer_active_dark);
             drawable_buffer_away = resources.getDrawable(R.drawable.widget_buffer_away_dark);
             drawable_buffer_gone = resources.getDrawable(R.drawable.widget_buffer_gone_dark);

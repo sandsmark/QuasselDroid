@@ -37,6 +37,8 @@
     <color name="buffer_active_color_light">#3f51b5</color>
     <color name="buffer_away_color_light">#7986cb</color>
     <color name="buffer_offline_color_light">#c5cae9</color>
+    <color name="buffer_hidden_perm_light">#82ff0008</color>
+    <color name="buffer_hidden_temp_light">#84fffc00</color>
 
     <color name="nick_owner_light">#fff9c4</color>
     <color name="nick_admin_light">#f3e5f5</color>
@@ -64,6 +66,8 @@
     <color name="buffer_active_color_dark">#283593</color>
     <color name="buffer_away_color_dark">#3949ab</color>
     <color name="buffer_offline_color_dark">#5c6bc0</color>
+    <color name="buffer_hidden_perm_dark">#82ff0008</color>
+    <color name="buffer_hidden_temp_dark">#84fffc00</color>
 
     <color name="nick_owner_dark">#ff785a42</color>
     <color name="nick_admin_dark">#ff2d2945</color>

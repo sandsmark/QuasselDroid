@@ -84,5 +84,8 @@
     <string name="message_ssl_changed">The core SSL certificate has changed, do you trust the new one?</string>
     <string name="message_ssl_new">Received a new SSL certificate, do you trust it?</string>
     <string name="message_too_old_protocol">Protocol version not supported, Quassel core is to old</string>
+    <string name="context_unhide">Make Visible</string>
+    <string name="context_show_hidden">Show hidden Buffers</string>
+    <string name="context_hide_hidden">Hide hidden Buffers</string>
 
 </resources>
