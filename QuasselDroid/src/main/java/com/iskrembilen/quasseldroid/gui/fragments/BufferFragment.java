@@ -519,25 +519,25 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
+                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
                     } else {
-                        holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
+                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
+                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        holder.parent.setBackground(ThemeUtil.drawable_buffer_away);
+                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_away);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
+                        holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -552,9 +552,9 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             }
 
             if(entry.isPermanentlyHidden()){
-                convertView.setBackground(ThemeUtil.drawable_buffer_hidden_perm);
+                convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_perm);
             } else if (entry.isTemporarilyHidden()) {
-                convertView.setBackground(ThemeUtil.drawable_buffer_hidden_temp);
+                convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_temp);
             }
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
