@@ -30,6 +30,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -453,7 +454,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         public int networkId;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
@@ -517,45 +517,31 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 holder = (ViewHolderChild) convertView.getTag();
             }
             Buffer entry = getChild(groupPosition, childPosition);
+            Drawable parentBackgroundDrawable = null;
             switch (entry.getInfo().type) {
                 case StatusBuffer:
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                            holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
-                        else
-                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
+                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_active;
                     } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                            holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
-                        else
-                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
+                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_gone;
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                            holder.parent.setBackground(ThemeUtil.drawable_buffer_gone);
-                        else
-                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_gone);
+                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_gone;
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                            holder.parent.setBackground(ThemeUtil.drawable_buffer_away);
-                        else
-                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_away);
+                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_away;
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                            holder.parent.setBackground(ThemeUtil.drawable_buffer_active);
-                        else
-                            holder.parent.setBackgroundDrawable(ThemeUtil.drawable_buffer_active);
+                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_active;
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -570,15 +556,17 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             }
 
             if(entry.isPermanentlyHidden()){
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    convertView.setBackground(ThemeUtil.drawable_buffer_hidden_perm);
-                else
-                    convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_perm);
+                parentBackgroundDrawable = ThemeUtil.drawable_buffer_hidden_perm;
             } else if (entry.isTemporarilyHidden()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    convertView.setBackground(ThemeUtil.drawable_buffer_hidden_temp);
-                else
+                parentBackgroundDrawable =ThemeUtil.drawable_buffer_hidden_temp;
+            }
+
+            if (parentBackgroundDrawable!=null) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                     convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_temp);
+                } else {
+                    convertView.setBackground(ThemeUtil.drawable_buffer_hidden_temp);
+                }
             }
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
