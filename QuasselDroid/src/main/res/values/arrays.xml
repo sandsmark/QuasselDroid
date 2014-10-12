@@ -25,4 +25,15 @@
         <item>dark</item>
     </string-array>
 
+    <string-array name="entries_timestamp_preference">
+        <item>Always</item>
+        <item>Depending on Orientation</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="entryvalues_timestamp_preference">
+        <item>always</item>
+        <item>orientation</item>
+        <item>never</item>
+    </string-array>
+
 </resources>

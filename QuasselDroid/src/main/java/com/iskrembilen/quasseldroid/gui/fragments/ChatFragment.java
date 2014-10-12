@@ -5,8 +5,11 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -18,11 +21,13 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -84,6 +89,7 @@ public class ChatFragment extends Fragment {
     private int bufferId = -1;
     private boolean connected;
     private NetworkCollection networks;
+    private String timeFormat;
 
     public static ChatFragment newInstance() {
         return new ChatFragment();
@@ -109,6 +115,22 @@ public class ChatFragment extends Fragment {
         backlogList = (ListView) root.findViewById(R.id.chat_backlog_list_view);
         inputField = (EditText) root.findViewById(R.id.chat_input_view);
         autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
+
+        String timeType = preferences.getString(getResources().getString(R.string.preference_timestamp_seconds),"orientation");
+        if (timeType.equalsIgnoreCase("always")) {
+            timeFormat = "%02d:%02d:%02d";
+        } else if (timeType.equalsIgnoreCase("never")) {
+            timeFormat = "%02d:%02d";
+        } else if (timeType.equalsIgnoreCase("orientation")) {
+            if (getActivity().getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE) {
+                timeFormat = "%02d:%02d:%02d";
+            } else {
+                timeFormat = "%02d:%02d";
+            }
+        } else {
+            timeFormat = "%02d:%02d";
+        }
+        Log.d(TAG,"Setting time format to include seconds: "+ timeType + ", resulting format: "+ timeFormat);
 
         backlogList.setAdapter(adapter);
         backlogList.setOnScrollListener(new BacklogScrollListener(5));
@@ -447,7 +469,7 @@ public class ChatFragment extends Fragment {
 
             IrcMessage entry = this.getItem(position);
             holder.messageID = entry.messageId;
-            holder.timeView.setText(entry.getTime());
+            holder.timeView.setText(entry.getTime(timeFormat));
 
             if (!preferences.getBoolean(getString(R.string.preference_colored_text), false)) {
                 entry.content = new SpannableString(entry.content.toString());

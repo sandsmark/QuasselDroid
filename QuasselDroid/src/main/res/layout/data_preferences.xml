@@ -41,6 +41,15 @@
             android:title="Theme" />
 
         <ListPreference
+            android:defaultValue="orientation"
+            android:dialogTitle="Show Seconds in Timestamp"
+            android:entries="@array/entries_timestamp_preference"
+            android:entryValues="@array/entryvalues_timestamp_preference"
+            android:key="@string/preference_timestamp_seconds"
+            android:summary="When should the Timestamp contain seconds"
+            android:title="Timestamp" />
+
+        <ListPreference
             android:defaultValue="14"
             android:dialogTitle="Choose fontsize for the bufferlist"
             android:entries="@array/entries_fontsize_preference"

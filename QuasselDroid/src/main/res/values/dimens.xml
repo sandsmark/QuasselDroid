@@ -10,4 +10,6 @@
     <dimen name="abc_action_bar_subtitle_top_margin">-3.0dip</dimen>
     <dimen name="abc_action_bar_title_text_size">18.0dip</dimen>
     <dimen name="abc_action_button_min_width">56.0dip</dimen>
+
+    <dimen name="message_spacing">2dp</dimen>
 </resources>
