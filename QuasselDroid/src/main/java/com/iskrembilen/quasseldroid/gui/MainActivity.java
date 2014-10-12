@@ -415,9 +415,11 @@ public class MainActivity extends Activity {
                 bufferFragment = BufferFragment.newInstance();
 
                 FragmentTransaction trans = manager.beginTransaction();
+
                 if (currentFragment != null) {
                     trans.remove(currentFragment);
                 }
+
                 trans.add(R.id.main_content_container, chatFragment);
 
                 //Initialize the buffer drawer
@@ -427,6 +429,7 @@ public class MainActivity extends Activity {
 
                 //Initialize the nick drawer
                 trans.add(R.id.right_drawer, nickFragment);
+
                 trans.commit();
             }
 
@@ -497,44 +500,43 @@ public class MainActivity extends Activity {
         if (event.bufferId != -1) {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
-                openBuffer(openedBuffer);
-            }
-        }
-    }
+                drawer.closeDrawers();
 
-    private void openBuffer(int openedBuffer) {
-        drawer.closeDrawers();
+                FragmentManager manager = getFragmentManager();
+                FragmentTransaction trans = manager.beginTransaction();
+                NetworkCollection networks = NetworkCollection.getInstance();
 
-        FragmentManager manager = getFragmentManager();
-        FragmentTransaction trans = manager.beginTransaction();
-        NetworkCollection networks = NetworkCollection.getInstance();
+                Fragment current = manager.findFragmentById(R.id.right_drawer);
+                Fragment target = null;
 
-        Fragment current = manager.findFragmentById(R.id.right_drawer);
-
-        try {
-            if (current != null) {
                 if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
-                    if (detailFragment!=null) trans.replace(R.id.right_drawer, detailFragment);
+                    target = detailFragment;
                     drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
                     closeDrawer(Gravity.RIGHT);
                 } else if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.ChannelBuffer) {
-                    if (nickFragment!=null) trans.replace(R.id.right_drawer, nickFragment);
+                    target = nickFragment;
                     drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
                     closeDrawer(Gravity.RIGHT);
                 } else {
                     drawer.setDrawerLockMode(drawer.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
                     closeDrawer(Gravity.RIGHT);
                 }
+
+                if (target!=null) {
+                    if (current==null) {
+                        trans.add(R.id.right_drawer, target);
+                    } else if (current.getClass() != target.getClass()) {
+                        trans.replace(R.id.right_drawer, target);
+                    }
+                }
+
+                trans.commit();
+
+                setTitleAndMenu();
+                invalidateOptionsMenu();
             }
-            trans.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
-        setTitleAndMenu();
-        invalidateOptionsMenu();
     }
-
     @Produce
     public BufferOpenedEvent produceBufferOpenedEvent() {
         return new BufferOpenedEvent(openedBuffer);
