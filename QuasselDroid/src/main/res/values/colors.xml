@@ -28,6 +28,8 @@
     <color name="action_title_color">#ffffff</color>
     <color name="action_subtitle_color">#bebebe</color>
 
+    <color name="marker_line">#d01716</color>
+
 
     <color name="buffer_highlight_color_light">#ff9800</color>
     <color name="buffer_unread_color_light">#3f51b5</color>
