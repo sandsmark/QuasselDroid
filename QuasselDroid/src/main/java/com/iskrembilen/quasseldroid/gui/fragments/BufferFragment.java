@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.annotation.TargetApi;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -452,6 +453,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         public int networkId;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
