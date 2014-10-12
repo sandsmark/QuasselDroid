@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
         actionTitleArea = actionBar.findViewById(R.id.actionTitleArea);
         actionBar.findViewById(R.id.actionButton).setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if (getOpenDrawers()!=1) {
+                if (getOpenDrawers() != 1) {
                     openDrawer(Gravity.LEFT);
                 } else {
                     closeDrawer(Gravity.LEFT);
@@ -285,11 +285,15 @@ public class MainActivity extends Activity {
         }
 
         NetworkCollection networks = NetworkCollection.getInstance();
-        if (openedBuffer != -1 && networks != null && networks.getBufferById(openedBuffer) == null) {
-            openedBuffer = -1;
-            BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
-            drawer.closeDrawer(Gravity.RIGHT);
-            drawer.openDrawer(Gravity.LEFT);
+        if (openedBuffer != -1 && networks != null) {
+            if (networks.getBufferById(openedBuffer) == null) {
+                openedBuffer = -1;
+                BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
+                drawer.closeDrawer(Gravity.RIGHT);
+                drawer.openDrawer(Gravity.LEFT);
+            } else {
+                BusProvider.getInstance().post(new BufferOpenedEvent(openedBuffer, true));
+            }
             return;
         }
         if (isDrawerOpen && bufferFragment != null) {
@@ -471,38 +475,42 @@ public class MainActivity extends Activity {
         if (event.bufferId != -1) {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
-                drawer.closeDrawers();
-
-                FragmentManager manager = getFragmentManager();
-                FragmentTransaction trans = manager.beginTransaction();
-                NetworkCollection networks = NetworkCollection.getInstance();
-
-                Fragment current = manager.findFragmentById(R.id.right_drawer);
-
-                try {
-                    if (current != null) {
-                        if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
-                            if (detailFragment!=null) trans.replace(R.id.right_drawer, detailFragment);
-                            drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
-                            closeDrawer(Gravity.RIGHT);
-                        } else if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.ChannelBuffer) {
-                            if (nickFragment!=null) trans.replace(R.id.right_drawer, nickFragment);
-                            drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
-                            closeDrawer(Gravity.RIGHT);
-                        } else {
-                            drawer.setDrawerLockMode(drawer.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
-                            closeDrawer(Gravity.RIGHT);
-                        }
-                    }
-                    trans.commit();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                setTitleAndMenu();
-                invalidateOptionsMenu();
+                openBuffer(openedBuffer);
             }
         }
+    }
+
+    private void openBuffer(int openedBuffer) {
+        drawer.closeDrawers();
+
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction trans = manager.beginTransaction();
+        NetworkCollection networks = NetworkCollection.getInstance();
+
+        Fragment current = manager.findFragmentById(R.id.right_drawer);
+
+        try {
+            if (current != null) {
+                if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.QueryBuffer) {
+                    if (detailFragment!=null) trans.replace(R.id.right_drawer, detailFragment);
+                    drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
+                    closeDrawer(Gravity.RIGHT);
+                } else if (networks.getBufferById(openedBuffer).getInfo().type == BufferInfo.Type.ChannelBuffer) {
+                    if (nickFragment!=null) trans.replace(R.id.right_drawer, nickFragment);
+                    drawer.setDrawerLockMode(drawer.LOCK_MODE_UNLOCKED, Gravity.RIGHT);
+                    closeDrawer(Gravity.RIGHT);
+                } else {
+                    drawer.setDrawerLockMode(drawer.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
+                    closeDrawer(Gravity.RIGHT);
+                }
+            }
+            trans.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        setTitleAndMenu();
+        invalidateOptionsMenu();
     }
 
     @Produce
@@ -533,19 +541,21 @@ public class MainActivity extends Activity {
         switch (side) {
         case 0:
             showSubtitle=true;
-            actionTitleArea.setClickable(true);
             if (openedBuffer != -1) {
                 NetworkCollection networks = NetworkCollection.getInstance();
                 Buffer buffer = networks.getBufferById(openedBuffer);
                 if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer) {
                     setActionBarTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
                     showSubtitle = false;
+                    actionTitleArea.setClickable(false);
                 } else {
                     setActionBarTitle(buffer.getInfo().name);
                     subTitleSpan=buffer.getTopic();
+                    actionTitleArea.setClickable(true);
                 }
             } else {
                 setActionBarTitle(getResources().getString(R.string.app_name));
+                actionTitleArea.setClickable(false);
             }
             if (chatFragment != null) chatFragment.setUserVisibleHint(true);
             updateSubtitle();
