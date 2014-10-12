@@ -167,6 +167,36 @@ public class ChatFragment extends Fragment {
             }
         });
 
+        inputField.setOnKeyListener(new View.OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_TAB && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    onNickComplete();
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    EditText text = (EditText) v;
+                    InputHistoryHelper.tempStoreCurrentEntry(text.getText().toString());
+                    text.setText(InputHistoryHelper.getNextHistoryEntry());
+                    text.setSelection(text.getText().length());
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    EditText text = (EditText) v;
+                    if (InputHistoryHelper.isViewingHistory()) {
+                        // Currently viewing history, so progress back down towards "entry zero"
+                        text.setText(InputHistoryHelper.getPreviousHistoryEntry());
+                    } else if (!text.getText().toString().equals("")) {
+                        // Not viewing history, so push the current input text into the history and clear the input
+                        InputHistoryHelper.addHistoryEntry(text.getText().toString());
+                        text.setText("");
+                    }
+                    text.setSelection(text.getText().length());
+                    return true;
+                }
+                return false;
+            }
+        });
+
         return root;
     }
 
