@@ -13,6 +13,7 @@ public class ThemeUtil {
 
     public static int theme;
     public static int chatPlainColor, chatActionColor, chatErrorColor, chatHighlightColor, chatTimestampColor, chatActionBg;
+    public static int chatPlainResource;
     public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
     public static int def_color;
     public static int[] nick_bgs;
@@ -48,6 +49,8 @@ public class ThemeUtil {
             chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_light);
             chatHighlightColor = resources.getColor(R.color.chat_line_highlight_light);
 
+            chatPlainResource = R.color.chat_line_plain_light;
+
             chatActionBg = resources.getColor(R.color.chat_bg_action_light);
 
             bufferReadColor = resources.getColor(R.color.buffer_read_color_light);
@@ -78,6 +81,8 @@ public class ThemeUtil {
             chatActionColor = resources.getColor(R.color.chat_line_action_dark);
             chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
             chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
+
+            chatPlainResource = R.color.chat_line_plain_dark;
 
             chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
 
