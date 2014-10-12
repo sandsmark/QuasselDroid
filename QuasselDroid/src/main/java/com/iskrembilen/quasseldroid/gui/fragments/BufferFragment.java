@@ -562,12 +562,10 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 parentBackgroundDrawable =ThemeUtil.drawable_buffer_hidden_temp;
             }
 
-            if (parentBackgroundDrawable!=null) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    convertView.setBackgroundDrawable(ThemeUtil.drawable_buffer_hidden_temp);
-                } else {
-                    convertView.setBackground(ThemeUtil.drawable_buffer_hidden_temp);
-                }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                convertView.setBackgroundDrawable(parentBackgroundDrawable);
+            } else {
+                convertView.setBackground(parentBackgroundDrawable);
             }
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
