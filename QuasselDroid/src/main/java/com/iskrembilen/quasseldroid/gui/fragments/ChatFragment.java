@@ -585,7 +585,7 @@ public class ChatFragment extends Fragment {
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                 case Plain:
                 default:
-                    if (entry.isSelf()) {
+                    if (entry.isSelf() || entry.isHighlighted()) {
                         color = ThemeUtil.chatPlainColor;
                     } else {
                         color = entry.senderColor;

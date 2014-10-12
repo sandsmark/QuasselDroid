@@ -24,14 +24,14 @@ public class QuasseldroidNotificationManager {
     private Context context;
     private SharedPreferences preferences;
     private List<Integer> highlightedBuffers;
-    NotificationManager notifyManager;
+    android.app.NotificationManager notifyManager;
     private boolean connected = false;
     private Notification pendingHighlightNotification;
 
     public QuasseldroidNotificationManager(Context context) {
         this.context = context;
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notifyManager = (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         highlightedBuffers = new ArrayList<Integer>();
         //Remove any disconnect notification since we are connecting again
         notifyManager.cancel(R.id.NOTIFICATION_DISCONNECTED);
@@ -124,13 +124,13 @@ public class QuasseldroidNotificationManager {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.stat_highlight)
-                .setContentTitle(context.getText(R.string.app_name))
-                .setContentText(context.getResources().getQuantityString(R.plurals.notification_highlighted_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size()))
-                .setOngoing(true)
-                .setTicker(context.getString(R.string.notification_you_have_been_highlighted))
-                .setWhen(System.currentTimeMillis())
-                .setNumber(highlightedBuffers.size());
+            .setSmallIcon(R.drawable.stat_highlight)
+            .setContentTitle(context.getText(R.string.app_name))
+            .setContentText(context.getResources().getQuantityString(R.plurals.notification_highlighted_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size()))
+            .setOngoing(true)
+            .setTicker(context.getString(R.string.notification_you_have_been_highlighted))
+            .setWhen(System.currentTimeMillis())
+            .setNumber(highlightedBuffers.size());
 
         Intent launch = new Intent(context, MainActivity.class);
         launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

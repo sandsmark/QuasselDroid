@@ -52,6 +52,8 @@
         <item quantity="one">You have highlights on %1$d buffer</item>
         <item quantity="other">You have highlights on %1$d buffers</item>
     </plurals>
+    <string name="notification_highlighted_one_buffer">You have been highlighted on %s</string>
+    <string name="notification_highlighted_one_short">New highlight on %s</string>
 
     <string name="title_lag">Lag: %1$s%2$s</string>
     <string name="preference_show_lag">showlag</string>

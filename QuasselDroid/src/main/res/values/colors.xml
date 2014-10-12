@@ -33,7 +33,7 @@
     <color name="buffer_unread_color_light">#3f51b5</color>
     <color name="buffer_activity_color_light">#8bc34a</color>
     <color name="buffer_read_color_light">#333333</color>
-    <color name="buffer_parted_color_light">#555555</color>
+    <color name="buffer_parted_color_light">#999999</color>
     <color name="buffer_active_color_light">#3f51b5</color>
     <color name="buffer_away_color_light">#7986cb</color>
     <color name="buffer_offline_color_light">#c5cae9</color>
@@ -60,7 +60,7 @@
     <color name="buffer_unread_color_dark">#3f51b5</color>
     <color name="buffer_activity_color_dark">#8bc34a</color>
     <color name="buffer_read_color_dark">#dddddd</color>
-    <color name="buffer_parted_color_dark">#aaaaaa</color>
+    <color name="buffer_parted_color_dark">#888888</color>
     <color name="buffer_active_color_dark">#283593</color>
     <color name="buffer_away_color_dark">#3949ab</color>
     <color name="buffer_offline_color_dark">#5c6bc0</color>

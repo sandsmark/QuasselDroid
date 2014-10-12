@@ -48,7 +48,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
