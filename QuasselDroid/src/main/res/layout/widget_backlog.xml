@@ -23,7 +23,8 @@
             android:layout_margin="4dp"
             android:autoLink="web"
             android:bufferType="spannable"
-            android:text="kuschku especially since I&apos;m at a bigger University now, and one class here costs as much as my whole semester at the community college" />
+            android:text="kuschku especially since I&apos;m at a bigger University now, and one class here costs as much as my whole semester at the community college"
+            android:textIsSelectable="true" />
 
     </LinearLayout>
 
