@@ -3,11 +3,13 @@
     <item
         android:id="@+id/context_menu_part"
         android:title="@string/context_part"
-        android:orderInCategory="1"></item>
+        android:orderInCategory="1"
+        android:alphabeticShortcut="w"></item>
     <item
         android:id="@+id/context_menu_join"
         android:title="@string/context_join"
-        android:orderInCategory="2"></item>
+        android:orderInCategory="2"
+        android:alphabeticShortcut="n"></item>
     <item
         android:id="@+id/context_menu_hide_temp"
         android:title="@string/context_hide_temporarily"
