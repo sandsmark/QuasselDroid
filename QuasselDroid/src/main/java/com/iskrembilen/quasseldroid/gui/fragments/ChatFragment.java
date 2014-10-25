@@ -490,7 +490,7 @@ public class ChatFragment extends Fragment {
                     if (entry.isSelf()) {
                         color = ThemeUtil.chatPlainColor;
                     } else {
-                        color = entry.senderColor;
+                        color = entry.getSenderColor();
                     }
 
                     Spannable nickSpan = new SpannableString(entry.getNick());
@@ -525,7 +525,7 @@ public class ChatFragment extends Fragment {
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format("%s joined", nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
@@ -535,7 +535,7 @@ public class ChatFragment extends Fragment {
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format("%s left: ", nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
@@ -545,7 +545,7 @@ public class ChatFragment extends Fragment {
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format("%s quit: ", nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
@@ -555,7 +555,7 @@ public class ChatFragment extends Fragment {
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format("%s was killed: ", nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
@@ -579,13 +579,13 @@ public class ChatFragment extends Fragment {
 
                     int color_nick;
                     if (nick.equalsIgnoreCase(entry.getSender())) {
-                        color_nick = entry.senderColor;
+                        color_nick = entry.getSenderColor();
                     } else {
                         color_nick = SenderColorHelper.getSenderColor(nick);
                     }
 
                     spannable = new SpannableString(rawText);
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     spannable.setSpan(new ForegroundColorSpan(color_nick), rawText.indexOf(nick), rawText.indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
@@ -604,13 +604,13 @@ public class ChatFragment extends Fragment {
                     spannable = new SpannableString(rawText);
 
                     if (affected_nick.equalsIgnoreCase(entry.getSender())) {
-                        color_affected_nick = entry.senderColor;
+                        color_affected_nick = entry.getSenderColor();
                     } else {
                         color_affected_nick = SenderColorHelper.getSenderColor(affected_nick);
                     }
 
                     spannable.setSpan(new ForegroundColorSpan(color_affected_nick), rawText.indexOf(affected_nick), rawText.indexOf(affected_nick) + affected_nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
@@ -624,7 +624,7 @@ public class ChatFragment extends Fragment {
                     } else {
                         rawText = String.format("%s is now known as %s", entry.getNick(), entry.content.toString());
                         spannable = new SpannableString(rawText);
-                        spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
                         int color_new = SenderColorHelper.getSenderColor(entry.content.toString());
 
@@ -656,7 +656,7 @@ public class ChatFragment extends Fragment {
                     if (entry.isSelf() || entry.isHighlighted()) {
                         color = ThemeUtil.chatPlainColor;
                     } else {
-                        color = entry.senderColor;
+                        color = entry.getSenderColor();
                     }
                     holder.msgView.setTextColor(ThemeUtil.chatPlainColor);
                     holder.msgView.setTypeface(Typeface.DEFAULT);

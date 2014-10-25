@@ -24,7 +24,7 @@
     <application
         android:name="Quasseldroid"
         android:description="@string/description"
-        android:icon="@drawable/icon"
+        android:icon="@mipmap/icon"
         android:label="@string/app_name"
         android:theme="@style/Theme.Quasseldroid.Light">
         <activity

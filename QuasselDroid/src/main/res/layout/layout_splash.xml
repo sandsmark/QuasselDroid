@@ -10,7 +10,7 @@
         android:id="@+id/logo_img"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:src="@drawable/logo" />
+        android:src="@mipmap/icon" />
 
     <TextView
         android:id="@+id/introText"

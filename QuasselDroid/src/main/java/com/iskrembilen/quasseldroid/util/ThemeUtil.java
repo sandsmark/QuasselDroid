@@ -18,6 +18,7 @@ public class ThemeUtil {
     public static int def_color;
     public static int[] nick_bgs;
     public static int[] nick_colors;
+    public static double[] nick_constants;
     public static Drawable drawable_buffer_away, drawable_buffer_active, drawable_buffer_gone, drawable_buffer_hidden_temp, drawable_buffer_hidden_perm;
 
     public static void initTheme(Context context) {
@@ -73,6 +74,8 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_voice_light),
                     resources.getColor(R.color.nick_user_light)
             };
+
+            nick_constants = new double[] {0.7, 0.5};
         } else if (themeName.equals("dark")) {
             theme = R.style.Theme_Quasseldroid_Dark;
 
@@ -106,6 +109,8 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_voice_dark),
                     resources.getColor(R.color.nick_user_dark)
             };
+
+            nick_constants = new double[] {1.0, 0.8};
         } else {
             setTheme(context, "light");
         }
