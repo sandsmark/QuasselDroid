@@ -260,6 +260,7 @@ public class MainActivity extends Activity {
         if (content==null || content.toString().trim().equalsIgnoreCase("")) {
             this.subTitle.setVisibility(View.GONE);
             this.subTitle.setText(null);
+            actionTitleArea.setClickable(false);
         } else {
             this.subTitle.setVisibility(View.VISIBLE);
             this.subTitle.setText(content);
@@ -451,12 +452,16 @@ public class MainActivity extends Activity {
 
     public void updateSubtitle() {
         if (showLag && showSubtitle && subTitleSpan!=null && subTitleSpan.toString().trim()!="") {
+            actionTitleArea.setClickable(true);
             setActionBarSubtitle(TextUtils.concat(Helper.formatLatency(lag, getResources()), " — ", subTitleSpan));
         } else if (showLag) {
+            actionTitleArea.setClickable(false);
             setActionBarSubtitle(Helper.formatLatency(lag, getResources()));
         } else if (showSubtitle) {
+            actionTitleArea.setClickable(true);
             setActionBarSubtitle(subTitleSpan);
         } else {
+            actionTitleArea.setClickable(false);
             setActionBarSubtitle(null);
         }
     }
@@ -571,15 +576,13 @@ public class MainActivity extends Activity {
                 if (buffer.getInfo().type == BufferInfo.Type.StatusBuffer) {
                     setActionBarTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
                     showSubtitle = false;
-                    actionTitleArea.setClickable(false);
                 } else {
                     setActionBarTitle(buffer.getInfo().name);
                     subTitleSpan=buffer.getTopic();
-                    actionTitleArea.setClickable(true);
                 }
             } else {
                 setActionBarTitle(getResources().getString(R.string.app_name));
-                actionTitleArea.setClickable(false);
+                showSubtitle = false;
             }
             if (chatFragment != null) chatFragment.setUserVisibleHint(true);
             updateSubtitle();
@@ -587,7 +590,6 @@ public class MainActivity extends Activity {
             break;
         case 1:
             showSubtitle = false;
-            actionTitleArea.setClickable(false);
             setMenuVisible(bufferFragment);
             if (chatFragment != null) chatFragment.setUserVisibleHint(false);
             setActionBarTitle(getResources().getString(R.string.app_name));
@@ -596,7 +598,6 @@ public class MainActivity extends Activity {
             break;
         case 2:
             showSubtitle=true;
-            actionTitleArea.setClickable(true);
             if (openedBuffer != -1) {
                 NetworkCollection networks = NetworkCollection.getInstance();
                 Buffer buffer = networks.getBufferById(openedBuffer);
@@ -609,6 +610,7 @@ public class MainActivity extends Activity {
                 }
             } else {
                 setActionBarTitle(getResources().getString(R.string.app_name));
+                showSubtitle = false;
             }
             if (chatFragment != null) chatFragment.setUserVisibleHint(true);
             updateSubtitle();
@@ -617,7 +619,6 @@ public class MainActivity extends Activity {
             break;
         default:
             showSubtitle = false;
-            actionTitleArea.setClickable(false);
             setMenuVisible(null);
             setActionBarTitle(getResources().getString(R.string.app_name));
             updateSubtitle();

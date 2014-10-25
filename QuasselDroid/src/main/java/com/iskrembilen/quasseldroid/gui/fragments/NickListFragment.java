@@ -295,6 +295,7 @@ public class NickListFragment extends Fragment {
             topic = buffer.getTopic();
             MainActivity mainActivity = ((MainActivity)getActivity());
             mainActivity.subTitleSpan = new SpannableString(topic);
+            mainActivity.updateSubtitle();
             observer.setBuffer(buffer);
         }
     }
