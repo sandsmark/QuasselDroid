@@ -36,6 +36,7 @@
     <string name="preference_reconnect_on_wifi_only">reconnect_on_wifi_only</string>
     <string name="preference_reconnect_on_metered">reconnect_on_metered</string>
     <string name="preference_timestamp_seconds">timestamp_seconds</string>
+    <string name="preference_detailed_actions">detailed_actions</string>
     <string name="context_part">Part</string>
     <string name="context_join">Join</string>
     <string name="context_delete">Delete</string>

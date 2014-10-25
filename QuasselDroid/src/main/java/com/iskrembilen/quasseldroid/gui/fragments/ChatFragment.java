@@ -105,7 +105,6 @@ public class ChatFragment extends Fragment {
         if (savedInstanceState != null && savedInstanceState.containsKey(BUFFER_ID)) {
             bufferId = savedInstanceState.getInt(BUFFER_ID);
         }
-
     }
 
     @Override
@@ -458,7 +457,7 @@ public class ChatFragment extends Fragment {
 
             //Set separator line here
             if (position != (getCount() - 1) && (buffer.getMarkerLineMessage() == getItem(position).messageId || (buffer.isMarkerLineFiltered() && getItem(position).messageId < buffer.getMarkerLineMessage() && getItem(position + 1).messageId > buffer.getMarkerLineMessage()))) {
-                holder.separatorView.getLayoutParams().height = 1;
+                holder.separatorView.getLayoutParams().height = Math.round(getResources().getDimension(R.dimen.markerline_height));
             } else {
                 holder.separatorView.getLayoutParams().height = 0;
             }
@@ -477,6 +476,8 @@ public class ChatFragment extends Fragment {
 
             Spannable spannable;
             String rawText;
+            String nick;
+            boolean detailedActions = preferences.getBoolean(getString(R.string.preference_detailed_actions),false);
 
             switch (entry.type) {
                 case Action:
@@ -521,7 +522,9 @@ public class ChatFragment extends Fragment {
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     break;
                 case Join:
-                    spannable = new SpannableString(String.format("%s joined", entry.getNick()));
+                    nick = entry.getNick();
+                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
+                    spannable = new SpannableString(String.format("%s joined", nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
@@ -529,7 +532,9 @@ public class ChatFragment extends Fragment {
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Part:
-                    spannable = new SpannableString(String.format("%s left: ", entry.getNick()));
+                    nick = entry.getNick();
+                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
+                    spannable = new SpannableString(String.format("%s left: ", nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
@@ -537,7 +542,9 @@ public class ChatFragment extends Fragment {
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Quit:
-                    spannable = new SpannableString(String.format("%s quit: ", entry.getNick()));
+                    nick = entry.getNick();
+                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
+                    spannable = new SpannableString(String.format("%s quit: ", nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
@@ -545,15 +552,17 @@ public class ChatFragment extends Fragment {
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kill:
-                    spannable = new SpannableString(String.format("%s was killed: ", entry.getNick()));
-                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nick = entry.getNick();
+                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
+                    spannable = new SpannableString(String.format("%s was killed: ", nick));
+                    spannable.setSpan(new ForegroundColorSpan(entry.senderColor), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
                     holder.parent.setBackgroundColor(ThemeUtil.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kick:
-                    String nick = "";
+                    nick = "";
                     String reason = "";
 
                     int nickEnd = entry.content.toString().indexOf(" ");
@@ -563,6 +572,8 @@ public class ChatFragment extends Fragment {
                     } else {
                         nick = entry.content.toString();
                     }
+
+                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
 
                     rawText = String.format("%s has kicked %s from %s: %s", entry.getNick(), nick, entry.bufferInfo.name, reason);
 
@@ -583,7 +594,12 @@ public class ChatFragment extends Fragment {
                     break;
                 case Mode:
                     int color_affected_nick;
-                    String affected_nick = entry.content.toString().substring(entry.content.toString().lastIndexOf(" "), entry.content.length()).trim();
+                    String affected_nick;
+                    if (entry.content.toString().startsWith("#")) {
+                        affected_nick = entry.content.toString().substring(entry.content.toString().lastIndexOf(" "), entry.content.toString().trim().length()).trim();
+                    } else {
+                        affected_nick = entry.content.toString().substring(0, entry.content.toString().lastIndexOf(" ")).trim();
+                    }
                     rawText = String.format(String.format("Mode %s by %s", entry.content.toString(), entry.getNick()));
                     spannable = new SpannableString(rawText);
 

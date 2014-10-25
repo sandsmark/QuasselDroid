@@ -66,6 +66,12 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="@string/preference_detailed_actions"
+            android:summary="Show the User’s nick@host in each server action (kick/join/etc.)"
+            android:title="Show User Hostnames" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="@string/preference_show_lag"
             android:summary="Show the core latency"
             android:title="Show Lag" />

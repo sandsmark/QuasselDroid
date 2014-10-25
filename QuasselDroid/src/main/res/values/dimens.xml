@@ -12,4 +12,5 @@
     <dimen name="abc_action_button_min_width">56.0dip</dimen>
 
     <dimen name="message_spacing">2dp</dimen>
+    <dimen name="markerline_height">1dp</dimen>
 </resources>
