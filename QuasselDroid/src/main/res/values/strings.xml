@@ -82,6 +82,8 @@
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_join">Join</string>
     <string name="dialog_action_save">Save</string>
+    <string name="dialog_action_close">Close</string>
+    <string name="dialog_action_edit">Edit</string>
 
     <string name="message_ssl_changed">The core SSL certificate has changed, do you trust the new one?</string>
     <string name="message_ssl_new">Received a new SSL certificate, do you trust it?</string>

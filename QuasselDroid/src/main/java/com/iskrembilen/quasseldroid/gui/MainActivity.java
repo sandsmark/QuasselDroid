@@ -71,7 +71,7 @@ import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
-import com.iskrembilen.quasseldroid.gui.fragments.TopicDialog;
+import com.iskrembilen.quasseldroid.gui.fragments.TopicViewDialog;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.CustomDrawerToggle;
@@ -250,9 +250,9 @@ public class MainActivity extends Activity {
     private void showDetailPopup() {
         String topic = null;
         if (nickFragment!=null)
-            topic = ((NickListFragment)nickFragment).topic;
+            topic = ((NickListFragment) nickFragment).topic;
         if (topic!=null)
-            TopicDialog.newInstance(topic).show(getFragmentManager(),TAG);
+            TopicViewDialog.newInstance(topic, openedBuffer).show(getFragmentManager(),TAG);
     }
 
     private void setActionBarSubtitle(CharSequence content) {
@@ -260,7 +260,6 @@ public class MainActivity extends Activity {
         if (content==null || content.toString().trim().equalsIgnoreCase("")) {
             this.subTitle.setVisibility(View.GONE);
             this.subTitle.setText(null);
-            actionTitleArea.setClickable(false);
         } else {
             this.subTitle.setVisibility(View.VISIBLE);
             this.subTitle.setText(content);
@@ -452,13 +451,13 @@ public class MainActivity extends Activity {
 
     public void updateSubtitle() {
         if (showLag && showSubtitle && subTitleSpan!=null && subTitleSpan.toString().trim()!="") {
-            actionTitleArea.setClickable(true);
+            actionTitleArea.setClickable(true&&subTitleSpan!=null);
             setActionBarSubtitle(TextUtils.concat(Helper.formatLatency(lag, getResources()), " — ", subTitleSpan));
         } else if (showLag) {
             actionTitleArea.setClickable(false);
             setActionBarSubtitle(Helper.formatLatency(lag, getResources()));
         } else if (showSubtitle) {
-            actionTitleArea.setClickable(true);
+            actionTitleArea.setClickable(true&&subTitleSpan!=null);
             setActionBarSubtitle(subTitleSpan);
         } else {
             actionTitleArea.setClickable(false);
