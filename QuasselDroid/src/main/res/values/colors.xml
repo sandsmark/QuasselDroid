@@ -32,13 +32,13 @@
 
 
     <color name="buffer_highlight_color_light">#ff9800</color>
-    <color name="buffer_unread_color_light">#3f51b5</color>
+    <color name="buffer_unread_color_light">#455ede</color>
     <color name="buffer_activity_color_light">#8bc34a</color>
     <color name="buffer_read_color_light">#333333</color>
     <color name="buffer_parted_color_light">#999999</color>
-    <color name="buffer_active_color_light">#3f51b5</color>
-    <color name="buffer_away_color_light">#7986cb</color>
-    <color name="buffer_offline_color_light">#c5cae9</color>
+    <color name="buffer_active_color_light">#4e6cef</color>
+    <color name="buffer_away_color_light">#738ffe</color>
+    <color name="buffer_offline_color_light">#afbfff</color>
     <color name="buffer_hidden_perm_light">#82ff0008</color>
     <color name="buffer_hidden_temp_light">#84fffc00</color>
 
@@ -61,13 +61,13 @@
 
 
     <color name="buffer_highlight_color_dark">#ff9800</color>
-    <color name="buffer_unread_color_dark">#3f51b5</color>
+    <color name="buffer_unread_color_dark">#455ede</color>
     <color name="buffer_activity_color_dark">#8bc34a</color>
     <color name="buffer_read_color_dark">#dddddd</color>
     <color name="buffer_parted_color_dark">#888888</color>
-    <color name="buffer_active_color_dark">#283593</color>
-    <color name="buffer_away_color_dark">#3949ab</color>
-    <color name="buffer_offline_color_dark">#5c6bc0</color>
+    <color name="buffer_active_color_dark">#4e6cef</color>
+    <color name="buffer_away_color_dark">#738ffe</color>
+    <color name="buffer_offline_color_dark">#afbfff</color>
     <color name="buffer_hidden_perm_dark">#82ff0008</color>
     <color name="buffer_hidden_temp_dark">#84fffc00</color>
 
