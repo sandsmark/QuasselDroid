@@ -100,6 +100,10 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         return new BufferFragment();
     }
 
+    public void finishActionMode() {
+        if (actionModeData!=null && actionModeData.actionMode!=null) actionModeData.actionMode.finish();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,6 +188,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             }
 
         };
+
         actionModeData.actionModeCallbackBuffer = new ActionMode.Callback() {
 
             @Override

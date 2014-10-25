@@ -209,6 +209,7 @@ public class MainActivity extends Activity {
                 if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
                     BusProvider.getInstance().post(new UpdateReadBufferEvent());
                 }
+                ((BufferFragment)bufferFragment).finishActionMode();
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -505,6 +506,7 @@ public class MainActivity extends Activity {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
                 drawer.closeDrawers();
+                ((BufferFragment)bufferFragment).finishActionMode();
 
                 FragmentManager manager = getFragmentManager();
                 FragmentTransaction trans = manager.beginTransaction();
