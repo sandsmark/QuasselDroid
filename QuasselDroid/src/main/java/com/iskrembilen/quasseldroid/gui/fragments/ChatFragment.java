@@ -594,23 +594,26 @@ public class ChatFragment extends Fragment {
                     break;
                 case Mode:
                     int color_affected_nick;
-                    String affected_nick;
-                    if (entry.content.toString().startsWith("#")) {
-                        affected_nick = entry.content.toString().substring(entry.content.toString().lastIndexOf(" "), entry.content.toString().trim().length()).trim();
-                    } else {
-                        affected_nick = entry.content.toString().substring(0, entry.content.toString().lastIndexOf(" ")).trim();
-                    }
+                    String affected_nick = null;
+
                     rawText = String.format(String.format("Mode %s by %s", entry.content.toString(), entry.getNick()));
                     spannable = new SpannableString(rawText);
 
-                    if (affected_nick.equalsIgnoreCase(entry.getSender())) {
-                        color_affected_nick = entry.getSenderColor();
-                    } else {
-                        color_affected_nick = SenderColorHelper.getSenderColor(affected_nick);
+                    if (entry.content.toString().trim().length()-entry.content.toString().trim().replaceAll(" ","").length()==2 && entry.content.toString().startsWith("#")) {
+                        affected_nick = entry.content.toString().substring(entry.content.toString().lastIndexOf(" "), entry.content.toString().trim().length()).trim();
+                    } else if (!entry.content.toString().startsWith("#")&&entry.content.toString().trim().length()-entry.content.toString().trim().replaceAll(" ","").length()==1){
+                        affected_nick = entry.content.toString().substring(0, entry.content.toString().lastIndexOf(" ")).trim();
                     }
 
-                    spannable.setSpan(new ForegroundColorSpan(color_affected_nick), rawText.indexOf(affected_nick), rawText.indexOf(affected_nick) + affected_nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    if (affected_nick!=null) {
+                        if (affected_nick.equalsIgnoreCase(entry.getSender())) {
+                            color_affected_nick = entry.getSenderColor();
+                        } else {
+                            color_affected_nick = SenderColorHelper.getSenderColor(affected_nick);
+                        }
+                        spannable.setSpan(new ForegroundColorSpan(color_affected_nick), rawText.indexOf(affected_nick), rawText.indexOf(affected_nick) + affected_nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    }
 
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.chatActionColor);
