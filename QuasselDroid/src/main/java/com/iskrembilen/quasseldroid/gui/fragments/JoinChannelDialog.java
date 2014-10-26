@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
@@ -54,9 +55,13 @@ public class JoinChannelDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String channelName = channelNameField.getText().toString().trim();
-                        String networkSelected = (String) networkSpinner.getSelectedItem();
-                        BusProvider.getInstance().post(new JoinChannelEvent(networkSelected, channelName));
-                        dismiss();
+                        if (channelName != null && !channelName.trim().equalsIgnoreCase("")) {
+                            String networkSelected = (String) networkSpinner.getSelectedItem();
+                            BusProvider.getInstance().post(new JoinChannelEvent(networkSelected, channelName));
+                            dismiss();
+                        } else {
+                            Toast.makeText(getActivity(),R.string.dialog_message_join_no_channel,Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }).setNegativeButton(getResources().getString(R.string.dialog_action_cancel), new DialogInterface.OnClickListener() {
             @Override
