@@ -60,6 +60,7 @@ public class QuasseldroidNotificationManager {
                     .setContentTitle(context.getText(R.string.app_name))
                     .setContentText(context.getText(R.string.notification_connected))
                     .setOngoing(true)
+                    .setPriority(NotificationCompat.PRIORITY_MIN)
                     .setWhen(System.currentTimeMillis());
 
             if (withPhysicalNotifications && preferences.getBoolean(context.getString(R.string.preference_notify_connect), false)) {
@@ -101,6 +102,7 @@ public class QuasseldroidNotificationManager {
                 .setContentTitle(context.getText(R.string.app_name))
                 .setContentText(context.getText(R.string.notification_connecting))
                 .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setWhen(System.currentTimeMillis());
 
         Intent launch = new Intent(context, MainActivity.class);
@@ -130,6 +132,7 @@ public class QuasseldroidNotificationManager {
             .setOngoing(true)
             .setTicker(context.getString(R.string.notification_you_have_been_highlighted))
             .setWhen(System.currentTimeMillis())
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setNumber(highlightedBuffers.size());
 
         Intent launch = new Intent(context, MainActivity.class);
@@ -174,6 +177,7 @@ public class QuasseldroidNotificationManager {
                 .setContentTitle(context.getText(R.string.app_name))
                 .setContentText(context.getText(R.string.notification_disconnected))
                 .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setWhen(System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this notification
