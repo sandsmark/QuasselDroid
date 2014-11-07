@@ -48,5 +48,5 @@ Authors
     (GUI, fixing minor bugs)
 
 
-Homepage: http://github.com/sandsmark/QuasselDroid
+Homepage: http://github.com/sandsmark/QuasselDroid  
 Beta Builds: https://plus.google.com/communities/104094956084217666662
