@@ -34,9 +34,8 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 
     CustomTrustManager(CoreConnection coreConnection) throws GeneralSecurityException {
         this.coreConnection = coreConnection;
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        tmf.init(ks);
+        tmf.init((KeyStore)null);
 
         TrustManager tms[] = tmf.getTrustManagers();
 
