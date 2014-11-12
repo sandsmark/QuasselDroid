@@ -662,6 +662,7 @@ public final class CoreConnection {
         Log.d(TAG, "Disconnected so closing connection");
         errorMessage = informationMessage;
         closeConnection();
+        service.reconnect(errorMessage);
     }
 
     /**
