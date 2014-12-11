@@ -17,7 +17,9 @@
         android:paddingBottom="8dp"
         android:duplicateParentState="false"
         android:gravity="left|center_vertical"
-        android:text="#quasseldroid"
+        android:text="#quasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidv"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>
