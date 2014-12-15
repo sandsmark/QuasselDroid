@@ -1,12 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:gravity="center_vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout android:gravity="left|center" android:orientation="horizontal" android:id="@+id/actionButton" android:layout_width="wrap_content" android:layout_height="fill_parent" android:background="@drawable/selectable_background_quasseldroid" android:paddingRight="3.0dip">
-        <ImageView android:layout_gravity="left|center" android:id="@+id/upIndicator" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_drawer" />
-        <ImageView android:layout_gravity="center" android:id="@+id/upIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="-4.0dip" android:layout_marginTop="@dimen/abc_action_bar_icon_vertical_padding" android:layout_marginBottom="@dimen/abc_action_bar_icon_vertical_padding" android:src="@mipmap/icon_flat" android:scaleType="fitCenter" android:adjustViewBounds="true" android:contentDescription="" />
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/action_bar"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:minHeight="?attr/actionBarSize"
+    android:background="?attr/colorPrimary"
+    app:theme="@style/Theme.QuasselDroid.Material.Light"
+    elevation="5dp">
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/actionTitleArea"
+        android:paddingLeft="3.0dp"
+        android:paddingStart="3.0dp"
+        android:paddingRight="3.0dp"
+        android:paddingEnd="3.0dp"
+        android:layout_width="fill_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/selectable_background_quasseldroid"
+        android:gravity="start|center_vertical">
+        <TextView
+            android:textSize="@dimen/abc_action_bar_title_text_size"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:singleLine="true"
+            android:text="@string/app_name"
+            android:textColor="#ffffffff"/>
+        <TextView
+            android:textSize="@dimen/abc_action_bar_subtitle_text_size"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:id="@+id/subtitle"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/abc_action_bar_subtitle_top_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+            android:textColor="#b3ffffff"/>
     </LinearLayout>
-    <LinearLayout android:gravity="left|center" android:orientation="vertical" android:id="@+id/actionTitleArea" android:paddingLeft="3.0dip" android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/selectable_background_quasseldroid">
-        <TextView android:textSize="@dimen/abc_action_bar_title_text_size" android:ellipsize="end" android:gravity="center_vertical" android:id="@+id/title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="true" android:text="@string/app_name" android:textColor="@color/action_title_color"/>
-        <TextView android:textSize="@dimen/abc_action_bar_subtitle_text_size" android:ellipsize="end" android:id="@+id/subtitle" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/abc_action_bar_subtitle_top_margin" android:singleLine="true" android:textColor="@color/action_subtitle_color"/>
-    </LinearLayout>
-</LinearLayout>
+</android.support.v7.widget.Toolbar>

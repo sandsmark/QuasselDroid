@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -55,6 +56,7 @@ public class PreferenceView extends PreferenceActivity {
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getResources().getString(R.string.preference_theme))) {
                     ThemeUtil.setTheme(PreferenceView.this, sharedPreferences.getString(key, ""));
+                    Log.d(getClass().getCanonicalName(),"Theme has changed: "+sharedPreferences.getString(key, ""));
                 }
 
             }

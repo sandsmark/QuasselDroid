@@ -1,6 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
 import android.app.Application;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -13,6 +14,7 @@ import com.squareup.otto.Subscribe;
 public class Quasseldroid extends Application {
     private static final String TAG = Quasseldroid.class.getSimpleName();
     public static Status status;
+    public Bundle savedInstanceState;
 
     @Override
     public void onCreate() {

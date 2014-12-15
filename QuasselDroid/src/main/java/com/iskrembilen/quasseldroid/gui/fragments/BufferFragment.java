@@ -24,9 +24,6 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.annotation.TargetApi;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -34,6 +31,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -44,14 +44,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
-import android.widget.ExpandableListView.OnGroupCollapseListener;
-import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.idunnololz.widgets.AnimatedExpandableListView;
+import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
@@ -73,17 +72,18 @@ import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 
-public class BufferFragment extends Fragment implements OnGroupExpandListener, OnChildClickListener, OnGroupCollapseListener {
+public class BufferFragment extends Fragment {
 
     public static final String BUFFER_ID_EXTRA = "bufferid";
     public static final String BUFFER_NAME_EXTRA = "buffername";
-    private static final String TAG = BufferFragment.class.getSimpleName();
-    private static final String ITEM_POSITION_KEY = "itempos";
 
+    private static final String TAG = BufferFragment.class.getSimpleName();
+
+    private static final String ITEM_POSITION_KEY = "itempos";
     private static final String LIST_POSITION_KEY = "listpos";
 
     BufferListAdapter bufferListAdapter;
-    ExpandableListView bufferList;
+    AnimatedExpandableListView bufferList;
 
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -93,8 +93,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
     private boolean showHiddenBuffers = false;
 
     private ActionModeData actionModeData = new ActionModeData();
-
-    private int openedBufferId = -1;
 
     public static BufferFragment newInstance() {
         return new BufferFragment();
@@ -129,7 +127,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_buffers, container, false);
-        bufferList = (ExpandableListView) root.findViewById(R.id.buffer_list);
+        bufferList = (AnimatedExpandableListView) root.findViewById(R.id.buffer_list);
         return root;
     }
 
@@ -139,9 +137,28 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         bufferListAdapter = new BufferListAdapter(getActivity());
         bufferList.setAdapter(bufferListAdapter);
         bufferList.setDividerHeight(0);
-        bufferList.setOnChildClickListener(this);
-        bufferList.setOnGroupCollapseListener(this);
-        bufferList.setOnGroupExpandListener(this);
+
+        bufferList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                if (bufferList.isGroupExpanded(groupPosition)) {
+                    bufferList.collapseGroupWithAnimation(groupPosition);
+                    bufferListAdapter.getGroup(groupPosition).setOpen(false);
+                } else {
+                    bufferList.expandGroupWithAnimation(groupPosition);
+                    bufferListAdapter.getGroup(groupPosition).setOpen(true);
+                }
+                return true;
+            }
+        });
+
+        bufferList.setOnChildClickListener(new OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
+                return true;
+            }
+        });
 
         initActionMenu();
 
@@ -203,7 +220,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false; // Return false if nothing is done
+                return false;
             }
 
             @Override
@@ -211,37 +228,32 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                 switch (item.getItemId()) {
                     case R.id.context_menu_join:
                         BufferHelper.joinChannel(actionModeData.id, bufferListAdapter.networks);
-                        mode.finish();
-                        return true;
+                        break;
                     case R.id.context_menu_part:
                         BufferHelper.partChannel(actionModeData.id, bufferListAdapter.networks);
-                        mode.finish();
-                        return true;
+                        break;
                     case R.id.context_menu_delete:
                         BufferHelper.showDeleteConfirmDialog(getActivity(), actionModeData.id);
-                        mode.finish();
-                        return true;
+                        break;
                     case R.id.context_menu_hide_temp:
                         BufferHelper.tempHideChannel(actionModeData.id);
-                        mode.finish();
-                        return true;
+                        break;
                     case R.id.context_menu_hide_perm:
                         BufferHelper.permHideChannel(actionModeData.id);
-                        mode.finish();
-                        return true;
+                        break;
                     case R.id.context_menu_unhide:
                         BufferHelper.unhideChannel(actionModeData.id);
-                        mode.finish();
-                        return true;
+                        break;
                     default:
                         return false;
                 }
+                mode.finish();
+                return true;
             }
 
             // Called when the user exits the action mode
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                //				actionModeData.listItem.setActivated(false);
                 actionModeData.actionMode = null;
                 bufferList.setItemChecked(actionModeData.index, false);
             }
@@ -252,7 +264,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
                                            int position, long id) {
-                ((ExpandableListView) parent).setItemChecked(position, true);
+                ((AnimatedExpandableListView) parent).setItemChecked(position, true);
 
                 long packedPosition = bufferList.getExpandableListPosition(position);
                 int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
@@ -340,7 +352,6 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         View itemView = bufferList.getChildAt(0);
         restoreItemPosition = itemView == null ? 0 : itemView.getTop();
         outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
-
     }
 
 
@@ -396,24 +407,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         newFragment.show(ft, "dialog");
     }
 
-    @Override
-    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-        openBuffer(bufferListAdapter.getChild(groupPosition, childPosition));
-        return true;
-    }
-
-    @Override
-    public void onGroupExpand(int groupPosition) {
-        bufferListAdapter.getGroup(groupPosition).setOpen(true);
-    }
-
-    @Override
-    public void onGroupCollapse(int groupPosition) {
-        bufferListAdapter.getGroup(groupPosition).setOpen(false);
-    }
-
     private void openBuffer(Buffer buffer) {
-        this.openedBufferId = buffer.getInfo().id;
         buffer.setTemporarilyHidden(false);
         BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
     }
@@ -460,7 +454,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public class BufferListAdapter extends BaseExpandableListAdapter implements Observer {
+    public class BufferListAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
 
@@ -479,7 +473,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                     if (getGroup(group).isOpen()) bufferList.expandGroup(group);
                     else bufferList.collapseGroup(group);
                 }
-                bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
+                //bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
             }
         }
 
@@ -511,9 +505,9 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+        public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             ViewHolderChild holder = null;
-            if (convertView == null) {
+            if (convertView == null || !(convertView.getTag() instanceof ViewHolderChild)) {
                 convertView = inflater.inflate(R.layout.widget_buffer_single, null);
                 holder = new ViewHolderChild();
                 holder.parent = convertView;
@@ -536,12 +530,12 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
-                    if (!bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
+                    if (!networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
                         parentBackgroundDrawable = ThemeUtil.drawable_buffer_gone;
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
-                    } else if (bufferListAdapter.networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
+                    } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
                         parentBackgroundDrawable = ThemeUtil.drawable_buffer_away;
                         if (!entry.isActive()) {
                             entry.setActive(true);
@@ -578,7 +572,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         }
 
         @Override
-        public int getChildrenCount(int groupPosition) {
+        public int getRealChildrenCount(int groupPosition) {
             if (networks != null) {
                 if (showHiddenBuffers)
                     return networks.getNetwork(groupPosition).getBuffers().getUnfilteredBufferCount();
@@ -610,7 +604,7 @@ public class BufferFragment extends Fragment implements OnGroupExpandListener, O
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
             ViewHolderGroup holder = null;
-            if (convertView == null) {
+            if (convertView == null || !(convertView.getTag() instanceof ViewHolderGroup)) {
                 convertView = inflater.inflate(R.layout.widget_buffer_group, null);
                 holder = new ViewHolderGroup();
                 holder.statusView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);

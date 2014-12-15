@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#3f51b5</color>
+    <color name="primary_dark">#303f9f</color>
+    <color name="accent">#009688</color>
+
     <color name="logo_text_color">#0686fd</color>
 
     <color name="nick_owner_color">#fbc02d</color>
@@ -36,11 +40,12 @@
     <color name="buffer_activity_color_light">#8bc34a</color>
     <color name="buffer_read_color_light">#333333</color>
     <color name="buffer_parted_color_light">#999999</color>
-    <color name="buffer_active_color_light">#4e6cef</color>
-    <color name="buffer_away_color_light">#738ffe</color>
-    <color name="buffer_offline_color_light">#afbfff</color>
+    <color name="buffer_active_color_light">#1976d2</color>
+    <color name="buffer_away_color_light">#42a5f5</color>
+    <color name="buffer_offline_color_light">#b3e5fc</color>
     <color name="buffer_hidden_perm_light">#82ff0008</color>
     <color name="buffer_hidden_temp_light">#84fffc00</color>
+    <color name="buffer_invalid_light">#ff333333</color>
 
     <color name="nick_owner_light">#fff9c4</color>
     <color name="nick_admin_light">#f3e5f5</color>
@@ -57,8 +62,6 @@
     <color name="chat_bg_action_light">#10000000</color>
 
     <color name="divider_color_light">#e5e5e5</color>
-    <color name="background_color_light">#a0ffffff</color>
-
 
     <color name="buffer_highlight_color_dark">#ff9800</color>
     <color name="buffer_unread_color_dark">#455ede</color>
@@ -70,6 +73,7 @@
     <color name="buffer_offline_color_dark">#afbfff</color>
     <color name="buffer_hidden_perm_dark">#82ff0008</color>
     <color name="buffer_hidden_temp_dark">#84fffc00</color>
+    <color name="buffer_invalid_dark">#ffcccccc</color>
 
     <color name="nick_owner_dark">#ff785a42</color>
     <color name="nick_admin_dark">#ff2d2945</color>
@@ -86,5 +90,4 @@
     <color name="chat_bg_action_dark">#18ffffff</color>
 
     <color name="divider_color_dark">#333333</color>
-    <color name="background_color_dark">#a0000000</color>
 </resources>

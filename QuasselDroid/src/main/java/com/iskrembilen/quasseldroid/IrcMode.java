@@ -10,11 +10,11 @@ public enum IrcMode {
      * Declare in order of rank, this way values() will naturally
      * return the different modes based on rank
      */
-    OWNER("Owner", "q", "s", "●"),
-    ADMIN("Admin", "a", "s",  "●"),
-    OPERATOR("Operator", "o", "s",  "●"),
-    HALF_OPERATOR("Half-Op", "h", "s",  "●"),
-    VOICE("Voiced", "v", "",  "●"),
+    OWNER("Owner", "q", "s", "•"),
+    ADMIN("Admin", "a", "s",  "•"),
+    OPERATOR("Operator", "o", "s",  "•"),
+    HALF_OPERATOR("Half-Op", "h", "s",  "•"),
+    VOICE("Voiced", "v", "",  "•"),
     USER("User", "", "s",  ""); //This will work as a catch-all for unknown modes
 
     public final String modeName;

@@ -1,7 +1,7 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.SpannableString;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -294,8 +294,7 @@ public class NickListFragment extends Fragment {
         if (buffer != null) {
             topic = buffer.getTopic();
             MainActivity mainActivity = ((MainActivity)getActivity());
-            mainActivity.subTitleSpan = new SpannableString(topic);
-            mainActivity.updateSubtitle();
+            mainActivity.getSupportActionBar().setSubtitle(topic);
             observer.setBuffer(buffer);
         }
     }

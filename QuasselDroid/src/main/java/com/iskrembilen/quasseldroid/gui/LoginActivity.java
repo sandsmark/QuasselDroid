@@ -25,7 +25,6 @@ package com.iskrembilen.quasseldroid.gui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,7 +35,9 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,7 +60,7 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
-import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog;
+import com.iskrembilen.quasseldroid.gui.dialogs.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
@@ -71,7 +72,7 @@ import android.util.Log;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends FragmentActivity implements Observer, LoginProgressDialog.Callbacks {
+public class LoginActivity extends ActionBarActivity implements Observer, LoginProgressDialog.Callbacks {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -225,6 +226,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
         if (ThemeUtil.theme != currentTheme) {
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            finish();
             startActivity(intent);
         }
     }
@@ -425,7 +427,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
 
             startService(connectIntent);
 
-            LoginProgressDialog.newInstance().show(getFragmentManager(), "dialog");
+            LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
         }
     };
 
@@ -439,7 +441,7 @@ public class LoginActivity extends FragmentActivity implements Observer, LoginPr
     }
 
     private void dismissLoginDialog() {
-        DialogFragment dialog = ((DialogFragment) getFragmentManager().findFragmentByTag("dialog"));
+        DialogFragment dialog = ((DialogFragment) getSupportFragmentManager().findFragmentByTag("dialog"));
         if (dialog != null) {
             dialog.dismiss();
         }

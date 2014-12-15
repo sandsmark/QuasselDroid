@@ -5,125 +5,86 @@
         <item name="android:background">@drawable/selectable_background_quasseldroid</item>
     </style>
 
-    <style name="ListChoiceBackgroundIndicator"></style>
-
-    <style name="Theme.Quasseldroid.Light" parent="@android:style/Theme.Holo.Light.DarkActionBar">
-        <item name="android:actionBarItemBackground">@drawable/selectable_background_quasseldroid
-        </item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
-        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Quasseldroid</item>
-        <item name="android:actionDropDownStyle">@style/DropDownNav.Quasseldroid</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Solid.Quasseldroid</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_quasseldroid</item>
-        <item name="android:actionModeSplitBackground">
-            @drawable/cab_background_bottom_quasseldroid
-        </item>
-        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Quasseldroid
-        </item>
-
-        <!-- Light.DarkActionBar specific -->
-        <item name="android:actionBarWidgetTheme">@style/Theme.Quasseldroid.Widget.Dark</item>
-        <item name="android:actionOverflowButtonStyle">@style/QuasselDroid.OverFlow</item>
+    <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
 
         <item name="spinnerButtonStyle">@style/SpinnerButton.Light</item>
         <item name="dividerColor">@color/divider_color_light</item>
-        <item name="backgroundColor">@color/background_color_light</item>
+        <item name="backgroundColor">@color/background_material_light</item>
         <item name="textColorPrimary">@android:color/primary_text_light</item>
         <item name="textColorSecondary">@android:color/secondary_text_light</item>
         <item name="textColorTertiary">@android:color/tertiary_text_light</item>
-
         <item name="ic_action_overflow">@drawable/ic_action_overflow_dark</item>
     </style>
 
-    <style name="Theme.Quasseldroid.Dark" parent="@android:style/Theme.Holo">
-        <item name="android:actionBarItemBackground">@drawable/selectable_background_quasseldroid
-        </item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
-        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Quasseldroid</item>
-        <item name="android:actionDropDownStyle">@style/DropDownNav.Quasseldroid</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Solid.Quasseldroid</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_quasseldroid</item>
-        <item name="android:actionModeSplitBackground">
-            @drawable/cab_background_bottom_quasseldroid
-        </item>
-        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Quasseldroid
-        </item>
-        <item name="android:actionBarWidgetTheme">@style/Theme.Quasseldroid.Widget.Dark</item>
-        <item name="android:actionOverflowButtonStyle">@style/QuasselDroid.OverFlow</item>
-        <item name="dividerColor">@color/divider_color_dark</item>
-        <item name="backgroundColor">@color/background_color_dark</item>
+    <style name="Theme.QuasselDroid.Material.Dark.NoActionBar" parent="Theme.AppCompat.NoActionBar">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
 
+        <item name="spinnerButtonStyle">@style/SpinnerButton.Dark</item>
+        <item name="dividerColor">@color/divider_color_dark</item>
+        <item name="backgroundColor">@color/background_material_dark</item>
         <item name="textColorPrimary">@android:color/primary_text_dark</item>
         <item name="textColorSecondary">@android:color/secondary_text_dark</item>
         <item name="textColorTertiary">@android:color/tertiary_text_dark</item>
-
         <item name="ic_action_overflow">@drawable/ic_action_overflow</item>
     </style>
 
-    <style name="ActionBar.Solid.Quasseldroid" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_solid_quasseldroid</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_quasseldroid</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_quasseldroid</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.Quasseldroid</item>
-        <item name="android:icon">@mipmap/icon_flat</item>
-        <item name="android:titleTextStyle">@style/ActionBar.TitleTextStyle</item>
+    <style name="Theme.QuasselDroid.Material.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="spinnerButtonStyle">@style/SpinnerButton.Light</item>
+        <item name="dividerColor">@color/divider_color_light</item>
+        <item name="backgroundColor">@color/background_material_light</item>
+        <item name="textColorPrimary">@android:color/primary_text_light</item>
+        <item name="textColorSecondary">@android:color/secondary_text_light</item>
+        <item name="textColorTertiary">@android:color/tertiary_text_light</item>
+        <item name="ic_action_overflow">@drawable/ic_action_overflow_dark</item>
     </style>
 
-    <style name="ActionBar.Transparent.Quasseldroid" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">@drawable/ab_transparent_quasseldroid</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.Quasseldroid</item>
-    </style>
+    <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.AppCompat">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
 
-    <style name="PopupMenu.Quasseldroid.Light" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
-        <item name="android:textColor">@android:color/secondary_text_light</item>
-    </style>
-
-    <style name="PopupMenu.Quasseldroid.Dark" parent="@android:style/Widget.Holo.ListPopupWindow">
-        <item name="android:textColor">@android:color/secondary_text_dark</item>
-    </style>
-
-    <style name="DropDownListView.Quasseldroid" parent="@android:style/Widget.Holo.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_quasseldroid</item>
-    </style>
-
-    <style name="ActionBarTabStyle.Quasseldroid" parent="@android:style/Widget.Holo.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_quasseldroid</item>
-    </style>
-
-    <style name="DropDownNav.Quasseldroid" parent="@android:style/Widget.Holo.Spinner">
-        <item name="android:background">@drawable/spinner_background_ab_quasseldroid</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_quasseldroid</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_quasseldroid</item>
-    </style>
-
-    <style name="ProgressBar.Quasseldroid" parent="@android:style/Widget.Holo.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_quasseldroid</item>
-    </style>
-
-    <style name="ActionButton.CloseMode.Quasseldroid" parent="@android:style/Widget.Holo.ActionButton.CloseMode">
-        <item name="android:background">@drawable/widget_cab_done</item>
-    </style>
-
-    <style name="ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-        <item name="android:textColor">@android:color/primary_text_dark</item>
-    </style>
-
-    <style name="Theme.Quasseldroid.Widget.Light" parent="@android:style/Theme.Holo">
-        <item name="android:popupMenuStyle">@style/PopupMenu.Quasseldroid.Light</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
-    </style>
-
-    <style name="Theme.Quasseldroid.Widget.Dark" parent="@android:style/Theme.Holo">
-        <item name="android:popupMenuStyle">@style/PopupMenu.Quasseldroid.Dark</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Quasseldroid</item>
+        <item name="spinnerButtonStyle">@style/SpinnerButton.Dark</item>
+        <item name="dividerColor">@color/divider_color_dark</item>
+        <item name="backgroundColor">@color/background_material_dark</item>
+        <item name="textColorPrimary">@android:color/primary_text_dark</item>
+        <item name="textColorSecondary">@android:color/secondary_text_dark</item>
+        <item name="textColorTertiary">@android:color/tertiary_text_dark</item>
+        <item name="ic_action_overflow">@drawable/ic_action_overflow</item>
     </style>
 
     <style name="QuasselDroid.OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_action_overflow</item>
     </style>
 
-    <style name="SpinnerButton.Light" parent="@android:style/Widget.Holo.Light.Spinner" />
+    <style name="PopupMenu.Quasseldroid.Light" parent="@style/Widget.AppCompat.Light.ListPopupWindow"/>
+    <style name="PopupMenu.Quasseldroid.Dark" parent="@style/Widget.AppCompat.ListPopupWindow"/>
 
+    <style name="SpinnerButton.Light" parent="@android:style/Widget.Holo.Light.Spinner" />
     <style name="SpinnerButton.Dark" parent="@android:style/Widget.Holo.Spinner" />
 
 </resources>

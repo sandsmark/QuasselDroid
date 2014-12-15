@@ -1,8 +1,5 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -12,6 +9,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -44,6 +44,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;

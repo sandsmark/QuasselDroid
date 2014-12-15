@@ -11,7 +11,7 @@ import com.iskrembilen.quasseldroid.R;
 
 public class ThemeUtil {
 
-    public static int theme;
+    public static int theme, theme_noactionbar;
     public static int chatPlainColor, chatActionColor, chatErrorColor, chatHighlightColor, chatTimestampColor, chatActionBg;
     public static int chatPlainResource;
     public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
@@ -20,6 +20,7 @@ public class ThemeUtil {
     public static int[] nick_colors;
     public static double[] nick_constants;
     public static Drawable drawable_buffer_away, drawable_buffer_active, drawable_buffer_gone, drawable_buffer_hidden_temp, drawable_buffer_hidden_perm;
+    public static int contextMenuStyle;
 
     public static void initTheme(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -42,7 +43,8 @@ public class ThemeUtil {
         def_color = resources.getColor(R.color.nick_user_color);
 
         if (themeName.equals("light")) {
-            theme = R.style.Theme_Quasseldroid_Light;
+            theme = R.style.Theme_QuasselDroid_Material_Light;
+            theme_noactionbar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar;
 
             chatPlainColor = resources.getColor(R.color.chat_line_plain_light);
             chatErrorColor = resources.getColor(R.color.chat_line_error_light);
@@ -77,7 +79,8 @@ public class ThemeUtil {
 
             nick_constants = new double[] {0.7, 0.5};
         } else if (themeName.equals("dark")) {
-            theme = R.style.Theme_Quasseldroid_Dark;
+            theme = R.style.Theme_QuasselDroid_Material_Dark;
+            theme_noactionbar = R.style.Theme_QuasselDroid_Material_Dark_NoActionBar;
 
             chatPlainColor = resources.getColor(R.color.chat_line_plain_dark);
             chatErrorColor = resources.getColor(R.color.chat_line_error_dark);

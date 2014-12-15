@@ -1,11 +1,11 @@
-package com.iskrembilen.quasseldroid.gui.fragments;
+package com.iskrembilen.quasseldroid.gui.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 
 import com.iskrembilen.quasseldroid.R;
 
