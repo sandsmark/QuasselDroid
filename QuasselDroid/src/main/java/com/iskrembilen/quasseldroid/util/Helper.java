@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import com.iskrembilen.quasseldroid.R;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 
 public class Helper {
 
@@ -21,5 +22,9 @@ public class Helper {
         }
         return String.format(res.getString(R.string.title_lag), latency, unit);
     }
+
+    /*public static Map<String,String> parseModeChange(String modechange) {
+
+    }*/
 
 }

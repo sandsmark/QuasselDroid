@@ -12,14 +12,10 @@ import com.iskrembilen.quasseldroid.R;
 public class ThemeUtil {
 
     public static int theme, theme_noactionbar;
-    public static int chatPlainColor, chatActionColor, chatErrorColor, chatHighlightColor, chatTimestampColor, chatActionBg;
-    public static int chatPlainResource;
-    public static int bufferPartedColor, bufferHighlightColor, bufferUnreadColor, bufferActivityColor, bufferReadColor;
     public static int def_color;
     public static int[] nick_bgs;
     public static int[] nick_colors;
     public static double[] nick_constants;
-    public static Drawable drawable_buffer_away, drawable_buffer_active, drawable_buffer_gone, drawable_buffer_hidden_temp, drawable_buffer_hidden_perm;
     public static int contextMenuStyle;
 
     public static void initTheme(Context context) {
@@ -46,27 +42,26 @@ public class ThemeUtil {
             theme = R.style.Theme_QuasselDroid_Material_Light;
             theme_noactionbar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar;
 
-            chatPlainColor = resources.getColor(R.color.chat_line_plain_light);
-            chatErrorColor = resources.getColor(R.color.chat_line_error_light);
-            chatActionColor = resources.getColor(R.color.chat_line_action_light);
-            chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_light);
-            chatHighlightColor = resources.getColor(R.color.chat_line_highlight_light);
+            color.chatPlain = resources.getColor(R.color.chat_line_plain_light);
+            color.chatError = resources.getColor(R.color.chat_line_error_light);
+            color.chatAction = resources.getColor(R.color.chat_line_action_light);
+            color.chatTimestamp = resources.getColor(R.color.chat_line_timestamp_light);
+            color.chatHighlight = resources.getColor(R.color.chat_line_highlight_light);
 
-            chatPlainResource = R.color.chat_line_plain_light;
+            color.chatActionBg = resources.getColor(R.color.chat_bg_action_light);
+            color.chatPlainBg = R.color.chat_line_plain_light;
 
-            chatActionBg = resources.getColor(R.color.chat_bg_action_light);
+            color.bufferRead = resources.getColor(R.color.buffer_read_color_light);
+            color.bufferParted = resources.getColor(R.color.buffer_parted_color_light);
+            color.bufferHighlight = resources.getColor(R.color.buffer_highlight_color_light);
+            color.bufferUnread = resources.getColor(R.color.buffer_unread_color_light);
+            color.bufferActivity = resources.getColor(R.color.buffer_activity_color_light);
 
-            bufferReadColor = resources.getColor(R.color.buffer_read_color_light);
-            bufferPartedColor = resources.getColor(R.color.buffer_parted_color_light);
-            bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color_light);
-            bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_light);
-            bufferActivityColor = resources.getColor(R.color.buffer_activity_color_light);
-
-            drawable_buffer_hidden_perm = resources.getDrawable(R.drawable.widget_buffer_hidden_perm_light);
-            drawable_buffer_hidden_temp = resources.getDrawable(R.drawable.widget_buffer_hidden_temp_light);
-            drawable_buffer_active = resources.getDrawable(R.drawable.widget_buffer_active_light);
-            drawable_buffer_away = resources.getDrawable(R.drawable.widget_buffer_away_light);
-            drawable_buffer_gone = resources.getDrawable(R.drawable.widget_buffer_gone_light);
+            color.bufferStateTemp = resources.getColor(R.color.buffer_status_temp_light);
+            color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_light);
+            color.bufferStateActive = resources.getColor(R.color.buffer_status_active_light);
+            color.bufferStateAway = resources.getColor(R.color.buffer_status_away_light);
+            color.bufferStateParted = resources.getColor(R.color.buffer_status_parted_light);
 
             nick_bgs = new int[] {
                     resources.getColor(R.color.nick_owner_light),
@@ -82,27 +77,26 @@ public class ThemeUtil {
             theme = R.style.Theme_QuasselDroid_Material_Dark;
             theme_noactionbar = R.style.Theme_QuasselDroid_Material_Dark_NoActionBar;
 
-            chatPlainColor = resources.getColor(R.color.chat_line_plain_dark);
-            chatErrorColor = resources.getColor(R.color.chat_line_error_dark);
-            chatActionColor = resources.getColor(R.color.chat_line_action_dark);
-            chatTimestampColor = resources.getColor(R.color.chat_line_timestamp_dark);
-            chatHighlightColor = resources.getColor(R.color.chat_line_highlight_dark);
+            color.chatPlain = resources.getColor(R.color.chat_line_plain_dark);
+            color.chatError = resources.getColor(R.color.chat_line_error_dark);
+            color.chatAction = resources.getColor(R.color.chat_line_action_dark);
+            color.chatTimestamp = resources.getColor(R.color.chat_line_timestamp_dark);
+            color.chatHighlight = resources.getColor(R.color.chat_line_highlight_dark);
 
-            chatPlainResource = R.color.chat_line_plain_dark;
+            color.chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
+            color.chatPlainBg = R.color.chat_line_plain_dark;
 
-            chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
+            color.bufferRead = resources.getColor(R.color.buffer_read_color_dark);
+            color.bufferParted = resources.getColor(R.color.buffer_parted_color_dark);
+            color.bufferHighlight = resources.getColor(R.color.buffer_highlight_color_dark);
+            color.bufferUnread = resources.getColor(R.color.buffer_unread_color_dark);
+            color.bufferActivity = resources.getColor(R.color.buffer_activity_color_dark);
 
-            bufferReadColor = resources.getColor(R.color.buffer_read_color_dark);
-            bufferPartedColor = resources.getColor(R.color.buffer_parted_color_dark);
-            bufferHighlightColor = resources.getColor(R.color.buffer_highlight_color_dark);
-            bufferUnreadColor = resources.getColor(R.color.buffer_unread_color_dark);
-            bufferActivityColor = resources.getColor(R.color.buffer_activity_color_dark);
-
-            drawable_buffer_hidden_perm = resources.getDrawable(R.drawable.widget_buffer_hidden_perm_dark);
-            drawable_buffer_hidden_temp = resources.getDrawable(R.drawable.widget_buffer_hidden_temp_dark);
-            drawable_buffer_active = resources.getDrawable(R.drawable.widget_buffer_active_dark);
-            drawable_buffer_away = resources.getDrawable(R.drawable.widget_buffer_away_dark);
-            drawable_buffer_gone = resources.getDrawable(R.drawable.widget_buffer_gone_dark);
+            color.bufferStateTemp = resources.getColor(R.color.buffer_status_temp_dark);
+            color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_dark);
+            color.bufferStateActive = resources.getColor(R.color.buffer_status_active_dark);
+            color.bufferStateAway = resources.getColor(R.color.buffer_status_away_dark);
+            color.bufferStateParted = resources.getColor(R.color.buffer_status_parted_dark);
 
             nick_bgs = new int[] {
                     resources.getColor(R.color.nick_owner_dark),
@@ -117,6 +111,31 @@ public class ThemeUtil {
         } else {
             setTheme(context, "light");
         }
+    }
+
+    public static class color {
+        public static int
+                chatPlain,
+                chatAction,
+                chatError,
+                chatHighlight,
+                chatTimestamp,
+                chatActionBg,
+                chatPlainBg;
+
+        public static int
+                bufferParted,
+                bufferHighlight,
+                bufferUnread,
+                bufferActivity,
+                bufferRead;
+
+        public static int
+                bufferStateTemp,
+                bufferStatePerm,
+                bufferStateActive,
+                bufferStateAway,
+                bufferStateParted;
     }
 
     public static final int getNickColor(IrcMode mode) {

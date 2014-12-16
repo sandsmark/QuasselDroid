@@ -25,11 +25,12 @@ import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class NickListFragment extends Fragment {
+public class NickListFragment extends Fragment implements Serializable {
     private NicksAdapter adapter;
     private ExpandableListView list;
     private int bufferId = -1;
@@ -159,9 +160,9 @@ public class NickListFragment extends Fragment {
 
             holder.nickView.setText(entry.nick);
             if (entry.away) {
-                holder.nickView.setTextColor(ThemeUtil.bufferPartedColor);
+                holder.nickView.setTextColor(ThemeUtil.color.bufferParted);
             } else {
-                holder.nickView.setTextColor(ThemeUtil.bufferReadColor);
+                holder.nickView.setTextColor(ThemeUtil.color.bufferRead);
             }
 
             holder.nickView.setOnClickListener(new View.OnClickListener() {

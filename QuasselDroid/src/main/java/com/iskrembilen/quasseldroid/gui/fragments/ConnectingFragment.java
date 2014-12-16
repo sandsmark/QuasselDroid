@@ -13,7 +13,9 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 
-public class ConnectingFragment extends Fragment {
+import java.io.Serializable;
+
+public class ConnectingFragment extends Fragment implements Serializable {
 
     private TextView progressTextView;
 

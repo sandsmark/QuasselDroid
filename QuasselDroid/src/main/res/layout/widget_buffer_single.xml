@@ -4,22 +4,26 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
-
+    
+    <View
+        android:id="@+id/buffer_status"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_gravity="start|center_vertical"
+        android:background="@color/buffer_status_active_light"/>
     <TextView
         android:id="@+id/buffer_list_item_name"
-        android:layout_width="0dip"
-        android:layout_height="match_parent"
-        android:layout_gravity="left|fill_vertical"
-        android:layout_weight="1"
-        android:paddingLeft="16dp"
-        android:paddingRight="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:duplicateParentState="false"
-        android:gravity="left|center_vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
         android:text="#quasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidquasseldroidv"
         android:ellipsize="end"
         android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="start|center_vertical"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"/>
 
 </LinearLayout>

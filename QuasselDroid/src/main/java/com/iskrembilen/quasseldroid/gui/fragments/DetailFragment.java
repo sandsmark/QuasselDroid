@@ -19,10 +19,11 @@ import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.squareup.otto.Subscribe;
 
+import java.io.Serializable;
 import java.util.Observable;
 import java.util.Observer;
 
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements Serializable {
     private final String TAG = NickListFragment.class.getSimpleName();
     private int bufferId = -1;
     private NetworkCollection networks;

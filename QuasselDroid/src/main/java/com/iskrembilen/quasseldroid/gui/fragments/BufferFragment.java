@@ -54,6 +54,7 @@ import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -72,7 +73,7 @@ import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 
-public class BufferFragment extends Fragment {
+public class BufferFragment extends Fragment implements Serializable {
 
     public static final String BUFFER_ID_EXTRA = "bufferid";
     public static final String BUFFER_NAME_EXTRA = "buffername";
@@ -445,6 +446,7 @@ public class BufferFragment extends Fragment {
 
     public static class ViewHolderChild {
         public TextView bufferView;
+        public View stateView;
         public View parent;
     }
 
@@ -453,7 +455,6 @@ public class BufferFragment extends Fragment {
         public int networkId;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public class BufferListAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
@@ -512,6 +513,7 @@ public class BufferFragment extends Fragment {
                 holder = new ViewHolderChild();
                 holder.parent = convertView;
                 holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
+                holder.stateView = convertView.findViewById(R.id.buffer_status);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderChild) convertView.getTag();
@@ -523,25 +525,25 @@ public class BufferFragment extends Fragment {
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_active;
+                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateActive);
                     } else {
-                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_gone;
+                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateParted);
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_gone;
+                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateParted);
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_away;
+                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateAway);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        parentBackgroundDrawable = ThemeUtil.drawable_buffer_active;
+                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateActive);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -556,15 +558,9 @@ public class BufferFragment extends Fragment {
             }
 
             if(entry.isPermanentlyHidden()){
-                parentBackgroundDrawable = ThemeUtil.drawable_buffer_hidden_perm;
+                holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStatePerm);
             } else if (entry.isTemporarilyHidden()) {
-                parentBackgroundDrawable =ThemeUtil.drawable_buffer_hidden_temp;
-            }
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                convertView.setBackgroundDrawable(parentBackgroundDrawable);
-            } else {
-                convertView.setBackground(parentBackgroundDrawable);
+                holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateTemp);
             }
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);

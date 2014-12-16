@@ -57,6 +57,7 @@
         <item name="textColorSecondary">@android:color/secondary_text_light</item>
         <item name="textColorTertiary">@android:color/tertiary_text_light</item>
         <item name="ic_action_overflow">@drawable/ic_action_overflow_dark</item>
+        <!--<item name="android:selectableItemBackgroundBorderless">@drawable/ripple_selector</item>-->
     </style>
 
     <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.AppCompat">

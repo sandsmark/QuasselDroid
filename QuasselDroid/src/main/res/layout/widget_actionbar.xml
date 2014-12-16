@@ -18,7 +18,6 @@
         android:paddingEnd="3.0dp"
         android:layout_width="fill_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@drawable/selectable_background_quasseldroid"
         android:gravity="start|center_vertical">
         <TextView
             android:textSize="@dimen/abc_action_bar_title_text_size"

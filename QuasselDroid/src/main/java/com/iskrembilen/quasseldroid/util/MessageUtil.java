@@ -257,7 +257,7 @@ public class MessageUtil {
                 color = R.color.ircmessage_gray;
                 break;
             default:
-                color = ThemeUtil.chatPlainResource;
+                color = ThemeUtil.color.chatPlainBg;
         }
         return color;
     }

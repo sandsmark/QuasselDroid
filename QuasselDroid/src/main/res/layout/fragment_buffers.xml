@@ -10,8 +10,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:choiceMode="singleChoice"
-        android:divider="@android:drawable/divider_horizontal_bright"
-        android:dividerHeight="1dp"
-        android:childDivider="@android:drawable/divider_horizontal_bright" />
+        android:dividerHeight="0dip"/>
 
 </LinearLayout>

@@ -30,6 +30,8 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -64,6 +66,7 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
@@ -85,6 +88,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String BUFFER_STATE = "buffer_state";
+    private static final String DRAWER_SELECTION = "drawer_selection";
     private static final String DRAWER_STATE = "drawer_state";
 
     SharedPreferences preferences;
@@ -115,7 +119,7 @@ public class MainActivity extends ActionBarActivity {
         currentTheme = ThemeUtil.theme_noactionbar;
         setContentView(R.layout.layout_main);
 
-        actionbar = new ClickableActionBar((Toolbar) findViewById(R.id.action_bar));
+        actionbar = new ClickableActionBar(getApplicationContext(),(Toolbar) findViewById(R.id.action_bar));
         setSupportActionBar(actionbar.getWrappedToolbar());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         actionbar.setOnTitleClickListener(new View.OnClickListener() {
@@ -140,6 +144,10 @@ public class MainActivity extends ActionBarActivity {
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View drawerView) {
                 manager.setWindowProperties(manager.getOpenDrawers(drawer));
+                if (drawerView.getId() == R.id.left_drawer && openedBuffer != -1) {
+                    BusProvider.getInstance().post(new UpdateReadBufferEvent());
+                }
+                ((BufferFragment) manager.bufferFragment).finishActionMode();
                 setTitleAndMenu();
             }
 
@@ -177,12 +185,8 @@ public class MainActivity extends ActionBarActivity {
         super.onPostCreate(savedInstanceState);
 
         if (((Quasseldroid) getApplication()).savedInstanceState!=null) {
-            savedInstanceState = ((Quasseldroid) getApplication()).savedInstanceState;
+            getState(((Quasseldroid) getApplication()).savedInstanceState);
 
-            if (savedInstanceState.containsKey(BUFFER_STATE))
-                openedBuffer = savedInstanceState.getInt(BUFFER_STATE);
-            if (savedInstanceState.containsKey(DRAWER_STATE))
-                openedDrawer = savedInstanceState.getInt(DRAWER_STATE);
             Log.d(TAG,"Loaded state: BUFFER="+openedBuffer+"; DRAWER="+openedDrawer);
 
             ((Quasseldroid) getApplication()).savedInstanceState = null;
@@ -190,6 +194,13 @@ public class MainActivity extends ActionBarActivity {
 
         // Sync the toggle state after onRestoreInstanceState has occurred.
         extensibleDrawerToggle.drawerToggle.syncState();
+    }
+
+    void getState(Bundle in) {
+        if (in.containsKey(BUFFER_STATE))
+            openedBuffer = in.getInt(BUFFER_STATE);
+        if (in.containsKey(DRAWER_SELECTION))
+            openedDrawer = in.getInt(DRAWER_SELECTION);
     }
 
     @Override
@@ -206,7 +217,7 @@ public class MainActivity extends ActionBarActivity {
         );
 
         if (ThemeUtil.theme_noactionbar != currentTheme) {
-            Log.d(TAG,"Changing theme");
+            Log.d(TAG, "Changing theme");
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             finish();
@@ -223,21 +234,27 @@ public class MainActivity extends ActionBarActivity {
         if (Quasseldroid.status == Status.Disconnected) {
             returnToLogin();
             return;
+        } else if (Quasseldroid.status == Status.Connected) {
+            loadBufferAndDrawerState();
         }
+        hideKeyboard(drawer);
+    }
 
+    private void loadBufferAndDrawerState() {
         NetworkCollection networks = NetworkCollection.getInstance();
-        if (openedBuffer != -1 && networks != null) {
-            if (networks.getBufferById(openedBuffer) == null) {
+        if (networks != null) {
+            if (openedBuffer == -1 || networks.getBufferById(openedBuffer) == null) {
+                Log.d(TAG, "Loading state: Empty");
                 openedBuffer = -1;
                 BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
                 drawer.closeDrawer(Gravity.END);
                 drawer.openDrawer(Gravity.START);
             } else {
+                Log.d(TAG, "Loading state: "+openedBuffer);
+                manager.openDrawer(openedDrawer);
                 BusProvider.getInstance().post(new BufferOpenedEvent(openedBuffer, true));
             }
         }
-        manager.openDrawer(openedDrawer);
-        hideKeyboard(drawer);
     }
 
     @Override
@@ -276,7 +293,7 @@ public class MainActivity extends ActionBarActivity {
 
     Bundle storeState(Bundle in) {
         in.putInt(BUFFER_STATE, openedBuffer);
-        in.putInt(DRAWER_STATE, manager.getOpenDrawers(extensibleDrawerToggle.drawer));
+        in.putInt(DRAWER_SELECTION, manager.getOpenDrawers(extensibleDrawerToggle.drawer));
         return in;
     }
 
@@ -327,11 +344,15 @@ public class MainActivity extends ActionBarActivity {
         Fragment currentFragment = fm.findFragmentById(R.id.main_content_container);
         if (event.done) {
             manager.init();
+
+            loadBufferAndDrawerState();
+
+            hideKeyboard(drawer);
+            setTitleAndMenu();
         } else if (currentFragment == null || currentFragment.getClass() != ConnectingFragment.class) {
             Log.d(TAG, "Showing progress");
             showInitProgress();
         }
-        setTitleAndMenu();
     }
 
     @Subscribe
@@ -491,13 +512,24 @@ public class MainActivity extends ActionBarActivity {
         Fragment detailFragment;
         Fragment bufferFragment;
 
-        Map<Integer,Fragment> drawers = new HashMap<Integer,Fragment>();
+        HashMap<Integer,Fragment> drawers = new HashMap<Integer,Fragment>();
+
+        void cleanup() {
+            setMainFragment(null);
+            setPanelFragment(Gravity.END, null);
+            setPanelFragment(Gravity.START, null);
+
+            chatFragment = null;
+            nickFragment = null;
+            detailFragment = null;
+            bufferFragment = null;
+        }
 
         void preInit() {
-            chatFragment = ChatFragment.newInstance();
-            nickFragment = NickListFragment.newInstance();
-            detailFragment = DetailFragment.newInstance();
-            bufferFragment = BufferFragment.newInstance();
+            if (chatFragment==null) chatFragment = ChatFragment.newInstance();
+            if (nickFragment==null) nickFragment = NickListFragment.newInstance();
+            if (detailFragment==null) detailFragment = DetailFragment.newInstance();
+            if (bufferFragment==null) bufferFragment = BufferFragment.newInstance();
         }
 
         void init() {
@@ -508,22 +540,27 @@ public class MainActivity extends ActionBarActivity {
         }
 
         void initMainFragment() {
+            setMainFragment(chatFragment);
+            manager.lockDrawer(Gravity.LEFT, false);
+        }
+
+        void setMainFragment(Fragment fragment) {
             FragmentManager fm = getSupportFragmentManager();
             Fragment currentFragment = fm.findFragmentById(R.id.main_content_container);
-            if (currentFragment == null || currentFragment.getClass() != ChatFragment.class) {
+            if (currentFragment == null || currentFragment.getClass() != fragment.getClass()) {
                 FragmentTransaction trans = fm.beginTransaction();
                 if (currentFragment != null) {
                     trans.remove(currentFragment);
                 }
-                trans.add(R.id.main_content_container,chatFragment);
+                trans.add(R.id.main_content_container,fragment);
                 trans.commit();
             }
-            manager.lockDrawer(Gravity.LEFT, false);
         }
 
         void setPanelFragment(int side, Fragment fragment) {
             int id = (side == Gravity.START) ? R.id.left_drawer : R.id.right_drawer;
-            String tag = (side==Gravity.END) ? "LEFT" : "RIGHT";
+            String tag = (side==Gravity.START) ? "LEFT" : "RIGHT";
+
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
             Fragment currentFragment = (drawers.containsKey(id)) ? drawers.get(id) : null;
@@ -531,7 +568,7 @@ public class MainActivity extends ActionBarActivity {
             String a = (currentFragment == null) ? "NULL" : currentFragment.getClass().getCanonicalName();
             String b = (fragment == null) ? "NULL" : fragment.getClass().getCanonicalName();
 
-            if (a == b) {
+            if (currentFragment == fragment) {
             } else if (fragment == null && currentFragment != null) {
                 ft.remove(currentFragment);
                 drawers.put(id,null);
@@ -625,9 +662,12 @@ public class MainActivity extends ActionBarActivity {
 
     class ClickableActionBar {
         Toolbar wrappedToolbar;
+        Context context;
 
-        ClickableActionBar(Toolbar toolbar) {
+        ClickableActionBar(Context context, Toolbar toolbar) {
+            this.context = context;
             this.wrappedToolbar = toolbar;
+            wrappedToolbar.findViewById(R.id.actionTitleArea).setBackground(getSelectedItemDrawable());
         }
 
         public Toolbar getWrappedToolbar() {
@@ -671,6 +711,14 @@ public class MainActivity extends ActionBarActivity {
 
         public void setTitleClickable(boolean clickability) {
             wrappedToolbar.findViewById(R.id.actionTitleArea).setClickable(clickability);
+        }
+
+        Drawable getSelectedItemDrawable() {
+            int[] attrs = new int[]{R.attr.selectableItemBackground};
+            TypedArray ta = context.obtainStyledAttributes(attrs);
+            Drawable selectedItemDrawable = ta.getDrawable(0);
+            ta.recycle();
+            return selectedItemDrawable;
         }
     }
 

@@ -40,11 +40,11 @@
     <color name="buffer_activity_color_light">#8bc34a</color>
     <color name="buffer_read_color_light">#333333</color>
     <color name="buffer_parted_color_light">#999999</color>
-    <color name="buffer_active_color_light">#1976d2</color>
-    <color name="buffer_away_color_light">#42a5f5</color>
-    <color name="buffer_offline_color_light">#b3e5fc</color>
-    <color name="buffer_hidden_perm_light">#82ff0008</color>
-    <color name="buffer_hidden_temp_light">#84fffc00</color>
+    <color name="buffer_status_active_light">#2962ff</color>
+    <color name="buffer_status_away_light">#82b1ff</color>
+    <color name="buffer_status_parted_light">#888888</color>
+    <color name="buffer_status_perm_light">#7f0004</color>
+    <color name="buffer_status_temp_light">#7f7e00</color>
     <color name="buffer_invalid_light">#ff333333</color>
 
     <color name="nick_owner_light">#fff9c4</color>
@@ -68,11 +68,11 @@
     <color name="buffer_activity_color_dark">#8bc34a</color>
     <color name="buffer_read_color_dark">#dddddd</color>
     <color name="buffer_parted_color_dark">#888888</color>
-    <color name="buffer_active_color_dark">#4e6cef</color>
-    <color name="buffer_away_color_dark">#738ffe</color>
-    <color name="buffer_offline_color_dark">#afbfff</color>
-    <color name="buffer_hidden_perm_dark">#82ff0008</color>
-    <color name="buffer_hidden_temp_dark">#84fffc00</color>
+    <color name="buffer_status_active_dark">#2962ff</color>
+    <color name="buffer_status_away_dark">#82b1ff</color>
+    <color name="buffer_status_parted_dark">#888888</color>
+    <color name="buffer_status_perm_dark">#7f0004</color>
+    <color name="buffer_status_temp_dark">#7f7e00</color>
     <color name="buffer_invalid_dark">#ffcccccc</color>
 
     <color name="nick_owner_dark">#ff785a42</color>
