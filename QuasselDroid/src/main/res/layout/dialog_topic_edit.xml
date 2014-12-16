@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
         android:id="@+id/dialog_topic_text"
         android:text="May JLee bless this ship, and all who sail http://google.com/ in her" />
 

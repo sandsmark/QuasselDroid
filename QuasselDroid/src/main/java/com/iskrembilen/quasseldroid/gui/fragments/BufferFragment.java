@@ -34,7 +34,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,6 +50,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.idunnololz.widgets.AnimatedExpandableListView;
+import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
@@ -188,11 +189,11 @@ public class BufferFragment extends Fragment implements Serializable {
                 switch (item.getItemId()) {
                     case R.id.context_menu_connect:
                         BufferHelper.connectNetwork(actionModeData.id);
-                        mode.finish();
+                        finishActionMode();
                         return true;
                     case R.id.context_menu_disconnect:
                         BufferHelper.disconnectNetwork(actionModeData.id);
-                        mode.finish();
+                        finishActionMode();
                         return true;
                     default:
                         return false;
@@ -275,7 +276,7 @@ public class BufferFragment extends Fragment implements Serializable {
                     Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
                     actionModeData.index = bufferList.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
 
-                    actionModeData.actionMode = getActivity().startActionMode(actionModeData.actionModeCallbackBuffer);
+                    actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackBuffer);
                     actionModeData.id = buffer.getInfo().id;
                     actionModeData.listItem = view;
                     if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
@@ -308,7 +309,7 @@ public class BufferFragment extends Fragment implements Serializable {
                     }
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                     Network network = bufferListAdapter.getGroup(groupPosition);
-                    actionModeData.actionMode = getActivity().startActionMode(actionModeData.actionModeCallbackNetwork);
+                    actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackNetwork);
                     actionModeData.id = network.getId();
                     actionModeData.listItem = view;
                     if (network.isConnected()) {

@@ -3,6 +3,7 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.SpannableString;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +12,14 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import com.idunnololz.widgets.AnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.UserCollection;
+import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
@@ -32,7 +35,7 @@ import java.util.Observer;
 
 public class NickListFragment extends Fragment implements Serializable {
     private NicksAdapter adapter;
-    private ExpandableListView list;
+    private AnimatedExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
     private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
@@ -59,7 +62,18 @@ public class NickListFragment extends Fragment implements Serializable {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_nicks, container, false);
-        list = (ExpandableListView) root.findViewById(R.id.userList);
+        list = (AnimatedExpandableListView) root.findViewById(R.id.userList);
+        list.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                if (list.isGroupExpanded(groupPosition)) {
+                    list.collapseGroupWithAnimation(groupPosition);
+                } else {
+                    list.expandGroupWithAnimation(groupPosition);
+                }
+                return true;
+            }
+        });
         return root;
     }
 
@@ -93,7 +107,7 @@ public class NickListFragment extends Fragment implements Serializable {
         BusProvider.getInstance().post(new UserClickedEvent(bufferId, nick));
     }
 
-    public class NicksAdapter extends BaseExpandableListAdapter implements Observer {
+    public class NicksAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
 
         private LayoutInflater inflater;
         private UserCollection users;
@@ -141,9 +155,7 @@ public class NickListFragment extends Fragment implements Serializable {
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition,
-                                 boolean isLastChild, View convertView, ViewGroup parent) {
-
+        public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             ViewHolderChild holder = null;
 
             if (convertView == null) {
@@ -176,7 +188,7 @@ public class NickListFragment extends Fragment implements Serializable {
         }
 
         @Override
-        public int getChildrenCount(int groupPosition) {
+        public int getRealChildrenCount(int groupPosition) {
             if (this.users == null) return 0;
             return getGroup(groupPosition).second.size();
         }
@@ -266,7 +278,7 @@ public class NickListFragment extends Fragment implements Serializable {
             if (bufferId != -1) {
                 observer.setBuffer(networks.getBufferById(bufferId));
                 updateUsers();
-                updateDetails();
+                BusProvider.getInstance().post(new BufferDetailsChangedEvent(bufferId));
             }
         }
     }
@@ -278,7 +290,7 @@ public class NickListFragment extends Fragment implements Serializable {
             if (networks != null) {
                 observer.setBuffer(networks.getBufferById(bufferId));
                 updateUsers();
-                updateDetails();
+                BusProvider.getInstance().post(new BufferDetailsChangedEvent(bufferId));
             }
         }
     }
@@ -290,13 +302,13 @@ public class NickListFragment extends Fragment implements Serializable {
         }
     }
 
-    public void updateDetails() {
-        Buffer buffer = networks.getBufferById(bufferId);
-        if (buffer != null) {
-            topic = buffer.getTopic();
-            MainActivity mainActivity = ((MainActivity)getActivity());
-            mainActivity.getSupportActionBar().setSubtitle(topic);
-            observer.setBuffer(buffer);
+    @Subscribe
+    public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
+        if (event.bufferId==bufferId) {
+            Buffer buffer = networks.getBufferById(bufferId);
+            if (buffer != null) {
+                observer.setBuffer(buffer);
+            }
         }
     }
 
@@ -314,7 +326,7 @@ public class NickListFragment extends Fragment implements Serializable {
             }
             switch ((Integer) data) {
                 case R.id.BUFFERUPDATE_TOPICCHANGED:
-                    updateDetails();
+                    BusProvider.getInstance().post(new BufferDetailsChangedEvent(bufferId));
                     break;
                 default:
             }

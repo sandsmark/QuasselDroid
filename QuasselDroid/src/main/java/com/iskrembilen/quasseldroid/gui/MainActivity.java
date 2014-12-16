@@ -58,6 +58,7 @@ import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
 import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
@@ -121,7 +122,7 @@ public class MainActivity extends ActionBarActivity {
 
         actionbar = new ClickableActionBar(getApplicationContext(),(Toolbar) findViewById(R.id.action_bar));
         setSupportActionBar(actionbar.getWrappedToolbar());
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         actionbar.setOnTitleClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 showDetailPopup();
@@ -178,6 +179,14 @@ public class MainActivity extends ActionBarActivity {
         };
 
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
+    }
+
+    @Subscribe
+    public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
+        if (event.bufferId==openedBuffer) {
+            topic = NetworkCollection.getInstance().getBufferById(openedBuffer).getTopic();
+            updateSubtitle();
+        }
     }
 
     @Override
@@ -374,20 +383,16 @@ public class MainActivity extends ActionBarActivity {
         }
         Log.d(TAG,"Setting subtitle "+(bufferHasTopic?"":"non ")+" clickable: "+topic);
         actionbar.setSubtitle(subtitle);
-        actionbar.setTitleClickable(!bufferHasTopic);
+        actionbar.setTitleClickable(bufferHasTopic);
         actionbar.setSubtitleVisibile(showLag || !emptyString(topic));
     }
 
     private boolean emptyString(CharSequence topic) {
-        return topic==null || topic.toString().trim()=="";
+        return topic==null || topic.toString().trim().equals("");
     }
 
     private void showDetailPopup() {
-        String topic = null;
-        if (manager.nickFragment!=null)
-            topic = ((NickListFragment) manager.nickFragment).topic;
-        if (topic!=null)
-            TopicViewDialog.newInstance(topic, openedBuffer).show(getSupportFragmentManager(),TAG);
+        TopicViewDialog.newInstance(topic, NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name, openedBuffer).show(getSupportFragmentManager(), TAG);
     }
 
     @Subscribe
@@ -398,7 +403,6 @@ public class MainActivity extends ActionBarActivity {
                 removeDialog(R.id.DIALOG_CONNECTING);
                 Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
             }
-            Log.e(TAG,"REASON: "+event.reason);
             returnToLogin();
         }
     }
@@ -463,7 +467,7 @@ public class MainActivity extends ActionBarActivity {
         } else {
             switch (buffer.getInfo().type) {
                 case QueryBuffer:
-                    bufferHasTopic = true;
+                    bufferHasTopic = false;
                     manager.setPanelFragment(Gravity.END,manager.detailFragment);
                     manager.lockDrawer(Gravity.END, false);
                     actionbar.setTitle(buffer.getInfo().name);
@@ -475,7 +479,7 @@ public class MainActivity extends ActionBarActivity {
                     actionbar.setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
                     break;
                 case ChannelBuffer:
-                    bufferHasTopic = false;
+                    bufferHasTopic = true;
                     manager.setPanelFragment(Gravity.END,manager.nickFragment);
                     manager.lockDrawer(Gravity.END, false);
                     actionbar.setTitle(buffer.getInfo().name);
@@ -594,6 +598,8 @@ public class MainActivity extends ActionBarActivity {
                 extensibleDrawerToggle.getDrawer().setDrawerLockMode(extensibleDrawerToggle.getDrawer().LOCK_MODE_LOCKED_CLOSED, side);
             else
                 extensibleDrawerToggle.getDrawer().setDrawerLockMode(extensibleDrawerToggle.getDrawer().LOCK_MODE_UNLOCKED, side);
+
+            if (side==Gravity.START) getSupportActionBar().setDisplayHomeAsUpEnabled(!locked);
         }
 
         public void setWindowProperties(int side) {

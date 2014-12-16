@@ -17,15 +17,17 @@ public class TopicEditDialog extends DialogFragment {
 
     private static final String TAG = TopicEditDialog.class.getSimpleName();
 
-    private String topic;
+    private CharSequence topic;
+    private String name;
     private int id;
 
     protected EditText topicField;
 
-    public static TopicEditDialog newInstance(String topic, int id) {
+    public static TopicEditDialog newInstance(CharSequence topic, String name, int id) {
         TopicEditDialog fragment = new TopicEditDialog();
         Bundle args = new Bundle();
-        args.putString("topic", topic);
+        args.putCharSequence("topic", topic);
+        args.putString("name", name);
         args.putInt("id", id);
         fragment.setArguments(args);
 
@@ -35,13 +37,15 @@ public class TopicEditDialog extends DialogFragment {
     @Override
     public void onActivityCreated(Bundle arg0) {
         super.onActivityCreated(arg0);
-        topic = getArguments().getString("topic");
+        topic = getArguments().getCharSequence("topic");
+        name = getArguments().getString("name");
         id = getArguments().getInt("id");
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        topic = getArguments().getString("topic");
+        topic = getArguments().getCharSequence("topic");
+        name = getArguments().getString("name");
         id = getArguments().getInt("id");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -52,7 +56,7 @@ public class TopicEditDialog extends DialogFragment {
         this.topicField = topicField;
         topicField.setText(topic);
 
-        builder.setView(dialog).setTitle("Channel Topic");
+        builder.setView(dialog).setTitle(name);
         builder.setPositiveButton(getString(R.string.dialog_action_close),new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

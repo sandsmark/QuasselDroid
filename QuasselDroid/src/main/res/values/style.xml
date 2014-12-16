@@ -32,6 +32,8 @@
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">@color/accent</item>
 
+        <item name="windowActionModeOverlay">true</item>
+
         <item name="spinnerButtonStyle">@style/SpinnerButton.Dark</item>
         <item name="dividerColor">@color/divider_color_dark</item>
         <item name="backgroundColor">@color/background_material_dark</item>
@@ -49,6 +51,8 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">@color/accent</item>
+
+        <item name="windowActionModeOverlay">true</item>
 
         <item name="spinnerButtonStyle">@style/SpinnerButton.Light</item>
         <item name="dividerColor">@color/divider_color_light</item>

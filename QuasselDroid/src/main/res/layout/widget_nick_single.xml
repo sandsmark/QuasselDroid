@@ -3,8 +3,8 @@
     android:id="@+id/nicklist_nick_view"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:paddingLeft="24dp"
-    android:paddingRight="8dp"
+    android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+    android:paddingLeft="32dp"
+    android:paddingRight="16dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp" />

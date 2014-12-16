@@ -57,7 +57,7 @@
     <string name="notification_highlighted_one_buffer">You have been highlighted on %s</string>
     <string name="notification_highlighted_one_short">New highlight on %s</string>
 
-    <string name="title_lag">Lag: %1$s%2$s</string>
+    <string name="title_lag">%1$s%2$s</string>
     <string name="preference_show_lag">showlag</string>
     <string name="unit_milliseconds">ms</string>
     <string name="unit_seconds">s</string>

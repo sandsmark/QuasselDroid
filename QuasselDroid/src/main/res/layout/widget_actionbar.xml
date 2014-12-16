@@ -7,8 +7,7 @@
     android:layout_width="match_parent"
     android:minHeight="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
-    app:theme="@style/Theme.QuasselDroid.Material.Light"
-    elevation="5dp">
+    app:theme="@style/Theme.QuasselDroid.Material.Light">
     <LinearLayout
         android:orientation="vertical"
         android:id="@+id/actionTitleArea"

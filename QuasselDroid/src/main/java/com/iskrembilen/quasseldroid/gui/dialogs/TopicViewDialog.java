@@ -15,15 +15,17 @@ public class TopicViewDialog extends DialogFragment {
 
     private static final String TAG = TopicViewDialog.class.getSimpleName();
 
-    private String topic;
+    private CharSequence topic;
+    private String name;
     private int id;
 
     protected TextView topicField;
 
-    public static TopicViewDialog newInstance(String topic, int id) {
+    public static TopicViewDialog newInstance(CharSequence topic, String name, int id) {
         TopicViewDialog fragment = new TopicViewDialog();
         Bundle args = new Bundle();
-        args.putString("topic", topic);
+        args.putCharSequence("topic", topic);
+        args.putString("name", name);
         args.putInt("id", id);
         fragment.setArguments(args);
 
@@ -33,13 +35,15 @@ public class TopicViewDialog extends DialogFragment {
     @Override
     public void onActivityCreated(Bundle arg0) {
         super.onActivityCreated(arg0);
-        topic = getArguments().getString("topic");
+        topic = getArguments().getCharSequence("topic");
+        name = getArguments().getString("name");
         id = getArguments().getInt("id");
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        topic = getArguments().getString("topic");
+        topic = getArguments().getCharSequence("topic");
+        name = getArguments().getString("name");
         id = getArguments().getInt("id");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -49,7 +53,7 @@ public class TopicViewDialog extends DialogFragment {
         topicField = (TextView) dialog.findViewById(R.id.dialog_topic_text);
         topicField.setText(topic);
 
-        builder.setView(dialog).setTitle("Channel Topic");
+        builder.setView(dialog).setTitle(name);
         builder.setPositiveButton(getString(R.string.dialog_action_close),new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -59,7 +63,7 @@ public class TopicViewDialog extends DialogFragment {
         builder.setNeutralButton(getString(R.string.dialog_action_edit), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                TopicEditDialog.newInstance(topic,id).show(getFragmentManager(),TAG);
+                TopicEditDialog.newInstance(topic,name,id).show(getFragmentManager(),TAG);
             }
         });
         return builder.create();
