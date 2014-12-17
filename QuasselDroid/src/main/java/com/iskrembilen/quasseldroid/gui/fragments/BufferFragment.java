@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -459,9 +460,11 @@ public class BufferFragment extends Fragment implements Serializable {
     public class BufferListAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
+        private Activity activity;
 
-        public BufferListAdapter(Context context) {
-            inflater = LayoutInflater.from(context);
+        public BufferListAdapter(Activity activity) {
+            this.inflater = LayoutInflater.from(activity);
+            this.activity = activity;
         }
 
         public void setNetworks(NetworkCollection networks) {
@@ -469,23 +472,34 @@ public class BufferFragment extends Fragment implements Serializable {
             if (networks == null)
                 return;
             networks.addObserver(this);
-            notifyDataSetChanged();
-            if (bufferListAdapter != null) {
-                for (int group = 0; group < getGroupCount(); group++) {
-                    if (getGroup(group).isOpen()) bufferList.expandGroup(group);
-                    else bufferList.collapseGroup(group);
+
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                    if (bufferListAdapter != null) {
+                        for (int group = 0; group < getGroupCount(); group++) {
+                            if (getGroup(group).isOpen()) bufferList.expandGroup(group);
+                            else bufferList.collapseGroup(group);
+                        }
+                        bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
+                    }
                 }
-                //bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
-            }
+            });
         }
 
         @Override
         public void update(Observable observable, Object data) {
-            notifyDataSetChanged();
-            for (int group = 0; group < getGroupCount(); group++) {
-                if (getGroup(group).isOpen()) bufferList.expandGroup(group);
-                else bufferList.collapseGroup(group);
-            }
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                    for (int group = 0; group < getGroupCount(); group++) {
+                        if (getGroup(group).isOpen()) bufferList.expandGroup(group);
+                        else bufferList.collapseGroup(group);
+                    }
+                }
+            });
         }
 
         @Override
@@ -520,7 +534,7 @@ public class BufferFragment extends Fragment implements Serializable {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             Buffer entry = getChild(groupPosition, childPosition);
-            Drawable parentBackgroundDrawable = null;
+            
             switch (entry.getInfo().type) {
                 case StatusBuffer:
                 case ChannelBuffer:

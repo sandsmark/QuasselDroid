@@ -30,12 +30,9 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -45,6 +42,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,7 +52,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
@@ -80,9 +77,6 @@ import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -129,8 +123,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        manager.preInit();
-
         drawer = (DrawerLayout) findViewById(R.id.drawer);
 
         extensibleDrawerToggle = new ExtensibleDrawerToggle(drawer, new ActionBarDrawerToggle(
@@ -161,8 +153,11 @@ public class MainActivity extends ActionBarActivity {
         });
         drawer.setDrawerListener((extensibleDrawerToggle.getDrawerListener()));
 
-        manager.lockDrawer(Gravity.LEFT,true);
-        manager.lockDrawer(Gravity.RIGHT, true);
+        manager.preInit();
+        manager.init();
+
+        manager.lockDrawer(Gravity.START,true);
+        manager.lockDrawer(Gravity.END, true);
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
@@ -253,8 +248,7 @@ public class MainActivity extends ActionBarActivity {
     private void loadBufferAndDrawerState() {
         NetworkCollection networks = NetworkCollection.getInstance();
         if (networks != null) {
-            manager.preInit();
-            manager.init();
+            manager.initMainFragment();
 
             if (openedBuffer == -1 || networks.getBufferById(openedBuffer) == null) {
                 Log.d(TAG, "Loading state: Empty");
@@ -354,7 +348,7 @@ public class MainActivity extends ActionBarActivity {
         FragmentManager fm = getSupportFragmentManager();
         Fragment currentFragment = fm.findFragmentById(R.id.main_content_container);
         if (event.done) {
-            manager.init();
+            manager.initMainFragment();
 
             loadBufferAndDrawerState();
 
@@ -386,7 +380,7 @@ public class MainActivity extends ActionBarActivity {
         Log.d(TAG,"Setting subtitle "+(bufferHasTopic?"":"non ")+" clickable: "+topic);
         actionbar.setSubtitle(subtitle);
         actionbar.setTitleClickable(bufferHasTopic);
-        actionbar.setSubtitleVisibile(showLag || !emptyString(topic));
+        actionbar.setSubtitleVisible(showLag || !emptyString(topic));
     }
 
     private boolean emptyString(CharSequence topic) {
@@ -418,7 +412,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void showInitProgress() {
-        manager.cleanup();
         manager.setPanelFragment(Gravity.NO_GRAVITY, new ConnectingFragment());
         drawer.closeDrawers();
     }
@@ -511,7 +504,7 @@ public class MainActivity extends ActionBarActivity {
         Fragment detailFragment;
         Fragment bufferFragment;
 
-        HashMap<Integer,Fragment> drawers = new HashMap<Integer,Fragment>();
+        SparseArray<Fragment> drawers = new SparseArray<Fragment>();
 
         void cleanup() {
             setPanelFragment(Gravity.NO_GRAVITY, null);
@@ -525,6 +518,8 @@ public class MainActivity extends ActionBarActivity {
         }
 
         void preInit() {
+            Log.d(getClass().getSimpleName(),"Setting up fragments");
+
             if (chatFragment==null) chatFragment = ChatFragment.newInstance();
             if (nickFragment==null) nickFragment = NickListFragment.newInstance();
             if (detailFragment==null) detailFragment = DetailFragment.newInstance();
@@ -532,6 +527,8 @@ public class MainActivity extends ActionBarActivity {
         }
 
         void init() {
+            Log.d(getClass().getSimpleName(),"Initializing Side and Main panels");
+
             setPanelFragment(Gravity.END, nickFragment);
             setPanelFragment(Gravity.START, bufferFragment);
 
@@ -540,7 +537,7 @@ public class MainActivity extends ActionBarActivity {
 
         void initMainFragment() {
             setPanelFragment(Gravity.NO_GRAVITY, chatFragment);
-            manager.lockDrawer(Gravity.LEFT, false);
+            manager.lockDrawer(Gravity.START, false);
         }
 
         void setPanelFragment(int side, Fragment fragment) {
@@ -569,7 +566,7 @@ public class MainActivity extends ActionBarActivity {
 
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
-            Fragment currentFragment = (drawers.containsKey(id)) ? drawers.get(id) : null;
+            Fragment currentFragment = drawers.get(id);
 
             String from = (currentFragment == null) ? "NULL" : currentFragment.getClass().getSimpleName();
             String to = (fragment == null) ? "NULL" : fragment.getClass().getSimpleName();
@@ -584,7 +581,7 @@ public class MainActivity extends ActionBarActivity {
                 ft.replace(id, fragment, tag);
             }
 
-            Log.d(this.getClass().getCanonicalName(), String.format("Add on side %s the fragment %s, replacing  %s",tag,to,from));
+            Log.d(this.getClass().getSimpleName(), String.format("Add on side %s the fragment %s, replacing  %s",tag,to,from));
 
             drawers.put(id,fragment);
 
@@ -596,9 +593,9 @@ public class MainActivity extends ActionBarActivity {
 
         void lockDrawer(int side, boolean locked) {
             if (locked)
-                extensibleDrawerToggle.getDrawer().setDrawerLockMode(extensibleDrawerToggle.getDrawer().LOCK_MODE_LOCKED_CLOSED, side);
+                extensibleDrawerToggle.getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, side);
             else
-                extensibleDrawerToggle.getDrawer().setDrawerLockMode(extensibleDrawerToggle.getDrawer().LOCK_MODE_UNLOCKED, side);
+                extensibleDrawerToggle.getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, side);
         }
 
         public void setWindowProperties(int side) {
@@ -672,19 +669,18 @@ public class MainActivity extends ActionBarActivity {
         ClickableActionBar(Context context, Toolbar toolbar) {
             this.context = context;
             this.wrappedToolbar = toolbar;
-            wrappedToolbar.findViewById(R.id.actionTitleArea).setBackground(getSelectedItemDrawable());
         }
 
         public Toolbar getWrappedToolbar() {
             return wrappedToolbar;
         }
 
-        public boolean isSubtitleVisibile() {
-            return ((TextView) wrappedToolbar.findViewById(R.id.subtitle)).getVisibility() == View.VISIBLE;
+        public boolean isSubtitleVisible() {
+            return wrappedToolbar.findViewById(R.id.subtitle).getVisibility() == View.VISIBLE;
         }
 
-        public void setSubtitleVisibile(boolean subtitleVisibility) {
-            ((TextView) wrappedToolbar.findViewById(R.id.subtitle)).setVisibility(
+        public void setSubtitleVisible(boolean subtitleVisibility) {
+            wrappedToolbar.findViewById(R.id.subtitle).setVisibility(
                     subtitleVisibility ? View.VISIBLE
                             : View.GONE
             );
@@ -714,16 +710,8 @@ public class MainActivity extends ActionBarActivity {
             return wrappedToolbar.findViewById(R.id.actionTitleArea).isClickable();
         }
 
-        public void setTitleClickable(boolean clickability) {
-            wrappedToolbar.findViewById(R.id.actionTitleArea).setClickable(clickability);
-        }
-
-        Drawable getSelectedItemDrawable() {
-            int[] attrs = new int[]{R.attr.selectableItemBackground};
-            TypedArray ta = context.obtainStyledAttributes(attrs);
-            Drawable selectedItemDrawable = ta.getDrawable(0);
-            ta.recycle();
-            return selectedItemDrawable;
+        public void setTitleClickable(boolean clickable) {
+            wrappedToolbar.findViewById(R.id.actionTitleArea).setClickable(clickable);
         }
     }
 

@@ -3,7 +3,7 @@ buildscript {
         maven { url 'http://repo1.maven.org/maven2' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.2'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 apply plugin: 'com.android.application'
@@ -14,8 +14,8 @@ repositories {
 
 dependencies {
     compile group: 'com.squareup', name: 'otto', version: '1.3.4'
-    compile group: 'com.android.support', name: 'support-v4', version: '21.0.+'
-    compile group: 'com.android.support', name: 'appcompat-v7', version: '21.0.+'
+    compile group: 'com.android.support', name: 'support-v4', version: '21.+'
+    compile group: 'com.android.support', name: 'appcompat-v7', version: '21.+'
     compile files('libs/crittercism_v3_0_7_sdkonly.jar')
 }
 if(project.hasProperty("Android.signing")
@@ -24,7 +24,7 @@ if(project.hasProperty("Android.signing")
 }
 android {
     compileSdkVersion 21
-    buildToolsVersion '21.0.2'
+    buildToolsVersion '21.1.2'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 21

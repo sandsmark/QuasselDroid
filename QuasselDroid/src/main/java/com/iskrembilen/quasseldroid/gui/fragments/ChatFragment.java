@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
