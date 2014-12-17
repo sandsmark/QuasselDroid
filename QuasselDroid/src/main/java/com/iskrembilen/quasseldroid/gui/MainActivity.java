@@ -450,7 +450,7 @@ public class MainActivity extends ActionBarActivity {
         manager.setWindowProperties(manager.getOpenDrawers(extensibleDrawerToggle.drawer));
         if (buffer==null || (manager.getOpenDrawers(extensibleDrawerToggle.drawer)==Gravity.START)) {
             bufferHasTopic = false;
-            actionbar.setTitle("Quasseldroid");
+            actionbar.setTitle(getResources().getString(R.string.app_name));
             topic = null;
         } else {
             switch (buffer.getInfo().type) {

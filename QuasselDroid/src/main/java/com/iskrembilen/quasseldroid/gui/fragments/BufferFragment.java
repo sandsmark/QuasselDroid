@@ -482,7 +482,7 @@ public class BufferFragment extends Fragment implements Serializable {
                             if (getGroup(group).isOpen()) bufferList.expandGroup(group);
                             else bufferList.collapseGroup(group);
                         }
-                        bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
+                        //bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
                     }
                 }
             });
@@ -534,7 +534,7 @@ public class BufferFragment extends Fragment implements Serializable {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             Buffer entry = getChild(groupPosition, childPosition);
-            
+
             switch (entry.getInfo().type) {
                 case StatusBuffer:
                 case ChannelBuffer:
