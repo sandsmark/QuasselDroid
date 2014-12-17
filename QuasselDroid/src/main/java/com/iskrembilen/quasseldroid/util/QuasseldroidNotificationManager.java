@@ -213,10 +213,15 @@ public class QuasseldroidNotificationManager {
 
                 if (messages.size()==1) {
                     IrcMessage m = messages.get(0);
-                    if (m.bufferInfo.type== BufferInfo.Type.QueryBuffer)
-                        inboxStyle.addLine(String.format("[%s] %s",m.bufferInfo.name,m.content));
-                    else
-                        inboxStyle.addLine(String.format("[%s] %s: %s",m.bufferInfo.name,m.getNick(),m.content));
+                    SpannableStringBuilder s;
+                    if (m.bufferInfo.type== BufferInfo.Type.QueryBuffer) {
+                        s = new SpannableStringBuilder(String.format("%s: %s",m.getNick(),m.content));
+                        s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                    } else {
+                        s = new SpannableStringBuilder(String.format("%s %s: %s",m.bufferInfo.name,m.getNick(),m.content));
+                        s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.bufferInfo.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                    }
+                    inboxStyle.addLine(s);
                 } else if (buffer.getInfo().type== BufferInfo.Type.QueryBuffer) {
                     SpannableStringBuilder s;
 
@@ -227,11 +232,12 @@ public class QuasseldroidNotificationManager {
                     }
                 } else {
                     SpannableStringBuilder s = new SpannableStringBuilder(buffer.getInfo().name);
+                    s.append(":");
                     s.setSpan(new StyleSpan(Typeface.BOLD), 0, buffer.getInfo().name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     inboxStyle.addLine(s);
                     for (IrcMessage m : messages) {
-                        inboxStyle.addLine(String.format("%s: %s",m.getNick(),m.content));
+                        inboxStyle.addLine(String.format("  %s: %s",m.getNick(),m.content));
                     }
                 }
             }
