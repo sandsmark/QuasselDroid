@@ -50,12 +50,17 @@
     <string name="dialog_delete_buffer_yes">Yes</string>
     <string name="dialog_delete_buffer_no">No</string>
 
-    <plurals name="notification_highlighted_on_x_buffers">
-        <item quantity="one">You have highlights on %1$d buffer</item>
-        <item quantity="other">You have highlights on %1$d buffers</item>
+    <plurals name="notification_x_highlights">
+        <item quantity="one">%1$d new highlight</item>
+        <item quantity="other">%1$d new highlights</item>
     </plurals>
-    <string name="notification_highlighted_one_buffer">You have been highlighted on %s</string>
-    <string name="notification_highlighted_one_short">New highlight on %s</string>
+
+    <plurals name="notification_on_x_buffers">
+        <item quantity="one">on %1$d buffer</item>
+        <item quantity="other">on %1$d buffers</item>
+    </plurals>
+
+    <string name="notification_hightlights_on_buffers">%1$s %2$s</string>
 
     <string name="title_lag">%1$s%2$s</string>
     <string name="preference_show_lag">showlag</string>

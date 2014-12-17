@@ -53,7 +53,7 @@ public class MessageUtil {
                 )
             ) && (!buffer.isDisplayed() && buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
             ) {
-            notificationManager.notifyHighlight(buffer.getInfo().id);
+            notificationManager.addMessage(message);
 
         }
     }
