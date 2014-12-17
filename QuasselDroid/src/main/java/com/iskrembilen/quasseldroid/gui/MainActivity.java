@@ -248,17 +248,17 @@ public class MainActivity extends ActionBarActivity {
     private void loadBufferAndDrawerState() {
         NetworkCollection networks = NetworkCollection.getInstance();
         if (networks != null) {
-            manager.initMainFragment();
-
             if (openedBuffer == -1 || networks.getBufferById(openedBuffer) == null) {
                 Log.d(TAG, "Loading state: Empty");
                 openedBuffer = -1;
                 BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
                 drawer.closeDrawer(Gravity.END);
                 drawer.openDrawer(Gravity.START);
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,Gravity.START);
             } else {
                 Log.d(TAG, "Loading state: "+openedBuffer);
                 manager.openDrawer(openedDrawer);
+                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,Gravity.START);
                 BusProvider.getInstance().post(new BufferOpenedEvent(openedBuffer, true));
             }
         }
@@ -324,14 +324,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                drawer.closeDrawer(Gravity.END);
-                if (drawer.isDrawerOpen(Gravity.START)) {
-                    drawer.closeDrawer(Gravity.START);
-                } else {
-                    drawer.openDrawer(Gravity.START);
-                }
-                return true;
             case R.id.menu_preferences:
                 Intent i = new Intent(MainActivity.this, PreferenceView.class);
                 startActivity(i);
@@ -496,6 +488,7 @@ public class MainActivity extends ActionBarActivity {
             BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
             drawer.closeDrawer(Gravity.END);
             drawer.openDrawer(Gravity.START);
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,Gravity.START);
         }
     }
     class QuasselDroidFragmentManager {
@@ -659,6 +652,16 @@ public class MainActivity extends ActionBarActivity {
 
         DrawerLayout getDrawer() {
             return drawer;
+        }
+
+        public void closeDrawer(int side) {
+            if (drawer.getDrawerLockMode(side)!=DrawerLayout.LOCK_MODE_LOCKED_OPEN)
+                drawer.closeDrawer(side);
+        }
+
+        public void openDrawer(int side) {
+            if (drawer.getDrawerLockMode(side)!=DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                drawer.openDrawer(side);
         }
     }
 
