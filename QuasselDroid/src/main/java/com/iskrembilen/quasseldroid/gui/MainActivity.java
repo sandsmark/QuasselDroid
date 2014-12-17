@@ -246,12 +246,16 @@ public class MainActivity extends ActionBarActivity {
         } else if (Quasseldroid.status == Status.Connected) {
             loadBufferAndDrawerState();
         }
+
         hideKeyboard(drawer);
     }
 
     private void loadBufferAndDrawerState() {
         NetworkCollection networks = NetworkCollection.getInstance();
         if (networks != null) {
+            manager.preInit();
+            manager.init();
+
             if (openedBuffer == -1 || networks.getBufferById(openedBuffer) == null) {
                 Log.d(TAG, "Loading state: Empty");
                 openedBuffer = -1;
@@ -277,8 +281,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onStop() {
         Log.d(TAG, "Stopping activity");
         unbindService(focusConnection);
-
-        ((Quasseldroid) getApplication()).savedInstanceState = storeState(new Bundle());
 
         super.onStop();
     }
@@ -416,16 +418,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void showInitProgress() {
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fm.beginTransaction();
-        ConnectingFragment fragment = ConnectingFragment.newInstance();
-        fragmentTransaction.replace(R.id.main_content_container, fragment, "init");
-        if (manager.bufferFragment != null)
-            fragmentTransaction.remove(manager.bufferFragment);
-        if (manager.nickFragment != null)
-            fragmentTransaction.remove(manager.nickFragment);
+        manager.cleanup();
+        manager.setPanelFragment(Gravity.NO_GRAVITY, new ConnectingFragment());
         drawer.closeDrawers();
-        fragmentTransaction.commit();
     }
 
     @Subscribe
@@ -519,7 +514,7 @@ public class MainActivity extends ActionBarActivity {
         HashMap<Integer,Fragment> drawers = new HashMap<Integer,Fragment>();
 
         void cleanup() {
-            setMainFragment(null);
+            setPanelFragment(Gravity.NO_GRAVITY, null);
             setPanelFragment(Gravity.END, null);
             setPanelFragment(Gravity.START, null);
 
@@ -544,51 +539,57 @@ public class MainActivity extends ActionBarActivity {
         }
 
         void initMainFragment() {
-            setMainFragment(chatFragment);
+            setPanelFragment(Gravity.NO_GRAVITY, chatFragment);
             manager.lockDrawer(Gravity.LEFT, false);
         }
 
-        void setMainFragment(Fragment fragment) {
-            FragmentManager fm = getSupportFragmentManager();
-            Fragment currentFragment = fm.findFragmentById(R.id.main_content_container);
-            if (currentFragment == null || currentFragment.getClass() != fragment.getClass()) {
-                FragmentTransaction trans = fm.beginTransaction();
-                if (currentFragment != null) {
-                    trans.remove(currentFragment);
-                }
-                trans.add(R.id.main_content_container,fragment);
-                trans.commit();
-            }
-        }
-
         void setPanelFragment(int side, Fragment fragment) {
-            int id = (side == Gravity.START) ? R.id.left_drawer : R.id.right_drawer;
-            String tag = (side==Gravity.START) ? "LEFT" : "RIGHT";
+            int id;
+            String tag;
+            boolean isDrawer;
+            switch (side) {
+                case Gravity.START:
+                    id = R.id.left_drawer;
+                    tag = "LEFT";
+                    isDrawer = true;
+                    break;
+                case Gravity.END:
+                    id = R.id.right_drawer;
+                    tag = "RIGHT";
+                    isDrawer = true;
+                    break;
+                case Gravity.NO_GRAVITY:
+                    id = R.id.main_content_container;
+                    tag = "MAIN";
+                    isDrawer = false;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Error replacing fragments: Unknown side");
+            }
 
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
             Fragment currentFragment = (drawers.containsKey(id)) ? drawers.get(id) : null;
 
-            String a = (currentFragment == null) ? "NULL" : currentFragment.getClass().getCanonicalName();
-            String b = (fragment == null) ? "NULL" : fragment.getClass().getCanonicalName();
+            String from = (currentFragment == null) ? "NULL" : currentFragment.getClass().getSimpleName();
+            String to = (fragment == null) ? "NULL" : fragment.getClass().getSimpleName();
 
-            if (currentFragment == fragment) {
-            } else if (fragment == null && currentFragment != null) {
+            if (fragment==currentFragment) {
+                // Replace stuff with itself: Do nothing!
+            } else if (fragment == null) {
                 ft.remove(currentFragment);
-                drawers.put(id,null);
-                lockDrawer(side, true);
-                Log.d(this.getClass().getCanonicalName(), "Replace " + a + " with " + b);
             } else if (currentFragment == null) {
                 ft.add(id, fragment, tag);
-                drawers.put(id,fragment);
-                lockDrawer(side, false);
-                Log.d(this.getClass().getCanonicalName(), "Replace " + a + " with " + b);
             } else {
                 ft.replace(id, fragment, tag);
-                drawers.put(id,fragment);
-                lockDrawer(side, false);
-                Log.d(this.getClass().getCanonicalName(), "Replace " + a + " with " + b);
             }
+
+            Log.d(this.getClass().getCanonicalName(), String.format("Add on side %s the fragment %s, replacing  %s",tag,to,from));
+
+            drawers.put(id,fragment);
+
+            if (isDrawer)
+                lockDrawer(side, (fragment == null));
 
             ft.commit();
         }
@@ -598,8 +599,6 @@ public class MainActivity extends ActionBarActivity {
                 extensibleDrawerToggle.getDrawer().setDrawerLockMode(extensibleDrawerToggle.getDrawer().LOCK_MODE_LOCKED_CLOSED, side);
             else
                 extensibleDrawerToggle.getDrawer().setDrawerLockMode(extensibleDrawerToggle.getDrawer().LOCK_MODE_UNLOCKED, side);
-
-            if (side==Gravity.START) getSupportActionBar().setDisplayHomeAsUpEnabled(!locked);
         }
 
         public void setWindowProperties(int side) {

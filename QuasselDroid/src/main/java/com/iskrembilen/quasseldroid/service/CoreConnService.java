@@ -976,7 +976,7 @@ public class CoreConnService extends Service {
         } else if (event.action == ChannelAction.MARK_AS_READ) {
             coreConn.requestMarkBufferAsRead(event.bufferId);
         } else if (event.action == ChannelAction.HIGHLIGHTS_READ) {
-            notificationManager.notifyHighlightsRead(event.bufferId);
+            if (notificationManager!=null) notificationManager.notifyHighlightsRead(event.bufferId);
         }
     }
 
