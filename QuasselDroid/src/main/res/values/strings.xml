@@ -137,8 +137,8 @@
         <string name="preference_timestamp" translatable="false">timestamp_seconds</string>
 
         <string name="preference_dialog_fontsize">Choose fontsize for the chat</string>
-        <string name="preference_summary_fontsize">The fontsize of the bufferlist</string>
-        <string name="preference_title_fontsize">Bufferlist fontsize</string>
+        <string name="preference_summary_fontsize">The fontsize of the chat</string>
+        <string name="preference_title_fontsize">Chat fontsize</string>
         <string name="preference_fontsize" translatable="false">fontsizeChannelList</string>
             <string name="fontsize_tiny">Tiny</string>
             <string name="fontsize_small">Small</string>
@@ -190,7 +190,7 @@
         <string name="preference_title_metered">Reconnect on metered wifi connection</string>
         <string name="preference_reconnect_metered" translatable="false">reconnect_on_metered</string>
 
-        <string name="preference_summary_reconnect_periodically">Normally Quassel reconnects only if your phone’s connection breaks down. Try this option if your disconnects are caused by the core restarting or similar situations</string>
+        <string name="preference_summary_reconnect_periodically">Normally Quassel reconnects only if your phone’s connection breaks down. Try this option if your disconnects are caused by the core restarting or the core losing connection</string>
         <string name="preference_title_reconnect_periodically">Reconnect periodically</string>
         <string name="preference_reconnect_periodically" translatable="false">reconnect_periodically</string>
 
