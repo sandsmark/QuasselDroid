@@ -16,9 +16,9 @@
         android:id="@+id/introText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="17dp"
-        android:text="uasseldroid"
+        android:layout_gravity="bottom"
+        android:text="@string/title_quasseldroid_logo"
         android:textColor="@color/logo_text_color"
-        android:textSize="40dip" />
+        android:textSize="40sp" />
 
 </LinearLayout>

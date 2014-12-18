@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="ActivatedItemBackground">
-        <item name="android:background">@drawable/selectable_background_quasseldroid</item>
-    </style>
-
     <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Main theme colors -->
         <!--   your app branding color for the app bar -->
@@ -20,7 +15,7 @@
         <item name="textColorPrimary">@android:color/primary_text_light</item>
         <item name="textColorSecondary">@android:color/secondary_text_light</item>
         <item name="textColorTertiary">@android:color/tertiary_text_light</item>
-        <item name="ic_action_overflow">@drawable/ic_action_overflow_dark</item>
+        <item name="ic_action_overflow">@drawable/ic_overflow_dark</item>
     </style>
 
     <style name="Theme.QuasselDroid.Material.Dark.NoActionBar" parent="Theme.AppCompat.NoActionBar">
@@ -40,7 +35,7 @@
         <item name="textColorPrimary">@android:color/primary_text_dark</item>
         <item name="textColorSecondary">@android:color/secondary_text_dark</item>
         <item name="textColorTertiary">@android:color/tertiary_text_dark</item>
-        <item name="ic_action_overflow">@drawable/ic_action_overflow</item>
+        <item name="ic_action_overflow">@drawable/ic_overflow</item>
     </style>
 
     <style name="Theme.QuasselDroid.Material.Light" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -60,7 +55,7 @@
         <item name="textColorPrimary">@android:color/primary_text_light</item>
         <item name="textColorSecondary">@android:color/secondary_text_light</item>
         <item name="textColorTertiary">@android:color/tertiary_text_light</item>
-        <item name="ic_action_overflow">@drawable/ic_action_overflow_dark</item>
+        <item name="ic_action_overflow">@drawable/ic_overflow_dark</item>
     </style>
 
     <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.AppCompat">
@@ -78,11 +73,11 @@
         <item name="textColorPrimary">@android:color/primary_text_dark</item>
         <item name="textColorSecondary">@android:color/secondary_text_dark</item>
         <item name="textColorTertiary">@android:color/tertiary_text_dark</item>
-        <item name="ic_action_overflow">@drawable/ic_action_overflow</item>
+        <item name="ic_action_overflow">@drawable/ic_overflow</item>
     </style>
 
     <style name="QuasselDroid.OverFlow" parent="@android:style/Widget.Holo.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_action_overflow</item>
+        <item name="android:src">@drawable/ic_overflow</item>
     </style>
 
     <style name="PopupMenu.Quasseldroid.Light" parent="@style/Widget.AppCompat.Light.ListPopupWindow"/>

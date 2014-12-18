@@ -389,7 +389,7 @@ public class MainActivity extends ActionBarActivity {
         } else {
             subtitle = topic;
         }
-        Log.d(TAG,"Setting subtitle "+(bufferHasTopic?"":"non ")+" clickable: "+topic);
+
         actionbar.setSubtitle(subtitle);
         actionbar.setTitleClickable(bufferHasTopic);
         actionbar.setSubtitleVisible(showLag || !emptyString(topic));
@@ -510,6 +510,7 @@ public class MainActivity extends ActionBarActivity {
             drawer.openDrawer(Gravity.START);
         }
     }
+
     class QuasselDroidFragmentManager {
         Fragment chatFragment;
         Fragment nickFragment;
@@ -517,17 +518,6 @@ public class MainActivity extends ActionBarActivity {
         Fragment bufferFragment;
 
         SparseArray<Fragment> drawers = new SparseArray<Fragment>();
-
-        void cleanup() {
-            setPanelFragment(Gravity.NO_GRAVITY, null);
-            setPanelFragment(Gravity.END, null);
-            setPanelFragment(Gravity.START, null);
-
-            chatFragment = null;
-            nickFragment = null;
-            detailFragment = null;
-            bufferFragment = null;
-        }
 
         void preInit() {
             Log.d(getClass().getSimpleName(),"Setting up fragments");

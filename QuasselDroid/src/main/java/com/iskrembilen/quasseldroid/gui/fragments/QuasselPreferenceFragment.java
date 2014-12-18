@@ -9,6 +9,6 @@ public class QuasselPreferenceFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.layout.data_preferences);
+        addPreferencesFromResource(R.xml.data_preferences);
     }
 }

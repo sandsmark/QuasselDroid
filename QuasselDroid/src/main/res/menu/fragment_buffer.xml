@@ -3,10 +3,8 @@
     <item
         android:id="@+id/menu_join_channel"
         android:title="@string/menu_join_channel"
-        android:icon="?actionJoinChannelIcon"
-        android:showAsAction="ifRoom|withText"
-        android:orderInCategory="1"></item>
+        android:orderInCategory="1" />
     <item
         android:id="@+id/context_menu_toggle_hidden"
-        android:title="@string/context_show_hidden"></item>
+        android:title="@string/context_show_hidden" />
 </menu>

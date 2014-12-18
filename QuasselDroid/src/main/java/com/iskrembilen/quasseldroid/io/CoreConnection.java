@@ -68,6 +68,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -407,6 +408,7 @@ public final class CoreConnection {
      * @throws EmptyQVariantException
      * @throws UnsupportedProtocolException
      */
+    @SuppressWarnings("unchecked")
     public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException, UnsupportedProtocolException {
         updateInitProgress("Connecting...");
         // START CREATE SOCKETS
@@ -424,11 +426,7 @@ public final class CoreConnection {
         magic = magic | 0x01;   //0x01 is encryption
 
         //DeflaterOutputStream SYNC_FLUSH support is required for compression, but Eclair doesn't support that.
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-            magic = magic | 0x02;   //0x02 is compression
-        } else {
-            Log.d(TAG, "Android version is too old, disabling compression.  Please update to 2.2 or later.");
-        }
+        magic = magic | 0x02;   //0x02 is compression
 
         outStream.writeUInt(magic, 32);
 
@@ -452,11 +450,7 @@ public final class CoreConnection {
 
             //Check if Compression should be used
             if (((responseValue >> 24) & 0x02) > 0) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-                    usingCompression = true;
-                } else {
-                    throw new UnsupportedProtocolException("Core is forcing compression, but compression is unsupported!");
-                }
+                usingCompression = true;
             }
         } catch (IOException e) {
             //This means that the core supports only the legacy handshake, so reopen the connection
@@ -480,7 +474,7 @@ public final class CoreConnection {
         updateInitProgress("Sending client info...");
         Map<String, QVariant<?>> initial = new HashMap<String, QVariant<?>>();
 
-        DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss", Locale.US);
         Date date = new Date();
         initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
         initial.put("UseSsl", new QVariant<Boolean>(true, QVariantType.Bool));

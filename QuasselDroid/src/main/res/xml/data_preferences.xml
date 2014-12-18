@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -27,7 +28,6 @@
             android:summary="How many lines to fetch on scroll"
             android:title="Dynamic backlog amount" />
     </PreferenceCategory>
-    >
 
     <PreferenceCategory android:title="Quassel">
 
@@ -160,14 +160,14 @@ this option, Quasseldroid tries to reconnect periodically in an increasing inter
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="Notification sound"></RingtonePreference>
+            android:title="Notification sound"/>
 
         <RingtonePreference
             android:key="@string/preference_notification_connect_sound_file"
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="Connection sound"></RingtonePreference>
+            android:title="Connection sound"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

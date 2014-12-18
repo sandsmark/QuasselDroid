@@ -23,7 +23,6 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dip"
-            android:layout_alignParentTop="true"
             android:layout_marginLeft="4dip"
             android:layout_marginRight="4dip"
             android:background="?android:attr/dividerVertical" />
@@ -32,8 +31,6 @@
             android:id="@+id/R.id.chat_input_frame"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentTop="true"
             android:orientation="horizontal" >
 
             <ImageButton
@@ -41,7 +38,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="@android:color/transparent"
-                android:contentDescription="Autocomplete button"
+                android:contentDescription="@string/hint_autocomplete"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_menu_search" />

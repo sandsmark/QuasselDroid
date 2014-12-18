@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:hint="Name"
+        android:hint="@string/hint_core_name"
         android:singleLine="true" />
 
     <EditText
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textUri"
-        android:hint="Address"
+        android:hint="@string/hint_core_address"
         android:singleLine="true" />
 
     <EditText
@@ -29,6 +29,6 @@
         android:inputType="number"
         android:maxLength="5"
         android:singleLine="true"
-        android:hint="Port"
+        android:hint="@string/hint_core_port"
         android:text="@string/default_port" />
 </LinearLayout>

@@ -105,5 +105,14 @@
     <string name="default_port">4242</string>
     <string name="channel_field">Channel</string>
     <string name="network_field">Network</string>
+    <string name="hint_autocomplete">Autocomplete button</string>
+    <string name="hint_status">Status</string>
+    <string name="hint_topic">Enter a topic for the channel</string>
+    <string name="hint_core_name">Name</string>
+    <string name="hint_core_address">Address</string>
+    <string name="hint_core_port">Port</string>
+    <string name="hint_loading">Loading…</string>
+    <string name="title_login">Login</string>
+    <string name="title_quasseldroid_logo">uasseldroid</string>
 
 </resources>
