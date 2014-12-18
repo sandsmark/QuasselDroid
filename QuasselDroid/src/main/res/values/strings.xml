@@ -102,5 +102,8 @@
     <string name="checkbox_remember_me">Remember me</string>
     <string name="password_field">Password</string>
     <string name="username_field">Username</string>
+    <string name="default_port">4242</string>
+    <string name="channel_field">Channel</string>
+    <string name="network_field">Network</string>
 
 </resources>

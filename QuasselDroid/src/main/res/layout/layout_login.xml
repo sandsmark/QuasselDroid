@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -51,8 +52,8 @@
                     android:layout_gravity="center_vertical|fill_horizontal"
                     android:layout_weight="1"
                     android:hint="@string/username_field"
-                    android:inputType="text"
-                    android:singleLine="true">
+                    android:singleLine="true"
+                    android:inputType="textNoSuggestions">
 
                     <requestFocus />
                 </EditText>
@@ -66,7 +67,7 @@
                     android:layout_weight="1"
                     android:hint="@string/password_field"
                     android:inputType="textPassword"
-                    android:singleLine="true" />
+                    android:singleLine="true"/>
 
                 <CheckBox
                     android:id="@+id/remember_me_checkbox"

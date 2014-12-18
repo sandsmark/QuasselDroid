@@ -9,7 +9,6 @@
         android:autoLink="web"
         android:padding="16dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Menu"
-        android:id="@+id/dialog_topic_text"
-        android:text="May JLee bless this ship, and all who sail http://google.com/ in her" />
+        android:id="@+id/dialog_topic_text" />
 
 </ScrollView>
