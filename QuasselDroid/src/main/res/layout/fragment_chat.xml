@@ -37,11 +37,11 @@
                 android:id="@+id/chat_auto_complete_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="@android:color/transparent"
                 android:contentDescription="@string/hint_autocomplete"
+                style="?android:attr/borderlessButtonStyle"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@android:drawable/ic_menu_search" />
+                android:src="?attr/ic_search" />
 
             <EditText
                 android:id="@+id/chat_input_view"

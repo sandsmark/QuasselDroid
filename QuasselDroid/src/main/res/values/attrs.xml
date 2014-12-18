@@ -3,6 +3,7 @@
     <attr name="spinnerButtonStyle" format="reference" />
 
     <attr name="ic_overflow" format="reference" />
+    <attr name="ic_search" format="reference" />
     <attr name="ic_collapse" format="reference" />
     <attr name="ic_expand" format="reference" />
 

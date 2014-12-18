@@ -12,11 +12,9 @@ import com.iskrembilen.quasseldroid.R;
 public class ThemeUtil {
 
     public static int theme, theme_noactionbar;
-    public static int def_color;
     public static int[] nick_bgs;
     public static int[] nick_colors;
     public static double[] nick_constants;
-    public static int contextMenuStyle;
 
     public static void initTheme(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -36,7 +34,7 @@ public class ThemeUtil {
                 resources.getColor(R.color.nick_voice_color),
                 resources.getColor(R.color.nick_user_color)
         };
-        def_color = resources.getColor(R.color.nick_user_color);
+        color.def_color = resources.getColor(R.color.nick_user_color);
 
         if (themeName.equals("light")) {
             theme = R.style.Theme_QuasselDroid_Material_Light;
@@ -136,9 +134,11 @@ public class ThemeUtil {
                 bufferStateActive,
                 bufferStateAway,
                 bufferStateParted;
+
+        public static int def_color;
     }
 
-    public static final int getNickColor(IrcMode mode) {
+    public static int getNickColor(IrcMode mode) {
         switch (mode) {
             case OWNER:
                 return nick_colors[0];
@@ -153,11 +153,11 @@ public class ThemeUtil {
             case USER:
                 return nick_colors[5];
             default:
-                return def_color;
+                return color.def_color;
         }
     }
 
-    public static final int getNickBg(IrcMode mode) {
+    public static int getNickBg(IrcMode mode) {
         switch (mode) {
             case OWNER:
                 return nick_bgs[0];
@@ -172,7 +172,7 @@ public class ThemeUtil {
             case USER:
                 return nick_bgs[5];
             default:
-                return def_color;
+                return color.def_color;
         }
     }
 }
