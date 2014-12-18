@@ -75,7 +75,7 @@ public class QuasseldroidNotificationManager {
             pendingHighlightNotification = null;
         } else {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                    .setSmallIcon(R.drawable.icon_flat)
+                    .setSmallIcon(R.drawable.stat_normal)
                     .setContentTitle(context.getText(R.string.app_name))
                     .setContentText(context.getText(R.string.notification_connected))
                     .setOngoing(true)
@@ -119,7 +119,7 @@ public class QuasseldroidNotificationManager {
 
     public Notification getConnectingNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.icon_flat)
+                .setSmallIcon(R.drawable.stat_connecting)
                 .setContentTitle(context.getText(R.string.app_name))
                 .setContentText(context.getText(R.string.notification_connecting))
                 .setOngoing(true)
@@ -286,7 +286,7 @@ public class QuasseldroidNotificationManager {
     public void notifyDisconnected() {
         connected = false;
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.icon_flat)
+                .setSmallIcon(R.drawable.stat_disconnected)
                 .setContentTitle(context.getText(R.string.app_name))
                 .setContentText(context.getText(R.string.notification_disconnected))
                 .setAutoCancel(true)
