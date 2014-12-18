@@ -23,7 +23,6 @@
 
 package com.iskrembilen.quasseldroid.service;
 
-import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,7 +37,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,6 +48,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
@@ -85,7 +84,6 @@ import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -230,7 +228,7 @@ public class CoreConnService extends Service {
 
     private void resetReconnectCounter() {
         reconnectCounter = Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_counter),
-            RECONNECT_COUNTER_DEFAULT));
+                RECONNECT_COUNTER_DEFAULT));
         reconnectDelay = 0;
     }
 
@@ -313,7 +311,7 @@ public class CoreConnService extends Service {
         coreConn.requestUnhideTempHiddenBuffer(bufferId);
         networks.getBufferById(bufferId).setTemporarilyHidden(false);
     }
-    
+
     public void unhidePermHiddenBuffer(int bufferId) {
         coreConn.requestUnhidePermHiddenBuffer(bufferId);
     }
@@ -345,12 +343,12 @@ public class CoreConnService extends Service {
         notificationManager = null;
         BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
         reconnectCounter = Integer.valueOf(preferences.getString(
-            getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
+                getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
     }
 
     public void connectToCore() {
         Log.i(TAG, "Connecting to core: " + address + ":" + port
-        + " with username " + username);
+                + " with username " + username);
         if(coreConn != null) {
             disconnectFromCore();
         }
@@ -372,6 +370,8 @@ public class CoreConnService extends Service {
      * read thread.
      */
     class IncomingHandler extends Handler {
+
+
         @Override
         public void handleMessage(Message msg) {
             if (msg == null || coreConn == null) {
@@ -536,7 +536,6 @@ public class CoreConnService extends Service {
                         user.ircOperator = bundle.getString("ircOperator");
                         user.channels = (ArrayList<String>) bundle.getSerializable("channels");
                         user.notifyObservers();
-                        user.notify(R.id.NEW_USER_INFO);
                     } else {
                         Log.e(TAG, "User not found for new user info");
                         //TODO: why is it not found...
@@ -627,7 +626,7 @@ public class CoreConnService extends Service {
                     initDone = true;
                     isConnecting = false;
                     resetReconnectCounter();
-					BusProvider.getInstance().post(new InitProgressEvent(true, ""));
+                    BusProvider.getInstance().post(new InitProgressEvent(true, ""));
                     BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
                     break;
                 case R.id.USER_PARTED:
@@ -729,7 +728,7 @@ public class CoreConnService extends Service {
                     break;
                 case R.id.SET_NETWORK_NAME:
                     networks.getNetworkById(msg.arg1).setName((String) msg.obj);
-					break;
+                    break;
                 case R.id.SET_NETWORK_CURRENT_SERVER:
                     networks.getNetworkById(msg.arg1).setServer((String) msg.obj);
                     break;
@@ -752,8 +751,7 @@ public class CoreConnService extends Service {
                     if (networkRealName != null) {
                         IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
                         if (userRealName != null) {
-                            userRealName.realName = bundle.getString("realName");
-                            userRealName.notify(R.id.SET_USER_REALNAME);
+                            userRealName.realName = bundle.getString("realname");
                         }
                     }
                     break;
@@ -764,18 +762,6 @@ public class CoreConnService extends Service {
                         IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
                         if (userAway != null) {
                             userAway.away = bundle.getBoolean("away");
-                            userAway.notify(R.id.SET_USER_AWAY);
-                        }
-                    }
-                    break;
-                case R.id.SET_USER_AWAY_MESSAGE:
-                    bundle = (Bundle) msg.obj;
-                    Network networkAwayMessage = networks.getNetworkById(msg.arg1);
-                    if (networkAwayMessage != null) {
-                        IrcUser userAwayMessage = networkAwayMessage.getUserByNick(bundle.getString("nick"));
-                        if (userAwayMessage != null) {
-                            userAwayMessage.awayMessage = bundle.getString("awayMessage");
-                            userAwayMessage.notify(R.id.SET_USER_AWAY_MESSAGE);
                         }
                     }
                     break;
@@ -824,7 +810,6 @@ public class CoreConnService extends Service {
         return !initDone && reconnectPrefValue == reconnectCounter;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private boolean checkForMeteredCondition() {
         boolean reconnectMeteredConnection = preferences.getBoolean(
                 getString(R.string.preference_reconnect_metered), false);
@@ -884,7 +869,8 @@ public class CoreConnService extends Service {
     };
 
     public boolean isInitComplete() {
-        return (coreConn != null) && coreConn.isInitComplete();
+        if (coreConn == null) return false;
+        return coreConn.isInitComplete();
     }
 
     public Network getNetworkById(int networkId) {
@@ -974,7 +960,7 @@ public class CoreConnService extends Service {
         } else if (event.action == ChannelAction.MARK_AS_READ) {
             coreConn.requestMarkBufferAsRead(event.bufferId);
         } else if (event.action == ChannelAction.HIGHLIGHTS_READ) {
-            if (notificationManager!=null) notificationManager.notifyHighlightsRead(event.bufferId);
+            notificationManager.notifyHighlightsRead(event.bufferId);
         }
     }
 
