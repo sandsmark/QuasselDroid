@@ -256,6 +256,8 @@ public class MainActivity extends ActionBarActivity {
         Log.d(TAG, "Resuming activity");
         super.onResume();
 
+        BusProvider.getInstance().register(this);
+
         if (ThemeUtil.theme_noactionbar != currentTheme) {
             Log.d(TAG, "Changing theme");
             Handler handler = new Handler();
@@ -268,7 +270,6 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
 
-        BusProvider.getInstance().register(this);
         if (Quasseldroid.status == Status.Disconnected) {
             returnToLogin();
             return;
