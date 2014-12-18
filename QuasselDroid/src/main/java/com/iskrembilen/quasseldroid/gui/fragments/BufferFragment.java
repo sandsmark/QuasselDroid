@@ -24,9 +24,8 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -81,9 +80,6 @@ public class BufferFragment extends Fragment implements Serializable {
 
     BufferListAdapter bufferListAdapter;
     AnimatedExpandableListView bufferList;
-
-    SharedPreferences preferences;
-    OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
@@ -323,7 +319,6 @@ public class BufferFragment extends Fragment implements Serializable {
 
     @Override
     public void onDestroy() {
-        preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         super.onDestroy();
     }
 

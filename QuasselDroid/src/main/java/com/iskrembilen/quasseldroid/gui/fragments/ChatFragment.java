@@ -693,8 +693,8 @@ public class ChatFragment extends Fragment implements Serializable {
                         nickSpan = new SpannableString(TextUtils.concat("<",entry.getNick(),">"));
                     else
                         nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
-                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
                     if ((Build.VERSION.SDK_INT >= 17) &&
                             getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL)

@@ -31,6 +31,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -247,20 +248,23 @@ public class MainActivity extends ActionBarActivity {
                 + ((ThemeUtil.theme_noactionbar == currentTheme) ? "== " : "!= ")
                 + ((currentTheme==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT":"DARK")
         );
-
-        if (ThemeUtil.theme_noactionbar != currentTheme) {
-            Log.d(TAG, "Changing theme");
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            finish();
-            startActivity(intent);
-        }
     }
 
     @Override
     protected void onResume() {
         Log.d(TAG, "Resuming activity");
         super.onResume();
+
+        if (ThemeUtil.theme_noactionbar != currentTheme) {
+            Log.d(TAG, "Changing theme");
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    recreate();
+                }
+            }, 1);
+        }
 
         BusProvider.getInstance().register(this);
         if (Quasseldroid.status == Status.Disconnected) {

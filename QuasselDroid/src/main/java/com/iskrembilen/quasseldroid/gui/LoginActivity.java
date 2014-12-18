@@ -34,6 +34,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GravityCompat;
@@ -208,7 +209,20 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     protected void onResume() {
         Log.d(TAG, "Resuming activity");
         super.onResume();
+
         BusProvider.getInstance().register(this);
+        if (ThemeUtil.theme != currentTheme) {
+            Log.d(TAG, "Changing theme");
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    recreate();
+                }
+            }, 1);
+        }
     }
 
     @Override
@@ -223,12 +237,6 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         Log.d(TAG, "Starting activity");
         super.onStart();
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
-        if (ThemeUtil.theme != currentTheme) {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            finish();
-            startActivity(intent);
-        }
     }
 
     @Override

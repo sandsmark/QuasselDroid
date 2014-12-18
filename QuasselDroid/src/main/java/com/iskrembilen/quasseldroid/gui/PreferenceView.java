@@ -28,6 +28,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -39,6 +40,17 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 public class PreferenceView extends ActionBarActivity {
     private String TAG = PreferenceView.class.getSimpleName();
 
+    private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals(getResources().getString(R.string.preference_theme))) {
+                ThemeUtil.initTheme(getApplicationContext());
+                Log.d(QuasselPreferenceFragment.class.getSimpleName(), "Theme updated");
+                recreate();
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeUtil.theme);
@@ -48,15 +60,7 @@ public class PreferenceView extends ActionBarActivity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new QuasselPreferenceFragment()).commit();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getResources().getString(R.string.preference_theme))) {
-                    ThemeUtil.initTheme(getApplicationContext());
-                }
-            }
-        });
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).registerOnSharedPreferenceChangeListener(sharedPreferenceListener);
     }
 
     @Override
@@ -76,5 +80,11 @@ public class PreferenceView extends ActionBarActivity {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).unregisterOnSharedPreferenceChangeListener(sharedPreferenceListener);
     }
 }

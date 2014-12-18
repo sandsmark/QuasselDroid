@@ -128,28 +128,23 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_notify_connect"
-            android:summary=""
             android:title="@string/preference_title_notify_connect" />
 
         <CheckBoxPreference
             android:key="@string/preference_notification_vibrate"
-            android:summary=""
             android:title="@string/preference_title_notification_vibrate" />
 
         <CheckBoxPreference
             android:key="@string/preference_notification_light"
-            android:summary=""
             android:title="@string/preference_title_notification_light" />
 
         <CheckBoxPreference
             android:key="@string/preference_notification_sound"
-            android:summary=""
             android:title="@string/preference_title_notification_sound" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_notification_sound_active"
-            android:summary=""
             android:title="@string/preference_title_notification_sound_active" />
 
         <RingtonePreference
