@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.service;
 
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -810,13 +812,14 @@ public class CoreConnService extends Service {
         return !initDone && reconnectPrefValue == reconnectCounter;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private boolean checkForMeteredCondition() {
         boolean reconnectMeteredConnection = preferences.getBoolean(
                 getString(R.string.preference_reconnect_metered), false);
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        return reconnectMeteredConnection || !connManager.isActiveNetworkMetered();
+        return reconnectMeteredConnection || !(Build.VERSION.SDK_INT>16 && connManager.isActiveNetworkMetered());
     }
 
 
