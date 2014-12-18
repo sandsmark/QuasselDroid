@@ -115,6 +115,7 @@ public class MainActivity extends ActionBarActivity {
         setTheme(ThemeUtil.theme_noactionbar);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.theme_noactionbar;
+
         setContentView(R.layout.layout_main);
 
         actionbar = new ClickableActionBar(getApplicationContext(),(Toolbar) findViewById(R.id.action_bar));
@@ -176,10 +177,15 @@ public class MainActivity extends ActionBarActivity {
         drawer.setDrawerListener((extensibleDrawerToggle.getDrawerListener()));
 
         manager.preInit();
-        manager.init();
 
-        manager.lockDrawer(Gravity.START,true);
-        manager.lockDrawer(Gravity.END, true);
+        if (savedInstanceState==null) {
+            manager.init();
+
+            manager.lockDrawer(Gravity.START, true);
+            manager.lockDrawer(Gravity.END, true);
+        } else {
+            manager.initMainFragment();
+        }
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
@@ -264,6 +270,7 @@ public class MainActivity extends ActionBarActivity {
             loadBufferAndDrawerState();
         }
 
+        setTitleAndMenu();
         hideKeyboard(drawer);
     }
 
@@ -288,6 +295,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onPause() {
         Log.d(TAG, "Pausing activity");
         BusProvider.getInstance().unregister(this);
+        manager.cleanupMenus();
         super.onPause();
     }
 
@@ -295,6 +303,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onStop() {
         Log.d(TAG, "Stopping activity");
         unbindService(focusConnection);
+        manager.cleanupMenus();
 
         super.onStop();
     }
@@ -305,6 +314,7 @@ public class MainActivity extends ActionBarActivity {
         preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 
         ((Quasseldroid) getApplication()).savedInstanceState = storeState(new Bundle());
+        manager.cleanupMenus();
 
         super.onDestroy();
     }
@@ -522,10 +532,32 @@ public class MainActivity extends ActionBarActivity {
         void preInit() {
             Log.d(getClass().getSimpleName(),"Setting up fragments");
 
-            if (chatFragment==null) chatFragment = ChatFragment.newInstance();
-            if (nickFragment==null) nickFragment = NickListFragment.newInstance();
-            if (detailFragment==null) detailFragment = DetailFragment.newInstance();
-            if (bufferFragment==null) bufferFragment = BufferFragment.newInstance();
+            FragmentManager manager = getSupportFragmentManager();
+
+            if (chatFragment==null) {
+                if (manager.findFragmentById(R.id.main_content_container) instanceof ChatFragment)
+                    chatFragment = manager.findFragmentById(R.id.main_content_container);
+                else
+                    chatFragment = ChatFragment.newInstance();
+            }
+            if (nickFragment==null) {
+                if (manager.findFragmentById(R.id.right_drawer) instanceof NickListFragment)
+                    nickFragment = manager.findFragmentById(R.id.right_drawer);
+                else
+                    nickFragment = NickListFragment.newInstance();
+            }
+            if (detailFragment==null) {
+                if (manager.findFragmentById(R.id.right_drawer) instanceof DetailFragment)
+                    detailFragment = manager.findFragmentById(R.id.right_drawer);
+                else
+                    detailFragment = DetailFragment.newInstance();
+            }
+            if (bufferFragment==null) {
+                if (manager.findFragmentById(R.id.left_drawer) instanceof BufferFragment)
+                    bufferFragment = manager.findFragmentById(R.id.left_drawer);
+                else
+                    bufferFragment = BufferFragment.newInstance();
+            }
         }
 
         void init() {
@@ -568,7 +600,10 @@ public class MainActivity extends ActionBarActivity {
 
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
-            Fragment currentFragment = drawers.get(id);
+            Fragment currentFragment = (drawers.get(id)==null) ? manager.findFragmentById(id) : drawers.get(id);
+
+            boolean menuVisbility = currentFragment!=null && currentFragment.isMenuVisible();
+            if (currentFragment!=null) currentFragment.setMenuVisibility(false);
 
             String from = (currentFragment == null) ? "NULL" : currentFragment.getClass().getSimpleName();
             String to = (fragment == null) ? "NULL" : fragment.getClass().getSimpleName();
@@ -585,12 +620,13 @@ public class MainActivity extends ActionBarActivity {
 
             Log.d(this.getClass().getSimpleName(), String.format("Add on side %s the fragment %s, replacing  %s",tag,to,from));
 
-            drawers.put(id,fragment);
+            drawers.put(id, fragment);
 
             if (isDrawer)
                 lockDrawer(side, (fragment == null));
 
             ft.commit();
+            if (fragment != null) fragment.setMenuVisibility(menuVisbility);
         }
 
         void lockDrawer(int side, boolean locked) {
@@ -637,6 +673,24 @@ public class MainActivity extends ActionBarActivity {
                 drawer.closeDrawers();
             else
                 drawer.openDrawer(openedDrawer);
+        }
+
+        public void cleanup() {
+            setPanelFragment(Gravity.START, null);
+            setPanelFragment(Gravity.END, null);
+            setPanelFragment(Gravity.NO_GRAVITY, null);
+
+            bufferFragment = null;
+            nickFragment = null;
+            chatFragment = null;
+            detailFragment = null;
+        }
+
+        public void cleanupMenus() {
+            bufferFragment.setMenuVisibility(false);
+            nickFragment.setMenuVisibility(false);
+            chatFragment.setMenuVisibility(false);
+            detailFragment.setMenuVisibility(false);
         }
     }
 
