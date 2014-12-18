@@ -2,16 +2,19 @@
 <resources>
     <!-- CONSTANTS -->
 
-    <string name="default_port">4242</string>
+    <string name="default_port" translatable="false">4242</string>
     <string name="title_lag">%1$s%2$s</string>
     <string name="unit_milliseconds">ms</string>
     <string name="unit_seconds">s</string>
-    <string name="has_focus">hasfocus</string>
+    <string name="has_focus" translatable="false">hasfocus</string>
 
     <!-- APPLICATION -->
 
     <string name="app_name">Quasseldroid</string>
-    <string name="description">An Android-based client for the decentralized Quassel IRC client.</string>
+    <string name="app_description">An Android-based client for the decentralized Quassel IRC client.</string>
+    <string name="app_description_long">Quassel is a distributed, decentralized IRC client, written using C++ and Qt. QuasselDroid is a pure-java client for the Quassel core, allowing you to connect to your Quassel core using your Android (TM) phone.</string>
+    <string name="app_links_github" translatable="false">GitHub:\nhttps://github.com/sandsmark/QuasselDroid</string>
+    <string name="app_links_community" translatable="false">Beta Builds:\nhttps://plus.google.com/communities/104094956084217666662</string>
 
     <!-- ACTIONS -->
 
@@ -43,7 +46,9 @@
 
     <string name="title_login">Login</string>
     <string name="title_loading">Loading…</string>
-    <string name="title_quasseldroid_logo">uasseldroid</string>
+    <string name="title_authors">Authors</string>
+    <string name="title_links">Links</string>
+    <string name="title_quasseldroid_logo" translatable="false">uasseldroid</string>
 
     <string name="hint_join_channel">Channel</string>
     <string name="hint_join_network">Network</string>
@@ -124,17 +129,17 @@
         <string name="preference_dialog_theme">Choose application theme</string>
         <string name="preference_summary_theme">The application theme</string>
         <string name="preference_title_theme">Theme</string>
-        <string name="preference_theme">selectedtheme</string>
+        <string name="preference_theme" translatable="false">selectedtheme</string>
 
         <string name="preference_dialog_timestamp">Show Seconds in Timestamp</string>
         <string name="preference_summary_timestamp">When should the Timestamp contain seconds</string>
         <string name="preference_title_timestamp">Timestamp</string>
-        <string name="preference_timestamp">timestamp_seconds</string>
+        <string name="preference_timestamp" translatable="false">timestamp_seconds</string>
 
-        <string name="preference_dialog_fontsize">Choose fontsize for the bufferlist</string>
+        <string name="preference_dialog_fontsize">Choose fontsize for the chat</string>
         <string name="preference_summary_fontsize">The fontsize of the bufferlist</string>
         <string name="preference_title_fontsize">Bufferlist fontsize</string>
-        <string name="preference_fontsize">fontsizeChannelList</string>
+        <string name="preference_fontsize" translatable="false">fontsizeChannelList</string>
             <string name="fontsize_tiny">Tiny</string>
             <string name="fontsize_small">Small</string>
             <string name="fontsize_normal">Normal</string>
@@ -143,75 +148,75 @@
 
         <string name="preference_summary_colored_text">Turn on/off support for mirc color coded text</string>
         <string name="preference_title_colored_text">Allow colored text</string>
-        <string name="preference_colored_text">allowcoloredtext</string>
+        <string name="preference_colored_text" translatable="false">allowcoloredtext</string>
 
         <string name="preference_summary_nickbrackets">Display the nick with brackets at each side</string>
         <string name="preference_title_nickbrackets">Show Nicks in classic style</string>
-        <string name="preference_nickbrackets">shownickbrackets</string>
+        <string name="preference_nickbrackets" translatable="false">shownickbrackets</string>
 
         <string name="preference_summary_hostname">Show the User’s nick@host in each server action (kick/join/etc.)</string>
         <string name="preference_title_hostname">Show User Hostnames</string>
-        <string name="preference_hostname">detailed_actions</string>
+        <string name="preference_hostname" translatable="false">detailed_actions</string>
 
         <string name="preference_summary_lag">Show latency between the client and the Core</string>
         <string name="preference_title_lag">Show Lag</string>
-        <string name="preference_lag">showlag</string>
+        <string name="preference_lag" translatable="false">showlag</string>
 
     <string name="preference_category_connection">Connection</string>
         <string name="preference_summary_fetch_to_last_seen">Fetch all unseen messages on connect. This can take a very long time!</string>
         <string name="preference_title_fetch_to_last_seen">Unread messages per chat</string>
-        <string name="preference_fetch_to_last_seen">getallunseenbacklog</string>
+        <string name="preference_fetch_to_last_seen" translatable="false">getallunseenbacklog</string>
 
         <string name="preference_summary_initial_backlog_limit">How many lines to fetch on connect</string>
         <string name="preference_title_initial_backlog_limit">Initial backlog amount</string>
-        <string name="preference_initial_backlog_limit">backlogLimit</string>
+        <string name="preference_initial_backlog_limit" translatable="false">backlogLimit</string>
 
         <string name="preference_summary_dynamic_backlog">How many lines to fetch on scroll</string>
         <string name="preference_title_dynamic_backlog">Dynamic backlog amount</string>
-        <string name="preference_dynamic_backlog">dynamicBacklog</string>
+        <string name="preference_dynamic_backlog" translatable="false">dynamicBacklog</string>
 
-        <string name="preference_wake_lock">wakelock</string>
+        <string name="preference_wake_lock" translatable="false">wakelock</string>
 
     <string name="preference_category_reconnect">Automatic Reconnect</string>
         <string name="preference_summary_reconnect">Reconnect, when connection is lost</string>
         <string name="preference_title_reconnect">Reconnect</string>
-        <string name="preference_reconnect">reconnect</string>
+        <string name="preference_reconnect" translatable="false">reconnect</string>
 
         <string name="preference_summary_reconnect_wifi">Reconnect only if wifi is available</string>
         <string name="preference_title_wifi">Reconnect with wifi only</string>
-        <string name="preference_reconnect_wifi">reconnect_on_wifi_only</string>
+        <string name="preference_reconnect_wifi" translatable="false">reconnect_on_wifi_only</string>
 
         <string name="preference_summary_metered">Allow reconnect while connected to a mobile WiFi hotspot.</string>
         <string name="preference_title_metered">Reconnect on metered wifi connection</string>
-        <string name="preference_reconnect_metered">reconnect_on_metered</string>
+        <string name="preference_reconnect_metered" translatable="false">reconnect_on_metered</string>
 
         <string name="preference_summary_reconnect_periodically">Normally Quassel reconnects only if your phone’s connection breaks down. Try this option if your disconnects are caused by the core restarting or similar situations</string>
         <string name="preference_title_reconnect_periodically">Reconnect periodically</string>
-        <string name="preference_reconnect_periodically">reconnect_periodically</string>
+        <string name="preference_reconnect_periodically" translatable="false">reconnect_periodically</string>
 
         <string name="preference_summary_reconnect_counter">How often to retry</string>
         <string name="preference_title_reconnect_counter">Reconnect counter</string>
-        <string name="preference_reconnect_counter">reconnectCounter</string>
+        <string name="preference_reconnect_counter" translatable="false">reconnectCounter</string>
 
     <string name="preference_category_notifications">Notifications</string>
         <string name="preference_title_notify_connect">Notify on connect</string>
-        <string name="preference_notify_connect">notifyconnect</string>
+        <string name="preference_notify_connect" translatable="false">notifyconnect</string>
 
         <string name="preference_title_notification_vibrate">Vibrate on notification</string>
-        <string name="preference_notification_vibrate">notificationvibrate</string>
+        <string name="preference_notification_vibrate" translatable="false">notificationvibrate</string>
 
         <string name="preference_title_notification_light">Use light on notification</string>
-        <string name="preference_notification_light">notificationlight</string>
+        <string name="preference_notification_light" translatable="false">notificationlight</string>
 
         <string name="preference_title_notification_sound">Play sound on notification</string>
-        <string name="preference_notification_sound">notificationsound</string>
+        <string name="preference_notification_sound" translatable="false">notificationsound</string>
 
         <string name="preference_title_notification_sound_active">Sound only when unfocused</string>
-        <string name="preference_notification_sound_active">notificationsoundactive</string>
+        <string name="preference_notification_sound_active" translatable="false">notificationsoundactive</string>
 
         <string name="preference_title_notification_sound_file">Notification sound</string>
-        <string name="preference_notification_sound_file">notificationsoundfile</string>
+        <string name="preference_notification_sound_file" translatable="false">notificationsoundfile</string>
 
         <string name="preference_title_notification_connect_sound_file">Connection sound</string>
-        <string name="preference_notification_connect_sound_file">notificationconnectsoundfile</string>
+        <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
 </resources>
