@@ -42,7 +42,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:layout_gravity="center_vertical"
-                        android:src="?attr/ic_action_overflow" />
+                        android:src="?attr/ic_overflow" />
                 </LinearLayout>
 
                 <EditText
