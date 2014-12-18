@@ -190,7 +190,7 @@ public class CoreConnService extends Service {
         preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
         preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), false);
         preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
-        preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_on_wifi_only), false);
+        preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_wifi), false);
         preferenceReconnectPeriodically = preferences.getBoolean(getString(R.string.preference_reconnect_periodically), false);
         preferenceListener = new OnSharedPreferenceChangeListener() {
 
@@ -204,8 +204,8 @@ public class CoreConnService extends Service {
                     else if (preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
                 } else if (key.equals(getString(R.string.preference_reconnect))) {
                     preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
-                } else if (key.equals(getString(R.string.preference_reconnect_on_wifi_only))) {
-                    preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_on_wifi_only), false);
+                } else if (key.equals(getString(R.string.preference_reconnect_wifi))) {
+                    preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_wifi), false);
                 } else if(key.equals(getString(R.string.preference_reconnect_counter))) {
                     resetReconnectCounter();
                 } else if(key.equals(getString(R.string.preference_reconnect_periodically))) {
@@ -835,7 +835,7 @@ public class CoreConnService extends Service {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private boolean checkForMeteredCondition() {
         boolean reconnectMeteredConnection = preferences.getBoolean(
-                getString(R.string.preference_reconnect_on_metered), false);
+                getString(R.string.preference_reconnect_metered), false);
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
@@ -845,7 +845,7 @@ public class CoreConnService extends Service {
 
     private boolean isWifiCondition() {
         boolean wifiConnection = preferences.getBoolean(
-                getString(R.string.preference_reconnect_on_wifi_only), false);
+                getString(R.string.preference_reconnect_wifi), false);
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);

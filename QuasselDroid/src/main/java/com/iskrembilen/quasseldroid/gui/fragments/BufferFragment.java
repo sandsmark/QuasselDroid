@@ -23,15 +23,10 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -51,16 +46,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.idunnololz.widgets.AnimatedExpandableListView;
-import com.iskrembilen.quasseldroid.gui.MainActivity;
-import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
-import com.squareup.otto.Subscribe;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.BufferUtils;
@@ -72,8 +57,17 @@ import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
+import com.iskrembilen.quasseldroid.gui.MainActivity;
+import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 public class BufferFragment extends Fragment implements Serializable {
 
@@ -113,17 +107,6 @@ public class BufferFragment extends Fragment implements Serializable {
             restoreItemPosition = savedInstanceState.getInt(ITEM_POSITION_KEY);
         }
         setHasOptionsMenu(true);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
-
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getResources().getString(R.string.preference_fontsize_channel_list))) {
-                    bufferListAdapter.notifyDataSetChanged();
-                }
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
     }
 
     @Override
@@ -368,9 +351,9 @@ public class BufferFragment extends Fragment implements Serializable {
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         if (showHiddenBuffers) {
-            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.context_hide_hidden);
+            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.action_hidden_hide);
         } else {
-            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.context_show_hidden);
+            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.action_hidden_display);
         }
     }
 

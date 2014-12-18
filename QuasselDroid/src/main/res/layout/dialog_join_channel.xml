@@ -10,7 +10,7 @@
         android:id="@+id/dialog_join_channel_network_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/network_field"/>
+        android:hint="@string/hint_join_network"/>
 
     <EditText
         android:id="@+id/dialog_join_channel_channel_name_field"
@@ -18,5 +18,5 @@
         android:layout_height="wrap_content"
         android:inputType="textUri"
         android:singleLine="true"
-        android:hint="@string/channel_field" />
+        android:hint="@string/hint_join_channel" />
 </LinearLayout>

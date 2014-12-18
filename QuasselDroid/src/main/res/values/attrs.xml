@@ -8,8 +8,4 @@
 
     <attr name="backgroundColor" format="reference" />
     <attr name="dividerColor" format="reference" />
-
-    <attr name="textColorPrimary" format="reference" />
-    <attr name="textColorSecondary" format="reference" />
-    <attr name="textColorTertiary" format="reference" />
 </resources>

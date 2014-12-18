@@ -7,13 +7,13 @@ import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-import java.util.ArrayList;
-
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+
+import java.util.ArrayList;
 
 public class HideEventsDialog extends DialogFragment {
 

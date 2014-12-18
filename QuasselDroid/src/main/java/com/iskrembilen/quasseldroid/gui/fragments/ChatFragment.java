@@ -1,41 +1,38 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.app.Activity;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Surface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -44,14 +41,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
-
-import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
-import com.squareup.otto.Subscribe;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMessage;
@@ -70,12 +59,19 @@ import com.iskrembilen.quasseldroid.events.ManageMessageEvent.MessageAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
+import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.SenderColorHelper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 public class ChatFragment extends Fragment implements Serializable {
 
@@ -94,6 +90,8 @@ public class ChatFragment extends Fragment implements Serializable {
     private NetworkCollection networks;
     private String timeFormat;
 
+    private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+
     public static ChatFragment newInstance() {
         return new ChatFragment();
     }
@@ -108,17 +106,21 @@ public class ChatFragment extends Fragment implements Serializable {
         if (savedInstanceState != null && savedInstanceState.containsKey(BUFFER_ID)) {
             bufferId = savedInstanceState.getInt(BUFFER_ID);
         }
+
+        sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(getString(R.string.preference_timestamp))) {
+                    updateTimeFormat();
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_chat, container, false);
-        backlogList = (ListView) root.findViewById(R.id.chat_backlog_list_view);
-        inputField = (EditText) root.findViewById(R.id.chat_input_view);
-        autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
+    public void updateTimeFormat() {
+        String timeType = preferences.getString(getResources().getString(R.string.preference_timestamp),"orientation");
 
-        String timeType = preferences.getString(getResources().getString(R.string.preference_timestamp_seconds),"orientation");
         if (timeType.equalsIgnoreCase("always")) {
             timeFormat = "%02d:%02d:%02d";
         } else if (timeType.equalsIgnoreCase("never")) {
@@ -133,11 +135,26 @@ public class ChatFragment extends Fragment implements Serializable {
             timeFormat = "%02d:%02d";
         }
         Log.d(TAG,"Setting time format to include seconds: "+ timeType + ", resulting format: "+ timeFormat);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_chat, container, false);
+        backlogList = (ListView) root.findViewById(R.id.chat_backlog_list_view);
+        inputField = (EditText) root.findViewById(R.id.chat_input_view);
+        autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
+
+        updateTimeFormat();
 
         backlogList.setAdapter(adapter);
         backlogList.setOnScrollListener(new BacklogScrollListener(5));
         backlogList.setSelection(backlogList.getChildCount());
-        backlogList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        // TODO: Add a feature to autocomplete nickname of a double-clicked message
+        // Does not work with selectable text yet
+
+        /*backlogList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             private int lastItem;
             private long lastTime;
 
@@ -160,7 +177,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     lastTime = currentTime;
                 }
             }
-        });
+        });*/
 
         autoCompleteButton.setOnClickListener(new OnClickListener() {
 
@@ -247,6 +264,7 @@ public class ChatFragment extends Fragment implements Serializable {
         Log.d(TAG, "Starting fragment");
         super.onStart();
         dynamicBacklogAmount = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         autoCompleteButton.setEnabled(false);
         inputField.setEnabled(false);
         BusProvider.getInstance().register(this);
@@ -265,6 +283,7 @@ public class ChatFragment extends Fragment implements Serializable {
         super.onStop();
         if (Quasseldroid.status == ConnectionChangedEvent.Status.Connected && getUserVisibleHint()) updateRead();
         adapter.clearBuffer();
+        preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         BusProvider.getInstance().unregister(this);
         setUserVisibleHint(false);
     }
@@ -440,6 +459,7 @@ public class ChatFragment extends Fragment implements Serializable {
             return buffer.getBacklogEntry(position).messageId;
         }
 
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder = null;
@@ -465,7 +485,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 holder.separatorView.getLayoutParams().height = 0;
             }
 
-            int fontsize = Integer.valueOf(preferences.getString(getString(R.string.preference_fontsize_channel_list), "14"));
+            int fontsize = Integer.valueOf(preferences.getString(getString(R.string.preference_fontsize), "14"));
             holder.msgView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontsize);
             holder.timeView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontsize);
 
@@ -480,7 +500,7 @@ public class ChatFragment extends Fragment implements Serializable {
             Spannable spannable;
             String rawText;
             String nick;
-            boolean detailedActions = preferences.getBoolean(getString(R.string.preference_detailed_actions),false);
+            boolean detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
 
             switch (entry.type) {
                 case Action:
@@ -496,7 +516,7 @@ public class ChatFragment extends Fragment implements Serializable {
                         color = entry.getSenderColor();
                     }
 
-                    Spannable nickSpan = new SpannableString(entry.getNick());
+                    SpannableString nickSpan = new SpannableString(entry.getNick());
                     entry.content.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.content.length(), 0);
                     nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
@@ -527,7 +547,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Join:
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format("%s joined", nick));
+                    spannable = new SpannableString(String.format(getResources().getString(R.string.message_join), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
@@ -537,7 +557,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Part:
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format("%s left: ", nick));
+                    spannable = new SpannableString(String.format(getString(R.string.message_leave), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
@@ -547,7 +567,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Quit:
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format("%s quit: ", nick));
+                    spannable = new SpannableString(String.format(getString(R.string.message_quit), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
@@ -557,7 +577,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Kill:
                     nick = entry.getNick();
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format("%s was killed: ", nick));
+                    spannable = new SpannableString(String.format(getString(R.string.message_kill), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, entry.content));
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
@@ -578,7 +598,7 @@ public class ChatFragment extends Fragment implements Serializable {
 
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
 
-                    rawText = String.format("%s has kicked %s from %s: %s", entry.getNick(), nick, entry.bufferInfo.name, reason);
+                    rawText = String.format(getString(R.string.message_kick), entry.getNick(), nick, entry.bufferInfo.name, reason);
 
                     int color_nick;
                     if (nick.equalsIgnoreCase(entry.getSender())) {
@@ -599,7 +619,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     int color_affected_nick;
                     String affected_nick = null;
 
-                    rawText = String.format(String.format("Mode %s by %s", entry.content.toString(), entry.getNick()));
+                    rawText = String.format(getString(R.string.message_mode), entry.content.toString(), entry.getNick());
                     spannable = new SpannableString(rawText);
 
                     if (entry.content.toString().trim().length()-entry.content.toString().trim().replaceAll(" ","").length()==2 && entry.content.toString().startsWith("#")) {
@@ -624,11 +644,11 @@ public class ChatFragment extends Fragment implements Serializable {
                     break;
                 case Nick:
                     if (entry.getNick().equals(entry.content.toString())) {
-                        rawText = String.format("You changed your nick to %s", entry.content.toString());
+                        rawText = String.format(getString(R.string.message_nick_self), entry.content.toString());
                         spannable = new SpannableString(rawText);
                         holder.msgView.setText(spannable);
                     } else {
-                        rawText = String.format("%s is now known as %s", entry.getNick(), entry.content.toString());
+                        rawText = String.format(getString(R.string.message_nick_other), entry.getNick(), entry.content.toString());
                         spannable = new SpannableString(rawText);
                         spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
@@ -654,7 +674,9 @@ public class ChatFragment extends Fragment implements Serializable {
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case DayChange:
-                    holder.msgView.setText(Html.fromHtml(String.format("<i> Day changed to %s</i>", entry.content.toString())));
+                    SpannableString s = new SpannableString(String.format(getString(R.string.message_daychange), entry.content.toString()));
+                    s.setSpan(new StyleSpan(Typeface.ITALIC),0,s.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    holder.msgView.setText(s);
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
                 case Plain:
@@ -667,10 +689,19 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.msgView.setTextColor(ThemeUtil.color.chatPlain);
                     holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    nickSpan = new SpannableString(entry.getNick());
+                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false))
+                        nickSpan = new SpannableString(TextUtils.concat("<",entry.getNick(),">"));
+                    else
+                        nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
                     nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText((SpannedString) TextUtils.concat(nickSpan, " ", entry.content));
+
+                    if ((Build.VERSION.SDK_INT >= 17) &&
+                            getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL)
+                        holder.msgView.setText(TextUtils.concat(entry.content, " ", nickSpan));
+                    else
+                        holder.msgView.setText(TextUtils.concat(nickSpan, " ", entry.content));
+
                     holder.parent.setBackgroundColor(Color.TRANSPARENT);
                     break;
             }

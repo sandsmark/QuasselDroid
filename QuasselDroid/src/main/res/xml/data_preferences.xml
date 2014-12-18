@@ -4,77 +4,83 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <PreferenceCategory android:title="Backlog Fetching">
+    <PreferenceCategory android:title="@string/preference_category_appearance">
+
+        <ListPreference
+            android:defaultValue="light"
+            android:dialogTitle="@string/preference_dialog_theme"
+            android:entries="@array/entries_theme_preference"
+            android:entryValues="@array/entryvalues_theme_preference"
+            android:key="@string/preference_theme"
+            android:summary="@string/preference_summary_theme"
+            android:title="@string/preference_title_theme" />
+
+        <ListPreference
+            android:defaultValue="orientation"
+            android:dialogTitle="@string/preference_dialog_timestamp"
+            android:entries="@array/entries_timestamp_preference"
+            android:entryValues="@array/entryvalues_timestamp_preference"
+            android:key="@string/preference_timestamp"
+            android:summary="@string/preference_summary_timestamp"
+            android:title="@string/preference_title_timestamp" />
+
+        <ListPreference
+            android:defaultValue="14"
+            android:dialogTitle="@string/preference_dialog_fontsize"
+            android:entries="@array/entries_fontsize_preference"
+            android:entryValues="@array/entryvalues_fontsize_preference"
+            android:key="@string/preference_fontsize"
+            android:summary="@string/preference_summary_fontsize"
+            android:title="@string/preference_title_fontsize" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/preference_colored_text"
+            android:summary="@string/preference_summary_colored_text"
+            android:title="@string/preference_title_colored_text" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_nickbrackets"
+            android:summary="@string/preference_summary_nickbrackets"
+            android:title="@string/preference_title_nickbrackets" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_hostname"
+            android:summary="@string/preference_summary_hostname"
+            android:title="@string/preference_title_hostname" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_lag"
+            android:summary="@string/preference_summary_lag"
+            android:title="@string/preference_title_lag" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preference_category_connection">
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_fetch_to_last_seen"
-            android:summary="Fetch all unseen messages on connect. This can take a very long time!"
-            android:title="Unread messages per chat"
+            android:summary="@string/preference_summary_fetch_to_last_seen"
+            android:title="@string/preference_title_fetch_to_last_seen"
             android:disableDependentsState="true" />
 
         <EditTextPreference
             android:defaultValue="10"
             android:key="@string/preference_initial_backlog_limit"
             android:numeric="integer"
-            android:summary="How many lines to fetch on connect"
-            android:title="Initial backlog amount"
+            android:summary="@string/preference_summary_initial_backlog_limit"
+            android:title="@string/preference_title_initial_backlog_limit"
             android:dependency="@string/preference_fetch_to_last_seen" />
 
         <EditTextPreference
             android:defaultValue="20"
             android:key="@string/preference_dynamic_backlog"
             android:numeric="integer"
-            android:summary="How many lines to fetch on scroll"
-            android:title="Dynamic backlog amount" />
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="Quassel">
-
-        <ListPreference
-            android:defaultValue="light"
-            android:dialogTitle="Choose application theme"
-            android:entries="@array/entries_theme_preference"
-            android:entryValues="@array/entryvalues_theme_preference"
-            android:key="@string/preference_theme"
-            android:summary="The application theme"
-            android:title="Theme" />
-
-        <ListPreference
-            android:defaultValue="orientation"
-            android:dialogTitle="Show Seconds in Timestamp"
-            android:entries="@array/entries_timestamp_preference"
-            android:entryValues="@array/entryvalues_timestamp_preference"
-            android:key="@string/preference_timestamp_seconds"
-            android:summary="When should the Timestamp contain seconds"
-            android:title="Timestamp" />
-
-        <ListPreference
-            android:defaultValue="14"
-            android:dialogTitle="Choose fontsize for the bufferlist"
-            android:entries="@array/entries_fontsize_preference"
-            android:entryValues="@array/entryvalues_fontsize_preference"
-            android:key="@string/preference_fontsize_channel_list"
-            android:summary="The fontsize of the bufferlist"
-            android:title="Bufferlist fontsize" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="@string/preference_colored_text"
-            android:summary="Turn on/off support for mirc color coded text"
-            android:title="Allow colored text" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="@string/preference_detailed_actions"
-            android:summary="Show the User’s nick@host in each server action (kick/join/etc.)"
-            android:title="Show User Hostnames" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="@string/preference_show_lag"
-            android:summary="Show the core latency"
-            android:title="Show Lag" />
+            android:summary="@string/preference_summary_dynamic_backlog"
+            android:title="@string/preference_title_dynamic_backlog" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -83,91 +89,82 @@
             android:title="Use a wake-lock to inhibit sleep" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Reconnection" >
+    <PreferenceCategory android:title="@string/preference_category_reconnect" >
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_reconnect"
-            android:summary="Reconnect, when connection is lost"
-            android:title="Reconnect"
-            android:disableDependentsState="false"
-            />
+            android:summary="@string/preference_summary_reconnect"
+            android:title="@string/preference_title_reconnect"
+            android:disableDependentsState="false" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/preference_reconnect_on_wifi_only"
-            android:summary="Reconnect only if wifi is available"
-            android:title="Reconnect with wifi only"
+            android:key="@string/preference_reconnect_wifi"
+            android:summary="@string/preference_summary_reconnect_wifi"
+            android:title="@string/preference_title_wifi"
             android:dependency="@string/preference_reconnect" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/preference_reconnect_on_metered"
-            android:summary="Reconnect, when on a metered connection. A connection is classified as
-metered, when it is sensitive to heavy data usage. For example, tethering connections can be
-classified as metered by the user."
-            android:title="Reconnect on metered wifi connection"
-            android:dependency="@string/preference_reconnect_on_wifi_only"
-            />
+            android:key="@string/preference_reconnect_metered"
+            android:summary="@string/preference_summary_metered"
+            android:title="@string/preference_title_metered"
+            android:dependency="@string/preference_reconnect_wifi" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_reconnect_periodically"
-            android:summary="Normally, Quasseldroid reconnects, when the lost network connection is
-reestablished. Try this option, if the standard reconnection functionality isn't working for you,
-because your connection is lost by restarts of the core, a temporarily unreachable core, etc. With
-this option, Quasseldroid tries to reconnect periodically in an increasing interval."
-            android:title="Reconnect periodically"
-            android:dependency="@string/preference_reconnect"
-            />
+            android:summary="@string/preference_summary_reconnect_periodically"
+            android:title="@string/preference_title_reconnect_periodically"
+            android:dependency="@string/preference_reconnect" />
         <EditTextPreference
-            android:defaultValue="10"
+            android:defaultValue="3"
             android:key="@string/preference_reconnect_counter"
             android:numeric="integer"
-            android:summary="How often to retry"
-            android:title="Reconnect counter"
-            android:dependency="@string/preference_reconnect_periodically"
-            />
+            android:summary="@string/preference_summary_reconnect_counter"
+            android:title="@string/preference_title_reconnect_counter"
+            android:dependency="@string/preference_reconnect_periodically" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Notifications">
+    <PreferenceCategory android:title="@string/preference_category_notifications">
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_notify_connect"
             android:summary=""
-            android:title="Notify on connect" />
+            android:title="@string/preference_title_notify_connect" />
 
         <CheckBoxPreference
             android:key="@string/preference_notification_vibrate"
             android:summary=""
-            android:title="Vibrate on notification" />
+            android:title="@string/preference_title_notification_vibrate" />
 
         <CheckBoxPreference
             android:key="@string/preference_notification_light"
             android:summary=""
-            android:title="Use light on notification" />
+            android:title="@string/preference_title_notification_light" />
 
         <CheckBoxPreference
             android:key="@string/preference_notification_sound"
             android:summary=""
-            android:title="Play sound on notification" />
+            android:title="@string/preference_title_notification_sound" />
 
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/preference_notification_sound_active"
             android:summary=""
-            android:title="Sound only when unfocused" />
+            android:title="@string/preference_title_notification_sound_active" />
 
         <RingtonePreference
             android:key="@string/preference_notification_sound_file"
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="Notification sound"/>
+            android:title="@string/preference_title_notification_sound_file"/>
 
         <RingtonePreference
             android:key="@string/preference_notification_connect_sound_file"
             android:ringtoneType="notification"
             android:showDefault="true"
             android:showSilent="true"
-            android:title="Connection sound"/>
+            android:title="@string/preference_title_notification_connect_sound_file"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

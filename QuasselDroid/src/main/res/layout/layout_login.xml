@@ -34,7 +34,7 @@
                         android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical|fill_horizontal"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"/>
 
                     <ImageButton
                         android:id="@+id/core_menu"
@@ -43,7 +43,7 @@
                         android:layout_height="48dp"
                         android:layout_gravity="center_vertical"
                         android:src="?attr/ic_overflow"
-                        android:scaleType="fitXY" />
+                        android:scaleType="fitCenter" />
                 </LinearLayout>
 
                 <EditText
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|fill_horizontal"
                     android:layout_weight="1"
-                    android:hint="@string/username_field"
+                    android:hint="@string/hint_identity_username"
                     android:singleLine="true"
                     android:inputType="textNoSuggestions">
 
@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|fill_horizontal"
                     android:layout_weight="1"
-                    android:hint="@string/password_field"
+                    android:hint="@string/hint_identity_password"
                     android:inputType="textPassword"
                     android:singleLine="true"/>
 
@@ -101,7 +101,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:text="@string/connect_button" />
+            android:text="@string/action_connect" />
     </RelativeLayout>
 
 </RelativeLayout>

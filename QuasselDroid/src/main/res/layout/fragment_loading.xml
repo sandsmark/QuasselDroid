@@ -19,7 +19,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="@string/hint_loading"
+        android:text="@string/title_loading"
         android:textAppearance="?android:attr/textAppearanceMedium">
 
     </TextView>

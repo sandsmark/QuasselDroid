@@ -10,14 +10,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.squareup.otto.Subscribe;
-
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.squareup.otto.Subscribe;
 
 public class SplashActivity extends Activity {
     // Set the display time, in milliseconds (or extract it out as a configurable parameter)

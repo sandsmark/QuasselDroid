@@ -36,9 +36,11 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.view.ContextThemeWrapper;
+import android.support.v7.widget.PopupMenu;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,7 +50,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.PopupMenu;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -67,7 +68,6 @@ import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
-import android.util.Log;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -165,7 +165,6 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
 
     public void showCoreContextMenu(Context context, View v) {
-        Context wrapper = new ContextThemeWrapper(context, R.style.PopupMenu_Quasseldroid_Light);
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
@@ -195,6 +194,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
             popup.getMenu().getItem(1).setEnabled(false);
             popup.getMenu().getItem(2).setEnabled(false);
         }
+
         popup.show();
     }
 
@@ -281,14 +281,12 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     @Override
     protected Dialog onCreateDialog(int id) {
         final Dialog dialog;
-        String certificateMessage = null;
-        int intention = -1;
+        String certificateMessage = getResources().getString(R.string.message_ssl_new);
+        int intention = 1;
         switch (id) {
             case R.id.DIALOG_EDIT_CORE:
                 intention = 0;
             case R.id.DIALOG_ADD_CORE:
-                if (intention == -1)
-                    intention = 1;
                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                 final View root = getLayoutInflater().inflate(R.layout.dialog_add_core, null);
                 nameField = (EditText) root.findViewById(R.id.dialog_name_field);
@@ -330,19 +328,16 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
             case R.id.DIALOG_CHANGED_CERTIFICATE:
                 certificateMessage = getResources().getString(R.string.message_ssl_changed);
             case R.id.DIALOG_NEW_CERTIFICATE:
-                if (certificateMessage == null) {
-                    certificateMessage = getResources().getString(R.string.message_ssl_new);
-                }
                 builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setMessage(certificateMessage + "\n" + hashedCert)
                         .setCancelable(false)
-                        .setPositiveButton(getResources().getString(R.string.dialog_delete_buffer_yes), new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.storeCertificate(hashedCert, core.getSelectedItemId());
                                 onConnect.onClick(null);
                             }
                         })
-                        .setNegativeButton(getResources().getString(R.string.dialog_delete_buffer_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -351,16 +346,16 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 break;
             case R.id.DIALOG_DELETE_CORE:
                 builder = new AlertDialog.Builder(LoginActivity.this);
-                builder.setTitle(getResources().getString(R.string.dialog_delete_buffer_title))
-                        .setMessage(getResources().getString(R.string.dialog_delete_buffer_message))
+                builder.setTitle(getResources().getString(R.string.dialog_title_delete_buffer))
+                        .setMessage(getResources().getString(R.string.dialog_message_delete_buffer))
                         .setCancelable(false)
-                        .setPositiveButton(getResources().getString(R.string.dialog_delete_buffer_yes), new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.deleteCore(core.getSelectedItemId());
                                 updateCoreSpinner();
                             }
                         })
-                        .setNegativeButton(getResources().getString(R.string.dialog_delete_buffer_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -384,12 +379,13 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 diag.setMessage("Error, connection information not filled out properly");
                 diag.setCancelable(false);
 
-                AlertDialog dg = diag.create();
-                dg.setOwnerActivity(LoginActivity.this);
-                dg.setButton("Ok", new DialogInterface.OnClickListener() {
+                diag.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                     }
                 });
+
+                AlertDialog dg = diag.create();
+                dg.setOwnerActivity(LoginActivity.this);
                 dg.show();
                 return;
             }

@@ -6,8 +6,9 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:minHeight="?attr/actionBarSize"
-    android:background="?attr/colorPrimary"
-    app:theme="@style/Theme.QuasselDroid.Material.Light">
+    android:background="?colorPrimary"
+    app:theme="@style/Theme.QuasselDroid.Material.Dark"
+    app:popupTheme="@style/Theme.AppCompat.Light" >
     <LinearLayout
         android:orientation="vertical"
         android:id="@+id/actionTitleArea"

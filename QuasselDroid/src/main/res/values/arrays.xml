@@ -36,4 +36,20 @@
         <item>never</item>
     </string-array>
 
+    <string-array name="author_names">
+        <item>Frederik M. J. Vestre (freqmod)</item>
+        <item>Martin "Java Sucks" Sandsmark (sandsmark)</item>
+        <item>Magnus Fjell (magnuf)</item>
+        <item>Ken Børge Viktil (Kenji)</item>
+        <item>Janne Koschinski (justJanne)</item>
+    </string-array>
+
+    <string-array name="author_descriptions">
+        <item>(Initial qdatastream deserialization attempts)</item>
+        <item>(Protocol implementation, (de)serializers, project (de)moralizer)</item>
+        <item>(GUI, Android stuff)</item>
+        <item>(GUI, Android stuff)</item>
+        <item>(GUI, Bugfixes and Android stuff)</item>
+    </string-array>
+
 </resources>

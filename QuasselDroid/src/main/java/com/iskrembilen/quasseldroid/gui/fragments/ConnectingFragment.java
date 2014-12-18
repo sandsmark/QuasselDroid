@@ -7,11 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.squareup.otto.Subscribe;
-
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.squareup.otto.Subscribe;
 
 import java.io.Serializable;
 

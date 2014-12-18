@@ -66,12 +66,12 @@ import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
+import com.iskrembilen.quasseldroid.gui.dialogs.TopicViewDialog;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
-import com.iskrembilen.quasseldroid.gui.dialogs.TopicViewDialog;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -152,8 +152,8 @@ public class MainActivity extends ActionBarActivity {
                 this,                   /* host Activity */
                 drawer,                 /* DrawerLayout object */
                 actionbar.wrappedToolbar,   /* nav drawer icon to replace 'Up' caret */
-                R.string.drawer_open,   /* "open drawer" description */
-                R.string.drawer_close   /* "close drawer" description */
+                R.string.hint_drawer_open,   /* "open drawer" description */
+                R.string.hint_drawer_close   /* "close drawer" description */
         ) {
             int openDrawers;
 
@@ -188,14 +188,14 @@ public class MainActivity extends ActionBarActivity {
         }
 
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+        showLag = preferences.getBoolean(getString(R.string.preference_lag), false);
 
         sharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
 
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getResources().getString(R.string.preference_show_lag))) {
-                    showLag = preferences.getBoolean(getString(R.string.preference_show_lag), false);
+                if (key.equals(getResources().getString(R.string.preference_lag))) {
+                    showLag = preferences.getBoolean(getString(R.string.preference_lag), false);
                     updateSubtitle();
                 }
             }
@@ -347,7 +347,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.base_menu, menu);
+        getMenuInflater().inflate(R.menu.activity_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

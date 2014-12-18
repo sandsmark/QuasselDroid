@@ -20,7 +20,7 @@
 
         <TextView
             android:id="@+id/backlog_msg_view"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/message_spacing"
             android:layout_marginBottom="@dimen/message_spacing"

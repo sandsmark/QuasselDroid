@@ -5,4 +5,9 @@
         android:title="@string/action_preferences"
         android:orderInCategory="10"
         android:alphabeticShortcut="p" />
+    <item
+        android:id="@+id/menu_disconnect"
+        android:title="@string/action_disconnect"
+        android:orderInCategory="11"
+        android:alphabeticShortcut="q" />
 </menu>

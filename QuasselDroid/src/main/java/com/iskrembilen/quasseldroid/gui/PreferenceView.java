@@ -28,13 +28,17 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.gui.dialogs.AboutDialog;
 import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class PreferenceView extends ActionBarActivity {
+    private String TAG = PreferenceView.class.getSimpleName();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeUtil.theme);
@@ -56,10 +60,20 @@ public class PreferenceView extends ActionBarActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_preferences, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem mi) {
-        if (mi.getItemId() == android.R.id.home) {
-            finish();
-            return true;
+        switch (mi.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.menu_about:
+                new AboutDialog().show(getFragmentManager(),TAG);
+                return true;
         }
         return false;
     }

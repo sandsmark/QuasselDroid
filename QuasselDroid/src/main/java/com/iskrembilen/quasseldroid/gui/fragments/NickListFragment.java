@@ -2,13 +2,10 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.SpannableString;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
@@ -23,7 +20,6 @@ import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
-import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
