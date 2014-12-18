@@ -13,11 +13,12 @@
         android:stackFromBottom="true"
         android:transcriptMode="normal" />
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/chat_input_frame"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_alignParentBottom="true" >
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
 
         <View
             android:layout_width="match_parent"
@@ -39,11 +40,6 @@
                 android:id="@+id/chat_auto_complete_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_gravity="center_vertical|left"
-                android:layout_toLeftOf="@+id/chat_input_view"
                 android:background="@android:color/transparent"
                 android:contentDescription="Autocomplete button"
                 android:padding="8dp"
@@ -52,18 +48,13 @@
 
             <EditText
                 android:id="@+id/chat_input_view"
-                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="8dp"
-                android:layout_weight="1"
+                android:layout_width="fill_parent"
                 android:background="@android:color/transparent"
                 android:imeOptions="actionSend"
-                android:inputType="textImeMultiLine|textCapSentences|textAutoCorrect" >
+                android:inputType="textImeMultiLine|textCapSentences|textAutoCorrect">
             </EditText>
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

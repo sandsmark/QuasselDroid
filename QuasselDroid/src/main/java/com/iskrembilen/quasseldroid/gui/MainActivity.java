@@ -37,6 +37,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -77,6 +78,8 @@ import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
+
+import java.lang.reflect.Field;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -124,6 +127,25 @@ public class MainActivity extends ActionBarActivity {
         });
 
         drawer = (DrawerLayout) findViewById(R.id.drawer);
+
+        try {
+            Field mLeftDragger = drawer.getClass().getDeclaredField("mLeftDragger");
+            mLeftDragger.setAccessible(true);
+            ViewDragHelper leftDraggerObj = (ViewDragHelper) mLeftDragger.get(drawer);
+            Field mLeftEdgeSize = leftDraggerObj.getClass().getDeclaredField("mEdgeSize");
+            mLeftEdgeSize.setAccessible(true);
+            int leftEdge = mLeftEdgeSize.getInt(leftDraggerObj);
+            mLeftEdgeSize.setInt(leftDraggerObj, leftEdge * 3);
+            Field mRightDragger = drawer.getClass().getDeclaredField("mRightDragger");
+            mRightDragger.setAccessible(true);
+            ViewDragHelper rightDraggerObj = (ViewDragHelper) mRightDragger.get(drawer);
+            Field mRightEdgeSize = rightDraggerObj.getClass().getDeclaredField("mEdgeSize");
+            mRightEdgeSize.setAccessible(true);
+            int rightEdge = mRightEdgeSize.getInt(rightDraggerObj);
+            mRightEdgeSize.setInt(rightDraggerObj, rightEdge * 3);
+        } catch (Exception e) {
+            Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
+        }
 
         extensibleDrawerToggle = new ExtensibleDrawerToggle(drawer, new ActionBarDrawerToggle(
                 this,                   /* host Activity */
@@ -254,11 +276,9 @@ public class MainActivity extends ActionBarActivity {
                 BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
                 drawer.closeDrawer(Gravity.END);
                 drawer.openDrawer(Gravity.START);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,Gravity.START);
             } else {
                 Log.d(TAG, "Loading state: "+openedBuffer);
                 manager.openDrawer(openedDrawer);
-                drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,Gravity.START);
                 BusProvider.getInstance().post(new BufferOpenedEvent(openedBuffer, true));
             }
         }
@@ -488,7 +508,6 @@ public class MainActivity extends ActionBarActivity {
             BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
             drawer.closeDrawer(Gravity.END);
             drawer.openDrawer(Gravity.START);
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN,Gravity.START);
         }
     }
     class QuasselDroidFragmentManager {
@@ -652,16 +671,6 @@ public class MainActivity extends ActionBarActivity {
 
         DrawerLayout getDrawer() {
             return drawer;
-        }
-
-        public void closeDrawer(int side) {
-            if (drawer.getDrawerLockMode(side)!=DrawerLayout.LOCK_MODE_LOCKED_OPEN)
-                drawer.closeDrawer(side);
-        }
-
-        public void openDrawer(int side) {
-            if (drawer.getDrawerLockMode(side)!=DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-                drawer.openDrawer(side);
         }
     }
 

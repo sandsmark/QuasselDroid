@@ -26,41 +26,41 @@ package com.iskrembilen.quasseldroid.gui;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
-public class PreferenceView extends PreferenceActivity {
-
-    Preference backlogLimit;
-    Preference backlogAdditional;
-    private OnSharedPreferenceChangeListener listener;
-
-    /**
-     * Called when the activity is first created.
-     */
+public class PreferenceView extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeUtil.theme);
+
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.layout.data_preferences);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        listener = new OnSharedPreferenceChangeListener() {
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new QuasselPreferenceFragment()).commit();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).registerOnSharedPreferenceChangeListener(new OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getResources().getString(R.string.preference_theme))) {
-                    ThemeUtil.setTheme(PreferenceView.this, sharedPreferences.getString(key, ""));
-                    Log.d(getClass().getCanonicalName(),"Theme has changed: "+sharedPreferences.getString(key, ""));
+                    ThemeUtil.initTheme(getApplicationContext());
                 }
-
             }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(listener);
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem mi) {
+        if (mi.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return false;
     }
 }

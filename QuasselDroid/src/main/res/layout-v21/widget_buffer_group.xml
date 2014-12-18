@@ -25,6 +25,7 @@
         android:duplicateParentState="false"
         android:gravity="start|center_vertical"
         android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:elegantTextHeight="false"
         android:textStyle="bold" />
 
 </LinearLayout>

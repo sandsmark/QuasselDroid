@@ -98,5 +98,9 @@
     <string name="context_unhide">Make Visible</string>
     <string name="context_show_hidden">Show hidden Buffers</string>
     <string name="context_hide_hidden">Hide hidden Buffers</string>
+    <string name="connect_button">Connect</string>
+    <string name="checkbox_remember_me">Remember me</string>
+    <string name="password_field">Password</string>
+    <string name="username_field">Username</string>
 
 </resources>

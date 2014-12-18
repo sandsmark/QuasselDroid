@@ -21,7 +21,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class SplashActivity extends Activity {
     // Set the display time, in milliseconds (or extract it out as a configurable parameter)
-    private final int SPLASH_DISPLAY_LENGTH = 500;
+    private final int SPLASH_DISPLAY_LENGTH = 0;
     private final String TAG = SplashActivity.class.getSimpleName();
     private Class<?> activityToStart;
     private ServiceConnection focusConnection = new ServiceConnection() {

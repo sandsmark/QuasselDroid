@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/action_bar"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:minHeight="?attr/actionBarSize"
+    android:background="?attr/colorPrimary"
+    android:elevation="4dp"
+    app:theme="@style/Theme.QuasselDroid.Material.Light">
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/actionTitleArea"
+        android:paddingLeft="3.0dp"
+        android:paddingStart="3.0dp"
+        android:paddingRight="3.0dp"
+        android:paddingEnd="3.0dp"
+        android:layout_width="fill_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="start|center_vertical">
+        <TextView
+            android:textSize="@dimen/abc_action_bar_title_text_size"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:singleLine="true"
+            android:text="@string/app_name"
+            android:textColor="#ffffffff"/>
+        <TextView
+            android:textSize="@dimen/abc_action_bar_subtitle_text_size"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:id="@+id/subtitle"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/abc_action_bar_subtitle_top_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+            android:textColor="#b3ffffff"/>
+    </LinearLayout>
+</android.support.v7.widget.Toolbar>

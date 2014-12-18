@@ -16,8 +16,7 @@
             android:layout_marginTop="@dimen/message_spacing"
             android:layout_marginBottom="@dimen/message_spacing"
             android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:text="17:46" />
+            android:layout_marginRight="4dp" />
 
         <TextView
             android:id="@+id/backlog_msg_view"
@@ -29,7 +28,6 @@
             android:layout_marginRight="4dp"
             android:autoLink="web"
             android:bufferType="spannable"
-            android:text="kuschku especially since I&apos;m at a bigger University now, and one class here costs as much as my whole semester at the community college"
             android:textIsSelectable="true"
             android:clickable="true" />
 
