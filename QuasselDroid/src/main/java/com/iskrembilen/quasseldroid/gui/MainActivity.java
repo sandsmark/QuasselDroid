@@ -54,6 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
@@ -264,6 +265,7 @@ public class MainActivity extends ActionBarActivity {
                     recreate();
                 }
             }, 1);
+            return;
         }
 
         BusProvider.getInstance().register(this);
@@ -543,24 +545,28 @@ public class MainActivity extends ActionBarActivity {
                     chatFragment = manager.findFragmentById(R.id.main_content_container);
                 else
                     chatFragment = ChatFragment.newInstance();
+                ((ChatFragment) chatFragment).setNetworks(NetworkCollection.getInstance());
             }
             if (nickFragment==null) {
                 if (manager.findFragmentById(R.id.right_drawer) instanceof NickListFragment)
                     nickFragment = manager.findFragmentById(R.id.right_drawer);
                 else
                     nickFragment = NickListFragment.newInstance();
+                ((NickListFragment) nickFragment).setNetworks(NetworkCollection.getInstance());
             }
             if (detailFragment==null) {
                 if (manager.findFragmentById(R.id.right_drawer) instanceof DetailFragment)
                     detailFragment = manager.findFragmentById(R.id.right_drawer);
                 else
                     detailFragment = DetailFragment.newInstance();
+                ((DetailFragment) detailFragment).setNetworks(NetworkCollection.getInstance());
             }
             if (bufferFragment==null) {
                 if (manager.findFragmentById(R.id.left_drawer) instanceof BufferFragment)
                     bufferFragment = manager.findFragmentById(R.id.left_drawer);
                 else
                     bufferFragment = BufferFragment.newInstance();
+                ((BufferFragment) bufferFragment).setNetworks(NetworkCollection.getInstance());
             }
         }
 

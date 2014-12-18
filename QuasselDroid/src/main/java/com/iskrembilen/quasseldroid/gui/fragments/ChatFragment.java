@@ -414,6 +414,14 @@ public class ChatFragment extends Fragment implements Serializable {
         nickCompletionHelper = null;
     }
 
+    public void setNetworks(NetworkCollection networks) {
+        this.networks = networks;
+    }
+
+    public NetworkCollection getNetworks() {
+        return networks;
+    }
+
     public static class ViewHolder {
         public TextView timeView;
         public TextView msgView;

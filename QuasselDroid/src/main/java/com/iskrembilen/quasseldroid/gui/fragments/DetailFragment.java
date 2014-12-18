@@ -140,6 +140,10 @@ public class DetailFragment extends Fragment implements Serializable {
         }
     }
 
+    public void setNetworks(NetworkCollection networks) {
+        this.networks = networks;
+    }
+
     public class NicksObserver implements Observer {
 
         private IrcUser user;

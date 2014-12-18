@@ -435,6 +435,10 @@ public class BufferFragment extends Fragment implements Serializable {
         public int networkId;
     }
 
+    public void setNetworks(NetworkCollection networks) {
+        if (bufferListAdapter!=null) bufferListAdapter.setNetworks(networks);
+    }
+
     public class BufferListAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
         private NetworkCollection networks;
         private LayoutInflater inflater;
@@ -446,6 +450,8 @@ public class BufferFragment extends Fragment implements Serializable {
         }
 
         public void setNetworks(NetworkCollection networks) {
+            if (this.networks!=null) this.networks.deleteObserver(this);
+
             this.networks = networks;
             if (networks == null)
                 return;

@@ -103,6 +103,10 @@ public class NickListFragment extends Fragment implements Serializable {
         BusProvider.getInstance().post(new UserClickedEvent(bufferId, nick));
     }
 
+    public void setNetworks(NetworkCollection networks) {
+        this.networks = networks;
+    }
+
     public class NicksAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
 
         private LayoutInflater inflater;
