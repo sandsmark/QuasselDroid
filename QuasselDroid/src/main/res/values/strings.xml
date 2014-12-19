@@ -99,12 +99,12 @@
     </plurals>
 
     <plurals name="notification_on_x_buffers">
-        <item quantity="one">on %1$d buffer</item>
-        <item quantity="other">on %1$d buffers</item>
+        <item quantity="one">%1$d buffer</item>
+        <item quantity="other">%1$d buffers</item>
     </plurals>
 
     <string name="notification_you_have_been_highlighted">You have been highlighted</string>
-    <string name="notification_hightlights_on_buffers">%1$s %2$s</string>
+    <string name="notification_hightlights_on_buffers">%1$s on %2$s</string>
 
     <string name="notification_connecting">Connecting to core</string>
     <string name="notification_connected">Connected to core</string>
