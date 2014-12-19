@@ -163,6 +163,9 @@ public class QuasseldroidNotificationManager {
     }
 
     public void notifyHighlights() {
+        if (!connected)
+            return;
+
         int defaults = 0;
 
         Resources res = context.getResources();
