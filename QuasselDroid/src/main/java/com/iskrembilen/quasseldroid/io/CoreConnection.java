@@ -1400,8 +1400,6 @@ public final class CoreConnection {
                                 boolean hasBuffer = networks.get(networkId).getBuffers().hasBuffer(bufferName);
 
                                 if (!hasBuffer) {
-                                    Log.e(TAG,"Got new IRC Channel: "+bufferName);
-
                                     //Create the new buffer object
                                     QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
                                     BufferInfo info = new BufferInfo();
