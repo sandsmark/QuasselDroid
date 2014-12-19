@@ -82,7 +82,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
         return buffers;
     }
 
-
     public void addBuffer(Buffer buffer) {
         buffers.addBuffer(buffer);
     }
