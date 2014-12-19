@@ -10,10 +10,13 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -21,8 +24,11 @@ import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
+import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +57,7 @@ public class QuasseldroidNotificationManager {
         notifyManager = (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         //Remove any disconnect notification since we are connecting again
         notifyManager.cancel(R.id.NOTIFICATION_DISCONNECTED);
+        BusProvider.getInstance().register(this);
     }
 
     public void notifyHighlightsRead(Integer bufferId) {
@@ -141,8 +148,10 @@ public class QuasseldroidNotificationManager {
     }
 
     public void addMessage(IrcMessage message) {
+        // If the buffer in question isn’t in the list of highlighted buffers, add it
         if (!highlightedBuffers.contains(message.bufferInfo.id)) {
             highlightedBuffers.add(message.bufferInfo.id);
+            // If the buffer has had no highlights yet, add a new list of highlights
             if (highlightedMessages.get(message.bufferInfo.id)==null)
                 highlightedMessages.put(message.bufferInfo.id, new ArrayList<IrcMessage>());
         }
@@ -284,6 +293,13 @@ public class QuasseldroidNotificationManager {
         }
 
         lastMessage = null;
+    }
+
+    @Subscribe
+    public void onInitProgressed(InitProgressEvent event) {
+        if (event.done && getHighlightedMessageCount()>0) {
+            notifyHighlights();
+        }
     }
 
     public void notifyDisconnected() {
