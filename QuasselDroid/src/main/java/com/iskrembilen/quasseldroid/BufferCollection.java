@@ -25,15 +25,19 @@ package com.iskrembilen.quasseldroid;
 
 import android.util.SparseArray;
 
+import com.iskrembilen.quasseldroid.util.Helper;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 public class BufferCollection extends Observable implements Observer {
 
@@ -146,15 +150,27 @@ public class BufferCollection extends Observable implements Observer {
     public Collection<Buffer> getRawBufferList() {
         List<Buffer> rawBufferList = new ArrayList<>(bufferIds.size());
         if (orderAlphabetical) {
-            for (Buffer b: buffersByName.values()) {
+            List<String> names = new ArrayList<>();
+            names.addAll(buffersByName.keySet());
+
+            Collections.sort(names,new Helper.AlphabeticalComparator());
+            Buffer b;
+            for (String name: names) {
+                b = buffersByName.get(name);
                 if (bufferIds.contains(b.getInfo().id))
                     rawBufferList.add(b);
             }
         } else {
-            for (int i : bufferIds) {
-                rawBufferList.add(getBuffer(i));
+            List<String> names = new ArrayList<>();
+            names.addAll(buffersByName.keySet());
+
+            Buffer b;
+            for (String name: names) {
+                b = buffersByName.get(name);
+                if (bufferIds.contains(b.getInfo().id))
+                    rawBufferList.add(b);
             }
-            Collections.sort(rawBufferList);
+            Collections.sort(rawBufferList,new Helper.OrderComparator());
         }
         return rawBufferList;
     }

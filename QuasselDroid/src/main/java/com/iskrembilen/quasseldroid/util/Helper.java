@@ -2,9 +2,11 @@ package com.iskrembilen.quasseldroid.util;
 
 import android.content.res.Resources;
 
+import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.R;
 
 import java.text.DecimalFormat;
+import java.util.Comparator;
 import java.util.Map;
 
 public class Helper {
@@ -23,8 +25,22 @@ public class Helper {
         return String.format(res.getString(R.string.title_lag), latency, unit);
     }
 
-    /*public static Map<String,String> parseModeChange(String modechange) {
+    public static Map<String,String> parseModeChange(String modechange) {
+        //TODO: Implement proper UserModeChange parser
+        return null;
+    }
 
-    }*/
+    public static class AlphabeticalComparator implements Comparator<String> {
+        public int compare(String s1, String s2)
+        {
+            return s1.compareToIgnoreCase(s2);
+        }
+    }
 
+    public static class OrderComparator implements Comparator<Buffer> {
+        @Override
+        public int compare(Buffer lhs, Buffer rhs) {
+            return lhs.getOrder() - rhs.getOrder();
+        }
+    }
 }
