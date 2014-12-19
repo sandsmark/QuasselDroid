@@ -963,7 +963,9 @@ public class CoreConnService extends Service {
         } else if (event.action == ChannelAction.MARK_AS_READ) {
             coreConn.requestMarkBufferAsRead(event.bufferId);
         } else if (event.action == ChannelAction.HIGHLIGHTS_READ) {
-            notificationManager.notifyHighlightsRead(event.bufferId);
+            // This is accessed sometimes even after we have disconnected from the core.
+            // In that case the notificationManager is already null
+            if (notificationManager!=null) notificationManager.notifyHighlightsRead(event.bufferId);
         }
     }
 
@@ -981,7 +983,9 @@ public class CoreConnService extends Service {
         Buffer buffer = networks.getBufferById(event.bufferId);
         if (buffer != null) {
             if (event.action == MessageAction.LAST_SEEN) {
-                notificationManager.notifyHighlightsRead(event.bufferId);
+                // This is accessed sometimes even after we have disconnected from the core.
+                // In that case the notificationManager is already null
+                if (notificationManager!=null) notificationManager.notifyHighlightsRead(event.bufferId);
                 coreConn.requestSetLastMsgRead(event.bufferId, event.messageId);
                 networks.getBufferById(event.bufferId).setLastSeenMessage(event.messageId);
             } else if (event.action == MessageAction.MARKER_LINE) {
