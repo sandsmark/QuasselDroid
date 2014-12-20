@@ -1341,8 +1341,6 @@ public final class CoreConnection {
                                              * support for custom highlight masks
                                              */
                                             MessageUtil.checkMessageForHighlight(service.getNotificicationManager(), networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
-                                            if (preferenceParseColors)
-                                                MessageUtil.parseStyleCodes(service, msg);
                                             buffer.addBacklogMessage(msg);
                                         } else {
                                             Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);

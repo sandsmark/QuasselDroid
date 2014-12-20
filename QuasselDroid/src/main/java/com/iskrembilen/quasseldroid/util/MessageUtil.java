@@ -3,6 +3,7 @@ package com.iskrembilen.quasseldroid.util;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
@@ -61,22 +62,23 @@ public class MessageUtil {
     /**
      * Parse mIRC style codes in IrcMessage
      */
-    public static void parseStyleCodes(Context context, IrcMessage message) {
+    public static SpannableString parseStyleCodes(Context context, String content, boolean parse) {
+        if (!parse)
+            return new SpannableString(content);
+
         final char boldIndicator = 2;
         final char normalIndicator = 15;
         final char italicIndicator = 29;
         final char underlineIndicator = 31;
         final char colorIndicator = 3;
 
-        String content = message.content.toString();
-
         if (content.indexOf(boldIndicator) == -1
                 && content.indexOf(italicIndicator) == -1
                 && content.indexOf(underlineIndicator) == -1
                 && content.indexOf(colorIndicator) == -1)
-            return;
+            return new SpannableString(content);
 
-        SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
+        SpannableStringBuilder newString = new SpannableStringBuilder(content);
 
         int start, end, endSearchOffset, startIndicatorLength, style, fg, bg;
         while (true) {
@@ -205,7 +207,7 @@ public class MessageUtil {
                 break;
         }
 
-        message.content = newString;
+        return new SpannableString(newString);
     }
 
     public static int mircCodeToColor(int code) {

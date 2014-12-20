@@ -410,8 +410,6 @@ public class CoreConnService extends Service {
                         for (IrcMessage curMessage : messageList) {
                             if (!buffer.hasMessage(curMessage)) {
                                 MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
-                                if (preferenceParseColors)
-                                    MessageUtil.parseStyleCodes(CoreConnService.this, curMessage);
                             } else {
                                 Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
                             }
@@ -437,7 +435,6 @@ public class CoreConnService extends Service {
                          * support for custom highlight masks
                          */
                         MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
-                        MessageUtil.parseStyleCodes(CoreConnService.this, message);
 
                         buffer.addMessage(message);
 

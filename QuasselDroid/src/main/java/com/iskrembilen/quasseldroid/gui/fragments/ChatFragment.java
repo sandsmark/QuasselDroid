@@ -64,6 +64,7 @@ import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.FormattingHelper;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
+import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
 import com.iskrembilen.quasseldroid.util.SenderColorHelper;
@@ -511,6 +512,7 @@ public class ChatFragment extends Fragment implements Serializable {
             String rawText;
             String nick;
             boolean detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
+            boolean parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
 
             switch (entry.type) {
                 case Action:
@@ -527,7 +529,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     }
 
                     SpannableString nickSpan = new SpannableString(entry.getNick());
-                    entry.content.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.content.length(), 0);
+                    SpannableString contentSpan = MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors);
+                    contentSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.content.length(), 0);
                     nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
@@ -569,7 +572,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format(getString(R.string.message_leave), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, entry.content));
+                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
@@ -579,7 +582,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format(getString(R.string.message_quit), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, entry.content));
+                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
@@ -589,7 +592,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
                     spannable = new SpannableString(String.format(getString(R.string.message_kill), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, entry.content));
+                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
@@ -617,9 +620,10 @@ public class ChatFragment extends Fragment implements Serializable {
                         color_nick = SenderColorHelper.getSenderColor(nick);
                     }
 
-                    spannable = new SpannableString(rawText);
+                    CharSequence parsedText = MessageUtil.parseStyleCodes(getActivity(),rawText,parseColors);
+                    spannable = new SpannableString(parsedText);
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    spannable.setSpan(new ForegroundColorSpan(color_nick), rawText.indexOf(nick), rawText.indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    spannable.setSpan(new ForegroundColorSpan(color_nick), parsedText.toString().indexOf(nick), parsedText.toString().indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
                     holder.msgView.setTextColor(ThemeUtil.color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
@@ -706,11 +710,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
-                    if ((Build.VERSION.SDK_INT >= 17) &&
-                            getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL)
-                        holder.msgView.setText(TextUtils.concat(entry.content, " ", nickSpan));
-                    else
-                        holder.msgView.setText(TextUtils.concat(nickSpan, " ", entry.content));
+                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
 
                     holder.parent.setBackgroundColor(Color.TRANSPARENT);
                     break;
