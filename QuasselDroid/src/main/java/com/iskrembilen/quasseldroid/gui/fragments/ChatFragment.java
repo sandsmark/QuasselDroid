@@ -530,11 +530,11 @@ public class ChatFragment extends Fragment implements Serializable {
 
                     SpannableString nickSpan = new SpannableString(entry.getNick());
                     SpannableString contentSpan = MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors);
-                    contentSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.content.length(), 0);
+                    contentSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, contentSpan.length(), 0);
                     nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", entry.content));
+                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", contentSpan));
                     break;
                 case Error:
                     holder.msgView.setText(entry.content);

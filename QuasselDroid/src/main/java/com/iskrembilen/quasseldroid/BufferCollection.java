@@ -53,7 +53,7 @@ public class BufferCollection extends Observable implements Observer {
 
     public void addBuffer(Buffer buffer) {
         putBuffer(buffer);
-        filterBuffers();
+        filteredList = getFilteredList();
         this.setChanged();
         buffer.addObserver(this);
         notifyObservers();
@@ -77,7 +77,7 @@ public class BufferCollection extends Observable implements Observer {
     }
 
     public int getBufferCount() {
-        return filteredList.size();
+        return getFilteredList().size();
     }
 
     public int getUnfilteredBufferCount() {
@@ -85,7 +85,7 @@ public class BufferCollection extends Observable implements Observer {
     }
 
     public Buffer getPos(int pos) {
-        return filteredList.get(pos);
+        return getFilteredList().get(pos);
     }
 
     public Buffer getUnfilteredPos(int pos) {
@@ -119,29 +119,30 @@ public class BufferCollection extends Observable implements Observer {
             putBuffer(buffer);
             buffer.addObserver(this);
         }
+        filteredList = getFilteredList();
         if (!changed) return;
-
-        filterBuffers();
         this.setChanged();
         notifyObservers();
     }
 
-    private void filterBuffers() {
-        filteredList.clear();
+    private List<Buffer> getFilteredList() {
+        List<Buffer> list = new ArrayList<>();
         for (Buffer buf : getRawBufferList()) {
             if (!isBufferFiltered(buf))
-                filteredList.add(buf);
+                list.add(buf);
         }
+        return list;
     }
 
 
     @Override
     public void update(Observable arg0, Object arg1) {
         if (arg1 != null && (Integer) arg1 == R.id.BUFFER_ORDER_CHANGED) {
-            filterBuffers();
+            //filteredList = getFilteredList();
         } else if (arg1 != null && (Integer) arg1 == R.id.BUFFER_HIDDEN_CHANGED) {
-            filterBuffers();
+            //filteredList = getFilteredList();
         }
+        filteredList = getFilteredList();
         this.setChanged();
         notifyObservers();
 
@@ -181,7 +182,7 @@ public class BufferCollection extends Observable implements Observer {
         buffersByName.remove(buffer.getInfo().name.toLowerCase(Locale.US));
         bufferIds.remove(Integer.valueOf(bufferId));
 
-        filteredList.remove(buffer);
+        filteredList = getFilteredList();
         buffer.deleteObservers();
 
         this.setChanged();
