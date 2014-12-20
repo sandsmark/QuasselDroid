@@ -196,6 +196,7 @@ public class BufferFragment extends Fragment implements Serializable {
                 inflater.inflate(R.menu.context_buffer_channel, menu);
 
                 bufferList.setItemChecked(actionModeData.index, true);
+                bufferList.getChildAt(actionModeData.index).setSelected(true);
 
                 return true;
             }
@@ -238,6 +239,7 @@ public class BufferFragment extends Fragment implements Serializable {
             public void onDestroyActionMode(ActionMode mode) {
                 actionModeData.actionMode = null;
                 bufferList.setItemChecked(actionModeData.index, false);
+                bufferList.getChildAt(actionModeData.index).setSelected(false);
             }
         };
 
@@ -246,16 +248,14 @@ public class BufferFragment extends Fragment implements Serializable {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
                                            int position, long id) {
-                ((AnimatedExpandableListView) parent).setItemChecked(position, true);
-
                 long packedPosition = bufferList.getExpandableListPosition(position);
                 int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
                 int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
 
                 if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
                     Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
-                    actionModeData.index = bufferList.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
 
+                    actionModeData.index = bufferList.getFlatListPosition(packedPosition);
                     actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackBuffer);
                     actionModeData.id = buffer.getInfo().id;
                     actionModeData.listItem = view;
@@ -289,6 +289,7 @@ public class BufferFragment extends Fragment implements Serializable {
                     }
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
                     Network network = bufferListAdapter.getGroup(groupPosition);
+                    actionModeData.index = bufferList.getFlatListPosition(packedPosition);
                     actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackNetwork);
                     actionModeData.id = network.getId();
                     actionModeData.listItem = view;
@@ -488,20 +489,12 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public Buffer getChild(int groupPosition, int childPosition) {
-            if(showHiddenBuffers) {
-                return networks.getNetwork(groupPosition).getBuffers().getUnfilteredPos(childPosition);
-            } else {
-                return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition);
-            }
+            return networks.getNetwork(groupPosition).getBuffers().getPos(showHiddenBuffers,childPosition);
         }
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            if(showHiddenBuffers) {
-                return networks.getNetwork(groupPosition).getBuffers().getUnfilteredPos(childPosition).getInfo().id;
-            } else {
-                return networks.getNetwork(groupPosition).getBuffers().getPos(childPosition).getInfo().id;
-            }
+            return getChild(groupPosition,childPosition).getInfo().id;
         }
 
         @Override
@@ -569,10 +562,7 @@ public class BufferFragment extends Fragment implements Serializable {
         @Override
         public int getRealChildrenCount(int groupPosition) {
             if (networks != null) {
-                if (showHiddenBuffers)
-                    return networks.getNetwork(groupPosition).getBuffers().getUnfilteredBufferCount();
-                else
-                    return networks.getNetwork(groupPosition).getBuffers().getBufferCount();
+                return networks.getNetwork(groupPosition).getBuffers().getBufferCount(showHiddenBuffers);
             }
             return 0;
         }
