@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid;
 
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,10 +44,11 @@ import java.util.Set;
 public class BufferCollection extends Observable implements Observer {
 
     private SparseArray<String> bufferNames = new SparseArray<>();
-    private List<Integer> bufferIds = new ArrayList<>();
+    private Set<Integer> bufferIds = new HashSet<>();
     private Map<String, Buffer> buffersByName = new HashMap<>();
 
-    private List<Buffer> filteredList = new ArrayList<>();
+    private List<Buffer> cachedList;
+    private List<Buffer> filteredList;
 
     private static final String TAG = BufferCollection.class.getSimpleName();
 
@@ -53,8 +56,8 @@ public class BufferCollection extends Observable implements Observer {
 
     public void addBuffer(Buffer buffer) {
         putBuffer(buffer);
-        filteredList = getFilteredList();
         this.setChanged();
+        updateBufferList();
         buffer.addObserver(this);
         notifyObservers();
     }
@@ -68,28 +71,15 @@ public class BufferCollection extends Observable implements Observer {
     }
 
     private boolean isBufferFiltered(Buffer buffer) {
-        //TODO: for now hide all buffers that are hidden
-        if (buffer.isPermanentlyHidden() || buffer.isTemporarilyHidden()) {
-            return true;
-        } else {
-            return false;
-        }
+        return  (buffer.isPermanentlyHidden() || buffer.isTemporarilyHidden());
     }
 
-    public int getBufferCount() {
-        return getFilteredList().size();
+    public int getBufferCount(boolean unfiltered) {
+        return getBufferList(unfiltered).size();
     }
 
-    public int getUnfilteredBufferCount() {
-        return bufferIds.size();
-    }
-
-    public Buffer getPos(int pos) {
-        return getFilteredList().get(pos);
-    }
-
-    public Buffer getUnfilteredPos(int pos) {
-        return buffersByName.get(bufferNames.get(bufferIds.get(pos)));
+    public Buffer getPos(boolean unfiltered, int pos) {
+        return getBufferList(unfiltered).get(pos);
     }
 
     public Buffer getBuffer(int bufferId) {
@@ -119,61 +109,55 @@ public class BufferCollection extends Observable implements Observer {
             putBuffer(buffer);
             buffer.addObserver(this);
         }
-        filteredList = getFilteredList();
+
         if (!changed) return;
         this.setChanged();
         notifyObservers();
-    }
-
-    private List<Buffer> getFilteredList() {
-        List<Buffer> list = new ArrayList<>();
-        for (Buffer buf : getRawBufferList()) {
-            if (!isBufferFiltered(buf))
-                list.add(buf);
-        }
-        return list;
     }
 
 
     @Override
     public void update(Observable arg0, Object arg1) {
         if (arg1 != null && (Integer) arg1 == R.id.BUFFER_ORDER_CHANGED) {
-            //filteredList = getFilteredList();
+            updateBufferList();
         } else if (arg1 != null && (Integer) arg1 == R.id.BUFFER_HIDDEN_CHANGED) {
-            //filteredList = getFilteredList();
+            updateBufferList();
         }
-        filteredList = getFilteredList();
         this.setChanged();
         notifyObservers();
 
     }
 
-    public Collection<Buffer> getRawBufferList() {
-        List<Buffer> rawBufferList = new ArrayList<>(bufferIds.size());
-        if (orderAlphabetical) {
-            List<String> names = new ArrayList<>();
-            names.addAll(buffersByName.keySet());
+    private List<Buffer> getListNotLazy(boolean unfiltered) {
+        List<Buffer> rawBufferList = new ArrayList<>();
 
-            Collections.sort(names,new Helper.AlphabeticalComparator());
-            Buffer b;
-            for (String name: names) {
-                b = buffersByName.get(name);
-                if (bufferIds.contains(b.getInfo().id))
-                    rawBufferList.add(b);
+        Buffer b;
+        for (int id : bufferIds) {
+            b = buffersByName.get(bufferNames.get(id));
+            if (unfiltered || !isBufferFiltered(b)) {
+                rawBufferList.add(b);
             }
-        } else {
-            List<String> names = new ArrayList<>();
-            names.addAll(buffersByName.keySet());
-
-            Buffer b;
-            for (String name: names) {
-                b = buffersByName.get(name);
-                if (bufferIds.contains(b.getInfo().id))
-                    rawBufferList.add(b);
-            }
-            Collections.sort(rawBufferList,new Helper.OrderComparator());
         }
+
+        if (orderAlphabetical) {
+            Collections.sort(rawBufferList, new Helper.AlphabeticalComparator());
+        } else {
+            Collections.sort(rawBufferList, new Helper.OrderComparator());
+        }
+
         return rawBufferList;
+    }
+
+    public List<Buffer> getBufferList(boolean unfiltered) {
+        if (unfiltered)
+            return cachedList;
+        else
+            return filteredList;
+    }
+
+    public void updateBufferList() {
+        cachedList = getListNotLazy(true);
+        filteredList = getListNotLazy(false);
     }
 
     public void removeBuffer(int bufferId) {
@@ -182,9 +166,8 @@ public class BufferCollection extends Observable implements Observer {
         buffersByName.remove(buffer.getInfo().name.toLowerCase(Locale.US));
         bufferIds.remove(Integer.valueOf(bufferId));
 
-        filteredList = getFilteredList();
         buffer.deleteObservers();
-
+        updateBufferList();
         this.setChanged();
         notifyObservers();
     }

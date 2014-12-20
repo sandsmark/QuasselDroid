@@ -1050,7 +1050,7 @@ public final class CoreConnection {
                                     String topic = (String) chan.get("topic").getData();
 
                                     boolean foundChannel = false;
-                                    for (Buffer buffer : network.getBuffers().getRawBufferList()) {
+                                    for (Buffer buffer : network.getBuffers().getBufferList(true)) {
                                         if (buffer.getInfo().name.equalsIgnoreCase(chanName)) {
                                             buffer.setTopic(topic);
                                             buffer.setActive(true);

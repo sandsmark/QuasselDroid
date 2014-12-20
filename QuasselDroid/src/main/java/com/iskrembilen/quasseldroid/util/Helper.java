@@ -33,10 +33,10 @@ public class Helper {
         return null;
     }
 
-    public static class AlphabeticalComparator implements Comparator<String> {
-        public int compare(String s1, String s2)
+    public static class AlphabeticalComparator implements Comparator<Buffer> {
+        public int compare(Buffer lhs, Buffer rhs)
         {
-            return s1.compareToIgnoreCase(s2);
+            return lhs.getInfo().name.compareToIgnoreCase(rhs.getInfo().name);
         }
     }
 

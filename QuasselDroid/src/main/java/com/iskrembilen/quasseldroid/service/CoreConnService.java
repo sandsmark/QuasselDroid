@@ -551,7 +551,7 @@ public class CoreConnService extends Service {
 //				ArrayList<Integer> c = new ArrayList<Integer>();
 //				for(Network net : networks.getNetworkList()) {
 //					c.add(net.getStatusBuffer().getInfo().id);
-//					for(Buffer buf : net.getBuffers().getRawBufferList()) {
+//					for(Buffer buf : net.getBuffers().getBufferList(true)) {
 //						c.add(buf.getInfo().id);
 //					}
 //				}
@@ -653,7 +653,7 @@ public class CoreConnService extends Service {
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
                     String modes = (String) bundle.get("mode");
                     bufferName = (String) bundle.get("buffername");
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
                         if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
                             buf.getUsers().addUser(user, modes);
                             return;
@@ -682,7 +682,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().addModeToUser(user, bundle.getString("mode"));
                             break;
@@ -697,7 +697,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
                             break;
