@@ -196,7 +196,6 @@ public class BufferFragment extends Fragment implements Serializable {
                 inflater.inflate(R.menu.context_buffer_channel, menu);
 
                 bufferList.setItemChecked(actionModeData.index, true);
-                bufferList.getChildAt(actionModeData.index).setSelected(true);
 
                 return true;
             }
@@ -239,7 +238,6 @@ public class BufferFragment extends Fragment implements Serializable {
             public void onDestroyActionMode(ActionMode mode) {
                 actionModeData.actionMode = null;
                 bufferList.setItemChecked(actionModeData.index, false);
-                bufferList.getChildAt(actionModeData.index).setSelected(false);
             }
         };
 
