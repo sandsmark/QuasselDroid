@@ -198,7 +198,7 @@ public class ChatFragment extends Fragment implements Serializable {
                         ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)))) {
                     if (!"" .equals(inputField.getText().toString().trim())) {
                         for (CharSequence line : Helper.split(inputField.getText(),"\n")) {
-                            BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, FormattingHelper.toEscapeCodes(new SpannableString(line))));
+                            BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, line.toString()));
                         }
                         InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
                         inputField.setText("");
