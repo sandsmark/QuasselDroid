@@ -63,8 +63,15 @@ public class MessageUtil {
      * Parse mIRC style codes in IrcMessage
      */
     public static SpannableString parseStyleCodes(Context context, String content, boolean parse) {
-        if (!parse)
-            return new SpannableString(content);
+        if (!parse) {
+            return new SpannableString(content
+                    .replaceAll("\\x02","")
+                    .replaceAll("\\x0F","")
+                    .replaceAll("\\x1D","")
+                    .replaceAll("\\x1F","")
+                    .replaceAll("\\x03[0-9]{1,2}(,[0-9]{1,2})?","")
+                    .replaceAll("\\x03",""));
+        }
 
         final char boldIndicator = 2;
         final char normalIndicator = 15;

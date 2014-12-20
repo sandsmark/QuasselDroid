@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -175,6 +176,8 @@ public class QuasseldroidNotificationManager {
         if (!connected)
             return;
 
+        boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text),true);
+
         int defaults = 0;
 
         Resources res = context.getResources();
@@ -199,7 +202,7 @@ public class QuasseldroidNotificationManager {
             IrcMessage message = highlightedMessages.get(highlightedBuffers.get(0)).get(0);
 
             builder.setContentTitle(message.bufferInfo.name)
-                   .setContentText(String.format("%s: %s",message.getNick(),message.content));
+                   .setContentText(MessageUtil.parseStyleCodes(context,String.format("%s: %s",message.getNick(),message.content),displayColors));
         } else {
             builder.setContentTitle(context.getText(R.string.app_name))
                    .setContentText(
@@ -225,20 +228,20 @@ public class QuasseldroidNotificationManager {
 
                 if (messages.size()==1) {
                     IrcMessage m = messages.get(0);
-                    SpannableStringBuilder s;
+                    SpannableString s;
                     if (m.bufferInfo.type== BufferInfo.Type.QueryBuffer) {
-                        s = new SpannableStringBuilder(String.format("%s: %s",m.getNick(),m.content));
+                        s = MessageUtil.parseStyleCodes(context,String.format("%s: %s",m.getNick(),m.content),displayColors);
                         s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                     } else {
-                        s = new SpannableStringBuilder(String.format("%s %s: %s",m.bufferInfo.name,m.getNick(),m.content));
+                        s = MessageUtil.parseStyleCodes(context,String.format("%s %s: %s",m.bufferInfo.name,m.getNick(),m.content),displayColors);
                         s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.bufferInfo.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                     }
                     inboxStyle.addLine(s);
                 } else if (buffer.getInfo().type== BufferInfo.Type.QueryBuffer) {
-                    SpannableStringBuilder s;
+                    SpannableString s;
 
                     for (IrcMessage m : messages) {
-                        s = new SpannableStringBuilder(String.format("%s: %s",m.getNick(),m.content));
+                        s = MessageUtil.parseStyleCodes(context,String.format("%s: %s",m.getNick(),m.content),displayColors);
                         s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                         inboxStyle.addLine(s);
                     }
