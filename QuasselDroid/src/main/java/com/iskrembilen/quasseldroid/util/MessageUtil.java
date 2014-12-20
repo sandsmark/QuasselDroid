@@ -169,12 +169,12 @@ public class MessageUtil {
                     newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
 
-                if (fg != -1) {
+                if (fg != -1 && mircCodeToColor(fg)!=android.R.color.transparent) {
                     newString.setSpan(new ForegroundColorSpan(context.getResources()
                             .getColor(mircCodeToColor(fg))), start, end,
                             Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
-                if (bg != -1) {
+                if (bg != -1 && mircCodeToColor(fg)!=android.R.color.transparent) {
                     newString.setSpan(new BackgroundColorSpan(context.getResources()
                             .getColor(mircCodeToColor(bg))), start, end,
                             Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
@@ -233,31 +233,34 @@ public class MessageUtil {
                 color = R.color.ircmessage_purple;
                 break;
             case 7: // orange (olive)
-                color = R.color.ircmessage_orange;
+                color = R.color.ircmessage_olive;
                 break;
             case 8: // yellow
                 color = R.color.ircmessage_yellow;
                 break;
             case 9: // light green (lime)
-                color = R.color.ircmessage_light_green;
+                color = R.color.ircmessage_lime_green;
                 break;
             case 10: // teal (a green/blue cyan)
                 color = R.color.ircmessage_teal;
                 break;
             case 11: // light cyan (cyan) (aqua)
-                color = R.color.ircmessage_light_cyan;
+                color = R.color.ircmessage_aqua_light;
                 break;
             case 12: // light blue (royal)
-                color = R.color.ircmessage_light_blue;
+                color = R.color.ircmessage_royal_blue;
                 break;
             case 13: // pink (light purple) (fuchsia)
                 color = R.color.ircmessage_pink;
                 break;
             case 14: // grey
-                color = R.color.ircmessage_gray;
+                color = R.color.ircmessage_dark_gray;
+                break;
+            case 15: // light grey
+                color = R.color.ircmessage_light_gray;
                 break;
             default:
-                color = ThemeUtil.color.chatPlainBg;
+                color = android.R.color.transparent;
         }
         return color;
     }

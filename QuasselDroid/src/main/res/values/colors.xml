@@ -15,19 +15,20 @@
 
     <color name="ircmessage_white">#FFFFFF</color>
     <color name="ircmessage_black">#000000</color>
-    <color name="ircmessage_blue">#3838d6</color>
-    <color name="ircmessage_green">#38d638</color>
-    <color name="ircmessage_red">#d63838</color>
-    <color name="ircmessage_brown">#8a5724</color>
-    <color name="ircmessage_purple">#d638d6</color>
-    <color name="ircmessage_orange">#d69438</color>
-    <color name="ircmessage_yellow">#dede23</color>
-    <color name="ircmessage_light_green">#ffa8d639</color>
-    <color name="ircmessage_teal">#ff32baba</color>
-    <color name="ircmessage_light_cyan">#ff3cdede</color>
-    <color name="ircmessage_light_blue">#ff399eeb</color>
-    <color name="ircmessage_pink">#d638cc</color>
-    <color name="ircmessage_gray">#888888</color>
+    <color name="ircmessage_blue">#000080</color>
+    <color name="ircmessage_green">#008000</color>
+    <color name="ircmessage_red">#FF0000</color>
+    <color name="ircmessage_brown">#804040</color>
+    <color name="ircmessage_purple">#8000FF</color>
+    <color name="ircmessage_olive">#FFA500</color>
+    <color name="ircmessage_yellow">#FFFF00</color>
+    <color name="ircmessage_lime_green">#00FF00</color>
+    <color name="ircmessage_teal">#008080</color>
+    <color name="ircmessage_aqua_light">#00FFFF</color>
+    <color name="ircmessage_royal_blue">#0000FF</color>
+    <color name="ircmessage_pink">#FF00FF</color>
+    <color name="ircmessage_dark_gray">#808080</color>
+    <color name="ircmessage_light_gray">#C0C0C0</color>
 
     <color name="action_title_color">#ffffff</color>
     <color name="action_subtitle_color">#bebebe</color>

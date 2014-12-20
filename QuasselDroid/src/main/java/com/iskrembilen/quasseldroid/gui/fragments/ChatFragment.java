@@ -61,6 +61,8 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.FormattingHelper;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
@@ -193,11 +195,11 @@ public class ChatFragment extends Fragment implements Serializable {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
                         ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)))) {
-                    String inputText = inputField.getText().toString();
-
-                    if (!"" .equals(inputText.trim())) {
-                        BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, inputText));
-                        InputHistoryHelper.addHistoryEntry(inputText);
+                    if (!"" .equals(inputField.getText().toString().trim())) {
+                        for (CharSequence line : Helper.split(inputField.getText(),"\n")) {
+                            BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, FormattingHelper.toEscapeCodes(new SpannableString(line))));
+                        }
+                        InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
                         inputField.setText("");
                         InputHistoryHelper.tempStoreCurrentEntry("");
                     }

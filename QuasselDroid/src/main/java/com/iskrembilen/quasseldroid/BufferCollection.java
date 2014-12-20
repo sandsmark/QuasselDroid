@@ -89,7 +89,7 @@ public class BufferCollection extends Observable implements Observer {
     }
 
     public Buffer getUnfilteredPos(int pos) {
-        return buffersByName.get(bufferNames.get(pos));
+        return buffersByName.get(bufferNames.get(bufferIds.get(pos)));
     }
 
     public Buffer getBuffer(int bufferId) {

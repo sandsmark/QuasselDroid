@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.R;
@@ -15,6 +17,7 @@ public class ThemeUtil {
     public static int[] nick_bgs;
     public static int[] nick_colors;
     public static double[] nick_constants;
+    public static SparseIntArray messageColor = new SparseIntArray();
 
     public static void initTheme(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
@@ -36,9 +39,14 @@ public class ThemeUtil {
         };
         color.def_color = resources.getColor(R.color.nick_user_color);
 
+        for (int i = 0; i<16; i++) {
+            messageColor.put(resources.getColor(MessageUtil.mircCodeToColor(i)),i);
+        }
+
         if (themeName.equals("light")) {
             theme = R.style.Theme_QuasselDroid_Material_Light;
             theme_noactionbar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar;
+
 
             color.chatPlain = resources.getColor(R.color.chat_line_plain_light);
             color.chatError = resources.getColor(R.color.chat_line_error_light);
