@@ -1215,6 +1215,7 @@ public final class CoreConnection {
                                 List<QVariant<?>> permList = (List<QVariant<?>>) map.get("RemovedBuffers").getData();
                                 List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
                                 updateInitProgress("Receiving buffer list information");
+                                BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
                                 Log.w(TAG, "Setting alphabetical order to: "+Boolean.toString(BufferCollection.orderAlphabetical));
 
 
