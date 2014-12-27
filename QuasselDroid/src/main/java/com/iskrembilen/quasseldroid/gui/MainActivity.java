@@ -112,9 +112,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity created");
-        setTheme(ThemeUtil.theme_noactionbar);
+        setTheme(ThemeUtil.themeNoActionBar);
         super.onCreate(savedInstanceState);
-        currentTheme = ThemeUtil.theme_noactionbar;
+        currentTheme = ThemeUtil.themeNoActionBar;
 
         setContentView(R.layout.layout_main);
 
@@ -196,9 +196,9 @@ public class MainActivity extends ActionBarActivity {
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
 
         Log.d(TAG, "Current themes: "
-                        + ((ThemeUtil.theme_noactionbar==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT ":"DARK ")
-                        + ((ThemeUtil.theme_noactionbar == currentTheme) ? "== " : "!= ")
-                        + ((currentTheme==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT":"DARK")
+                + ((ThemeUtil.themeNoActionBar ==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT ":"DARK ")
+                + ((ThemeUtil.themeNoActionBar == currentTheme) ? "== " : "!= ")
+                + ((currentTheme==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT":"DARK")
         );
     }
 
@@ -209,7 +209,7 @@ public class MainActivity extends ActionBarActivity {
 
         BusProvider.getInstance().register(this);
 
-        if (ThemeUtil.theme_noactionbar != currentTheme) {
+        if (ThemeUtil.themeNoActionBar != currentTheme) {
             Log.d(TAG, "Changing theme");
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {

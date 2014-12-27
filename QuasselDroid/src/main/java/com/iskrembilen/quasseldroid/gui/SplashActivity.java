@@ -33,7 +33,7 @@ public class SplashActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(ThemeUtil.theme_noactionbar);
+        setTheme(ThemeUtil.themeNoActionBar);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.layout_splash);

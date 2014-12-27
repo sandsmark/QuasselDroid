@@ -4,11 +4,9 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -16,7 +14,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -61,7 +58,6 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.FormattingHelper;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
@@ -480,7 +476,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 holder = new ViewHolder();
                 holder.parent = convertView;
                 holder.timeView = (TextView) convertView.findViewById(R.id.backlog_time_view);
-                holder.timeView.setTextColor(ThemeUtil.color.chatTimestamp);
+                holder.timeView.setTextColor(ThemeUtil.Color.chatTimestamp);
                 holder.msgView = (TextView) convertView.findViewById(R.id.backlog_msg_view);
                 holder.separatorView = (TextView) convertView.findViewById(R.id.backlog_list_separator);
                 holder.item_layout = (LinearLayout) convertView.findViewById(R.id.backlog_item_linearlayout);
@@ -516,14 +512,14 @@ public class ChatFragment extends Fragment implements Serializable {
 
             switch (entry.type) {
                 case Action:
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.msgView.setTypeface(Typeface.DEFAULT);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
 
 
                     int color;
                     if (entry.isSelf()) {
-                        color = ThemeUtil.color.chatPlain;
+                        color = ThemeUtil.Color.chatPlain;
                     } else {
                         color = entry.getSenderColor();
                     }
@@ -538,24 +534,24 @@ public class ChatFragment extends Fragment implements Serializable {
                     break;
                 case Error:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatError);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatError);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Server:
                 case Info:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Topic:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Notice:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Join:
                     nick = entry.getNick();
@@ -563,8 +559,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     spannable = new SpannableString(String.format(getResources().getString(R.string.message_join), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Part:
@@ -573,8 +569,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     spannable = new SpannableString(String.format(getString(R.string.message_leave), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Quit:
@@ -583,8 +579,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     spannable = new SpannableString(String.format(getString(R.string.message_quit), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kill:
@@ -593,8 +589,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     spannable = new SpannableString(String.format(getString(R.string.message_kill), nick));
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kick:
@@ -625,8 +621,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     spannable.setSpan(new ForegroundColorSpan(color_nick), parsedText.toString().indexOf(nick), parsedText.toString().indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Mode:
@@ -653,8 +649,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     }
 
                     holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Nick:
                     if (entry.getNick().equals(entry.content.toString())) {
@@ -671,36 +667,36 @@ public class ChatFragment extends Fragment implements Serializable {
                         spannable.setSpan(new ForegroundColorSpan(color_new), rawText.lastIndexOf(entry.content.toString()), rawText.lastIndexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                         holder.msgView.setText(spannable);
                     }
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitJoin:
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitQuit:
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case DayChange:
                     SpannableString s = new SpannableString(String.format(getString(R.string.message_daychange), entry.content.toString()));
                     s.setSpan(new StyleSpan(Typeface.ITALIC),0,s.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(s);
-                    holder.msgView.setTextColor(ThemeUtil.color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                 case Plain:
                 default:
                     if (entry.isSelf() || entry.isHighlighted()) {
-                        color = ThemeUtil.color.chatPlain;
+                        color = ThemeUtil.Color.chatPlain;
                     } else {
                         color = entry.getSenderColor();
                     }
-                    holder.msgView.setTextColor(ThemeUtil.color.chatPlain);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatPlain);
                     holder.msgView.setTypeface(Typeface.DEFAULT);
 
                     if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false))
@@ -712,11 +708,11 @@ public class ChatFragment extends Fragment implements Serializable {
 
                     holder.msgView.setText(TextUtils.concat(nickSpan, " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
 
-                    holder.parent.setBackgroundColor(Color.TRANSPARENT);
+                    holder.parent.setBackgroundColor(android.graphics.Color.TRANSPARENT);
                     break;
             }
             if (entry.isHighlighted()) {
-                holder.item_layout.setBackgroundColor(ThemeUtil.color.chatHighlight);
+                holder.item_layout.setBackgroundColor(ThemeUtil.Color.chatHighlight);
             } else {
                 holder.item_layout.setBackgroundResource(0);
             }

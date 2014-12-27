@@ -1,7 +1,6 @@
 package com.iskrembilen.quasseldroid.util;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -10,14 +9,11 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -28,15 +24,10 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
-import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class QuasseldroidNotificationManager {
 
@@ -260,7 +251,7 @@ public class QuasseldroidNotificationManager {
             builder.setStyle(inboxStyle);
         }
 
-        builder.setColor(ThemeUtil.color.chatHighlight);
+        builder.setColor(ThemeUtil.Color.chatHighlight);
 
         Intent launch = new Intent(context, MainActivity.class);
         launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
