@@ -636,7 +636,7 @@ public class MainActivity extends ActionBarActivity {
             if (isDrawer)
                 lockDrawer(side, (fragment == null));
 
-            ft.commit();
+            ft.commitAllowingStateLoss();
             if (fragment != null) fragment.setMenuVisibility(menuVisbility);
         }
 
