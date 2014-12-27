@@ -14,7 +14,6 @@
         <item>14</item>
         <item>16</item>
         <item>18</item>
-<<<<<<< HEAD
     </string-array>
 
     <string-array name="entries_theme_preference">
@@ -24,8 +23,6 @@
     <string-array name="entryvalues_theme_preference">
         <item>light</item>
         <item>dark</item>
-=======
->>>>>>> Updated UI
     </string-array>
 
     <string-array name="entries_timestamp_preference">

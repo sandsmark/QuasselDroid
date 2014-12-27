@@ -116,13 +116,8 @@ public class IrcMessage implements Comparable<IrcMessage> {
     }
 
 
-<<<<<<< HEAD
     public String getTime(String format) {
         return String.format(format, timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
-=======
-    public String getTime() {
-        return String.format("%02d:%02d", timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
->>>>>>> Updated UI
     }
 
     public void setSender(String sender) {
