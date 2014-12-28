@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EditText
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+    android:id="@+id/dialog_topic_text"
+    android:hint="@string/hint_topic"
+    android:inputType="text" />

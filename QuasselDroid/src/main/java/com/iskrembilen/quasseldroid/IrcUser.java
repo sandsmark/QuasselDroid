@@ -47,6 +47,11 @@ public class IrcUser extends Observable implements Comparable<IrcUser> {
         notifyObservers(R.id.USER_CHANGEDNICK);
     }
 
+    public void notify(int id) {
+        this.setChanged();
+        notifyObservers(id);
+    }
+
     @Override
     public int compareTo(IrcUser another) {
         return this.nick.compareToIgnoreCase(another.nick);

@@ -7,6 +7,7 @@ import com.iskrembilen.quasseldroid.IrcUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class NickCompletionHelper extends Filter {
 
@@ -47,7 +48,7 @@ public class NickCompletionHelper extends Filter {
     protected FilterResults performFiltering(CharSequence constraint) {
         List<IrcUser> filteredUsers = new ArrayList<IrcUser>();
         for (IrcUser user : users) {
-            if (user.nick.toLowerCase().startsWith(((String) constraint).toLowerCase())) {
+            if (user.nick.toLowerCase(Locale.US).startsWith(((String) constraint).toLowerCase(Locale.US))) {
                 filteredUsers.add(user);
             }
         }

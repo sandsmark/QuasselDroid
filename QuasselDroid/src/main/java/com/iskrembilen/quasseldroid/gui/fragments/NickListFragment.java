@@ -1,41 +1,45 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.idunnololz.widgets.AnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.IrcMode;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.UserCollection;
+import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class NickListFragment extends SherlockFragment {
+public class NickListFragment extends Fragment implements Serializable {
     private NicksAdapter adapter;
-    private ExpandableListView list;
+    private AnimatedExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
     private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
     private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
     private final String TAG = NickListFragment.class.getSimpleName();
+    public String topic;
+
+    private BacklogObserver observer = new BacklogObserver();
 
     public static NickListFragment newInstance() {
         return new NickListFragment();
@@ -53,8 +57,19 @@ public class NickListFragment extends SherlockFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.nick_list_fragment_layout, container, false);
-        list = (ExpandableListView) root.findViewById(R.id.userList);
+        View root = inflater.inflate(R.layout.fragment_nicks, container, false);
+        list = (AnimatedExpandableListView) root.findViewById(R.id.userList);
+        list.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                if (list.isGroupExpanded(groupPosition)) {
+                    list.collapseGroupWithAnimation(groupPosition);
+                } else {
+                    list.expandGroupWithAnimation(groupPosition);
+                }
+                return true;
+            }
+        });
         return root;
     }
 
@@ -88,11 +103,14 @@ public class NickListFragment extends SherlockFragment {
         BusProvider.getInstance().post(new UserClickedEvent(bufferId, nick));
     }
 
-    public class NicksAdapter extends BaseExpandableListAdapter implements Observer {
+    public void setNetworks(NetworkCollection networks) {
+        this.networks = networks;
+    }
+
+    public class NicksAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
 
         private LayoutInflater inflater;
         private UserCollection users;
-
 
         public NicksAdapter() {
             inflater = getActivity().getLayoutInflater();
@@ -133,31 +151,30 @@ public class NickListFragment extends SherlockFragment {
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            //TODO: This will cause bugs when you have more than 99 children in a group
-            return groupPosition * 100 + childPosition;
+            return groupPosition * Integer.MAX_VALUE + childPosition;
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition,
-                                 boolean isLastChild, View convertView, ViewGroup parent) {
-
+        public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             ViewHolderChild holder = null;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.nicklist_item, null);
+                convertView = inflater.inflate(R.layout.widget_nick_single, null);
                 holder = new ViewHolderChild();
                 holder.nickView = (TextView) convertView.findViewById(R.id.nicklist_nick_view);
-                holder.userImage = (ImageView) convertView.findViewById(R.id.nicklist_nick_image);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             final IrcUser entry = getChild(groupPosition, childPosition);
+            final IrcMode mode = getGroup(groupPosition).first;
+            convertView.setBackgroundColor(ThemeUtil.getNickBg(mode));
+
             holder.nickView.setText(entry.nick);
             if (entry.away) {
-                holder.userImage.setImageResource(R.drawable.im_user_away);
+                holder.nickView.setTextColor(ThemeUtil.Color.bufferParted);
             } else {
-                holder.userImage.setImageResource(R.drawable.im_user);
+                holder.nickView.setTextColor(ThemeUtil.Color.bufferRead);
             }
 
             holder.nickView.setOnClickListener(new View.OnClickListener() {
@@ -171,7 +188,7 @@ public class NickListFragment extends SherlockFragment {
         }
 
         @Override
-        public int getChildrenCount(int groupPosition) {
+        public int getRealChildrenCount(int groupPosition) {
             if (this.users == null) return 0;
             return getGroup(groupPosition).second.size();
         }
@@ -206,36 +223,29 @@ public class NickListFragment extends SherlockFragment {
             ViewHolderGroup holder = null;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.nicklist_group_item, null);
+                convertView = inflater.inflate(R.layout.widget_nick_group, null);
                 holder = new ViewHolderGroup();
                 holder.nameView = (TextView) convertView.findViewById(R.id.nicklist_group_name_view);
-                holder.imageView = (ImageView) convertView.findViewById(R.id.nicklist_group_image_view);
-                holder.expanderView = (ImageView) convertView.findViewById(R.id.nicklist_expander_image_view);
-                holder.groupHolderView = (LinearLayout) convertView.findViewById(R.id.nicklist_holder_view);
+                holder.countView = (TextView) convertView.findViewById(R.id.nicklist_group_count_view);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderGroup) convertView.getTag();
             }
             Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
+            convertView.setBackgroundColor(ThemeUtil.getNickBg(group.first));
+            holder.nameView.setTextColor(ThemeUtil.getNickColor(group.first));
+            holder.countView.setTextColor(ThemeUtil.getNickColor(group.first));
+
             if (group.second.size() < 1) {
+                convertView.setVisibility(View.GONE);
                 holder.nameView.setVisibility(View.GONE);
-                holder.imageView.setVisibility(View.GONE);
-                holder.expanderView.setVisibility(View.GONE);
-                holder.groupHolderView.setPadding(0, 0, 0, 0);
-
-
+                holder.countView.setVisibility(View.GONE);
             } else {
-                if (group.second.size() > 1) {
-                    holder.nameView.setText(group.second.size() + " " + group.first.modeName + group.first.pluralization);
-                } else {
-                    holder.nameView.setText(group.second.size() + " " + group.first.modeName);
-                }
+                convertView.setVisibility(View.VISIBLE);
                 holder.nameView.setVisibility(View.VISIBLE);
-                holder.imageView.setVisibility(View.VISIBLE);
-                holder.expanderView.setVisibility(View.VISIBLE);
-                holder.imageView.setImageResource(group.first.iconResource);
-                holder.groupHolderView.setPadding(5, 2, 2, 2);
-                holder.expanderView.getDrawable().setState(list.isGroupExpanded(groupPosition) ? EXPANDED_STATE : NOT_EXPANDED_STATE);
+                holder.countView.setVisibility(View.VISIBLE);
+                holder.nameView.setText(group.first.modeName);
+                holder.countView.setText(group.first.icon + " " + group.second.size());
             }
             return convertView;
         }
@@ -254,14 +264,11 @@ public class NickListFragment extends SherlockFragment {
 
     public static class ViewHolderChild {
         public TextView nickView;
-        public ImageView userImage;
     }
 
     public static class ViewHolderGroup {
         public TextView nameView;
-        public ImageView imageView;
-        public ImageView expanderView;
-        public LinearLayout groupHolderView;
+        public TextView countView;
     }
 
     @Subscribe
@@ -269,7 +276,9 @@ public class NickListFragment extends SherlockFragment {
         if (event.networks != null) {
             this.networks = event.networks;
             if (bufferId != -1) {
+                observer.setBuffer(networks.getBufferById(bufferId));
                 updateUsers();
+                BusProvider.getInstance().post(new BufferDetailsChangedEvent(bufferId));
             }
         }
     }
@@ -279,7 +288,9 @@ public class NickListFragment extends SherlockFragment {
         if (event.bufferId != -1) {
             this.bufferId = event.bufferId;
             if (networks != null) {
+                observer.setBuffer(networks.getBufferById(bufferId));
                 updateUsers();
+                BusProvider.getInstance().post(new BufferDetailsChangedEvent(bufferId));
             }
         }
     }
@@ -288,6 +299,37 @@ public class NickListFragment extends SherlockFragment {
         Buffer buffer = networks.getBufferById(bufferId);
         if (buffer != null) {
             adapter.setUsers(buffer.getUsers());
+        }
+    }
+
+    @Subscribe
+    public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
+        if (event.bufferId==bufferId) {
+            Buffer buffer = networks.getBufferById(bufferId);
+            if (buffer != null) {
+                observer.setBuffer(buffer);
+            }
+        }
+    }
+
+    public class BacklogObserver implements Observer {
+        private Buffer buffer;
+        public void setBuffer(Buffer buffer) {
+            if (this.buffer!=null) this.buffer.deleteObserver(this);
+            this.buffer = buffer;
+            if (this.buffer!=null) this.buffer.addObserver(this);
+        }
+        @Override
+        public void update(Observable observable, Object data) {
+            if (data == null) {
+                return;
+            }
+            switch ((Integer) data) {
+                case R.id.BUFFERUPDATE_TOPICCHANGED:
+                    BusProvider.getInstance().post(new BufferDetailsChangedEvent(bufferId));
+                    break;
+                default:
+            }
         }
     }
 }

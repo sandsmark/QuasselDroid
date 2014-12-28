@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.service;
 
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,6 +50,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
@@ -188,7 +191,7 @@ public class CoreConnService extends Service {
         preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
         preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), false);
         preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
-        preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_on_wifi_only), false);
+        preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_wifi), false);
         preferenceReconnectPeriodically = preferences.getBoolean(getString(R.string.preference_reconnect_periodically), false);
         preferenceListener = new OnSharedPreferenceChangeListener() {
 
@@ -202,8 +205,8 @@ public class CoreConnService extends Service {
                     else if (preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
                 } else if (key.equals(getString(R.string.preference_reconnect))) {
                     preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
-                } else if (key.equals(getString(R.string.preference_reconnect_on_wifi_only))) {
-                    preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_on_wifi_only), false);
+                } else if (key.equals(getString(R.string.preference_reconnect_wifi))) {
+                    preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_wifi), false);
                 } else if(key.equals(getString(R.string.preference_reconnect_counter))) {
                     resetReconnectCounter();
                 } else if(key.equals(getString(R.string.preference_reconnect_periodically))) {
@@ -228,7 +231,7 @@ public class CoreConnService extends Service {
 
     private void resetReconnectCounter() {
         reconnectCounter = Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_counter),
-            RECONNECT_COUNTER_DEFAULT));
+                RECONNECT_COUNTER_DEFAULT));
         reconnectDelay = 0;
     }
 
@@ -311,7 +314,7 @@ public class CoreConnService extends Service {
         coreConn.requestUnhideTempHiddenBuffer(bufferId);
         networks.getBufferById(bufferId).setTemporarilyHidden(false);
     }
-    
+
     public void unhidePermHiddenBuffer(int bufferId) {
         coreConn.requestUnhidePermHiddenBuffer(bufferId);
     }
@@ -343,12 +346,12 @@ public class CoreConnService extends Service {
         notificationManager = null;
         BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
         reconnectCounter = Integer.valueOf(preferences.getString(
-            getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
+                getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
     }
 
     public void connectToCore() {
         Log.i(TAG, "Connecting to core: " + address + ":" + port
-        + " with username " + username);
+                + " with username " + username);
         if(coreConn != null) {
             disconnectFromCore();
         }
@@ -407,8 +410,6 @@ public class CoreConnService extends Service {
                         for (IrcMessage curMessage : messageList) {
                             if (!buffer.hasMessage(curMessage)) {
                                 MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
-                                if (preferenceParseColors)
-                                    MessageUtil.parseStyleCodes(CoreConnService.this, curMessage);
                             } else {
                                 Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
                             }
@@ -434,7 +435,6 @@ public class CoreConnService extends Service {
                          * support for custom highlight masks
                          */
                         MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
-                        MessageUtil.parseStyleCodes(CoreConnService.this, message);
 
                         buffer.addMessage(message);
 
@@ -551,7 +551,7 @@ public class CoreConnService extends Service {
 //				ArrayList<Integer> c = new ArrayList<Integer>();
 //				for(Network net : networks.getNetworkList()) {
 //					c.add(net.getStatusBuffer().getInfo().id);
-//					for(Buffer buf : net.getBuffers().getRawBufferList()) {
+//					for(Buffer buf : net.getBuffers().getBufferList(true)) {
 //						c.add(buf.getInfo().id);
 //					}
 //				}
@@ -626,7 +626,7 @@ public class CoreConnService extends Service {
                     initDone = true;
                     isConnecting = false;
                     resetReconnectCounter();
-					BusProvider.getInstance().post(new InitProgressEvent(true, ""));
+                    BusProvider.getInstance().post(new InitProgressEvent(true, ""));
                     BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
                     break;
                 case R.id.USER_PARTED:
@@ -653,7 +653,7 @@ public class CoreConnService extends Service {
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
                     String modes = (String) bundle.get("mode");
                     bufferName = (String) bundle.get("buffername");
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
                         if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
                             buf.getUsers().addUser(user, modes);
                             return;
@@ -682,7 +682,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().addModeToUser(user, bundle.getString("mode"));
                             break;
@@ -697,7 +697,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getRawBufferList()) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
                             break;
@@ -728,7 +728,7 @@ public class CoreConnService extends Service {
                     break;
                 case R.id.SET_NETWORK_NAME:
                     networks.getNetworkById(msg.arg1).setName((String) msg.obj);
-					break;
+                    break;
                 case R.id.SET_NETWORK_CURRENT_SERVER:
                     networks.getNetworkById(msg.arg1).setServer((String) msg.obj);
                     break;
@@ -810,19 +810,20 @@ public class CoreConnService extends Service {
         return !initDone && reconnectPrefValue == reconnectCounter;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private boolean checkForMeteredCondition() {
         boolean reconnectMeteredConnection = preferences.getBoolean(
-                getString(R.string.preference_reconnect_on_metered), false);
+                getString(R.string.preference_reconnect_metered), false);
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        return reconnectMeteredConnection || !connManager.isActiveNetworkMetered();
+        return reconnectMeteredConnection || !(Build.VERSION.SDK_INT>Build.VERSION_CODES.JELLY_BEAN && connManager.isActiveNetworkMetered());
     }
 
 
     private boolean isWifiCondition() {
         boolean wifiConnection = preferences.getBoolean(
-                getString(R.string.preference_reconnect_on_wifi_only), false);
+                getString(R.string.preference_reconnect_wifi), false);
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -960,7 +961,9 @@ public class CoreConnService extends Service {
         } else if (event.action == ChannelAction.MARK_AS_READ) {
             coreConn.requestMarkBufferAsRead(event.bufferId);
         } else if (event.action == ChannelAction.HIGHLIGHTS_READ) {
-            notificationManager.notifyHighlightsRead(event.bufferId);
+            // This is accessed sometimes even after we have disconnected from the core.
+            // In that case the notificationManager is already null
+            if (notificationManager!=null) notificationManager.notifyHighlightsRead(event.bufferId);
         }
     }
 
@@ -978,7 +981,9 @@ public class CoreConnService extends Service {
         Buffer buffer = networks.getBufferById(event.bufferId);
         if (buffer != null) {
             if (event.action == MessageAction.LAST_SEEN) {
-                notificationManager.notifyHighlightsRead(event.bufferId);
+                // This is accessed sometimes even after we have disconnected from the core.
+                // In that case the notificationManager is already null
+                if (notificationManager!=null) notificationManager.notifyHighlightsRead(event.bufferId);
                 coreConn.requestSetLastMsgRead(event.bufferId, event.messageId);
                 networks.getBufferById(event.bufferId).setLastSeenMessage(event.messageId);
             } else if (event.action == MessageAction.MARKER_LINE) {

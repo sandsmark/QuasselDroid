@@ -21,9 +21,14 @@
 
 package com.iskrembilen.quasseldroid.io;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import java.io.OutputStream;
+import java.lang.annotation.Target;
 import java.util.zip.DeflaterOutputStream;
 
+@TargetApi(Build.VERSION_CODES.KITKAT)
 public class SwitchableDeflaterOutputStream extends DeflaterOutputStream{
 
     public SwitchableDeflaterOutputStream(OutputStream os) {

@@ -34,8 +34,16 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -47,9 +55,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
@@ -57,19 +62,18 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
-import com.iskrembilen.quasseldroid.gui.fragments.LoginProgressDialog;
+import com.iskrembilen.quasseldroid.gui.dialogs.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
-import android.util.Log;
 
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends SherlockFragmentActivity implements Observer, LoginProgressDialog.Callbacks {
+public class LoginActivity extends ActionBarActivity implements Observer, LoginProgressDialog.Callbacks {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
     public static final String PREFS_ACCOUNT = "AccountPreferences";
@@ -83,6 +87,9 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
     EditText passwordField;
     CheckBox rememberMe;
     Button connect;
+    EditText portField;
+    EditText nameField;
+    EditText addressField;
 
     private String hashedCert;//ugly
     private int currentTheme;
@@ -96,7 +103,7 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.theme;
-        setContentView(R.layout.login);
+        setContentView(R.layout.layout_login);
 
         settings = getSharedPreferences(PREFS_ACCOUNT, MODE_PRIVATE);
         dbHelper = new QuasselDbHelper(this);
@@ -141,6 +148,14 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
         //TODO: Ken:Implement view reuse
         core.setAdapter(adapter);
 
+        final View core_menu = findViewById(R.id.core_menu);
+        core_menu.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showCoreContextMenu(getApplicationContext(), core_menu);
+            }
+        });
+
         //Use saved settings
         if (core.getCount() > settings.getInt(PREFS_CORE, 0))
             core.setSelection(settings.getInt(PREFS_CORE, 0));
@@ -149,9 +164,44 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
         connect.setOnClickListener(onConnect);
     }
 
+
+    public void showCoreContextMenu(Context context, View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+            @Override
+            public boolean onMenuItemClick(android.view.MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_add_core:
+                        showDialog(R.id.DIALOG_ADD_CORE);
+                        break;
+                    case R.id.menu_edit_core:
+                        if (dbHelper.hasCores()) {
+                            showDialog(R.id.DIALOG_EDIT_CORE);
+                        }
+                        break;
+                    case R.id.menu_delete_core:
+                        if (dbHelper.hasCores()) {
+                            showDialog(R.id.DIALOG_DELETE_CORE);
+                        }
+                        updateCoreSpinner();
+                        break;
+                }
+                return false;
+            }
+        });
+        popup.inflate(R.menu.context_core);
+        if (core.getCount()==0) {
+            popup.getMenu().findItem(R.id.menu_edit_core).setEnabled(false);
+            popup.getMenu().findItem(R.id.menu_delete_core).setEnabled(false);
+        }
+
+        popup.show();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.login_menu, menu);
+        getMenuInflater().inflate(R.menu.base_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -159,7 +209,20 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
     protected void onResume() {
         Log.d(TAG, "Resuming activity");
         super.onResume();
+
         BusProvider.getInstance().register(this);
+        if (ThemeUtil.theme != currentTheme) {
+            Log.d(TAG, "Changing theme");
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    recreate();
+                }
+            }, 1);
+        }
     }
 
     @Override
@@ -174,11 +237,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
         Log.d(TAG, "Starting activity");
         super.onStart();
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
-        if (ThemeUtil.theme != currentTheme) {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
     }
 
     @Override
@@ -202,26 +260,6 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_add_core:
-                showDialog(R.id.DIALOG_ADD_CORE); //TODO: convert to fragment
-                break;
-            case R.id.menu_edit_core:
-                if (dbHelper.hasCores()) {
-                    showDialog(R.id.DIALOG_EDIT_CORE); //TODO: convert to fragment
-                } else {
-                    Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.id.menu_delete_core:
-                if (dbHelper.hasCores()) {
-                    dbHelper.deleteCore(core.getSelectedItemId());
-                    Toast.makeText(LoginActivity.this, "Deleted core", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(this, "No cores to edit", Toast.LENGTH_LONG).show();
-                }
-                updateCoreSpinner();
-                //TODO: maybe add some confirm dialog when deleting a core
-                break;
             case R.id.menu_preferences:
                 Intent i = new Intent(LoginActivity.this, PreferenceView.class);
                 startActivity(i);
@@ -234,97 +272,100 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
     protected void onPrepareDialog(int id, Dialog dialog) {
         switch (id) {
             case R.id.DIALOG_ADD_CORE:
-                dialog.setTitle("Add new core");
+                portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
                 break;
             case R.id.DIALOG_EDIT_CORE:
-                dialog.setTitle("Edit core");
                 Bundle res = dbHelper.getCore(core.getSelectedItemId());
                 ((EditText) dialog.findViewById(R.id.dialog_name_field)).setText(res.getString(QuasselDbHelper.KEY_NAME));
                 ((EditText) dialog.findViewById(R.id.dialog_address_field)).setText(res.getString(QuasselDbHelper.KEY_ADDRESS));
                 ((EditText) dialog.findViewById(R.id.dialog_port_field)).setText(Integer.toString(res.getInt(QuasselDbHelper.KEY_PORT)));
                 break;
+            default:
+                break;
         }
-
         super.onPrepareDialog(id, dialog);
     }
 
     @Override
-    protected Dialog onCreateDialog(int id) {
+    protected Dialog onCreateDialog(final int id) {
         final Dialog dialog;
-        String certificateMessage = null;
+        String certificateMessage = getResources().getString(R.string.message_ssl_new);
         switch (id) {
-
-            case R.id.DIALOG_EDIT_CORE: //fallthrough
+            case R.id.DIALOG_EDIT_CORE:
             case R.id.DIALOG_ADD_CORE:
-                dialog = new Dialog(this);
-                dialog.setContentView(R.layout.dialog_add_core);
-                dialog.setTitle("Add new core");
-
-                OnClickListener buttonListener = new OnClickListener() {
-
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                final View root = getLayoutInflater().inflate(R.layout.dialog_add_core, null);
+                nameField = (EditText) root.findViewById(R.id.dialog_name_field);
+                addressField = (EditText) root.findViewById(R.id.dialog_address_field);
+                portField = (EditText) root.findViewById(R.id.dialog_port_field);
+                portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
+                builder.setView(root);
+                builder.setTitle(getResources().getString(R.string.dialog_title_core_add));
+                builder.setPositiveButton(getResources().getString(R.string.dialog_action_save), new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        EditText nameField = (EditText) dialog.findViewById(R.id.dialog_name_field);
-                        EditText addressField = (EditText) dialog.findViewById(R.id.dialog_address_field);
-                        EditText portField = (EditText) dialog.findViewById(R.id.dialog_port_field);
-                        if (v.getId() == R.id.cancel_button) {
-                            nameField.setText("");
-                            addressField.setText("");
-                            portField.setText("");
-                            dialog.dismiss();
-
-
-                        } else if (v.getId() == R.id.save_button && !nameField.getText().toString().equals("") && !addressField.getText().toString().equals("") && !portField.getText().toString().equals("")) {
-                            String name = nameField.getText().toString().trim();
-                            String address = addressField.getText().toString().trim();
-                            int port = Integer.parseInt(portField.getText().toString().trim());
-
-                            //TODO: Ken: maybe add some better check on what state the dialog is used for, edit/add. At least use a string from the resources so its the same if you change it.
-                            if ((String) dialog.getWindow().getAttributes().getTitle() == "Add new core") {
-                                dbHelper.addCore(name, address, port);
-                            } else if ((String) dialog.getWindow().getAttributes().getTitle() == "Edit core") {
-                                dbHelper.updateCore(core.getSelectedItemId(), name, address, port);
-                            }
-                            LoginActivity.this.updateCoreSpinner();
-                            nameField.setText("");
-                            addressField.setText("");
-                            portField.setText("");
-                            dialog.dismiss();
-                            if ((String) dialog.getWindow().getAttributes().getTitle() == "Add new core") {
-                                Toast.makeText(LoginActivity.this, "Added core", Toast.LENGTH_LONG).show();
-                            } else if ((String) dialog.getWindow().getAttributes().getTitle() == "Edit core") {
-                                Toast.makeText(LoginActivity.this, "Edited core", Toast.LENGTH_LONG).show();
-                            }
-                        }
-
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String name = nameField.getText().toString().trim();
+                        String address = addressField.getText().toString().trim();
+                        int port = Integer.parseInt(portField.getText().toString().trim());
+                        if (id == R.id.DIALOG_ADD_CORE)
+                            dbHelper.addCore(name, address, port);
+                        else
+                            dbHelper.updateCore(core.getSelectedItemId(), name, address, port);
+                        LoginActivity.this.updateCoreSpinner();
+                        nameField.setText("");
+                        addressField.setText("");
+                        portField.setText("");
+                        dialogInterface.dismiss();
                     }
-                };
-                dialog.findViewById(R.id.cancel_button).setOnClickListener(buttonListener);
-                dialog.findViewById(R.id.save_button).setOnClickListener(buttonListener);
+                });
+                builder.setNegativeButton(getResources().getString(R.string.dialog_action_cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        nameField.setText("");
+                        addressField.setText("");
+                        portField.setText("");
+                        dialogInterface.dismiss();
+                    }
+                });
+                dialog = builder.create();
                 break;
             case R.id.DIALOG_CHANGED_CERTIFICATE:
-                certificateMessage = "The core SSL-Certificate has changed, do you trust the new one?\n";
+                certificateMessage = getResources().getString(R.string.message_ssl_changed);
             case R.id.DIALOG_NEW_CERTIFICATE:
-                if (certificateMessage == null) {
-                    certificateMessage = "Received a new certificate, do you trust it?\n";
-                }
-                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                builder.setMessage(certificateMessage + hashedCert)
+                builder = new AlertDialog.Builder(LoginActivity.this);
+                builder.setMessage(certificateMessage + "\n" + hashedCert)
                         .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.storeCertificate(hashedCert, core.getSelectedItemId());
                                 onConnect.onClick(null);
                             }
                         })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
                         });
                 dialog = builder.create();
                 break;
-
+            case R.id.DIALOG_DELETE_CORE:
+                builder = new AlertDialog.Builder(LoginActivity.this);
+                builder.setTitle(getResources().getString(R.string.dialog_title_delete_buffer))
+                        .setMessage(getResources().getString(R.string.dialog_message_delete_buffer))
+                        .setCancelable(false)
+                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dbHelper.deleteCore(core.getSelectedItemId());
+                                updateCoreSpinner();
+                            }
+                        })
+                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                dialog = builder.create();
+                break;
             default:
                 dialog = null;
                 break;
@@ -342,12 +383,13 @@ public class LoginActivity extends SherlockFragmentActivity implements Observer,
                 diag.setMessage("Error, connection information not filled out properly");
                 diag.setCancelable(false);
 
-                AlertDialog dg = diag.create();
-                dg.setOwnerActivity(LoginActivity.this);
-                dg.setButton("Ok", new DialogInterface.OnClickListener() {
+                diag.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                     }
                 });
+
+                AlertDialog dg = diag.create();
+                dg.setOwnerActivity(LoginActivity.this);
                 dg.show();
                 return;
             }

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <PreferenceCategory android:title="@string/preference_category_appearance">
+
+        <ListPreference
+            android:defaultValue="light"
+            android:dialogTitle="@string/preference_dialog_theme"
+            android:entries="@array/entries_theme_preference"
+            android:entryValues="@array/entryvalues_theme_preference"
+            android:key="@string/preference_theme"
+            android:summary="@string/preference_summary_theme"
+            android:title="@string/preference_title_theme" />
+
+        <ListPreference
+            android:defaultValue="orientation"
+            android:dialogTitle="@string/preference_dialog_timestamp"
+            android:entries="@array/entries_timestamp_preference"
+            android:entryValues="@array/entryvalues_timestamp_preference"
+            android:key="@string/preference_timestamp"
+            android:summary="@string/preference_summary_timestamp"
+            android:title="@string/preference_title_timestamp" />
+
+        <ListPreference
+            android:defaultValue="14"
+            android:dialogTitle="@string/preference_dialog_fontsize"
+            android:entries="@array/entries_fontsize_preference"
+            android:entryValues="@array/entryvalues_fontsize_preference"
+            android:key="@string/preference_fontsize"
+            android:summary="@string/preference_summary_fontsize"
+            android:title="@string/preference_title_fontsize" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/preference_colored_text"
+            android:summary="@string/preference_summary_colored_text"
+            android:title="@string/preference_title_colored_text" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_nickbrackets"
+            android:summary="@string/preference_summary_nickbrackets"
+            android:title="@string/preference_title_nickbrackets" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_hostname"
+            android:summary="@string/preference_summary_hostname"
+            android:title="@string/preference_title_hostname" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_lag"
+            android:summary="@string/preference_summary_lag"
+            android:title="@string/preference_title_lag" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preference_category_connection">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_fetch_to_last_seen"
+            android:summary="@string/preference_summary_fetch_to_last_seen"
+            android:title="@string/preference_title_fetch_to_last_seen"
+            android:disableDependentsState="true" />
+
+        <EditTextPreference
+            android:defaultValue="10"
+            android:key="@string/preference_initial_backlog_limit"
+            android:numeric="integer"
+            android:summary="@string/preference_summary_initial_backlog_limit"
+            android:title="@string/preference_title_initial_backlog_limit"
+            android:dependency="@string/preference_fetch_to_last_seen" />
+
+        <EditTextPreference
+            android:defaultValue="20"
+            android:key="@string/preference_dynamic_backlog"
+            android:numeric="integer"
+            android:summary="@string/preference_summary_dynamic_backlog"
+            android:title="@string/preference_title_dynamic_backlog" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_wake_lock"
+            android:summary="Use more battery when you turn off the screen, to keep connections alive"
+            android:title="Use a wake-lock to inhibit sleep" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preference_category_reconnect" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect"
+            android:summary="@string/preference_summary_reconnect"
+            android:title="@string/preference_title_reconnect"
+            android:disableDependentsState="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_wifi"
+            android:summary="@string/preference_summary_reconnect_wifi"
+            android:title="@string/preference_title_wifi"
+            android:dependency="@string/preference_reconnect" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_metered"
+            android:summary="@string/preference_summary_metered"
+            android:title="@string/preference_title_metered"
+            android:dependency="@string/preference_reconnect_wifi" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_periodically"
+            android:summary="@string/preference_summary_reconnect_periodically"
+            android:title="@string/preference_title_reconnect_periodically"
+            android:dependency="@string/preference_reconnect" />
+        <EditTextPreference
+            android:defaultValue="3"
+            android:key="@string/preference_reconnect_counter"
+            android:numeric="integer"
+            android:summary="@string/preference_summary_reconnect_counter"
+            android:title="@string/preference_title_reconnect_counter"
+            android:dependency="@string/preference_reconnect_periodically" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/preference_category_notifications">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_notify_connect"
+            android:title="@string/preference_title_notify_connect" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_notification_vibrate"
+            android:title="@string/preference_title_notification_vibrate" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_notification_light"
+            android:title="@string/preference_title_notification_light" />
+
+        <CheckBoxPreference
+            android:key="@string/preference_notification_sound"
+            android:title="@string/preference_title_notification_sound" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/preference_notification_sound_active"
+            android:title="@string/preference_title_notification_sound_active" />
+
+        <RingtonePreference
+            android:key="@string/preference_notification_sound_file"
+            android:ringtoneType="notification"
+            android:showDefault="true"
+            android:showSilent="true"
+            android:title="@string/preference_title_notification_sound_file"/>
+
+        <RingtonePreference
+            android:key="@string/preference_notification_connect_sound_file"
+            android:ringtoneType="notification"
+            android:showDefault="true"
+            android:showSilent="true"
+            android:title="@string/preference_title_notification_connect_sound_file"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

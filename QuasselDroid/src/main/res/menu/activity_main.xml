@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_preferences"
+        android:title="@string/action_preferences"
+        android:orderInCategory="10"
+        android:alphabeticShortcut="p" />
+    <item
+        android:id="@+id/menu_disconnect"
+        android:title="@string/action_disconnect"
+        android:orderInCategory="11"
+        android:alphabeticShortcut="q" />
+</menu>

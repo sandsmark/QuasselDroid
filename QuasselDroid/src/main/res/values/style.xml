@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.QuasselDroid.Material.Light">
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="Theme.QuasselDroid.Material.Dark.NoActionBar" parent="Theme.QuasselDroid.Material.Dark">
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="Theme.QuasselDroid.Material.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="listSelector">@drawable/selectable_item_light</item>
+
+        <item name="dividerColor">@color/divider_color_light</item>
+        <item name="backgroundColor">@color/background_material_light</item>
+
+        <item name="android:textColorPrimary">@color/primary_text_default_material_light</item>
+        <item name="android:textColorSecondary">@color/secondary_text_default_material_light</item>
+
+        <item name="ic_overflow">@drawable/ic_overflow_light</item>
+        <item name="ic_search">@drawable/ic_search_light</item>
+        <item name="ic_expand">@drawable/ic_expand_light</item>
+        <item name="ic_collapse">@drawable/ic_collapse_light</item>
+    </style>
+
+    <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.AppCompat">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
+
+
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="listSelector">@drawable/selectable_item_dark</item>
+
+        <item name="dividerColor">@color/divider_color_dark</item>
+        <item name="backgroundColor">@color/background_material_dark</item>
+
+        <item name="android:textColorPrimary">@color/primary_text_default_material_dark</item>
+        <item name="android:textColorSecondary">@color/secondary_text_default_material_dark</item>
+
+        <item name="ic_overflow">@drawable/ic_overflow_dark</item>
+        <item name="ic_search">@drawable/ic_search_dark</item>
+        <item name="ic_expand">@drawable/ic_expand_dark</item>
+        <item name="ic_collapse">@drawable/ic_collapse_dark</item>
+    </style>
+
+    <style name="PopupMenu.Quasseldroid.Light" parent="@style/Widget.AppCompat.Light.ListPopupWindow"/>
+    <style name="PopupMenu.Quasseldroid.Dark" parent="@style/Widget.AppCompat.ListPopupWindow"/>
+
+    <style name="SpinnerButton.Light" parent="@android:style/Widget.Holo.Light.Spinner" />
+    <style name="SpinnerButton.Dark" parent="@android:style/Widget.Holo.Spinner" />
+
+</resources>

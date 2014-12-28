@@ -7,7 +7,7 @@ public class SenderColorHelper {
 
     public static int getSenderColor(String nick) {
         double doubleHash = ((long) nick.hashCode() - Integer.MIN_VALUE) / INTEGER_RANGE;
-        int color = hslToRgb(doubleHash, 0.8, 0.5); //Last to values comes from trial and error
+        int color = hslToRgb(doubleHash, ThemeUtil.nickConstants[0], ThemeUtil.nickConstants[1]); //Last to values comes from trial and error
         return color;
     }
 

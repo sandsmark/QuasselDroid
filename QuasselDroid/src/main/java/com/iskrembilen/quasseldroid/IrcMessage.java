@@ -101,7 +101,6 @@ public class IrcMessage implements Comparable<IrcMessage> {
     private String sender;
     public Type type;
     public byte flags;
-    public int senderColor;
 
     private ArrayList<String> urls = new ArrayList<String>();
 
@@ -117,13 +116,16 @@ public class IrcMessage implements Comparable<IrcMessage> {
     }
 
 
-    public String getTime() {
-        return String.format("%02d:%02d:%02d", timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
+    public String getTime(String format) {
+        return String.format(format, timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
     }
 
     public void setSender(String sender) {
         this.sender = sender;
-        this.senderColor = SenderColorHelper.getSenderColor(getNick());
+    }
+
+    public int getSenderColor() {
+        return SenderColorHelper.getSenderColor(getNick());
     }
 
     public String getNick() {

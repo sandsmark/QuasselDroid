@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="?attr/listSelector">
+
+    <View
+        android:id="@+id/buffer_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:drawable/divider_horizontal_bright"/>
+
+    <TextView
+        android:id="@+id/buffer_list_item_name"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_gravity="start|fill_vertical"
+        android:layout_weight="1"
+        android:padding="12dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
+        android:duplicateParentState="false"
+        android:gravity="start|center_vertical"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:textStyle="bold" />
+
+</LinearLayout>

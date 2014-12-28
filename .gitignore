@@ -6,3 +6,5 @@ gen/*
 local.properties
 .gradle/*
 .idea/*
+gradle.properties
+**/version.properties

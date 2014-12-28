@@ -68,6 +68,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -92,6 +93,7 @@ public final class CoreConnection {
     private SwitchableInflaterInputStream inflater;
 
     private Map<Integer, Buffer> buffers;
+    private Map<String, Buffer> emptyBuffers;
     private CoreInfo coreInfo;
     private Map<Integer, Network> networks;
 
@@ -407,6 +409,7 @@ public final class CoreConnection {
      * @throws EmptyQVariantException
      * @throws UnsupportedProtocolException
      */
+    @SuppressWarnings("unchecked")
     public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException, UnsupportedProtocolException {
         updateInitProgress("Connecting...");
         // START CREATE SOCKETS
@@ -424,11 +427,7 @@ public final class CoreConnection {
         magic = magic | 0x01;   //0x01 is encryption
 
         //DeflaterOutputStream SYNC_FLUSH support is required for compression, but Eclair doesn't support that.
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-            magic = magic | 0x02;   //0x02 is compression
-        } else {
-            Log.d(TAG, "Android version is too old, disabling compression.  Please update to 2.2 or later.");
-        }
+        magic = magic | 0x02;   //0x02 is compression
 
         outStream.writeUInt(magic, 32);
 
@@ -452,11 +451,7 @@ public final class CoreConnection {
 
             //Check if Compression should be used
             if (((responseValue >> 24) & 0x02) > 0) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ECLAIR_MR1) {
-                    usingCompression = true;
-                } else {
-                    throw new UnsupportedProtocolException("Core is forcing compression, but compression is unsupported!");
-                }
+                usingCompression = true;
             }
         } catch (IOException e) {
             //This means that the core supports only the legacy handshake, so reopen the connection
@@ -480,7 +475,7 @@ public final class CoreConnection {
         updateInitProgress("Sending client info...");
         Map<String, QVariant<?>> initial = new HashMap<String, QVariant<?>>();
 
-        DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss", Locale.US);
         Date date = new Date();
         initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
         initial.put("UseSsl", new QVariant<Boolean>(true, QVariantType.Bool));
@@ -582,6 +577,7 @@ public final class CoreConnection {
 
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
         buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
+        emptyBuffers = new HashMap<>();
         QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
         ArrayList<Integer> bufferIds = new ArrayList<Integer>();
         for (QVariant<?> bufferInfoQV : bufferInfos) {
@@ -1036,6 +1032,9 @@ public final class CoreConnection {
                                     user.awayMessage = (String) map.get("awayMessage").getData();
                                     user.ircOperator = (String) map.get("ircOperator").getData();
                                     user.nick = (String) map.get("nick").getData();
+                                    if (map.containsKey("realName")) {
+                                        user.realName = (String) map.get("realName").getData();
+                                    }
                                     user.channels = (List<String>) map.get("channels").getData();
 
                                     ircUsers.add(user);
@@ -1051,7 +1050,7 @@ public final class CoreConnection {
                                     String topic = (String) chan.get("topic").getData();
 
                                     boolean foundChannel = false;
-                                    for (Buffer buffer : network.getBuffers().getRawBufferList()) {
+                                    for (Buffer buffer : network.getBuffers().getBufferList(true)) {
                                         if (buffer.getInfo().name.equalsIgnoreCase(chanName)) {
                                             buffer.setTopic(topic);
                                             buffer.setActive(true);
@@ -1217,6 +1216,7 @@ public final class CoreConnection {
                                 List<QVariant<?>> orderList = (List<QVariant<?>>) map.get("BufferList").getData();
                                 updateInitProgress("Receiving buffer list information");
                                 BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
+                                Log.w(TAG, "Setting alphabetical order to: "+Boolean.toString(BufferCollection.orderAlphabetical));
 
 
                                 //TODO: maybe send this in a bulk to the service so it wont sort and shit every time
@@ -1342,8 +1342,6 @@ public final class CoreConnection {
                                              * support for custom highlight masks
                                              */
                                             MessageUtil.checkMessageForHighlight(service.getNotificicationManager(), networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
-                                            if (preferenceParseColors)
-                                                MessageUtil.parseStyleCodes(service, msg);
                                             buffer.addBacklogMessage(msg);
                                         } else {
                                             Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
@@ -1398,23 +1396,17 @@ public final class CoreConnection {
                                 int networkId = Integer.parseInt(objectName);
                                 String bufferName = (String) packedFunc.remove(0).getData();
                                 System.out.println(bufferName);
-                                boolean hasBuffer = false;
-                                for (Buffer buffer : networks.get(networkId).getBuffers().getRawBufferList()) {
-                                    if (buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
-                                        hasBuffer = true;
-                                    }
-                                }
+                                boolean hasBuffer = networks.get(networkId).getBuffers().hasBuffer(bufferName);
+
                                 if (!hasBuffer) {
                                     //Create the new buffer object
                                     QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
                                     BufferInfo info = new BufferInfo();
                                     info.name = bufferName;
-                                    maxBufferId += 1;
-                                    info.id = maxBufferId;
+                                    info.id = -1;
                                     info.networkId = networkId;
                                     info.type = BufferInfo.Type.ChannelBuffer;
                                     Buffer buffer = new Buffer(info, dbHelper);
-                                    buffers.put(info.id, buffer);
                                     Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
                                     msg.sendToTarget();
                                 }
@@ -1480,6 +1472,14 @@ public final class CoreConnection {
                                 bundle.putString("nick", tmp[1]);
                                 bundle.putBoolean("away", (Boolean) packedFunc.remove(0).getData());
                                 service.getHandler().obtainMessage(R.id.SET_USER_AWAY, networkId, 0, bundle).sendToTarget();
+                            } else if (className.equals("IrcUser") && function.equals("setAwayMessage")) {
+                                Log.d(TAG, "Sync: IrcUser -> setAwayMessage");
+                                String[] tmp = objectName.split("/", 2);
+                                int networkId = Integer.parseInt(tmp[0]);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("nick", tmp[1]);
+                                bundle.putString("awayMessage", (String) packedFunc.remove(0).getData());
+                                service.getHandler().obtainMessage(R.id.SET_USER_AWAY_MESSAGE, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("setRealName")) {
                                 Log.d(TAG, "Sync: IrcUser -> setRealName");
                                 String[] tmp = objectName.split("/", 2);
@@ -1600,20 +1600,16 @@ public final class CoreConnection {
                             } else if (className.equals("BufferViewConfig") && function.equals("addBuffer")) {
                                 Log.d(TAG, "Sync: BufferViewConfig -> addBuffer");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
-                                if (!buffers.containsKey(bufferId)) {
-//                                System.err.println("got buffer info for non-existent buffer id: " + bufferId);
-                                    continue;
-                                }
+
                                 if (bufferId > maxBufferId) {
                                     maxBufferId = bufferId;
                                 }
-                                if (buffers.get(bufferId).isTemporarilyHidden()) {
+                                if (buffers.containsKey(bufferId) && buffers.get(bufferId).isTemporarilyHidden()) {
                                     Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
                                     msg.arg1 = ((Integer) bufferId);
                                     msg.obj = false;
                                     msg.sendToTarget();
-                                }
-                                if (buffers.get(bufferId).isPermanentlyHidden()) {
+                                } else if (buffers.containsKey(bufferId) && buffers.get(bufferId).isPermanentlyHidden()) {
                                     Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
                                     msg.arg1 = ((Integer) bufferId);
                                     msg.obj = false;
@@ -1622,9 +1618,8 @@ public final class CoreConnection {
 
                                 Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
                                 msg.arg1 = bufferId;
-                                msg.arg2 = networks.get(buffers.get(bufferId).getInfo().networkId).getBufferCount();
+                                msg.arg2 = (Integer) packedFunc.remove(0).getData();
                                 msg.sendToTarget();
-
                             } else if (className.equals("BufferViewConfig") && function.equals("removeBuffer")) {
                                 Log.d(TAG, "Sync: BufferViewConfig -> removeBuffer");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
@@ -1694,6 +1689,15 @@ public final class CoreConnection {
                                     for (String nick : netsplitHelper.getNicks()) {
                                         service.getHandler().obtainMessage(R.id.USER_QUIT, message.bufferInfo.networkId, 0, nick).sendToTarget();
                                     }
+                                }
+
+                                BufferCollection col = networks.get(message.bufferInfo.networkId).getBuffers();
+                                if (col.hasBuffer(message.bufferInfo.name)) {
+                                    Buffer buffer;
+                                    buffer = col.getBuffer(message.bufferInfo.name);
+                                    buffer.getInfo().id = message.bufferInfo.id;
+                                    col.addBuffer(buffer);
+                                    buffers.put((Integer) buffer.getInfo().id, buffer);
                                 }
 
                                 Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);

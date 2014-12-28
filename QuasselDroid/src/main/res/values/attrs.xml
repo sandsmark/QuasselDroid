@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="spinnerButtonStyle" format="reference" />
 
-    <attr name="actionJoinChannelIcon" format="reference" />
-    <attr name="actionSettingsIcon" format="reference" />
-    <attr name="actionDisconnectIcon" format="reference" />
-    <attr name="actionEditIcon" format="reference" />
-    <attr name="actionUserListIcon" format="reference" />
+    <attr name="listSelector" format="reference" />
 
+    <attr name="ic_overflow" format="reference" />
+    <attr name="ic_search" format="reference" />
+    <attr name="ic_collapse" format="reference" />
+    <attr name="ic_expand" format="reference" />
+
+    <attr name="backgroundColor" format="reference" />
+    <attr name="dividerColor" format="reference" />
 </resources>

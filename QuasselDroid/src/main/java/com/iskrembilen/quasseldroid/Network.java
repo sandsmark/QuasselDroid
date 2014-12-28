@@ -82,7 +82,6 @@ public class Network extends Observable implements Observer, Comparable<Network>
         return buffers;
     }
 
-
     public void addBuffer(Buffer buffer) {
         buffers.addBuffer(buffer);
     }
@@ -182,7 +181,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
         nickUserMap.remove(nick);
         for (IrcUser user : userList) {
             if (user.nick.equals(nick)) {
-                for (Buffer buffer : buffers.getRawBufferList()) {
+                for (Buffer buffer : buffers.getBufferList(true)) {
                     if (user.channels.contains(buffer.getInfo().name)) {
                         buffer.getUsers().removeUserByNick(nick);
                     }
@@ -204,7 +203,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
                 break;
             }
         }
-        for (Buffer buffer : buffers.getRawBufferList()) {
+        for (Buffer buffer : buffers.getBufferList(true)) {
             if (buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
                 buffer.getUsers().removeUserByNick(nick);
                 if (nick.equalsIgnoreCase(getNick())) {
@@ -233,7 +232,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 
     public int getBufferCount() {
-        return buffers.getBufferCount();
+        return buffers.getBufferCount(false);
     }
 
 
@@ -250,7 +249,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
         } else {
             setOpen(false);
             if (statusBuffer != null) statusBuffer.setActive(false);
-            for (Buffer buffer : buffers.getRawBufferList()) {
+            for (Buffer buffer : buffers.getBufferList(true)) {
                 buffer.setActive(false);
             }
         }

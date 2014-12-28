@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_add_core"
+        android:title="@string/action_core_add"/>
+
+    <item
+        android:id="@+id/menu_edit_core"
+        android:title="@string/action_core_edit"/>
+    <item
+        android:id="@+id/menu_delete_core"
+        android:title="@string/action_core_delete"/>
+</menu>

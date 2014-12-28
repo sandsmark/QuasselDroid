@@ -2,15 +2,20 @@
 <resources>
 
     <string-array name="entries_fontsize_preference">
-        <item>Small</item>
-        <item>Normal</item>
-        <item>Big</item>
+        <item>@string/fontsize_tiny</item>
+        <item>@string/fontsize_small</item>
+        <item>@string/fontsize_normal</item>
+        <item>@string/fontsize_big</item>
+        <item>@string/fontsize_huge</item>
     </string-array>
     <string-array name="entryvalues_fontsize_preference">
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
+        <item>10</item>
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+        <item>18</item>
     </string-array>
+
     <string-array name="entries_theme_preference">
         <item>Light</item>
         <item>Dark</item>
@@ -18,6 +23,33 @@
     <string-array name="entryvalues_theme_preference">
         <item>light</item>
         <item>dark</item>
+    </string-array>
+
+    <string-array name="entries_timestamp_preference">
+        <item>Always</item>
+        <item>Depending on Orientation</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="entryvalues_timestamp_preference">
+        <item>always</item>
+        <item>orientation</item>
+        <item>never</item>
+    </string-array>
+
+    <string-array name="author_names">
+        <item>Frederik M. J. Vestre (freqmod)</item>
+        <item>Martin "Java Sucks" Sandsmark (sandsmark)</item>
+        <item>Magnus Fjell (magnuf)</item>
+        <item>Ken Børge Viktil (Kenji)</item>
+        <item>Janne Koschinski (justJanne)</item>
+    </string-array>
+
+    <string-array name="author_descriptions">
+        <item>(Initial qdatastream deserialization attempts)</item>
+        <item>(Protocol implementation, (de)serializers, project (de)moralizer)</item>
+        <item>(GUI, Android stuff)</item>
+        <item>(GUI, Android stuff)</item>
+        <item>(GUI, Bugfixes and Android stuff)</item>
     </string-array>
 
 </resources>

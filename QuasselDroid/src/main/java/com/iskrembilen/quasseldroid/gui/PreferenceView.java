@@ -26,39 +26,65 @@ package com.iskrembilen.quasseldroid.gui;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.gui.dialogs.AboutDialog;
+import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
-public class PreferenceView extends PreferenceActivity {
+public class PreferenceView extends ActionBarActivity {
+    private String TAG = PreferenceView.class.getSimpleName();
 
-    Preference backlogLimit;
-    Preference backlogAdditional;
-    private OnSharedPreferenceChangeListener listener;
+    private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals(getResources().getString(R.string.preference_theme))) {
+                ThemeUtil.initTheme(getApplicationContext());
+                Log.d(QuasselPreferenceFragment.class.getSimpleName(), "Theme updated");
+                recreate();
+            }
+        }
+    };
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeUtil.theme);
+
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.layout.preferences);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        listener = new OnSharedPreferenceChangeListener() {
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new QuasselPreferenceFragment()).commit();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).registerOnSharedPreferenceChangeListener(sharedPreferenceListener);
+    }
 
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if (key.equals(getResources().getString(R.string.preference_theme))) {
-                    ThemeUtil.setTheme(PreferenceView.this, sharedPreferences.getString(key, ""));
-                }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_preferences, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(listener); //To avoid GC issues
+    @Override
+    public boolean onOptionsItemSelected(MenuItem mi) {
+        switch (mi.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.menu_about:
+                new AboutDialog().show(getFragmentManager(),TAG);
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).unregisterOnSharedPreferenceChangeListener(sharedPreferenceListener);
     }
 }

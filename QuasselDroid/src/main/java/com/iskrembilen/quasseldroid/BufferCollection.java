@@ -24,151 +24,150 @@
 package com.iskrembilen.quasseldroid;
 
 import android.util.Log;
+import android.util.SparseArray;
+
+import com.iskrembilen.quasseldroid.util.Helper;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 public class BufferCollection extends Observable implements Observer {
 
-    private HashMap<Integer, Buffer> buffers = new HashMap<Integer, Buffer>();
-    private List<Buffer> bufferList = new ArrayList<Buffer>();
-    private List<Buffer> filteredList = new ArrayList<Buffer>();
+    private SparseArray<String> bufferNames = new SparseArray<>();
+    private Set<Integer> bufferIds = new HashSet<>();
+    private Map<String, Buffer> buffersByName = new HashMap<>();
 
-    public static boolean orderAlphabetical = true;
+    private List<Buffer> cachedList;
+    private List<Buffer> filteredList;
 
     private static final String TAG = BufferCollection.class.getSimpleName();
 
-    public void addBuffer(Buffer buffer) {
-        if (buffers.containsKey(buffer.getInfo().id)) {
-            Log.e(TAG, "Getting buffer already have: " + buffer.getInfo().name);
-            return;
-        }
+    public static boolean orderAlphabetical;
 
-        buffers.put(buffer.getInfo().id, buffer);
-        bufferList.add(buffer);
-//		if(!isBufferFiltered(buffer)) {
-//			filteredList.add(buffer);
-//			Collections.sort(filteredList);
-//		}
-        Collections.sort(bufferList);
-        filterBuffers();
+    public void addBuffer(Buffer buffer) {
+        putBuffer(buffer);
         this.setChanged();
+        updateBufferList();
         buffer.addObserver(this);
         notifyObservers();
     }
 
-    private boolean isBufferFiltered(Buffer buffer) {
-        //TODO: for now hide all buffers that are hidden
-        if (buffer.isPermanentlyHidden() || buffer.isTemporarilyHidden()) {
-            return true;
-        } else {
-            return false;
+    private void putBuffer(Buffer buffer) {
+        if (buffer.getInfo().id != -1) {
+            bufferNames.put(buffer.getInfo().id, buffer.getInfo().name.toLowerCase(Locale.US));
+            bufferIds.add(buffer.getInfo().id);
         }
+        buffersByName.put(buffer.getInfo().name.toLowerCase(Locale.US), buffer);
     }
 
-    public int getBufferCount() {
-        return filteredList.size();
+    private boolean isBufferFiltered(Buffer buffer) {
+        return  (buffer.isPermanentlyHidden() || buffer.isTemporarilyHidden());
     }
 
-    public int getUnfilteredBufferCount() {
-        return bufferList.size();
+    public int getBufferCount(boolean unfiltered) {
+        return getBufferList(unfiltered).size();
     }
 
-    public Buffer getPos(int pos) {
-        return filteredList.get(pos);
-    }
-
-    public Buffer getUnfilteredPos(int pos) {
-        return bufferList.get(pos);
+    public Buffer getPos(boolean unfiltered, int pos) {
+        return getBufferList(unfiltered).get(pos);
     }
 
     public Buffer getBuffer(int bufferId) {
-        return this.buffers.get(bufferId);
+        return getBuffer(bufferNames.get(bufferId));
     }
 
-    /**
-     * @param name Searches the buffer with name name
-     * @return A found Buffer or null
-     */
     public Buffer getBuffer(String name) {
-        for (Buffer buffer : this.bufferList) {
-            if (buffer.getInfo().name.equals(name)) {
-                return buffer;
-            }
-        }
-        return null;
+        return buffersByName.get(name.toLowerCase(Locale.US));
     }
 
     public boolean hasBuffer(int id) {
-        return buffers.containsKey(id);
+        return bufferNames.get(id)!=null;
+    }
+
+    public boolean hasBuffer(Buffer buffer) {
+        return hasBuffer(buffer.getInfo().id);
+    }
+
+    public boolean hasBuffer(String bufferName) {
+        return buffersByName.containsKey(bufferName.toLowerCase(Locale.US));
     }
 
     public void addBuffers(Collection<Buffer> buffers) {
         boolean changed = false;
         for (Buffer buffer : buffers) {
-            if (this.buffers.containsKey(buffer.getInfo().id)) {
-                Log.e(TAG, "Getting buffer in buffers we already have: " + buffer.getInfo().name);
-                continue;
-            }
-            //Log.d(TAG, buffer.getInfo().name + " : " + buffer.getInfo().id);
-
             changed = true;
-            this.buffers.put(buffer.getInfo().id, buffer);
-            bufferList.add(buffer);
-//			if(!isBufferFiltered(buffer)) {
-//				filteredList.add(buffer);
-//			}
+            putBuffer(buffer);
             buffer.addObserver(this);
         }
-        if (!changed) return;
 
-        Collections.sort(bufferList);
-        filterBuffers();
+        if (!changed) return;
         this.setChanged();
         notifyObservers();
-    }
-
-    private void filterBuffers() {
-        filteredList.clear();
-        for (Buffer buf : bufferList) {
-            if (!isBufferFiltered(buf))
-                filteredList.add(buf);
-        }
     }
 
 
     @Override
     public void update(Observable arg0, Object arg1) {
         if (arg1 != null && (Integer) arg1 == R.id.BUFFER_ORDER_CHANGED) {
-            Collections.sort(bufferList);
-//			for (Buffer buf:bufferList) {
-//				Log.d("KEN", buf.getInfo().name + " : " +buf.getInfo().id);
-//			}
-            filterBuffers();
-//			Log.e(TAG, "UPDATEEEEEEEEE");
+            updateBufferList();
         } else if (arg1 != null && (Integer) arg1 == R.id.BUFFER_HIDDEN_CHANGED) {
-            filterBuffers();
+            updateBufferList();
         }
         this.setChanged();
         notifyObservers();
 
     }
 
-    public List<Buffer> getRawBufferList() {
-        return bufferList;
+    private List<Buffer> getListNotLazy(boolean unfiltered) {
+        List<Buffer> rawBufferList = new ArrayList<>();
+
+        Buffer b;
+        for (int id : bufferIds) {
+            b = buffersByName.get(bufferNames.get(id));
+            if (unfiltered || !isBufferFiltered(b)) {
+                rawBufferList.add(b);
+            }
+        }
+
+        if (orderAlphabetical) {
+            Collections.sort(rawBufferList, new Helper.AlphabeticalComparator());
+        } else {
+            Collections.sort(rawBufferList, new Helper.OrderComparator());
+        }
+
+        return rawBufferList;
+    }
+
+    public List<Buffer> getBufferList(boolean unfiltered) {
+        if (unfiltered)
+            return cachedList;
+        else
+            return filteredList;
+    }
+
+    public void updateBufferList() {
+        cachedList = getListNotLazy(true);
+        filteredList = getListNotLazy(false);
     }
 
     public void removeBuffer(int bufferId) {
-        Buffer buffer = buffers.remove(bufferId);
-        bufferList.remove(buffer);
-        filteredList.remove(buffer);
-        buffer.deleteObservers();
+        Buffer buffer = getBuffer(bufferId);
+        bufferNames.remove(bufferId);
+        buffersByName.remove(buffer.getInfo().name.toLowerCase(Locale.US));
+        bufferIds.remove(Integer.valueOf(bufferId));
 
+        buffer.deleteObservers();
+        updateBufferList();
         this.setChanged();
         notifyObservers();
     }

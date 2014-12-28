@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/nicklist_group_view" >
+
+    <TextView
+        android:id="@+id/nicklist_group_name_view"
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:textStyle="bold"
+        android:layout_weight="1"
+        android:layout_gravity="start|center_vertical"
+        android:padding="16dp" />
+    <TextView
+        android:id="@+id/nicklist_group_count_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:layout_gravity="center_vertical|end"
+        android:padding="16dp" />
+</LinearLayout>

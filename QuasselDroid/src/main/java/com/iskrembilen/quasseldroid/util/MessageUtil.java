@@ -3,6 +3,7 @@ package com.iskrembilen.quasseldroid.util;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
@@ -53,7 +54,7 @@ public class MessageUtil {
                 )
             ) && (!buffer.isDisplayed() && buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
             ) {
-            notificationManager.notifyHighlight(buffer.getInfo().id);
+            notificationManager.addMessage(message);
 
         }
     }
@@ -61,22 +62,30 @@ public class MessageUtil {
     /**
      * Parse mIRC style codes in IrcMessage
      */
-    public static void parseStyleCodes(Context context, IrcMessage message) {
+    public static SpannableString parseStyleCodes(Context context, String content, boolean parse) {
+        if (!parse) {
+            return new SpannableString(content
+                    .replaceAll("\\x02","")
+                    .replaceAll("\\x0F","")
+                    .replaceAll("\\x1D","")
+                    .replaceAll("\\x1F","")
+                    .replaceAll("\\x03[0-9]{1,2}(,[0-9]{1,2})?","")
+                    .replaceAll("\\x03",""));
+        }
+
         final char boldIndicator = 2;
         final char normalIndicator = 15;
         final char italicIndicator = 29;
         final char underlineIndicator = 31;
         final char colorIndicator = 3;
 
-        String content = message.content.toString();
-
         if (content.indexOf(boldIndicator) == -1
                 && content.indexOf(italicIndicator) == -1
                 && content.indexOf(underlineIndicator) == -1
                 && content.indexOf(colorIndicator) == -1)
-            return;
+            return new SpannableString(content);
 
-        SpannableStringBuilder newString = new SpannableStringBuilder(message.content);
+        SpannableStringBuilder newString = new SpannableStringBuilder(content);
 
         int start, end, endSearchOffset, startIndicatorLength, style, fg, bg;
         while (true) {
@@ -169,12 +178,12 @@ public class MessageUtil {
                     newString.setSpan(new StyleSpan(style), start, end, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
 
-                if (fg != -1) {
+                if (fg != -1 && mircCodeToColor(fg)!=android.R.color.transparent) {
                     newString.setSpan(new ForegroundColorSpan(context.getResources()
                             .getColor(mircCodeToColor(fg))), start, end,
                             Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                 }
-                if (bg != -1) {
+                if (bg != -1 && mircCodeToColor(fg)!=android.R.color.transparent) {
                     newString.setSpan(new BackgroundColorSpan(context.getResources()
                             .getColor(mircCodeToColor(bg))), start, end,
                             Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
@@ -205,7 +214,7 @@ public class MessageUtil {
                 break;
         }
 
-        message.content = newString;
+        return new SpannableString(newString);
     }
 
     public static int mircCodeToColor(int code) {
@@ -233,31 +242,34 @@ public class MessageUtil {
                 color = R.color.ircmessage_purple;
                 break;
             case 7: // orange (olive)
-                color = R.color.ircmessage_orange;
+                color = R.color.ircmessage_olive;
                 break;
             case 8: // yellow
                 color = R.color.ircmessage_yellow;
                 break;
             case 9: // light green (lime)
-                color = R.color.ircmessage_light_green;
+                color = R.color.ircmessage_lime_green;
                 break;
             case 10: // teal (a green/blue cyan)
                 color = R.color.ircmessage_teal;
                 break;
             case 11: // light cyan (cyan) (aqua)
-                color = R.color.ircmessage_light_cyan;
+                color = R.color.ircmessage_aqua_light;
                 break;
             case 12: // light blue (royal)
-                color = R.color.ircmessage_light_blue;
+                color = R.color.ircmessage_royal_blue;
                 break;
             case 13: // pink (light purple) (fuchsia)
                 color = R.color.ircmessage_pink;
                 break;
             case 14: // grey
-                color = R.color.ircmessage_gray;
+                color = R.color.ircmessage_dark_gray;
+                break;
+            case 15: // light grey
+                color = R.color.ircmessage_light_gray;
                 break;
             default:
-                color = ThemeUtil.chatPlainResource;
+                color = android.R.color.transparent;
         }
         return color;
     }

@@ -1,6 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
 import android.app.Application;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -13,13 +14,14 @@ import com.squareup.otto.Subscribe;
 public class Quasseldroid extends Application {
     private static final String TAG = Quasseldroid.class.getSimpleName();
     public static Status status;
+    public Bundle savedInstanceState;
 
     @Override
     public void onCreate() {
         super.onCreate();
         status = Status.Disconnected;
         //Populate the preferences with default values if this has not been done before
-        PreferenceManager.setDefaultValues(this, R.layout.preferences, true);
+        PreferenceManager.setDefaultValues(this, R.xml.data_preferences, true);
         //Load current theme
         ThemeUtil.initTheme(this);
         BusProvider.getInstance().register(this);

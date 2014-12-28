@@ -1,86 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#3f51b5</color>
+    <color name="primary_dark">#303f9f</color>
+    <color name="accent">#009688</color>
+
     <color name="logo_text_color">#0686fd</color>
 
-    <color name="buffer_unread_color_light">#0000F5</color>
-    <color name="buffer_highlight_color_light">#ff8000</color>
-    <color name="buffer_read_color_light">#000000</color>
-    <color name="buffer_parted_color_light">#C0C0C0</color>
-    <color name="buffer_activity_color_light">#008000</color>
-    <color name="buffer_perm_hidden_color_light">#82ff0008</color>
-    <color name="buffer_temp_hidden_color_light">#84fffc00</color>
+    <color name="nick_owner_color">#fbc02d</color>
+    <color name="nick_admin_color">#512da8</color>
+    <color name="nick_operator_color">#d01716</color>
+    <color name="nick_halfop_color">#f57c00</color>
+    <color name="nick_voice_color">#689f38</color>
+    <color name="nick_user_color">#888888</color>
 
-    <color name="buffer_unread_color_dark">#ff7b00</color>
-    <color name="buffer_highlight_color_dark">#ff00bf</color>
-    <color name="buffer_read_color_dark">#debc85</color>
-    <color name="buffer_parted_color_dark">#a0a0a4</color>
-    <color name="buffer_activity_color_dark">#008000</color>
-    <color name="buffer_perm_hidden_color_dark">#82ff0008</color>
-    <color name="buffer_temp_hidden_color_dark">#84fffc00</color>
-
-
-    <color name="chat_line_self_dark">#009966</color>
-    <color name="chat_line_plain_dark">#debc85</color>
-    <color name="chat_line_notice_dark">#916409</color>
-    <color name="chat_line_action_dark">#007a80</color>
-    <color name="chat_line_nick_dark">#633b5a</color>
-    <color name="chat_line_mode_dark">#346E9E</color>
-    <color name="chat_line_join_dark">#005538</color>
-    <color name="chat_line_part_dark">#633b5a</color>
-    <color name="chat_line_quit_dark">#683A38</color>
-    <color name="chat_line_kick_dark">#633b5a</color>
-    <color name="chat_line_kill_dark">#633b5a</color>
-    <color name="chat_line_server_dark">#916409</color>
-    <color name="chat_line_info_dark">#916409</color>
-    <color name="chat_line_error_dark">#916409</color>
-    <color name="chat_line_daychange_dark">#916409</color>
-    <color name="chat_line_topic_dark">#633b5a</color>
-    <color name="chat_line_netsplitjoin_dark">#005538</color>
-    <color name="chat_line_netsplitquit_dark">#683A38</color>
-    <color name="chat_line_highlight_dark">#00583a</color>
-    <color name="chat_line_timestamp_dark">#707c70</color>
-
-    <color name="chat_line_self_light">#000000</color>
-    <color name="chat_line_plain_light">#000000</color>
-    <color name="chat_line_notice_light">#916409</color>
-    <color name="chat_line_action_light">#0000ff</color>
-    <color name="chat_line_nick_light">#960096</color>
-    <color name="chat_line_mode_light">#960096</color>
-    <color name="chat_line_join_light">#960096</color>
-    <color name="chat_line_part_light">#960096</color>
-    <color name="chat_line_quit_light">#960096</color>
-    <color name="chat_line_kick_light">#960096</color>
-    <color name="chat_line_kill_light">#960096</color>
-    <color name="chat_line_server_light">#916409</color>
-    <color name="chat_line_info_light">#916409</color>
-    <color name="chat_line_error_light">#916409</color>
-    <color name="chat_line_daychange_light">#916409</color>
-    <color name="chat_line_topic_light">#960096</color>
-    <color name="chat_line_netsplitjoin_light">#960096</color>
-    <color name="chat_line_netsplitquit_light">#960096</color>
-    <color name="chat_line_highlight_light">#ff8000</color>
-    <color name="chat_line_timestamp_light">#707c70</color>
-
-    <color name="buffer_offline_color">#666</color>
-    <color name="ircmessage_white">#fff</color>
-    <color name="ircmessage_black">#000</color>
-    <color name="ircmessage_blue">#0A0A85</color>
-    <color name="ircmessage_green">#0f0</color>
-    <color name="ircmessage_red">#f00</color>
-    <color name="ircmessage_brown">#800000</color>
-    <color name="ircmessage_purple">#800080</color>
-    <color name="ircmessage_orange">#808000</color>
+    <color name="ircmessage_white">#FFFFFF</color>
+    <color name="ircmessage_black">#000000</color>
+    <color name="ircmessage_blue">#000080</color>
+    <color name="ircmessage_green">#008000</color>
+    <color name="ircmessage_red">#FF0000</color>
+    <color name="ircmessage_brown">#804040</color>
+    <color name="ircmessage_purple">#8000FF</color>
+    <color name="ircmessage_olive">#FFA500</color>
     <color name="ircmessage_yellow">#FFFF00</color>
-    <color name="ircmessage_light_green">#BFFF00</color>
+    <color name="ircmessage_lime_green">#00FF00</color>
     <color name="ircmessage_teal">#008080</color>
-    <color name="ircmessage_light_cyan">#00FFFF</color>
-    <color name="ircmessage_light_blue">#4169E1</color>
-    <color name="ircmessage_pink">#F984EF</color>
-    <color name="ircmessage_gray">#888</color>
+    <color name="ircmessage_aqua_light">#00FFFF</color>
+    <color name="ircmessage_royal_blue">#0000FF</color>
+    <color name="ircmessage_pink">#FF00FF</color>
+    <color name="ircmessage_dark_gray">#808080</color>
+    <color name="ircmessage_light_gray">#C0C0C0</color>
 
-    <color name="pager_indicator_text_color">#96AA39</color>
-    <color name="pager_indicator_color">#3B3B3B</color>
-    <color name="topic_border_color">#3B3B3B</color>
+    <color name="action_title_color">#ffffff</color>
+    <color name="action_subtitle_color">#bebebe</color>
+
+    <color name="marker_line">#d01716</color>
 
 
+    <color name="buffer_highlight_color_light">#ff9800</color>
+    <color name="buffer_unread_color_light">#455ede</color>
+    <color name="buffer_activity_color_light">#8bc34a</color>
+    <color name="buffer_read_color_light">#333333</color>
+    <color name="buffer_parted_color_light">#999999</color>
+    <color name="buffer_status_active_light">#2962ff</color>
+    <color name="buffer_status_away_light">#82b1ff</color>
+    <color name="buffer_status_parted_light">#888888</color>
+    <color name="buffer_status_perm_light">#7f0004</color>
+    <color name="buffer_status_temp_light">#7f7e00</color>
+    <color name="buffer_invalid_light">#ff333333</color>
+
+    <color name="nick_owner_light">#fff9c4</color>
+    <color name="nick_admin_light">#f3e5f5</color>
+    <color name="nick_operator_light">#fde0dc</color>
+    <color name="nick_halfop_light">#fff3e0</color>
+    <color name="nick_voice_light">#f1f8e9</color>
+    <color name="nick_user_light">#e7e9fd</color>
+
+    <color name="chat_line_plain_light">@android:color/primary_text_light</color>
+    <color name="chat_line_action_light">@android:color/secondary_text_light</color>
+    <color name="chat_line_error_light">#d63838</color>
+    <color name="chat_line_highlight_light">#ff8000</color>
+    <color name="chat_line_timestamp_light">@android:color/tertiary_text_light</color>
+    <color name="chat_bg_action_light">#10000000</color>
+
+    <color name="divider_color_light">#e5e5e5</color>
+
+    <color name="buffer_highlight_color_dark">#ff9800</color>
+    <color name="buffer_unread_color_dark">#455ede</color>
+    <color name="buffer_activity_color_dark">#8bc34a</color>
+    <color name="buffer_read_color_dark">#dddddd</color>
+    <color name="buffer_parted_color_dark">#888888</color>
+    <color name="buffer_status_active_dark">#2962ff</color>
+    <color name="buffer_status_away_dark">#82b1ff</color>
+    <color name="buffer_status_parted_dark">#888888</color>
+    <color name="buffer_status_perm_dark">#7f0004</color>
+    <color name="buffer_status_temp_dark">#7f7e00</color>
+    <color name="buffer_invalid_dark">#ffcccccc</color>
+
+    <color name="nick_owner_dark">#ff785a42</color>
+    <color name="nick_admin_dark">#ff2d2945</color>
+    <color name="nick_operator_dark">#ff572e2e</color>
+    <color name="nick_halfop_dark">#ff734b39</color>
+    <color name="nick_voice_dark">#ff283623</color>
+    <color name="nick_user_dark">#ff2a3e4d</color>
+
+    <color name="chat_line_plain_dark">@android:color/primary_text_dark</color>
+    <color name="chat_line_action_dark">@android:color/secondary_text_dark</color>
+    <color name="chat_line_error_dark">#d63838</color>
+    <color name="chat_line_highlight_dark">#ff8000</color>
+    <color name="chat_line_timestamp_dark">@android:color/tertiary_text_dark</color>
+    <color name="chat_bg_action_dark">#18ffffff</color>
+
+    <color name="divider_color_dark">#333333</color>
 </resources>
