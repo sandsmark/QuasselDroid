@@ -192,8 +192,8 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         });
         popup.inflate(R.menu.context_core);
         if (core.getCount()==0) {
-            popup.getMenu().getItem(1).setEnabled(false);
-            popup.getMenu().getItem(2).setEnabled(false);
+            popup.getMenu().findItem(R.id.menu_edit_core).setEnabled(false);
+            popup.getMenu().findItem(R.id.menu_delete_core).setEnabled(false);
         }
 
         popup.show();
