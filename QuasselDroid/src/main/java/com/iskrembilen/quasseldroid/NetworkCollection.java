@@ -1,5 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
+import android.util.SparseArray;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,8 +11,8 @@ import java.util.Observer;
 
 public class NetworkCollection extends Observable implements Observer {
     private static final String TAG = NetworkCollection.class.getSimpleName();
-    List<Network> networkList = new ArrayList<Network>();
-    HashMap<Integer, Network> networkMap = new HashMap<Integer, Network>();
+    List<Network> networkList = new ArrayList<>();
+    SparseArray<Network> networkMap = new SparseArray<Network>();
 
     private static NetworkCollection instance;
 
@@ -79,8 +81,8 @@ public class NetworkCollection extends Observable implements Observer {
     }
 
     public void removeNetwork(int networkId) {
-        Network network = networkMap.remove(networkId);
-        networkList.remove(network);
+        Network network = networkMap.get(networkId);
+        networkMap.remove(networkId);
         network.deleteObservers();
         Collections.sort(networkList);
         setChanged();
