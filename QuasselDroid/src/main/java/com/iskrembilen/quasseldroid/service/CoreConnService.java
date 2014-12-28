@@ -817,7 +817,7 @@ public class CoreConnService extends Service {
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        return reconnectMeteredConnection || !(Build.VERSION.SDK_INT>16 && connManager.isActiveNetworkMetered());
+        return reconnectMeteredConnection || !(Build.VERSION.SDK_INT>Build.VERSION_CODES.JELLY_BEAN && connManager.isActiveNetworkMetered());
     }
 
 
