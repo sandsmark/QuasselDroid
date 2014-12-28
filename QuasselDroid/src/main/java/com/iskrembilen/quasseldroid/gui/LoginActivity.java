@@ -287,20 +287,17 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     }
 
     @Override
-    protected Dialog onCreateDialog(int id) {
+    protected Dialog onCreateDialog(final int id) {
         final Dialog dialog;
         String certificateMessage = getResources().getString(R.string.message_ssl_new);
-        int intention = 1;
         switch (id) {
             case R.id.DIALOG_EDIT_CORE:
-                intention = 0;
             case R.id.DIALOG_ADD_CORE:
                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                 final View root = getLayoutInflater().inflate(R.layout.dialog_add_core, null);
                 nameField = (EditText) root.findViewById(R.id.dialog_name_field);
                 addressField = (EditText) root.findViewById(R.id.dialog_address_field);
                 portField = (EditText) root.findViewById(R.id.dialog_port_field);
-                final int dialog_intention = intention;
                 portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
                 builder.setView(root);
                 builder.setTitle(getResources().getString(R.string.dialog_title_core_add));
@@ -310,11 +307,10 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                         String name = nameField.getText().toString().trim();
                         String address = addressField.getText().toString().trim();
                         int port = Integer.parseInt(portField.getText().toString().trim());
-                        if (dialog_intention == 1) {
+                        if (id == R.id.DIALOG_ADD_CORE)
                             dbHelper.addCore(name, address, port);
-                        } else if (dialog_intention == 0) {
+                        else
                             dbHelper.updateCore(core.getSelectedItemId(), name, address, port);
-                        }
                         LoginActivity.this.updateCoreSpinner();
                         nameField.setText("");
                         addressField.setText("");
