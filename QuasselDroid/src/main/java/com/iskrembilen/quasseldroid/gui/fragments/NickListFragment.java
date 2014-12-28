@@ -172,9 +172,9 @@ public class NickListFragment extends Fragment implements Serializable {
 
             holder.nickView.setText(entry.nick);
             if (entry.away) {
-                holder.nickView.setTextColor(ThemeUtil.color.bufferParted);
+                holder.nickView.setTextColor(ThemeUtil.Color.bufferParted);
             } else {
-                holder.nickView.setTextColor(ThemeUtil.color.bufferRead);
+                holder.nickView.setTextColor(ThemeUtil.Color.bufferRead);
             }
 
             holder.nickView.setOnClickListener(new View.OnClickListener() {

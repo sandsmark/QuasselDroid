@@ -25,7 +25,6 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -515,25 +514,25 @@ public class BufferFragment extends Fragment implements Serializable {
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateActive);
+                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateActive);
                     } else {
-                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateParted);
+                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateParted);
                     }
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateParted);
+                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateParted);
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateAway);
+                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateAway);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateActive);
+                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateActive);
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -548,9 +547,9 @@ public class BufferFragment extends Fragment implements Serializable {
             }
 
             if(entry.isPermanentlyHidden()){
-                holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStatePerm);
+                holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStatePerm);
             } else if (entry.isTemporarilyHidden()) {
-                holder.stateView.setBackgroundColor(ThemeUtil.color.bufferStateTemp);
+                holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateTemp);
             }
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);

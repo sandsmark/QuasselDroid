@@ -23,14 +23,14 @@ public class AboutDialog extends DialogFragment {
         View dialog = inflater.inflate(R.layout.dialog_about, null);
         LinearLayout authorList = (LinearLayout) dialog.findViewById(R.id.authors);
 
-        String[] author_names = getResources().getStringArray(R.array.author_names);
-        String[] author_descriptions = getResources().getStringArray(R.array.author_descriptions);
+        String[] authorNames = getResources().getStringArray(R.array.author_names);
+        String[] authorDescriptions = getResources().getStringArray(R.array.author_descriptions);
 
         View item;
-        for (int i = 0; i < author_names.length; i++ ) {
+        for (int i = 0; i < authorNames.length; i++ ) {
             item = inflater.inflate(R.layout.widget_author,null);
-            ((TextView) item.findViewById(R.id.text1)).setText(author_names[i]);
-            ((TextView) item.findViewById(R.id.text2)).setText(author_descriptions[i]);
+            ((TextView) item.findViewById(R.id.text1)).setText(authorNames[i]);
+            ((TextView) item.findViewById(R.id.text2)).setText(authorDescriptions[i]);
             authorList.addView(item);
         }
 
