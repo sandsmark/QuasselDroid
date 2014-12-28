@@ -196,9 +196,9 @@ public class MainActivity extends ActionBarActivity {
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
 
         Log.d(TAG, "Current themes: "
-                + ((ThemeUtil.themeNoActionBar ==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT ":"DARK ")
-                + ((ThemeUtil.themeNoActionBar == currentTheme) ? "== " : "!= ")
-                + ((currentTheme==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT":"DARK")
+                        + ((ThemeUtil.theme_noactionbar==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT ":"DARK ")
+                        + ((ThemeUtil.theme_noactionbar == currentTheme) ? "== " : "!= ")
+                        + ((currentTheme==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT":"DARK")
         );
     }
 
