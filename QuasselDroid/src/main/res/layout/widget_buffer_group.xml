@@ -18,6 +18,8 @@
         android:layout_gravity="start|fill_vertical"
         android:layout_weight="1"
         android:padding="12dp"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:layout_marginLeft="32dp"
         android:layout_marginStart="32dp"
         android:duplicateParentState="false"
