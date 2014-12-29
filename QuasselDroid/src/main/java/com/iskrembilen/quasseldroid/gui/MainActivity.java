@@ -73,6 +73,7 @@ import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
+import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -108,6 +109,8 @@ public class MainActivity extends ActionBarActivity {
 
     private CharSequence topic;
     private boolean bufferHasTopic;
+
+    private boolean connectionEstablished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -226,6 +229,7 @@ public class MainActivity extends ActionBarActivity {
             return;
         } else if (Quasseldroid.status == Status.Connected) {
             loadBufferAndDrawerState();
+            connectionEstablished = true;
         }
 
         setTitleAndMenu();
@@ -328,10 +332,11 @@ public class MainActivity extends ActionBarActivity {
             manager.initMainFragment();
 
             loadBufferAndDrawerState();
+            connectionEstablished = true;
 
             manager.hideKeyboard();
             setTitleAndMenu();
-        } else if (currentFragment == null || currentFragment.getClass() != ConnectingFragment.class) {
+        } else if (currentFragment == null || !connectionEstablished && currentFragment.getClass()!=ConnectingFragment.class) {
             Log.d(TAG, "Showing progress");
             showInitProgress();
         }
@@ -488,7 +493,7 @@ public class MainActivity extends ActionBarActivity {
         private boolean hasDrawer;
 
         void preInit() {
-            Log.d(getClass().getSimpleName(),"Setting up fragments");
+            Log.d(getClass().getSimpleName(), "Setting up fragments");
 
             FragmentManager manager = getSupportFragmentManager();
 
