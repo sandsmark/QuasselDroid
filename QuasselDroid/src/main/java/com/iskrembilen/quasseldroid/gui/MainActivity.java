@@ -331,7 +331,7 @@ public class MainActivity extends ActionBarActivity {
 
             manager.hideKeyboard();
             setTitleAndMenu();
-        } else if (currentFragment == null || currentFragment.getClass() != ConnectingFragment.class) {
+        } else if (currentFragment == null) {
             Log.d(TAG, "Showing progress");
             showInitProgress();
         }
