@@ -665,6 +665,8 @@ public class MainActivity extends ActionBarActivity {
             if (null==findViewById(R.id.drawer)) {
                 hasDrawer = false;
                 return;
+            } else {
+                hasDrawer = true;
             }
 
             drawer = (DrawerLayout) findViewById(R.id.drawer);
