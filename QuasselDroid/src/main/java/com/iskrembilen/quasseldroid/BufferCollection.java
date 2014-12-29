@@ -47,8 +47,8 @@ public class BufferCollection extends Observable implements Observer {
     private Set<Integer> bufferIds = new HashSet<>();
     private Map<String, Buffer> buffersByName = new HashMap<>();
 
-    private List<Buffer> cachedList;
-    private List<Buffer> filteredList;
+    private List<Buffer> cachedList = new ArrayList<>();
+    private List<Buffer> filteredList = new ArrayList<>();
 
     private static final String TAG = BufferCollection.class.getSimpleName();
 
