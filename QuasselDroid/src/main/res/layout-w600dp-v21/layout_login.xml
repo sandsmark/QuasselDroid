@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="600dp"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:elevation="4dp"
+    android:layout_gravity="center_horizontal|fill_vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -38,9 +40,9 @@
 
                 <ImageButton
                     android:id="@+id/core_menu"
-                    style="@style/Widget.AppCompat.ActionButton"
-                    android:layout_width="@dimen/abc_action_button_min_height_material"
-                    android:layout_height="@dimen/abc_action_button_min_width_material"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_gravity="center_vertical"
                     android:src="?attr/ic_overflow"
                     android:scaleType="fitCenter" />

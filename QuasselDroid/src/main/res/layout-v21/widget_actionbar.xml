@@ -3,9 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/action_bar"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/abc_action_bar_default_height_material"
     android:layout_width="match_parent"
-    android:minHeight="?attr/actionBarSize"
     android:background="?colorPrimary"
     app:theme="@style/Theme.QuasselDroid.Material.Dark"
     app:popupTheme="@style/Theme.AppCompat.Light"
@@ -18,10 +17,9 @@
         android:paddingRight="3.0dp"
         android:paddingEnd="3.0dp"
         android:layout_width="fill_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="@dimen/abc_action_bar_default_height_material"
         android:gravity="start|center_vertical">
         <TextView
-            android:textSize="@dimen/abc_action_bar_title_text_size"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:id="@+id/title"
