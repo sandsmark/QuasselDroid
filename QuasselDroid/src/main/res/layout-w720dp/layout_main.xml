@@ -1,0 +1,50 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/widget_actionbar" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/left_drawer"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:tag="LEFT"
+            android:background="?attr/backgroundColor"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <FrameLayout
+            android:id="@+id/main_content_container"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/backgroundColor"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@+id/right_drawer"
+            android:layout_toStartOf="@+id/right_drawer"
+            android:layout_toRightOf="@+id/left_drawer"
+            android:layout_toEndOf="@+id/left_drawer" />
+
+        <FrameLayout
+            android:id="@+id/right_drawer"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:tag="RIGHT"
+            android:background="?attr/backgroundColor"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+
+</LinearLayout>
