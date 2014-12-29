@@ -395,7 +395,11 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onBufferOpened(BufferOpenedEvent event) {
-        if (event.bufferId != -1) {
+        NetworkCollection networks = NetworkCollection.getInstance();
+
+        if (event.bufferId != -1
+                && networks.getBufferById(event.bufferId)!=null
+                && networks.getNetworkById(networks.getBufferById(event.bufferId).getInfo().networkId)!=null) {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
                 manager.openDrawer(Gravity.NO_GRAVITY);
@@ -405,7 +409,6 @@ public class MainActivity extends ActionBarActivity {
             }
         }
     }
-
     private void setTitleAndMenu() {
         NetworkCollection networks = NetworkCollection.getInstance();
         Buffer buffer = networks.getBufferById(openedBuffer);
