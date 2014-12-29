@@ -689,6 +689,11 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.msgView.setText(s);
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                case Invite:
+                    holder.msgView.setText(entry.content);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    break;
                 case Plain:
                 default:
                     if (entry.isSelf() || entry.isHighlighted()) {
