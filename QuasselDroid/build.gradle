@@ -37,6 +37,11 @@ android {
             applicationIdSuffix ".debug"
         }
         release {
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace(".apk", "-" + defaultConfig.versionName + ".apk"))
+                }
+            }
         }
     }
     productFlavors {
