@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#3f51b5</color>
-    <color name="primary_dark">#303f9f</color>
-    <color name="accent">#009688</color>
+    <color name="primary">#0271B3</color>
+    <color name="primary_dark">#085f92</color>
+    <color name="accent">#00b8d4</color>
 
     <color name="logo_text_color">#0686fd</color>
 
@@ -58,11 +58,11 @@
     <color name="chat_line_plain_light">@android:color/primary_text_light</color>
     <color name="chat_line_action_light">@android:color/secondary_text_light</color>
     <color name="chat_line_error_light">#d63838</color>
-    <color name="chat_line_highlight_light">#ff8000</color>
+    <color name="chat_line_highlight_light">#ff9100</color>
     <color name="chat_line_timestamp_light">@android:color/tertiary_text_light</color>
     <color name="chat_bg_action_light">#10000000</color>
 
-    <color name="divider_color_light">#e5e5e5</color>
+    +    <color name="divider_color_light">#0C000000</color>
 
     <color name="buffer_highlight_color_dark">#ff9800</color>
     <color name="buffer_unread_color_dark">#455ede</color>
@@ -86,9 +86,9 @@
     <color name="chat_line_plain_dark">@android:color/primary_text_dark</color>
     <color name="chat_line_action_dark">@android:color/secondary_text_dark</color>
     <color name="chat_line_error_dark">#d63838</color>
-    <color name="chat_line_highlight_dark">#ff8000</color>
+    <color name="chat_line_highlight_dark">#E68D1A</color>
     <color name="chat_line_timestamp_dark">@android:color/tertiary_text_dark</color>
     <color name="chat_bg_action_dark">#18ffffff</color>
 
-    <color name="divider_color_dark">#333333</color>
+    <color name="divider_color_dark">#0Cffffff</color>
 </resources>
