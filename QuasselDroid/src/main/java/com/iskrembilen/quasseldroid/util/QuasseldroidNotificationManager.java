@@ -78,7 +78,8 @@ public class QuasseldroidNotificationManager {
                     .setContentTitle(context.getText(R.string.app_name))
                     .setContentText(context.getText(R.string.notification_connected))
                     .setOngoing(true)
-                    .setPriority(NotificationCompat.PRIORITY_MIN)
+                    .setPriority(preferences.getBoolean("notifypersistence", false) ? NotificationCompat.PRIORITY_MIN : NotificationCompat.PRIORITY_LOW)
+                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
                     .setWhen(System.currentTimeMillis());
 
             if (withPhysicalNotifications && preferences.getBoolean(context.getString(R.string.preference_notify_connect), false)) {

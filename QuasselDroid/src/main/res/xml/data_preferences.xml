@@ -127,6 +127,11 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="@string/preference_notify_hide_persistence"
+            android:title="@string/preference_title_notify_hide_persistence" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="@string/preference_notify_connect"
             android:title="@string/preference_title_notify_connect" />
 
