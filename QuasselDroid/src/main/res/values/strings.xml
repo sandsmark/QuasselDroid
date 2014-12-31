@@ -201,7 +201,8 @@
     <string name="preference_category_notifications">Notifications</string>
         <string name="preference_title_notify_connect">Notify on connect</string>
         <string name="preference_notify_connect" translatable="false">notifyconnect</string>
-
+        <string name="preference_notify_hide_persistence" translatable="false">notifypersistence</string>
+        <string name="preference_title_notify_hide_persistence">Hide icon from notification area</string>
         <string name="preference_title_notification_vibrate">Vibrate on notification</string>
         <string name="preference_notification_vibrate" translatable="false">notificationvibrate</string>
 
