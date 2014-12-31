@@ -21,10 +21,12 @@
 
 package com.iskrembilen.quasseldroid.io;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -52,6 +54,7 @@ import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
+import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -102,8 +105,11 @@ public final class CoreConnection {
     private int port;
     private String username;
     private String password;
+    private String clientVersion;
 
-    CoreConnService service;
+    private Handler handler;
+    public Context applicationContext;
+    private QuasseldroidNotificationManager notificationManager;
     private Timer heartbeatTimer;
     private ReadThread readThread;
 
@@ -125,14 +131,17 @@ public final class CoreConnection {
 
 
     public CoreConnection(long coreId, String address, int port, String username,
-                          String password, CoreConnService parent) {
+                          String password, String clientVersion, Handler serviceHandler,
+                          Context appContext, QuasseldroidNotificationManager notificationManager) {
         this.coreId = coreId;
         this.address = address;
         this.port = port;
         this.username = username;
         this.password = password;
-        this.service = parent;
-
+        this.handler = serviceHandler;
+        this.clientVersion = clientVersion;
+        this.applicationContext = appContext;
+        this.notificationManager = notificationManager;
         outputExecutor = Executors.newSingleThreadExecutor();
 
         readThread = new ReadThread();
@@ -479,7 +488,7 @@ public final class CoreConnection {
         Date date = new Date();
         initial.put("ClientDate", new QVariant<String>(dateFormat.format(date), QVariantType.String));
         initial.put("UseSsl", new QVariant<Boolean>(true, QVariantType.Bool));
-        initial.put("ClientVersion", new QVariant<String>("Quasseldroid " + service.getVersionName(), QVariantType.String));
+        initial.put("ClientVersion", new QVariant<String>("Quasseldroid " + clientVersion, QVariantType.String));
         initial.put("UseCompression", new QVariant<Boolean>(false, QVariantType.Bool));
         initial.put("MsgType", new QVariant<String>("ClientInit", QVariantType.String));
         initial.put("ProtocolVersion", new QVariant<Integer>(10, QVariantType.Int));
@@ -578,7 +587,7 @@ public final class CoreConnection {
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
         buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
         emptyBuffers = new HashMap<>();
-        QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
+        QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
         ArrayList<Integer> bufferIds = new ArrayList<Integer>();
         for (QVariant<?> bufferInfoQV : bufferInfos) {
             BufferInfo bufferInfo = (BufferInfo) bufferInfoQV.getData();
@@ -611,11 +620,11 @@ public final class CoreConnection {
         }
         sendInitRequest("BufferSyncer", "");
         sendInitRequest("BufferViewManager", "");
-        SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(service);
+        SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(applicationContext);
 
         //Get backlog if user selected a fixed amount
-        if (!options.getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
-            int backlogAmount = Integer.parseInt(options.getString(service.getString(R.string.preference_initial_backlog_limit), "1"));
+        if (!options.getBoolean(applicationContext.getString(R.string.preference_fetch_to_last_seen), false)) {
+            int backlogAmount = Integer.parseInt(options.getString(applicationContext.getString(R.string.preference_initial_backlog_limit), "1"));
             for (Buffer buffer : buffers.values()) {
                 requestMoreBacklog(buffer.getInfo().id, backlogAmount);
             }
@@ -641,7 +650,7 @@ public final class CoreConnection {
         updateInitProgress("Connection established, waiting on networks...");
 
         // Notify the UI we have an open socket
-        Message msg = service.getHandler().obtainMessage(R.id.CONNECTING);
+        Message msg = handler.obtainMessage(R.id.CONNECTING);
         msg.sendToTarget();
 
         initComplete = false;
@@ -804,17 +813,17 @@ public final class CoreConnection {
 
     private void updateInitProgress(String message) {
         Log.i(TAG, message);
-        service.getHandler().obtainMessage(R.id.INIT_PROGRESS, message).sendToTarget();
+        handler.obtainMessage(R.id.INIT_PROGRESS, message).sendToTarget();
     }
 
     private void sendConnectingEvent() {
         Log.i(TAG, "Sending Connecting event");
-        service.getHandler().obtainMessage(R.id.CONNECTING).sendToTarget();
+        handler.obtainMessage(R.id.CONNECTING).sendToTarget();
     }
 
     private void updateInitDone() {
         initComplete = true;
-        service.getHandler().obtainMessage(R.id.INIT_DONE).sendToTarget();
+        handler.obtainMessage(R.id.INIT_DONE).sendToTarget();
     }
 
     private class ReadThread extends Thread {
@@ -870,8 +879,9 @@ public final class CoreConnection {
                 Log.w(TAG, "IOException while closing socket", e);
             }
 
-            service.getHandler().obtainMessage(R.id.LOST_CONNECTION, errorMessage).sendToTarget();
-            service = null;
+            handler.obtainMessage(R.id.LOST_CONNECTION, errorMessage).sendToTarget();
+            handler = null;
+            applicationContext = null;
         }
 
         public String doRun() throws EmptyQVariantException {
@@ -885,7 +895,7 @@ public final class CoreConnection {
             } catch (UnknownHostException e) {
                 return "Unknown host!";
             } catch (UnsupportedProtocolException e) {
-                service.getHandler().obtainMessage(R.id.UNSUPPORTED_PROTOCOL).sendToTarget();
+                handler.obtainMessage(R.id.UNSUPPORTED_PROTOCOL).sendToTarget();
                 Log.w(TAG, e);
                 closeConnection();
                 return null;
@@ -893,11 +903,11 @@ public final class CoreConnection {
                 Log.w(TAG, "Got IOException while connecting");
                 if (e.getCause() instanceof NewCertificateException) {
                     Log.w(TAG, "Got NewCertificateException while connecting");
-                    service.getHandler().obtainMessage(R.id.NEW_CERTIFICATE, ((NewCertificateException) e.getCause()).hashedCert()).sendToTarget();
+                    handler.obtainMessage(R.id.NEW_CERTIFICATE, ((NewCertificateException) e.getCause()).hashedCert()).sendToTarget();
                     closeConnection();
                 } else if (e.getCause() instanceof CertificateException) {
                     Log.w(TAG, "Got CertificateException while connecting");
-                    service.getHandler().obtainMessage(R.id.INVALID_CERTIFICATE, e.getCause().getMessage()).sendToTarget();
+                    handler.obtainMessage(R.id.INVALID_CERTIFICATE, e.getCause().getMessage()).sendToTarget();
                     closeConnection();
                 } else {
                     e.printStackTrace();
@@ -979,7 +989,7 @@ public final class CoreConnection {
                                 Calendar calendarSent = (Calendar) packedFunc.remove(0).getData();
                                 int latency = (int) (calendarNow.getTimeInMillis() - calendarSent.getTimeInMillis()) / 2;
                                 Log.d(TAG, "Latency: " + latency);
-                                service.getHandler().obtainMessage(R.id.SET_CORE_LATENCY, latency, 0, null).sendToTarget();
+                                handler.obtainMessage(R.id.SET_CORE_LATENCY, latency, 0, null).sendToTarget();
                             }
                             break;
 						/*
@@ -1080,7 +1090,7 @@ public final class CoreConnection {
                                 }
 
                                 Log.i(TAG, "Sending network " + network.getName() + " to service");
-                                service.getHandler().obtainMessage(R.id.ADD_NETWORK, network).sendToTarget();
+                                handler.obtainMessage(R.id.ADD_NETWORK, network).sendToTarget();
 
 
                                 //sendInitRequest("BufferSyncer", "");
@@ -1119,10 +1129,10 @@ public final class CoreConnection {
                                     int bufferId = (Integer) lastSeen.get(i).getData();
                                     int msgId = (Integer) lastSeen.get(i + 1).getData();
                                     if (buffers.containsKey(bufferId)) { // We only care for buffers we have open
-                                        if (PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_fetch_to_last_seen), false)) {
+                                        if (PreferenceManager.getDefaultSharedPreferences(applicationContext).getBoolean(applicationContext.getString(R.string.preference_fetch_to_last_seen), false)) {
                                             requestBacklog(bufferId, msgId);
                                         }
-                                        Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
+                                        Message msg = handler.obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
                                         msg.arg1 = bufferId;
                                         msg.arg2 = msgId;
                                         msg.sendToTarget();
@@ -1138,7 +1148,7 @@ public final class CoreConnection {
                                         int bufferId = (Integer) markerLines.get(i).getData();
                                         int msgId = (Integer) markerLines.get(i + 1).getData();
                                         if (buffers.containsKey(bufferId)) {
-                                            Message msg = service.getHandler().obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
+                                            Message msg = handler.obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
                                             msg.arg1 = bufferId;
                                             msg.arg2 = msgId;
                                             msg.sendToTarget();
@@ -1162,7 +1172,7 @@ public final class CoreConnection {
                                 bundle.putBoolean("away", (Boolean) userMap.get("away").getData());
                                 bundle.putString("ircOperator", (String) userMap.get("ircOperator").getData());
                                 bundle.putString("nick", (String) userMap.get("nick").getData());
-                                Message msg = service.getHandler().obtainMessage(R.id.NEW_USER_INFO);
+                                Message msg = handler.obtainMessage(R.id.NEW_USER_INFO);
                                 int networkId = Integer.parseInt(objectName.split("/", 2)[0]);
                                 msg.obj = bundle;
                                 msg.arg1 = networkId;
@@ -1183,9 +1193,9 @@ public final class CoreConnection {
                                 for (Buffer buffer : buffers.values()) {
                                     if (buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
                                         found = true;
-                                        Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                        Message msg = handler.obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
                                         msg.sendToTarget();
-                                        msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ACTIVE, buffer.getInfo().id, 0, true);
+                                        msg = handler.obtainMessage(R.id.SET_BUFFER_ACTIVE, buffer.getInfo().id, 0, true);
                                         msg.sendToTarget();
                                         break;
                                     }
@@ -1225,7 +1235,7 @@ public final class CoreConnection {
                                         Log.e(TAG, "TempList, don't have buffer: " + bufferId.getData());
                                         continue;
                                     }
-                                    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
+                                    Message msg = handler.obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
                                     msg.arg1 = ((Integer) bufferId.getData());
                                     msg.obj = true;
                                     msg.sendToTarget();
@@ -1236,7 +1246,7 @@ public final class CoreConnection {
                                         Log.e(TAG, "TempList, don't have buffer: " + bufferId.getData());
                                         continue;
                                     }
-                                    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
+                                    Message msg = handler.obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
                                     msg.arg1 = ((Integer) bufferId.getData());
                                     msg.obj = true;
                                     msg.sendToTarget();
@@ -1252,7 +1262,7 @@ public final class CoreConnection {
                                         Log.w(TAG, "Got buffer info for non-existent buffer id: " + id);
                                         continue;
                                     }
-                                    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
+                                    Message msg = handler.obtainMessage(R.id.SET_BUFFER_ORDER);
                                     msg.arg1 = id;
                                     msg.arg2 = order;
 
@@ -1326,7 +1336,7 @@ public final class CoreConnection {
 
                                 if (!initComplete) { //We are still initializing backlog for the first time
                                     updateInitProgress("Receiving backlog");
-                                    boolean preferenceParseColors = PreferenceManager.getDefaultSharedPreferences(service).getBoolean(service.getString(R.string.preference_colored_text), false);
+                                    boolean preferenceParseColors = PreferenceManager.getDefaultSharedPreferences(applicationContext).getBoolean(applicationContext.getString(R.string.preference_colored_text), false);
                                     for (QVariant<?> message : data) {
                                         IrcMessage msg = (IrcMessage) message.getData();
                                         Buffer buffer = buffers.get(msg.bufferInfo.id);
@@ -1341,7 +1351,7 @@ public final class CoreConnection {
                                              * Check if we are highlighted in the message, TODO: Add
                                              * support for custom highlight masks
                                              */
-                                            MessageUtil.checkMessageForHighlight(service.getNotificicationManager(), networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
+                                            MessageUtil.checkMessageForHighlight(notificationManager, networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
                                             buffer.addBacklogMessage(msg);
                                         } else {
                                             Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
@@ -1353,7 +1363,7 @@ public final class CoreConnection {
                                     for (QVariant<?> message : data) {
                                         messageList.add((IrcMessage) message.getData());
                                     }
-                                    Message msg = service.getHandler().obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
+                                    Message msg = handler.obtainMessage(R.id.NEW_BACKLOGITEM_TO_SERVICE);
                                     msg.obj = messageList;
                                     msg.sendToTarget();
                                 }
@@ -1370,7 +1380,7 @@ public final class CoreConnection {
                                 if (!initComplete) {
                                     networks.get(Integer.parseInt(objectName)).onUserJoined(user);
                                 } else {
-                                    service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
+                                    handler.obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
                                 }
                                 sendInitRequest("IrcUser", objectName + "/" + nick.split("!")[0]);
                             } else if (className.equals("Network") && function.equals("setConnectionState")) {
@@ -1380,7 +1390,7 @@ public final class CoreConnection {
                                 //If network has no status buffer it is the first time we are connecting to it
                                 if (state == ConnectionState.Connecting && networks.get(networkId).getStatusBuffer() == null) {
                                     //Create the new buffer object for status buffer
-                                    QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
+                                    QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
                                     BufferInfo info = new BufferInfo();
                                     maxBufferId += 1;
                                     info.id = maxBufferId;
@@ -1388,9 +1398,9 @@ public final class CoreConnection {
                                     info.type = BufferInfo.Type.StatusBuffer;
                                     Buffer buffer = new Buffer(info, dbHelper);
                                     buffers.put(info.id, buffer);
-                                    service.getHandler().obtainMessage(R.id.SET_STATUS_BUFFER, networkId, 0, buffer).sendToTarget();
+                                    handler.obtainMessage(R.id.SET_STATUS_BUFFER, networkId, 0, buffer).sendToTarget();
                                 }
-                                service.getHandler().obtainMessage(R.id.SET_CONNECTION_STATE, networkId, 0, state).sendToTarget();
+                                handler.obtainMessage(R.id.SET_CONNECTION_STATE, networkId, 0, state).sendToTarget();
                             } else if (className.equals("Network") && function.equals("addIrcChannel")) {
                                 Log.d(TAG, "Sync: Network -> addIrcChannel");
                                 int networkId = Integer.parseInt(objectName);
@@ -1400,14 +1410,14 @@ public final class CoreConnection {
 
                                 if (!hasBuffer) {
                                     //Create the new buffer object
-                                    QuasselDbHelper dbHelper = new QuasselDbHelper(service.getApplicationContext());
+                                    QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
                                     BufferInfo info = new BufferInfo();
                                     info.name = bufferName;
                                     info.id = -1;
                                     info.networkId = networkId;
                                     info.type = BufferInfo.Type.ChannelBuffer;
                                     Buffer buffer = new Buffer(info, dbHelper);
-                                    Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
+                                    Message msg = handler.obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
                                     msg.sendToTarget();
                                 }
                                 sendInitRequest("IrcChannel", objectName + "/" + bufferName);
@@ -1415,27 +1425,27 @@ public final class CoreConnection {
                                 Log.d(TAG, "Sync: Network -> setConnected");
                                 boolean connected = (Boolean) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
-                                service.getHandler().obtainMessage(R.id.SET_CONNECTED, networkId, 0, connected).sendToTarget();
+                                handler.obtainMessage(R.id.SET_CONNECTED, networkId, 0, connected).sendToTarget();
                             } else if (className.equals("Network") && function.equals("setMyNick")) {
                                 Log.d(TAG, "Sync: Network -> setMyNick");
                                 String nick = (String) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
-                                service.getHandler().obtainMessage(R.id.SET_MY_NICK, networkId, 0, nick).sendToTarget();
+                                handler.obtainMessage(R.id.SET_MY_NICK, networkId, 0, nick).sendToTarget();
                             } else if (className.equals("Network") && function.equals("setLatency")) {
                                 Log.d(TAG, "Sync: Network -> setLatency");
                                 int networkLatency = (Integer) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
-                                service.getHandler().obtainMessage(R.id.SET_NETWORK_LATENCY, networkId, networkLatency, null).sendToTarget();
+                                handler.obtainMessage(R.id.SET_NETWORK_LATENCY, networkId, networkLatency, null).sendToTarget();
                             } else if (className.equals("Network") && function.equals("setNetworkName")) {
                                 Log.d(TAG, "Sync: Network -> setNetworkName");
                                 String networkName = (String) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
-                                service.getHandler().obtainMessage(R.id.SET_NETWORK_NAME, networkId, 0, networkName).sendToTarget();
+                                handler.obtainMessage(R.id.SET_NETWORK_NAME, networkId, 0, networkName).sendToTarget();
                             } else if (className.equals("Network") && function.equals("setCurrentServer")) {
                                 Log.d(TAG, "Sync: Network -> setCurrentServer");
                                 String currentServer = (String) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
-                                service.getHandler().obtainMessage(R.id.SET_NETWORK_CURRENT_SERVER, networkId, 0, currentServer).sendToTarget();
+                                handler.obtainMessage(R.id.SET_NETWORK_CURRENT_SERVER, networkId, 0, currentServer).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("partChannel")) {
                                 Log.d(TAG, "Sync: IrcUser -> partChannel");
                                 String[] tmp = objectName.split("/", 2);
@@ -1444,13 +1454,13 @@ public final class CoreConnection {
                                 Bundle bundle = new Bundle();
                                 bundle.putString("nick", userName);
                                 bundle.putString("buffer", (String) packedFunc.remove(0).getData());
-                                service.getHandler().obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("quit")) {
                                 Log.d(TAG, "Sync: IrcUser -> quit");
                                 String[] tmp = objectName.split("/", 2);
                                 int networkId = Integer.parseInt(tmp[0]);
                                 String userName = tmp[1];
-                                service.getHandler().obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
+                                handler.obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("setNick")) {
                                 Log.d(TAG, "Sync: IrcUser -> setNick");
 							/*
@@ -1463,7 +1473,7 @@ public final class CoreConnection {
                                 Bundle bundle = new Bundle();
                                 bundle.putString("nick", tmp[1]);
                                 bundle.putString("server", (String) packedFunc.remove(0).getData());
-                                service.getHandler().obtainMessage(R.id.SET_USER_SERVER, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.SET_USER_SERVER, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("setAway")) {
                                 Log.d(TAG, "Sync: IrcUser -> setAway");
                                 String[] tmp = objectName.split("/", 2);
@@ -1471,7 +1481,7 @@ public final class CoreConnection {
                                 Bundle bundle = new Bundle();
                                 bundle.putString("nick", tmp[1]);
                                 bundle.putBoolean("away", (Boolean) packedFunc.remove(0).getData());
-                                service.getHandler().obtainMessage(R.id.SET_USER_AWAY, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.SET_USER_AWAY, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("setAwayMessage")) {
                                 Log.d(TAG, "Sync: IrcUser -> setAwayMessage");
                                 String[] tmp = objectName.split("/", 2);
@@ -1479,7 +1489,7 @@ public final class CoreConnection {
                                 Bundle bundle = new Bundle();
                                 bundle.putString("nick", tmp[1]);
                                 bundle.putString("awayMessage", (String) packedFunc.remove(0).getData());
-                                service.getHandler().obtainMessage(R.id.SET_USER_AWAY_MESSAGE, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.SET_USER_AWAY_MESSAGE, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcUser") && function.equals("setRealName")) {
                                 Log.d(TAG, "Sync: IrcUser -> setRealName");
                                 String[] tmp = objectName.split("/", 2);
@@ -1487,7 +1497,7 @@ public final class CoreConnection {
                                 Bundle bundle = new Bundle();
                                 bundle.putString("nick", tmp[1]);
                                 bundle.putString("realname", (String) packedFunc.remove(0).getData());
-                                service.getHandler().obtainMessage(R.id.SET_USER_REALNAME, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.SET_USER_REALNAME, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
                                 Log.d(TAG, "Sync: IrcChannel -> joinIrcUsers");
                                 List<String> nicks = (List<String>) packedFunc.remove(0).getData();
@@ -1501,7 +1511,7 @@ public final class CoreConnection {
                                     bundle.putString("nick", nicks.get(i));
                                     bundle.putString("mode", modes.get(i));
                                     bundle.putString("buffername", bufferName);
-                                    service.getHandler().obtainMessage(R.id.USER_JOINED, networkId, 0, bundle).sendToTarget();
+                                    handler.obtainMessage(R.id.USER_JOINED, networkId, 0, bundle).sendToTarget();
                                 }
                             } else if (className.equals("IrcChannel") && function.equals("addUserMode")) {
                                 Log.d(TAG, "Sync: IrcChannel -> addUserMode");
@@ -1516,7 +1526,7 @@ public final class CoreConnection {
                                 bundle.putString("nick", nick);
                                 bundle.putString("mode", changedMode);
                                 bundle.putString("channel", channel);
-                                service.getHandler().obtainMessage(R.id.USER_ADD_MODE, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.USER_ADD_MODE, networkId, 0, bundle).sendToTarget();
 
 
                             } else if (className.equals("IrcChannel") && function.equals("removeUserMode")) {
@@ -1533,7 +1543,7 @@ public final class CoreConnection {
                                 bundle.putString("mode", changedMode);
                                 bundle.putString("channel", channel);
 
-                                service.getHandler().obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.USER_REMOVE_MODE, networkId, 0, bundle).sendToTarget();
                             } else if (className.equals("IrcChannel") && function.equals("setTopic")) {
                                 Log.d(TAG, "Sync: IrcChannel -> setTopic");
                                 String[] tmp = objectName.split("/", 2);
@@ -1545,7 +1555,7 @@ public final class CoreConnection {
                                 for (Buffer buffer : buffers.values()) {
                                     if (buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
                                         found = true;
-                                        Message msg = service.getHandler().obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                        Message msg = handler.obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
                                         msg.sendToTarget();
                                         break;
                                     }
@@ -1557,7 +1567,7 @@ public final class CoreConnection {
                                 Log.d(TAG, "Sync: BufferSyncer -> setLastSeenMsg");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
                                 int msgId = (Integer) packedFunc.remove(0).getData();
-                                Message msg = service.getHandler().obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
+                                Message msg = handler.obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
                                 msg.arg1 = bufferId;
                                 msg.arg2 = msgId;
                                 msg.sendToTarget();
@@ -1566,7 +1576,7 @@ public final class CoreConnection {
                                 Log.d(TAG, "Sync: BufferSyncer -> setMarkerLine");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
                                 int msgId = (Integer) packedFunc.remove(0).getData();
-                                Message msg = service.getHandler().obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
+                                Message msg = handler.obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
                                 msg.arg1 = bufferId;
                                 msg.arg2 = msgId;
                                 msg.sendToTarget();
@@ -1585,13 +1595,13 @@ public final class CoreConnection {
                                 if (buffers.containsKey(bufferId)) {
                                     int networkId = buffers.get(bufferId).getInfo().networkId;
                                     buffers.remove(bufferId);
-                                    service.getHandler().obtainMessage(R.id.REMOVE_BUFFER, networkId, bufferId).sendToTarget();
+                                    handler.obtainMessage(R.id.REMOVE_BUFFER, networkId, bufferId).sendToTarget();
                                 }
                             } else if (className.equals("BufferSyncer") && function.equals("renameBuffer")) {
                                 Log.d(TAG, "Sync: BufferSyncer -> renameBuffer");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
                                 String newName = (String) packedFunc.remove(0).getData();
-                                Message msg = service.getHandler().obtainMessage(R.id.RENAME_BUFFER);
+                                Message msg = handler.obtainMessage(R.id.RENAME_BUFFER);
                                 msg.arg1 = bufferId;
                                 msg.arg2 = 0;
                                 msg.obj = newName;
@@ -1605,18 +1615,18 @@ public final class CoreConnection {
                                     maxBufferId = bufferId;
                                 }
                                 if (buffers.containsKey(bufferId) && buffers.get(bufferId).isTemporarilyHidden()) {
-                                    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
+                                    Message msg = handler.obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
                                     msg.arg1 = ((Integer) bufferId);
                                     msg.obj = false;
                                     msg.sendToTarget();
                                 } else if (buffers.containsKey(bufferId) && buffers.get(bufferId).isPermanentlyHidden()) {
-                                    Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
+                                    Message msg = handler.obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
                                     msg.arg1 = ((Integer) bufferId);
                                     msg.obj = false;
                                     msg.sendToTarget();
                                 }
 
-                                Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_ORDER);
+                                Message msg = handler.obtainMessage(R.id.SET_BUFFER_ORDER);
                                 msg.arg1 = bufferId;
                                 msg.arg2 = (Integer) packedFunc.remove(0).getData();
                                 msg.sendToTarget();
@@ -1627,7 +1637,7 @@ public final class CoreConnection {
                                     Log.e(TAG, "Dont't have buffer: " + bufferId);
                                     continue;
                                 }
-                                Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
+                                Message msg = handler.obtainMessage(R.id.SET_BUFFER_TEMP_HIDDEN);
                                 msg.arg1 = ((Integer) bufferId);
                                 msg.obj = true;
                                 msg.sendToTarget();
@@ -1639,7 +1649,7 @@ public final class CoreConnection {
                                     Log.e(TAG, "Dont't have buffer: " + bufferId);
                                     continue;
                                 }
-                                Message msg = service.getHandler().obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
+                                Message msg = handler.obtainMessage(R.id.SET_BUFFER_PERM_HIDDEN);
                                 msg.arg1 = ((Integer) bufferId);
                                 msg.obj = true;
                                 msg.sendToTarget();
@@ -1667,9 +1677,9 @@ public final class CoreConnection {
                                 if (!networks.get(message.bufferInfo.networkId).containsBuffer(message.bufferInfo.id) &&
                                         message.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
                                     // TODO: persist the db connections
-                                    Buffer buffer = new Buffer(message.bufferInfo, new QuasselDbHelper(service.getApplicationContext()));
+                                    Buffer buffer = new Buffer(message.bufferInfo, new QuasselDbHelper(applicationContext));
                                     buffers.put(message.bufferInfo.id, buffer);
-                                    Message msg = service.getHandler().obtainMessage(R.id.NEW_BUFFER_TO_SERVICE);
+                                    Message msg = handler.obtainMessage(R.id.NEW_BUFFER_TO_SERVICE);
                                     msg.obj = buffer;
                                     msg.sendToTarget();
                                 }
@@ -1679,7 +1689,7 @@ public final class CoreConnection {
                                     for (String nick : netsplitHelper.getNicks()) {
                                         IrcUser user = new IrcUser();
                                         user.nick = nick;
-                                        service.getHandler().obtainMessage(R.id.NEW_USER_ADDED, message.bufferInfo.networkId, 0, user).sendToTarget();
+                                        handler.obtainMessage(R.id.NEW_USER_ADDED, message.bufferInfo.networkId, 0, user).sendToTarget();
                                         sendInitRequest("IrcUser", message.bufferInfo.networkId + "/" + nick);
                                     }
                                 }
@@ -1687,7 +1697,7 @@ public final class CoreConnection {
                                 if (message.type == IrcMessage.Type.NetsplitQuit) {
                                     NetsplitHelper netsplitHelper = new NetsplitHelper(message.content.toString());
                                     for (String nick : netsplitHelper.getNicks()) {
-                                        service.getHandler().obtainMessage(R.id.USER_QUIT, message.bufferInfo.networkId, 0, nick).sendToTarget();
+                                        handler.obtainMessage(R.id.USER_QUIT, message.bufferInfo.networkId, 0, nick).sendToTarget();
                                     }
                                 }
 
@@ -1700,7 +1710,7 @@ public final class CoreConnection {
                                     buffers.put((Integer) buffer.getInfo().id, buffer);
                                 }
 
-                                Message msg = service.getHandler().obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
+                                Message msg = handler.obtainMessage(R.id.NEW_MESSAGE_TO_SERVICE);
                                 msg.obj = message;
                                 msg.sendToTarget();
                                 //11-12 21:48:02.514: I/CoreConnection(277): Unhandled RpcCall: __objectRenamed__ ([IrcUser, 1/Kenji, 1/Kenj1]).
@@ -1715,7 +1725,7 @@ public final class CoreConnection {
                                 Bundle bundle = new Bundle();
                                 bundle.putString("oldNick", oldNick);
                                 bundle.putString("newNick", newNick);
-                                service.getHandler().obtainMessage(R.id.USER_CHANGEDNICK, networkId, -1, bundle).sendToTarget();
+                                handler.obtainMessage(R.id.USER_CHANGEDNICK, networkId, -1, bundle).sendToTarget();
                             } else if (functionName.equals("2networkCreated(NetworkId)")) {
                                 Log.d(TAG, "RpcCall: " + "2networkCreated(NetworkId)");
                                 int networkId = ((Integer) packedFunc.remove(0).getData());
@@ -1726,7 +1736,7 @@ public final class CoreConnection {
                                 Log.d(TAG, "RpcCall: " + "2networkRemoved(NetworkId)");
                                 int networkId = ((Integer) packedFunc.remove(0).getData());
                                 networks.remove(networkId);
-                                service.getHandler().obtainMessage(R.id.NETWORK_REMOVED, networkId, 0).sendToTarget();
+                                handler.obtainMessage(R.id.NETWORK_REMOVED, networkId, 0).sendToTarget();
                             } else {
                                 Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
                             }
