@@ -456,6 +456,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     @Subscribe
     public void onConnectionChanged(ConnectionChangedEvent event) {
         if (event.status == Status.Connecting || event.status == Status.Connected) {
+            Log.d(TAG, "Application is connecting, open MainActivity");
             dismissLoginDialog();
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

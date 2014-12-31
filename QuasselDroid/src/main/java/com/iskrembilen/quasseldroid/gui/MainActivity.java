@@ -225,6 +225,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         if (Quasseldroid.status == Status.Disconnected) {
+            Log.d(TAG, "Status is disconnected when resuming activity");
             returnToLogin();
             return;
         } else if (Quasseldroid.status == Status.Connected) {

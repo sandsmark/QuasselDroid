@@ -853,21 +853,25 @@ public class CoreConnService extends Service {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(!requestedDisconnect && preferenceReconnect && !preferenceReconnectPeriodically && coreConn == null && !isConnected()) {
-                ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo info = cm.getNetworkInfo(intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1));
+            if(info.getState() == NetworkInfo.State.DISCONNECTED && isConnected()) {
+                Log.d(TAG, "Current network is unavailable, disconnect from core");
+                disconnectFromCore();
+            } else if (!requestedDisconnect && preferenceReconnect && !preferenceReconnectPeriodically && coreConn == null && !isConnected()) {
+                Log.d(TAG, "Reconnecting after network change");
+                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                    if (activeNetwork != null && activeNetwork.isConnected()) {
+                        boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
 
-                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                if (activeNetwork != null && activeNetwork.isConnected()) {
-                    boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-
-                    if (isWiFi && checkForMeteredCondition()) {
-                        Log.d(TAG, "Reconnecting on Wifi");
-                        connectToCore();
-                    } else if(!preferenceReconnectWifiOnly) {
-                        Log.d(TAG, "Reconnecting (not Wifi)");
-                        connectToCore();
+                        if (isWiFi && checkForMeteredCondition()) {
+                            Log.d(TAG, "Reconnecting on Wifi");
+                            connectToCore();
+                        } else if(!preferenceReconnectWifiOnly) {
+                            Log.d(TAG, "Reconnecting (not Wifi)");
+                            connectToCore();
+                        }
                     }
-                }
             }
         }
     };
@@ -899,7 +903,7 @@ public class CoreConnService extends Service {
 
     @Produce
     public ConnectionChangedEvent produceConnectionStatus() {
-        if (isConnected())
+        if (isConnected() && !isConnecting && initDone)
             return new ConnectionChangedEvent(Status.Connected);
         else if (isConnecting && !initDone)
             return new ConnectionChangedEvent(Status.Connecting);
