@@ -78,7 +78,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
 			 * or throw a security exception to let the user know that something is wrong.
 			 */
             String hashedCert = hash(chain[0].getEncoded());
-            QuasselDbHelper dbHelper = new QuasselDbHelper(coreConnection.service);
+            QuasselDbHelper dbHelper = new QuasselDbHelper(coreConnection.applicationContext);
             dbHelper.open();
             String storedCert = dbHelper.getCertificate(coreConnection.getCoreId());
             dbHelper.close();
