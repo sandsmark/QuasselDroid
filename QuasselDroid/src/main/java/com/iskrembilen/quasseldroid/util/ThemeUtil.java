@@ -111,7 +111,7 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_user_dark)
             };
 
-            nickConstants = new double[] {1.0, 0.8};
+            nickConstants = new double[] {0.84, 0.71};
         } else {
             setTheme(context, "light");
         }
