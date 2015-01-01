@@ -5,6 +5,11 @@
         android:title="@string/action_join_channel"
         android:orderInCategory="1" />
     <item
-        android:id="@+id/context_menu_toggle_hidden"
-        android:title="@string/action_hidden_display" />
+        android:id="@+id/menu_preferences"
+        android:title="@string/action_preferences"
+        android:orderInCategory="10" />
+    <item
+        android:id="@+id/menu_disconnect"
+        android:title="@string/action_disconnect"
+        android:orderInCategory="11" />
 </menu>
