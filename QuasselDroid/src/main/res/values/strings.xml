@@ -194,9 +194,9 @@
         <string name="preference_title_reconnect_periodically">Reconnect periodically</string>
         <string name="preference_reconnect_periodically" translatable="false">reconnect_periodically</string>
 
-        <string name="preference_summary_reconnect_counter">How often to retry</string>
-        <string name="preference_title_reconnect_counter">Reconnect counter</string>
-        <string name="preference_reconnect_counter" translatable="false">reconnectCounter</string>
+        <string name="preference_summary_reconnect_interval">How many min between each reconnect attempt</string>
+        <string name="preference_title_reconnect_interval">Reconnect interval</string>
+        <string name="preference_reconnect_interval" translatable="false">reconnectInterval</string>
 
     <string name="preference_category_notifications">Notifications</string>
         <string name="preference_title_notify_connect">Notify on connect</string>

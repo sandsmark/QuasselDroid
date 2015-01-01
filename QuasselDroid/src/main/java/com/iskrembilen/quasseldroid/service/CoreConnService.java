@@ -57,6 +57,7 @@ import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
@@ -125,6 +126,7 @@ public class CoreConnService extends Service {
     private boolean requestedDisconnect;
 
     IncomingHandler incomingHandler;
+    Handler reconnectHandler;
 
     SharedPreferences preferences;
 
@@ -140,6 +142,7 @@ public class CoreConnService extends Service {
     private boolean isConnecting = false;
     private boolean initDone = false;
     private String initReason = "";
+    private boolean hasBeenConnected = false;
 
     private boolean preferenceUseWakeLock;
     private WakeLock wakeLock;
@@ -148,7 +151,7 @@ public class CoreConnService extends Service {
 
     private boolean preferenceReconnect;
     private boolean preferenceReconnectWifiOnly;
-    private boolean preferenceReconnectPeriodically;
+    private boolean preferenceReconnectMeteredWifi;
 
     private long coreId;
     private String address;
@@ -156,11 +159,8 @@ public class CoreConnService extends Service {
     private String username;
     private String password;
 
-    private int reconnectCounter;
-    private static String RECONNECT_COUNTER_DEFAULT = "10";
-
     private int reconnectDelay = 0;
-    private int reconnectDelayIncrement = 4000;
+    private int preferenceReconnectInterval;
 
     // On a QueryUserEvent save those to be able to open the added buffer
     private int networkToSwitchTo;
@@ -186,12 +186,14 @@ public class CoreConnService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Service created");
+        reconnectHandler = new Handler();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferenceParseColors = preferences.getBoolean(getString(R.string.preference_colored_text), false);
         preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), false);
         preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
         preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_wifi), false);
-        preferenceReconnectPeriodically = preferences.getBoolean(getString(R.string.preference_reconnect_periodically), false);
+        preferenceReconnectInterval = Integer.parseInt(preferences.getString(getString(R.string.preference_reconnect_interval), "5")) * 1000 * 60;
+        preferenceReconnectMeteredWifi = preferences.getBoolean(getString(R.string.preference_reconnect_metered), false);
         preferenceListener = new OnSharedPreferenceChangeListener() {
 
             @Override
@@ -206,17 +208,16 @@ public class CoreConnService extends Service {
                     preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
                 } else if (key.equals(getString(R.string.preference_reconnect_wifi))) {
                     preferenceReconnectWifiOnly = preferences.getBoolean(getString(R.string.preference_reconnect_wifi), false);
-                } else if(key.equals(getString(R.string.preference_reconnect_counter))) {
-                    resetReconnectCounter();
-                } else if(key.equals(getString(R.string.preference_reconnect_periodically))) {
-                    preferenceReconnectPeriodically = preferences.getBoolean(getString(R.string.preference_reconnect_periodically), false);
+                } else if(key.equals(getString(R.string.preference_reconnect_interval))) {
+                    preferenceReconnectInterval = Integer.parseInt(preferences.getString(getString(R.string.preference_reconnect_interval), "5")) * 1000 * 60;
+                } else if(key.equals(getString(R.string.preference_reconnect_metered))) {
+                    preferenceReconnectMeteredWifi = preferences.getBoolean(getString(R.string.preference_reconnect_metered), false);
                 }
             }
         };
         preferences.registerOnSharedPreferenceChangeListener(preferenceListener);
         BusProvider.getInstance().register(this);
         registerReceiver(receiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        resetReconnectCounter();
     }
 
     @Override
@@ -226,12 +227,6 @@ public class CoreConnService extends Service {
         BusProvider.getInstance().unregister(this);
         unregisterReceiver(receiver);
         stopForeground(true);
-    }
-
-    private void resetReconnectCounter() {
-        reconnectCounter = Integer.valueOf(preferences.getString(getString(R.string.preference_reconnect_counter),
-                RECONNECT_COUNTER_DEFAULT));
-        reconnectDelay = 0;
     }
 
     public Handler getHandler() {
@@ -257,6 +252,7 @@ public class CoreConnService extends Service {
             this.disconnectFromCore();
         }
         requestedDisconnect = false;
+        hasBeenConnected = false;
         Bundle connectData = intent.getExtras();
         coreId = connectData.getLong("id");
         address = connectData.getString("address");
@@ -343,11 +339,14 @@ public class CoreConnService extends Service {
         initDone = false;
         isConnecting = false;
         notificationManager = null;
-        incomingHandler.disabled = true;
+        if(incomingHandler != null) {
+            incomingHandler.disabled = true;
+            incomingHandler.removeCallbacksAndMessages(null);
+        }
         incomingHandler = null;
-        BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
-        reconnectCounter = Integer.valueOf(preferences.getString(
-                getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
+        if(Quasseldroid.status != Status.Disconnected) {
+            BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
+        }
     }
 
     public void connectToCore() {
@@ -383,7 +382,6 @@ public class CoreConnService extends Service {
             if (msg == null || coreConn == null || disabled == true) {
                 return;
             }
-
             Buffer buffer;
             IrcMessage message;
             List<IrcMessage> messageList;
@@ -520,7 +518,15 @@ public class CoreConnService extends Service {
                     /**
                      * Lost connection with core, update notification
                      */
+                    Log.d(TAG, "Handle message: Lost connection");
                     String errorMessage = (String) msg.obj;
+                    notificationManager.notifyDisconnected();
+                    if (errorMessage != null && !errorMessage.equals("")) { // Have description of what is wrong,
+                        // used only for login atm
+                        BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, errorMessage));
+                    } else {
+                        BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
+                    }
                     reconnect(errorMessage);
                     break;
                 case R.id.NEW_USER_ADDED:
@@ -627,8 +633,9 @@ public class CoreConnService extends Service {
                     notificationManager.notifyConnected();
                     BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Connected));
                     initDone = true;
+                    hasBeenConnected = true;
                     isConnecting = false;
-                    resetReconnectCounter();
+                    reconnectDelay = 0;
                     BusProvider.getInstance().post(new InitProgressEvent(true, ""));
                     BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
                     break;
@@ -772,82 +779,56 @@ public class CoreConnService extends Service {
         }
     }
 
-    private void reconnect(String message) {
-        if (coreConn != null) {
-            coreConn.closeConnection();
-        }
-
-        if (preferences.getBoolean(getString(R.string.preference_reconnect_periodically), false) &&
-                preferences.getBoolean(getString(R.string.preference_reconnect), false) &&
-                reconnectCounter > 0 && isWifiCondition() && checkForMeteredCondition() &&
-                !isInitialConnectionAttempt()
-                ) {
-            reconnectCounter--;
-
-            BusProvider.getInstance().post(new InitProgressEvent(false, "Reconnecting..."));
-
-            getHandler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (reconnectDelay == 0) {
-                        reconnectDelay = reconnectDelayIncrement;
-                    }
-                    else {
-                        reconnectDelay = reconnectDelay * 2;
-                    }
-                    connectToCore();
-                }
-            }, reconnectDelay);
-        } else {
-            connectionLost(message);
-        }
-    }
-
     /*
      * Check, if the current connection attempt is the first, user initiated attempt, or if we are
      * in the automatic reconnection process.
      */
     private boolean isInitialConnectionAttempt() {
-        int reconnectPrefValue = Integer.valueOf(preferences.getString(
-                getString(R.string.preference_reconnect_counter), RECONNECT_COUNTER_DEFAULT));
-        return !initDone && reconnectPrefValue == reconnectCounter;
+        return !hasBeenConnected;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private boolean checkForMeteredCondition() {
-        boolean reconnectMeteredConnection = preferences.getBoolean(
-                getString(R.string.preference_reconnect_metered), false);
-
+    private boolean satisfyReconnectConditions() {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-
-        return reconnectMeteredConnection || !(Build.VERSION.SDK_INT>Build.VERSION_CODES.JELLY_BEAN && connManager.isActiveNetworkMetered());
-    }
-
-
-    private boolean isWifiCondition() {
-        boolean wifiConnection = preferences.getBoolean(
-                getString(R.string.preference_reconnect_wifi), false);
-
-        ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-        return !wifiConnection || mWifi.isConnected();
-    }
-
-    private void connectionLost(String message) {
-        /**
-         * Lost connection with core, update notification
-         */
-        if(coreConn != null) {
-            if (message != null && !message.equals("")) { // Have description of what is wrong,
-                // used only for login atm
-                BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected, message));
-            } else {
-                BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
-            }
-            notificationManager.notifyDisconnected();
+        NetworkInfo network = connManager.getActiveNetworkInfo();
+        if(network == null || !network.isConnected()) {
+            return false;
         }
-        disconnectFromCore();
+        boolean wifiCheck = !preferenceReconnectWifiOnly || network.getType() == ConnectivityManager.TYPE_WIFI;
+        boolean meteredCheck = preferenceReconnectMeteredWifi || !(network.getType() == ConnectivityManager.TYPE_WIFI && Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN && connManager.isActiveNetworkMetered());
+        return preferenceReconnect && wifiCheck && meteredCheck ;
+    }
+
+    private void reconnect(String message) {
+        if (coreConn != null) {
+            disconnectFromCore();
+        }
+        reconnectHandler.removeCallbacksAndMessages(null);
+        if (satisfyReconnectConditions() && !isInitialConnectionAttempt()) {
+            Log.d(TAG, "Scheduling reconnect in " + reconnectDelay);
+            reconnectHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    BusProvider.getInstance().post(new InitProgressEvent(false, "Reconnecting..."));
+                    if(coreConn == null) {
+                        if (reconnectDelay == 0) {
+                            reconnectDelay = preferenceReconnectInterval;
+                        }
+                        ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+                        NetworkInfo network = connManager.getActiveNetworkInfo();
+                        if(network != null && network.isConnected()) {
+                            Log.d(TAG, "Trigger reconnect attempt...");
+                            connectToCore();
+                        } else {
+                            Log.d(TAG, "No connected network when trying to reconnect...");
+                            reconnect("");
+                        }
+                    } else {
+                        reconnectDelay = 0;
+                    }
+                }
+                }, reconnectDelay);
+        }
     }
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -857,21 +838,13 @@ public class CoreConnService extends Service {
             NetworkInfo info = cm.getNetworkInfo(intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1));
             if(info.getState() == NetworkInfo.State.DISCONNECTED && isConnected()) {
                 Log.d(TAG, "Current network is unavailable, disconnect from core");
+                notificationManager.notifyDisconnected();
                 disconnectFromCore();
-            } else if (!requestedDisconnect && preferenceReconnect && !preferenceReconnectPeriodically && coreConn == null && !isConnected()) {
+            } else if (!requestedDisconnect && info.getState() == NetworkInfo.State.CONNECTED && coreConn == null
+                    && !isInitialConnectionAttempt() && satisfyReconnectConditions()) {
                 Log.d(TAG, "Reconnecting after network change");
-                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-                    if (activeNetwork != null && activeNetwork.isConnected()) {
-                        boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
-
-                        if (isWiFi && checkForMeteredCondition()) {
-                            Log.d(TAG, "Reconnecting on Wifi");
-                            connectToCore();
-                        } else if(!preferenceReconnectWifiOnly) {
-                            Log.d(TAG, "Reconnecting (not Wifi)");
-                            connectToCore();
-                        }
-                    }
+                reconnectHandler.removeCallbacksAndMessages(null);
+                connectToCore();
             }
         }
     };
