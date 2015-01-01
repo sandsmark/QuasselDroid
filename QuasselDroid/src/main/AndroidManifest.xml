@@ -47,9 +47,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Start of Crittercism.com Code -->
-        <activity android:name="com.crittercism.NotificationActivity" />
-        <!-- End of Crittercism.com Code -->
     </application>
 
 </manifest>

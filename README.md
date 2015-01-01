@@ -20,7 +20,6 @@ for your convenience):
  - Otto: http://square.github.com/otto/
  - Android Support Library: http://developer.android.com/tools/extras/support-library.html  
    **Android Support Library requires the corresponding package to be installed in the SDK manager**
- - Crittercism: https://www.crittercism.com/developers/docs-android
 
 Building
 --------
