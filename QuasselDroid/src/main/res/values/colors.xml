@@ -37,14 +37,14 @@
     <color name="buffer_highlight_color_light">#ffab00</color>
     <color name="buffer_unread_color_light">#1976d2</color>
     <color name="buffer_activity_color_light">#00c853</color>
-    <color name="buffer_read_color_light">#dddddd</color>
-    <color name="buffer_parted_color_light">#888888</color>
+    <color name="buffer_read_color_light">#333333</color>
+    <color name="buffer_parted_color_light">#999999</color>
     <color name="buffer_status_active_light">#0097a7</color>
     <color name="buffer_status_away_light">#094e50</color>
     <color name="buffer_status_parted_light">#888888</color>
     <color name="buffer_status_perm_light">#b71c1c</color>
     <color name="buffer_status_temp_light">#ff3d00</color>
-    <color name="buffer_invalid_light">#ffcccccc</color>
+    <color name="buffer_invalid_light">#ff333333</color>
 
     <color name="nick_owner_light">#fff9c4</color>
     <color name="nick_admin_light">#f3e5f5</color>
