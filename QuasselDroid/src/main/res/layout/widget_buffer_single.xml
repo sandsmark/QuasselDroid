@@ -5,14 +5,14 @@
     android:orientation="horizontal"
     android:background="?attr/listSelector">
     
-    <View
+    <ImageView
         android:id="@+id/buffer_status"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_gravity="start|center_vertical"
-        android:background="@color/buffer_status_active_light"/>
+        android:src="@drawable/ic_status"/>
     <TextView
         android:id="@+id/buffer_list_item_name"
         android:layout_width="fill_parent"

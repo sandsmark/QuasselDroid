@@ -24,10 +24,13 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Activity;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,6 +43,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -424,7 +428,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
     public static class ViewHolderChild {
         public TextView bufferView;
-        public View stateView;
+        public ImageView stateView;
         public View parent;
     }
 
@@ -502,37 +506,38 @@ public class BufferFragment extends Fragment implements Serializable {
                 holder = new ViewHolderChild();
                 holder.parent = convertView;
                 holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
-                holder.stateView = convertView.findViewById(R.id.buffer_status);
+                holder.stateView = (ImageView) convertView.findViewById(R.id.buffer_status);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolderChild) convertView.getTag();
             }
             Buffer entry = getChild(groupPosition, childPosition);
 
+            int color = ThemeUtil.Color.bufferParted;
+            int drawable = R.drawable.ic_status;
+
             switch (entry.getInfo().type) {
                 case StatusBuffer:
                 case ChannelBuffer:
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
-                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateActive);
-                    } else {
-                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateParted);
+                        color = ThemeUtil.Color.bufferStateActive;
                     }
+                    drawable = R.drawable.ic_status_channel;
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
                     if (!networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateParted);
                         if (entry.isActive()) {
                             entry.setActive(false);
                         }
                     } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateAway);
+                        color = ThemeUtil.Color.bufferStateAway;
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
-                        holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateActive);
+                        color = ThemeUtil.Color.bufferStateActive;
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
@@ -547,10 +552,14 @@ public class BufferFragment extends Fragment implements Serializable {
             }
 
             if(entry.isPermanentlyHidden()){
-                holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStatePerm);
+                color = ThemeUtil.Color.bufferStatePerm;
             } else if (entry.isTemporarilyHidden()) {
-                holder.stateView.setBackgroundColor(ThemeUtil.Color.bufferStateTemp);
+                color = ThemeUtil.Color.bufferStateTemp;
             }
+
+            Drawable imageDrawable = getResources().getDrawable(drawable);
+            DrawableCompat.setTint(imageDrawable,color);
+            holder.stateView.setImageDrawable(imageDrawable);
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
             return convertView;

@@ -23,7 +23,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dip"
-            android:background="?android:attr/dividerVertical" />
+            android:background="?attr/dividerColor" />
 
         <LinearLayout
             android:id="@+id/R.id.chat_input_frame"
@@ -36,7 +36,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:contentDescription="@string/hint_autocomplete"
-                style="?android:attr/borderlessButtonStyle"
+                style="@style/Widget.AppCompat.ActionButton"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="?attr/ic_search" />
