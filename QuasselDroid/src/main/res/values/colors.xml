@@ -4,8 +4,6 @@
     <color name="primary_dark">#085f92</color>
     <color name="accent">#00b8d4</color>
 
-    <color name="logo_text_color">#0686fd</color>
-
     <color name="nick_owner_color">#fbc02d</color>
     <color name="nick_admin_color">#512da8</color>
     <color name="nick_operator_color">#d01716</color>
@@ -36,16 +34,16 @@
     <color name="marker_line">#d01716</color>
 
 
-    <color name="buffer_highlight_color_light">#ff9800</color>
-    <color name="buffer_unread_color_light">#455ede</color>
-    <color name="buffer_activity_color_light">#8bc34a</color>
+    <color name="buffer_highlight_color_light">#ffab00</color>
+    <color name="buffer_unread_color_light">#1976d2</color>
+    <color name="buffer_activity_color_light">#00c853</color>
     <color name="buffer_read_color_light">#333333</color>
     <color name="buffer_parted_color_light">#999999</color>
-    <color name="buffer_status_active_light">#2962ff</color>
-    <color name="buffer_status_away_light">#82b1ff</color>
+    <color name="buffer_status_active_light">#0097a7</color>
+    <color name="buffer_status_away_light">#094e50</color>
     <color name="buffer_status_parted_light">#888888</color>
-    <color name="buffer_status_perm_light">#7f0004</color>
-    <color name="buffer_status_temp_light">#7f7e00</color>
+    <color name="buffer_status_perm_light">#b71c1c</color>
+    <color name="buffer_status_temp_light">#ff3d00</color>
     <color name="buffer_invalid_light">#ff333333</color>
 
     <color name="nick_owner_light">#fff9c4</color>
@@ -62,18 +60,18 @@
     <color name="chat_line_timestamp_light">@android:color/tertiary_text_light</color>
     <color name="chat_bg_action_light">#10000000</color>
 
-    +    <color name="divider_color_light">#0C000000</color>
+    <color name="divider_color_light">#0C000000</color>
 
-    <color name="buffer_highlight_color_dark">#ff9800</color>
-    <color name="buffer_unread_color_dark">#455ede</color>
-    <color name="buffer_activity_color_dark">#8bc34a</color>
+    <color name="buffer_highlight_color_dark">#ffab00</color>
+    <color name="buffer_unread_color_dark">#1976d2</color>
+    <color name="buffer_activity_color_dark">#00c853</color>
     <color name="buffer_read_color_dark">#dddddd</color>
     <color name="buffer_parted_color_dark">#888888</color>
-    <color name="buffer_status_active_dark">#2962ff</color>
-    <color name="buffer_status_away_dark">#82b1ff</color>
+    <color name="buffer_status_active_dark">#0097a7</color>
+    <color name="buffer_status_away_dark">#094e50</color>
     <color name="buffer_status_parted_dark">#888888</color>
-    <color name="buffer_status_perm_dark">#7f0004</color>
-    <color name="buffer_status_temp_dark">#7f7e00</color>
+    <color name="buffer_status_perm_dark">#b71c1c</color>
+    <color name="buffer_status_temp_dark">#ff3d00</color>
     <color name="buffer_invalid_dark">#ffcccccc</color>
 
     <color name="nick_owner_dark">#ff785a42</color>
@@ -91,4 +89,5 @@
     <color name="chat_bg_action_dark">#18ffffff</color>
 
     <color name="divider_color_dark">#0Cffffff</color>
+
 </resources>
