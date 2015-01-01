@@ -14,6 +14,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -24,6 +25,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
+import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
@@ -50,6 +52,7 @@ public class QuasseldroidNotificationManager {
         //Remove any disconnect notification since we are connecting again
         notifyManager.cancel(R.id.NOTIFICATION_DISCONNECTED);
         BusProvider.getInstance().register(this);
+        PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(sharedPreferenceListener);
     }
 
     public void notifyHighlightsRead(Integer bufferId) {
@@ -296,6 +299,18 @@ public class QuasseldroidNotificationManager {
             notifyHighlights();
         }
     }
+
+    private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals(context.getResources().getString(R.string.preference_notify_hide_persistence))
+                    && pendingHighlightNotification==null
+                    && connected
+                    && highlightedMessages.size()==0) {
+                notifyConnected(false);
+            }
+        }
+    };
 
     public void notifyDisconnected() {
         connected = false;
