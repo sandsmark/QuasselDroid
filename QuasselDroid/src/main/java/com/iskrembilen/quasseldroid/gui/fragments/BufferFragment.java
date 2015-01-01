@@ -24,11 +24,13 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.app.Activity;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -555,8 +557,9 @@ public class BufferFragment extends Fragment implements Serializable {
                 color = ThemeUtil.Color.bufferStateTemp;
             }
 
-            holder.stateView.setImageDrawable(getResources().getDrawable(drawable));
-            holder.stateView.getDrawable().setTint(color);
+            Drawable imageDrawable = getResources().getDrawable(drawable);
+            DrawableCompat.setTint(imageDrawable,color);
+            holder.stateView.setImageDrawable(imageDrawable);
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
             return convertView;
