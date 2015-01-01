@@ -1,4 +1,4 @@
-/*
+k/*
     QuasselDroid - Quassel client for Android
  	Copyright (C) 2011 Ken Børge Viktil
  	Copyright (C) 2011 Magnus Fjell
@@ -26,12 +26,16 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 import android.app.Activity;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,12 +45,15 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.base.Predicate;
 import com.idunnololz.widgets.AnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
@@ -56,11 +63,14 @@ import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
+import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
+import com.iskrembilen.quasseldroid.gui.PreferenceView;
 import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
@@ -70,6 +80,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 public class BufferFragment extends Fragment implements Serializable {
 
@@ -83,10 +94,10 @@ public class BufferFragment extends Fragment implements Serializable {
 
     BufferListAdapter bufferListAdapter;
     AnimatedExpandableListView bufferList;
+    Spinner filterSpinner;
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
-    private boolean showHiddenBuffers = false;
 
     private ActionModeData actionModeData = new ActionModeData();
 
@@ -113,6 +124,47 @@ public class BufferFragment extends Fragment implements Serializable {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_buffers, container, false);
         bufferList = (AnimatedExpandableListView) root.findViewById(R.id.buffer_list);
+
+        Toolbar toolbar = (Toolbar) inflater.inflate(R.layout.widget_buffer_header, null, false);
+        filterSpinner = (Spinner) toolbar.findViewById(R.id.filter_spinner);
+        filterSpinner.setAdapter(new ArrayAdapter<>(getActivity(),R.layout.support_simple_spinner_dropdown_item,BufferCollectionHelper.FILTER_NAMES));
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                bufferListAdapter.setFilters(BufferCollectionHelper.LIST_FILTERS.get(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                bufferListAdapter.setFilters(BufferCollectionHelper.FILTER_SET_VISIBLE);
+            }
+        });
+        filterSpinner.setSelection(1);
+
+        toolbar.inflateMenu(R.menu.fragment_buffer);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_join_channel:
+                        if (bufferListAdapter.networks == null)
+                            Toast.makeText(getActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
+                        else showJoinChannelDialog();
+                        return true;
+                    case R.id.menu_preferences:
+                        Intent i = new Intent(getActivity(), PreferenceView.class);
+                        startActivity(i);
+                        return true;
+                    case R.id.menu_disconnect:
+                        BusProvider.getInstance().post(new DisconnectCoreEvent());
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        bufferList.addHeaderView(toolbar);
+
         return root;
     }
 
@@ -337,39 +389,6 @@ public class BufferFragment extends Fragment implements Serializable {
         outState.putInt(ITEM_POSITION_KEY, restoreItemPosition);
     }
 
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_buffer, menu);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        if (showHiddenBuffers) {
-            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.action_hidden_hide);
-        } else {
-            menu.findItem(R.id.context_menu_toggle_hidden).setTitle(R.string.action_hidden_display);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_join_channel:
-                if (bufferListAdapter.networks == null)
-                    Toast.makeText(getActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
-                else showJoinChannelDialog();
-                return true;
-            case R.id.context_menu_toggle_hidden:
-                showHiddenBuffers = !showHiddenBuffers;
-                bufferListAdapter.notifyDataSetChanged();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void showJoinChannelDialog() {
         List<Network> networkList = bufferListAdapter.networks.getNetworkList();
         String[] networkArray = new String[networkList.size()];
@@ -446,6 +465,8 @@ public class BufferFragment extends Fragment implements Serializable {
         private LayoutInflater inflater;
         private Activity activity;
 
+        private Set<Predicate<Buffer>> filters;
+
         public BufferListAdapter(Activity activity) {
             this.inflater = LayoutInflater.from(activity);
             this.activity = activity;
@@ -459,23 +480,15 @@ public class BufferFragment extends Fragment implements Serializable {
                 return;
             networks.addObserver(this);
 
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                    if (bufferListAdapter != null) {
-                        for (int group = 0; group < getGroupCount(); group++) {
-                            if (getGroup(group).isOpen()) bufferList.expandGroup(group);
-                            else bufferList.collapseGroup(group);
-                        }
-                        //bufferList.setSelectionFromTop(restoreListPosition, restoreItemPosition);
-                    }
-                }
-            });
+            update();
         }
 
         @Override
         public void update(Observable observable, Object data) {
+            update();
+        }
+
+        public void update() {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -490,7 +503,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public Buffer getChild(int groupPosition, int childPosition) {
-            return networks.getNetwork(groupPosition).getBuffers().getPos(showHiddenBuffers,childPosition);
+            return networks.getNetwork(groupPosition).getBuffers().getPos(filters,childPosition);
         }
 
         @Override
@@ -568,7 +581,7 @@ public class BufferFragment extends Fragment implements Serializable {
         @Override
         public int getRealChildrenCount(int groupPosition) {
             if (networks != null) {
-                return networks.getNetwork(groupPosition).getBuffers().getBufferCount(showHiddenBuffers);
+                return networks.getNetwork(groupPosition).getBuffers().getBufferCount(filters);
             }
             return 0;
         }
@@ -626,7 +639,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public boolean hasStableIds() {
-            return true;
+            return false;
         }
 
 
@@ -646,6 +659,10 @@ public class BufferFragment extends Fragment implements Serializable {
                 network.deleteObserver(this);
         }
 
+        public void setFilters(Set<Predicate<Buffer>> filters) {
+            this.filters = filters;
+            update();
+        }
     }
 
     class ActionModeData {

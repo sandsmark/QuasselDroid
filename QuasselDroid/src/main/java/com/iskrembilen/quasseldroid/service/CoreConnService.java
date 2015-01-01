@@ -82,7 +82,9 @@ import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.squareup.otto.Produce;
@@ -472,8 +474,8 @@ public class CoreConnService extends Service {
                     networks.addNetwork((Network) msg.obj);
                     break;
                 case R.id.NETWORK_REMOVED:
-                    BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(msg.arg1).getStatusBuffer().getInfo().id));
                     networks.removeNetwork(msg.arg1);
+                    BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(msg.arg1).getStatusBuffer().getInfo().id));
                     break;
                 case R.id.SET_CONNECTION_STATE:
                     if (networks.getNetworkById(msg.arg1) != null) {
@@ -668,7 +670,7 @@ public class CoreConnService extends Service {
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
                     String modes = (String) bundle.get("mode");
                     bufferName = (String) bundle.get("buffername");
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                         if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
                             buf.getUsers().addUser(user, modes);
                             return;
@@ -697,7 +699,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().addModeToUser(user, bundle.getString("mode"));
                             break;
@@ -712,7 +714,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
                             break;

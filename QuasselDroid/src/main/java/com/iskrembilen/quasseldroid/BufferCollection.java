@@ -23,15 +23,17 @@
 
 package com.iskrembilen.quasseldroid;
 
-import android.util.Log;
 import android.util.SparseArray;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.Helper;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +51,7 @@ public class BufferCollection extends Observable implements Observer {
 
     private List<Buffer> cachedList = new ArrayList<>();
     private List<Buffer> filteredList = new ArrayList<>();
+    private Set<Predicate<Buffer>> filters = BufferCollectionHelper.FILTER_SET_VISIBLE;
 
     private static final String TAG = BufferCollection.class.getSimpleName();
 
@@ -70,16 +73,12 @@ public class BufferCollection extends Observable implements Observer {
         buffersByName.put(buffer.getInfo().name.toLowerCase(Locale.US), buffer);
     }
 
-    private boolean isBufferFiltered(Buffer buffer) {
-        return  (buffer.isPermanentlyHidden() || buffer.isTemporarilyHidden());
+    public int getBufferCount(Set<Predicate<Buffer>> filters) {
+        return getBufferList(filters).size();
     }
 
-    public int getBufferCount(boolean unfiltered) {
-        return getBufferList(unfiltered).size();
-    }
-
-    public Buffer getPos(boolean unfiltered, int pos) {
-        return getBufferList(unfiltered).get(pos);
+    public Buffer getPos(Set<Predicate<Buffer>> filters, int pos) {
+        return getBufferList(filters).get(pos);
     }
 
     public Buffer getBuffer(int bufferId) {
@@ -128,36 +127,40 @@ public class BufferCollection extends Observable implements Observer {
 
     }
 
-    private List<Buffer> getListNotLazy(boolean unfiltered) {
-        List<Buffer> rawBufferList = new ArrayList<>();
-
-        Buffer b;
-        for (int id : bufferIds) {
-            b = buffersByName.get(bufferNames.get(id));
-            if (unfiltered || !isBufferFiltered(b)) {
-                rawBufferList.add(b);
-            }
-        }
-
-        if (orderAlphabetical) {
-            Collections.sort(rawBufferList, new Helper.AlphabeticalComparator());
-        } else {
-            Collections.sort(rawBufferList, new Helper.OrderComparator());
-        }
-
-        return rawBufferList;
+    private List<Buffer> getListNotLazy() {
+        return new ArrayList<Buffer>(
+                Collections2.transform(
+                    bufferIds,
+                    new Function<Integer,Buffer>() { public Buffer apply(Integer id) {
+                        return buffersByName.get(bufferNames.get(id));
+                    }}));
     }
 
-    public List<Buffer> getBufferList(boolean unfiltered) {
-        if (unfiltered)
-            return cachedList;
-        else
-            return filteredList;
+    private List<Buffer> getFilteredNotLazy(Set<Predicate<Buffer>> filters) {
+        Collection<Buffer> cache = cachedList;
+
+        for (Predicate<Buffer> filter : filters) {
+            cache = Collections2.filter(cache, filter);
+        }
+
+        List<Buffer> list = new ArrayList<>(cache);
+        Collections.sort(list,
+                orderAlphabetical ? BufferCollectionHelper.COMPARATOR_ALPHABETICAL : BufferCollectionHelper.COMPARATOR_ORDER);
+        return list;
+    }
+
+    public List<Buffer> getBufferList(Set<Predicate<Buffer>> filters) {
+        if (filters != this.filters) {
+            this.filters = filters;
+            filteredList = getFilteredNotLazy(filters);
+        }
+
+        return filteredList;
     }
 
     public void updateBufferList() {
-        cachedList = getListNotLazy(true);
-        filteredList = getListNotLazy(false);
+        cachedList = getListNotLazy();
+        filteredList = getFilteredNotLazy(filters);
     }
 
     public void removeBuffer(int bufferId) {

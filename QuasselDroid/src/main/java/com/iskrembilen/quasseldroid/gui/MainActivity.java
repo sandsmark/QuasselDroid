@@ -94,8 +94,6 @@ public class MainActivity extends ActionBarActivity {
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
-    private DrawerLayout drawer;
-    private ExtensibleDrawerToggle extensibleDrawerToggle;
     private ClickableActionBar actionbar;
 
     private QuasselDroidFragmentManager manager = new QuasselDroidFragmentManager();
@@ -106,7 +104,7 @@ public class MainActivity extends ActionBarActivity {
     private int lag = 0;
 
     private int openedBuffer = -1;
-    private int openedDrawer = Gravity.NO_GRAVITY;
+    private Side openedDrawer = Side.NONE;
 
     private CharSequence topic;
     private boolean bufferHasTopic;
@@ -131,15 +129,10 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        manager.setupDrawer();
-
         manager.preInit();
 
         if (savedInstanceState==null) {
             manager.init();
-
-            manager.lockDrawer(Gravity.START, true);
-            manager.lockDrawer(Gravity.END, true);
         } else {
             manager.initMainFragment();
         }
@@ -180,16 +173,13 @@ public class MainActivity extends ActionBarActivity {
 
             ((Quasseldroid) getApplication()).savedInstanceState = null;
         }
-
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        if (manager.hasDrawer) extensibleDrawerToggle.drawerToggle.syncState();
     }
 
     void getState(Bundle in) {
         if (in.containsKey(BUFFER_STATE))
             openedBuffer = in.getInt(BUFFER_STATE);
         if (in.containsKey(DRAWER_SELECTION))
-            openedDrawer = in.getInt(DRAWER_SELECTION);
+            openedDrawer = Side.valueOf(in.getString(DRAWER_SELECTION));
     }
 
     @Override
@@ -229,6 +219,8 @@ public class MainActivity extends ActionBarActivity {
         Log.d(TAG, "Resuming activity");
         super.onResume();
 
+        manager.setupDrawer();
+
         BusProvider.getInstance().register(this);
 
         if (ThemeUtil.themeNoActionBar != currentTheme) {
@@ -263,7 +255,7 @@ public class MainActivity extends ActionBarActivity {
                 Log.d(TAG, "Loading state: Empty");
                 openedBuffer = -1;
                 BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
-                manager.openDrawer(Gravity.START);
+                manager.openDrawer(Side.LEFT);
             } else {
                 Log.d(TAG, "Loading state: "+openedBuffer);
                 manager.openDrawer(openedDrawer);
@@ -300,14 +292,14 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG,"Saving state: BUFFER="+openedBuffer+"; DRAWER="+manager.getOpenDrawers());
+        Log.d(TAG,"Saving state: BUFFER="+openedBuffer+"; DRAWER="+manager.getOpenDrawer());
         super.onSaveInstanceState(outState);
         storeState(outState);
     }
 
     Bundle storeState(Bundle in) {
         in.putInt(BUFFER_STATE, openedBuffer);
-        if (manager.hasDrawer) in.putInt(DRAWER_SELECTION, manager.getOpenDrawers());
+        in.putString(DRAWER_SELECTION, manager.getOpenDrawer().name());
         return in;
     }
 
@@ -315,7 +307,7 @@ public class MainActivity extends ActionBarActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         Log.d(TAG, "Configuration changed");
         super.onConfigurationChanged(newConfig);
-        extensibleDrawerToggle.drawerToggle.onConfigurationChanged(newConfig);
+        manager.extensibleDrawerToggle.drawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -339,6 +331,9 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             case R.id.menu_disconnect:
                 BusProvider.getInstance().post(new DisconnectCoreEvent());
+                return true;
+            case R.id.menu_nick_list:
+                manager.onDrawerButtonClicked();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -414,8 +409,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void showInitProgress() {
-        manager.setPanelFragment(Gravity.NO_GRAVITY, new ConnectingFragment());
-        manager.openDrawer(Gravity.NO_GRAVITY);
+        manager.setFragment(R.id.main_content_container, new ConnectingFragment());
+        manager.closeDrawer(Side.BOTH);
     }
 
     @Subscribe
@@ -427,7 +422,7 @@ public class MainActivity extends ActionBarActivity {
                 && networks.getNetworkById(networks.getBufferById(event.bufferId).getInfo().networkId)!=null) {
             openedBuffer = event.bufferId;
             if (event.switchToBuffer) {
-                manager.openDrawer(Gravity.NO_GRAVITY);
+                manager.closeDrawer(Side.BOTH);
                 ((BufferFragment)manager.bufferFragment).finishActionMode();
                 updateBufferRead();
                 setTitleAndMenu();
@@ -438,22 +433,9 @@ public class MainActivity extends ActionBarActivity {
         NetworkCollection networks = NetworkCollection.getInstance();
         Buffer buffer = networks.getBufferById(openedBuffer);
 
-        switch (manager.getOpenDrawers()) {
-            case Gravity.START:
-                Log.d(TAG, "Opened drawer: START");
-                break;
-            case Gravity.END:
-                Log.d(TAG, "Opened drawer: END");
-                break;
-            case Gravity.NO_GRAVITY:
-                Log.d(TAG, "Opened drawer: NONE");
-                break;
-            default:
-                Log.d(TAG, "Opened drawer: " + manager.getOpenDrawers());
-        }
+        manager.chatFragment.setMenuVisibility(true);
 
-        if (manager.hasDrawer) manager.setWindowProperties(manager.getOpenDrawers());
-        if (buffer==null || manager.hasDrawer && (manager.getOpenDrawers()==Gravity.START)) {
+        if (buffer==null) {
             bufferHasTopic = false;
             actionbar.setTitle(getResources().getString(R.string.app_name));
             topic = null;
@@ -461,29 +443,29 @@ public class MainActivity extends ActionBarActivity {
             switch (buffer.getInfo().type) {
                 case QueryBuffer:
                     bufferHasTopic = false;
-                    manager.setPanelFragment(Gravity.END,manager.detailFragment);
-                    manager.lockDrawer(Gravity.END, false);
+                    manager.setFragment(R.id.right_drawer, manager.detailFragment);
+                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_UNLOCKED);
                     actionbar.setTitle(buffer.getInfo().name);
                     topic = buffer.getTopic();
                     break;
                 case StatusBuffer:
-                    bufferHasTopic = true;
-                    manager.lockDrawer(Gravity.END, true);
+                    bufferHasTopic = false;
+                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     actionbar.setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
                     topic = buffer.getTopic();
                     break;
                 case ChannelBuffer:
                     bufferHasTopic = true;
-                    manager.setPanelFragment(Gravity.END,manager.nickFragment);
-                    manager.lockDrawer(Gravity.END, false);
+                    manager.setFragment(R.id.right_drawer, manager.nickFragment);
+                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_UNLOCKED);
                     actionbar.setTitle(buffer.getInfo().name);
                     topic = buffer.getTopic();
                     break;
                 default:
                     bufferHasTopic = false;
                     actionbar.setTitle(buffer.getInfo().name);
+                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     topic = buffer.getTopic();
-                    manager.lockDrawer(Gravity.END, true);
             }
         }
         updateSubtitle();
@@ -500,18 +482,23 @@ public class MainActivity extends ActionBarActivity {
         if (event.bufferId == openedBuffer) {
             openedBuffer = -1;
             BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
-            manager.openDrawer(Gravity.START);
+            manager.openDrawer(Side.LEFT);
         }
     }
 
     class QuasselDroidFragmentManager {
-        Fragment chatFragment;
-        Fragment nickFragment;
-        Fragment detailFragment;
-        Fragment bufferFragment;
+        private Fragment chatFragment;
+        private Fragment nickFragment;
+        private Fragment detailFragment;
+        private Fragment bufferFragment;
 
-        SparseArray<Fragment> drawers = new SparseArray<Fragment>();
-        private boolean hasDrawer;
+        private ExtensibleDrawerToggle extensibleDrawerToggle;
+
+        private SparseArray<Fragment> drawers = new SparseArray<>();
+        private DrawerLayout leftDrawer;
+        private DrawerLayout rightDrawer;
+
+        private Side openDrawer;
 
         void preInit() {
             Log.d(getClass().getSimpleName(), "Setting up fragments");
@@ -551,41 +538,16 @@ public class MainActivity extends ActionBarActivity {
         void init() {
             Log.d(getClass().getSimpleName(),"Initializing Side and Main panels");
 
-            setPanelFragment(Gravity.END, nickFragment);
-            setPanelFragment(Gravity.START, bufferFragment);
+            setFragment(R.id.right_drawer, nickFragment);
 
             initMainFragment();
         }
 
         void initMainFragment() {
-            setPanelFragment(Gravity.NO_GRAVITY, chatFragment);
-            manager.lockDrawer(Gravity.START, false);
+            setFragment(R.id.main_content_container, chatFragment);
         }
 
-        void setPanelFragment(int side, Fragment fragment) {
-            int id;
-            String tag;
-            boolean isDrawer;
-            switch (side) {
-                case Gravity.START:
-                    id = R.id.left_drawer;
-                    tag = "LEFT";
-                    isDrawer = true;
-                    break;
-                case Gravity.END:
-                    id = R.id.right_drawer;
-                    tag = "RIGHT";
-                    isDrawer = true;
-                    break;
-                case Gravity.NO_GRAVITY:
-                    id = R.id.main_content_container;
-                    tag = "MAIN";
-                    isDrawer = false;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Error replacing fragments: Unknown side");
-            }
-
+        void setFragment(int id, Fragment fragment) {
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
             Fragment currentFragment = (drawers.get(id)==null) ? manager.findFragmentById(id) : drawers.get(id);
@@ -601,150 +563,106 @@ public class MainActivity extends ActionBarActivity {
             } else if (fragment == null) {
                 ft.remove(currentFragment);
             } else if (currentFragment == null) {
-                ft.add(id, fragment, tag);
+                ft.add(id, fragment);
             } else {
-                ft.replace(id, fragment, tag);
+                ft.replace(id, fragment);
             }
 
-            Log.d(this.getClass().getSimpleName(), String.format("Add on side %s the fragment %s, replacing  %s",tag,to,from));
-
             drawers.put(id, fragment);
-
-            if (isDrawer)
-                lockDrawer(side, (fragment == null));
 
             ft.commitAllowingStateLoss();
             if (fragment != null) fragment.setMenuVisibility(menuVisbility);
         }
 
-        void lockDrawer(int side, boolean locked) {
-            if (hasDrawer && locked)
-                extensibleDrawerToggle.getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, side);
-            else if (hasDrawer)
-                extensibleDrawerToggle.getDrawer().setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, side);
-        }
-
-        public void setWindowProperties(int side) {
-            switch (side) {
-                case Gravity.START:
-                    bufferFragment.setMenuVisibility(true);
-                    chatFragment.setMenuVisibility(false);
-                    break;
-                case Gravity.END:
-                case Gravity.NO_GRAVITY:
-                default:
-                    bufferFragment.setMenuVisibility(false);
-                    chatFragment.setMenuVisibility(true);
-                    break;
-            }
-        }
-
-        public int getOpenDrawers() {
-            if (hasDrawer)
-                return getOpenDrawers(extensibleDrawerToggle.drawer);
-            else
-                return Gravity.NO_GRAVITY;
-        }
-
-        public int getOpenDrawers(DrawerLayout drawer) {
-            if (!hasDrawer || drawer.isDrawerVisible(Gravity.START)) {
-                return Gravity.START;
-            } else if (drawer.isDrawerVisible(Gravity.END)) {
-                return Gravity.END;
-            } else {
-                return Gravity.NO_GRAVITY;
-            }
-        }
-
-        public void closeDrawerOpposite(View drawerView) {
-            if (hasDrawer && drawerView.getTag()=="LEFT")
-                closeDrawer(Gravity.START);
-            else if (hasDrawer)
-                closeDrawer(Gravity.END);
-        }
-
-        public void openDrawer(int openedDrawer) {
-            if (hasDrawer) {
-                closeDrawer(Gravity.CENTER);
-                if (openedDrawer != Gravity.NO_GRAVITY) {
-                    drawer.openDrawer(openedDrawer);
-                }
-            }
-        }
-
-        public void cleanup() {
-            setPanelFragment(Gravity.START, null);
-            setPanelFragment(Gravity.END, null);
-            setPanelFragment(Gravity.NO_GRAVITY, null);
-
-            bufferFragment = null;
-            nickFragment = null;
-            chatFragment = null;
-            detailFragment = null;
-        }
-
         public void cleanupMenus() {
-            bufferFragment.setMenuVisibility(false);
             nickFragment.setMenuVisibility(false);
             chatFragment.setMenuVisibility(false);
             detailFragment.setMenuVisibility(false);
         }
 
         public void setupDrawer() {
-            if (null==findViewById(R.id.drawer)) {
-                hasDrawer = false;
-                return;
+            leftDrawer = (DrawerLayout) findViewById(R.id.main_drawer);
+            rightDrawer = (DrawerLayout) findViewById(R.id.nick_drawer);
+
+            if (leftDrawer!=null) {
+                leftDrawer.setStatusBarBackgroundColor(getResources().getColor(R.color.primary_dark));
+
+                if (extensibleDrawerToggle==null) {
+                    extensibleDrawerToggle = new ExtensibleDrawerToggle(leftDrawer, new ActionBarDrawerToggle(
+                            MainActivity.this, /* host Activity */
+                            leftDrawer, /* DrawerLayout object */
+                            actionbar.getWrappedToolbar(), /* nav drawer icon to replace 'Up' caret */
+                            R.string.hint_drawer_open, /* "open drawer" description */
+                            R.string.hint_drawer_close /* "close drawer" description */
+                    ) {
+                        /**
+                         * Called when a drawer has settled in a completely closed state.
+                         */
+                        public void onDrawerClosed(View drawerView) {
+                            updateBufferRead();
+                            updateBufferRead();
+                            ((BufferFragment) manager.bufferFragment).finishActionMode();
+                            setTitleAndMenu();
+                        }
+
+                        /**
+                         * Called when a drawer has settled in a completely open state.
+                         */
+                        public void onDrawerOpened(View drawerView) {
+                            manager.closeDrawer(Side.RIGHT);
+                            setTitleAndMenu();
+                        }
+                    });
+                    leftDrawer.setDrawerListener((extensibleDrawerToggle.getDrawerListener()));
+                }
+            }
+        }
+
+        private void onDrawerButtonClicked() {
+            if (rightDrawer.isDrawerVisible(Gravity.END)) {
+                closeDrawer(Side.RIGHT);
             } else {
-                hasDrawer = true;
+                openDrawer(Side.RIGHT);
+            }
+        }
+
+        private void closeDrawer(Side side) {
+            if (side==Side.RIGHT||side==Side.BOTH) {
+                rightDrawer.closeDrawers();
             }
 
-            drawer = (DrawerLayout) findViewById(R.id.drawer);
-
-            try {
-                Field mLeftDragger = drawer.getClass().getDeclaredField("mLeftDragger");
-                mLeftDragger.setAccessible(true);
-                ViewDragHelper leftDraggerObj = (ViewDragHelper) mLeftDragger.get(drawer);
-                Field mLeftEdgeSize = leftDraggerObj.getClass().getDeclaredField("mEdgeSize");
-                mLeftEdgeSize.setAccessible(true);
-                int leftEdge = mLeftEdgeSize.getInt(leftDraggerObj);
-                mLeftEdgeSize.setInt(leftDraggerObj, leftEdge * 3);
-                Field mRightDragger = drawer.getClass().getDeclaredField("mRightDragger");
-                mRightDragger.setAccessible(true);
-                ViewDragHelper rightDraggerObj = (ViewDragHelper) mRightDragger.get(drawer);
-                Field mRightEdgeSize = rightDraggerObj.getClass().getDeclaredField("mEdgeSize");
-                mRightEdgeSize.setAccessible(true);
-                int rightEdge = mRightEdgeSize.getInt(rightDraggerObj);
-                mRightEdgeSize.setInt(rightDraggerObj, rightEdge * 3);
-            } catch (Exception e) {
-                Log.e(TAG, "Setting the draggable zone for the drawers failed!", e);
+            if (leftDrawer!=null&&(side==Side.LEFT||side==Side.BOTH)) {
+                leftDrawer.closeDrawers();
             }
+        }
 
-            extensibleDrawerToggle = new ExtensibleDrawerToggle(drawer, new ActionBarDrawerToggle(
-                    MainActivity.this,                   /* host Activity */
-                    drawer,                 /* DrawerLayout object */
-                    actionbar.wrappedToolbar,   /* nav drawer icon to replace 'Up' caret */
-                    R.string.hint_drawer_open,   /* "open drawer" description */
-                    R.string.hint_drawer_close   /* "close drawer" description */
-            ) {
-                int openDrawers;
 
-                /** Called when a drawer has settled in a completely closed state. */
-                public void onDrawerClosed(View drawerView) {
-                    manager.setWindowProperties(manager.getOpenDrawers());
-                    updateBufferRead();
-                    if (drawerView.getId()==R.id.left_drawer) updateBufferRead();
-                    ((BufferFragment) manager.bufferFragment).finishActionMode();
-                    setTitleAndMenu();
-                }
+        public void openDrawer(Side side) {
+            if (side==Side.RIGHT) {
+                rightDrawer.openDrawer(Gravity.END);
+            } else if (side==Side.LEFT&&leftDrawer!=null) {
+                if (rightDrawer.isDrawerVisible(Gravity.END))
+                    rightDrawer.closeDrawers();
 
-                /** Called when a drawer has settled in a completely open state. */
-                public void onDrawerOpened(View drawerView) {
-                    manager.closeDrawerOpposite(drawerView);
-                    manager.setWindowProperties(manager.getOpenDrawers());
-                    setTitleAndMenu();
-                }
-            });
-            drawer.setDrawerListener((extensibleDrawerToggle.getDrawerListener()));
+                leftDrawer.openDrawer(Gravity.START);
+            }
+        }
+
+        public void lockDrawer(Side side, int lockMode) {
+            if (side==Side.RIGHT) {
+                rightDrawer.setDrawerLockMode(lockMode);
+            } else if (side==Side.LEFT&&leftDrawer!=null) {
+                leftDrawer.setDrawerLockMode(lockMode);
+            }
+        }
+
+        public Side getOpenDrawer() {
+            if (leftDrawer!=null && leftDrawer.isDrawerVisible(Gravity.START))
+                return Side.LEFT;
+            else if (rightDrawer.isDrawerVisible(Gravity.RIGHT))
+                return Side.RIGHT;
+            else
+                return Side.NONE;
         }
 
         public void hideKeyboard() {
@@ -755,13 +673,6 @@ public class MainActivity extends ActionBarActivity {
             view.requestFocus();
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-        }
-
-        public void closeDrawer(int side) {
-            if (hasDrawer && side==Gravity.CENTER)
-                drawer.closeDrawers();
-            else if (hasDrawer)
-                drawer.closeDrawer(side);
         }
     }
 
@@ -855,5 +766,12 @@ public class MainActivity extends ActionBarActivity {
         public void onServiceDisconnected(ComponentName cn) {
         }
     };
+
+    public enum Side {
+        LEFT,
+        RIGHT,
+        BOTH,
+        NONE;
+    }
 
 }

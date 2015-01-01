@@ -222,4 +222,5 @@
 
         <string name="preference_title_notification_connect_sound_file">Connection sound</string>
         <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
+    <string name="action_nick_list">Channel userlist</string>
 </resources>

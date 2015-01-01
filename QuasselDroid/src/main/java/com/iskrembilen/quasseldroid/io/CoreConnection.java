@@ -52,6 +52,8 @@ import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
@@ -1073,7 +1075,7 @@ public final class CoreConnection {
                                     String topic = (String) chan.get("topic").getData();
 
                                     boolean foundChannel = false;
-                                    for (Buffer buffer : network.getBuffers().getBufferList(true)) {
+                                    for (Buffer buffer : network.getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                                         if (buffer.getInfo().name.equalsIgnoreCase(chanName)) {
                                             buffer.setTopic(topic);
                                             buffer.setActive(true);

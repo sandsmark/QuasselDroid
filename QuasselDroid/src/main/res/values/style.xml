@@ -8,7 +8,7 @@
         <item name="windowActionBar">false</item>
     </style>
 
-    <style name="Theme.QuasselDroid.Material.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.QuasselDroid.Material.Light" parent="Theme.QuasselDroid.Base.Light">
         <!-- Main theme colors -->
         <!--   your app branding color for the app bar -->
         <item name="colorPrimary">@color/primary</item>
@@ -33,7 +33,7 @@
         <item name="ic_collapse">@drawable/ic_collapse_light</item>
     </style>
 
-    <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.AppCompat">
+    <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.QuasselDroid.Base.Dark">
         <!-- Main theme colors -->
         <!--   your app branding color for the app bar -->
         <item name="colorPrimary">@color/primary</item>
@@ -59,10 +59,13 @@
         <item name="ic_collapse">@drawable/ic_collapse_dark</item>
     </style>
 
+    <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar" />
+    <style name="Theme.QuasselDroid.Base.Dark" parent="Theme.AppCompat" />
+
     <style name="PopupMenu.Quasseldroid.Light" parent="@style/Widget.AppCompat.Light.ListPopupWindow"/>
     <style name="PopupMenu.Quasseldroid.Dark" parent="@style/Widget.AppCompat.ListPopupWindow"/>
 
-    <style name="SpinnerButton.Light" parent="@android:style/Widget.Holo.Light.Spinner" />
-    <style name="SpinnerButton.Dark" parent="@android:style/Widget.Holo.Spinner" />
+    <style name="SpinnerButton.Light" parent="@style/Widget.AppCompat.Light.Spinner.DropDown.ActionBar" />
+    <style name="SpinnerButton.Dark" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar" />
 
 </resources>

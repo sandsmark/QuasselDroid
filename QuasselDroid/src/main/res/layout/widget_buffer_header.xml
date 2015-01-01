@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/buffer_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary_light"
+    android:paddingTop="@dimen/abc_action_bar_default_height_material"
+    app:theme="@style/Theme.QuasselDroid.Material.Light"
+    app:popupTheme="@style/Theme.AppCompat.Light">
+    <Spinner
+        android:id="@+id/filter_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <android.support.v7.widget.ActionMenuView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/action_menu" />
+</android.support.v7.widget.Toolbar>

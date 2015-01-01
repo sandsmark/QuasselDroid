@@ -3,14 +3,17 @@ package com.iskrembilen.quasseldroid.util;
 import android.content.res.Resources;
 import android.text.SpannableString;
 
+import com.google.common.base.Predicate;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Helper {
 
@@ -31,20 +34,6 @@ public class Helper {
     public static Map<String,String> parseModeChange(String modechange) {
         //TODO: Implement proper UserModeChange parser
         return null;
-    }
-
-    public static class AlphabeticalComparator implements Comparator<Buffer> {
-        public int compare(Buffer lhs, Buffer rhs)
-        {
-            return lhs.getInfo().name.compareToIgnoreCase(rhs.getInfo().name);
-        }
-    }
-
-    public static class OrderComparator implements Comparator<Buffer> {
-        @Override
-        public int compare(Buffer lhs, Buffer rhs) {
-            return lhs.getOrder() - rhs.getOrder();
-        }
     }
 
     public static CharSequence[] split(CharSequence string, String pattern) {

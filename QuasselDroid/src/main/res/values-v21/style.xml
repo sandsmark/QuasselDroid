@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+    <style name="Theme.QuasselDroid.Base.Dark" parent="Theme.AppCompat">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+    <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.QuasselDroid.Material.Light">
+        <item name="windowActionBar">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+    <style name="Theme.QuasselDroid.Material.Dark.NoActionBar" parent="Theme.QuasselDroid.Material.Dark">
+        <item name="windowActionBar">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>

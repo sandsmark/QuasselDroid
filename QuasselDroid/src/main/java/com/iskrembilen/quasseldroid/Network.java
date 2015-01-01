@@ -1,5 +1,9 @@
 package com.iskrembilen.quasseldroid;
 
+<<<<<<< HEAD
+=======
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
+>>>>>>> Updated UI, added ability to customize filters
 import com.iskrembilen.quasseldroid.util.Helper;
 
 import java.util.ArrayList;
@@ -185,7 +189,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
         nickUserMap.remove(nick);
         for (IrcUser user : userList) {
             if (user.nick.equals(nick)) {
-                for (Buffer buffer : buffers.getBufferList(true)) {
+                for (Buffer buffer : buffers.getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                     if (user.channels.contains(buffer.getInfo().name)) {
                         buffer.getUsers().removeUserByNick(nick);
                     }
@@ -207,7 +211,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
                 break;
             }
         }
-        for (Buffer buffer : buffers.getBufferList(true)) {
+        for (Buffer buffer : buffers.getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
             if (buffer.getInfo().name.equalsIgnoreCase(bufferName)) {
                 buffer.getUsers().removeUserByNick(nick);
                 if (nick.equalsIgnoreCase(getNick())) {
@@ -236,7 +240,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
 
 
     public int getBufferCount() {
-        return buffers.getBufferCount(false);
+        return buffers.getBufferCount(BufferCollectionHelper.FILTER_SET_VISIBLE);
     }
 
 
@@ -253,7 +257,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
         } else {
             setOpen(false);
             if (statusBuffer != null) statusBuffer.setActive(false);
-            for (Buffer buffer : buffers.getBufferList(true)) {
+            for (Buffer buffer : buffers.getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                 buffer.setActive(false);
             }
         }
