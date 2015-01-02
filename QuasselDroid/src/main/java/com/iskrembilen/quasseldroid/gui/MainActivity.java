@@ -648,7 +648,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 });
                 leftDrawer.setDrawerListener((extensibleDrawerToggle.getDrawerListener()));
-            } else if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP) {
+            } else if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
                 getWindow().setStatusBarColor(getResources().getColor(R.color.primary_dark));
             }
         }
@@ -773,20 +773,6 @@ public class MainActivity extends ActionBarActivity {
         ClickableActionBar(Context context, Toolbar toolbar) {
             this.context = context;
             this.wrappedToolbar = toolbar;
-            this.wrappedToolbar.findViewById(R.id.actionTitleArea).setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (isTitleClickable()) {
-                        Toast toast = Toast.makeText(MainActivity.this, hint, Toast.LENGTH_SHORT);
-                        Helper.positionToast(toast, v, getWindow(), 0, (int) -getResources().getDimension(R.dimen.toast_offset));
-                        toast.show();
-                        ((Vibrator) MainActivity.this.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(20);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            });
 
             TypedArray ta = wrappedToolbar.getContext().obtainStyledAttributes(new int[]{R.attr.selectableItemBackgroundBorderless});
             selectableItemBackground = ta.getDrawable(0);
@@ -843,7 +829,7 @@ public class MainActivity extends ActionBarActivity {
                     this.wrappedToolbar.findViewById(R.id.actionTitleArea).setBackground(selectableItemBackground);
                 } else {
                     this.wrappedToolbar.findViewById(R.id.actionTitleArea).setBackgroundDrawable(selectableItemBackground);
-                }
+                }g
             } else {
                 this.wrappedToolbar.findViewById(R.id.actionTitleArea).setBackgroundResource(android.R.color.transparent);
             }

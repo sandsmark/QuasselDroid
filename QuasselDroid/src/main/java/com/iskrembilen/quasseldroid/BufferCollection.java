@@ -63,6 +63,8 @@ public class BufferCollection extends Observable implements Observer {
         updateBufferList();
         buffer.addObserver(this);
         notifyObservers();
+
+        android.view.MenuItem x;
     }
 
     private void putBuffer(Buffer buffer) {
