@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -590,7 +591,7 @@ public class BufferFragment extends Fragment implements Serializable {
             }
 
             Drawable imageDrawable = getResources().getDrawable(drawable);
-            DrawableCompat.setTint(imageDrawable,color);
+            imageDrawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
             holder.stateView.setImageDrawable(imageDrawable);
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);

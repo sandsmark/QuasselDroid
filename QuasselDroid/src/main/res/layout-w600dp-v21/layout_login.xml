@@ -4,7 +4,7 @@
     android:layout_width="600dp"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:elevation="4dp"
+    android:elevation="8dp"
     android:layout_gravity="center_horizontal|fill_vertical">
 
     <ScrollView
