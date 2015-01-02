@@ -131,7 +131,9 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // TODO Auto-generated method stub
+                usernameField.setText("");
+                passwordField.setText("");
+                rememberMe.setChecked(false);
             }
         });
 
@@ -401,7 +403,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 dbHelper.deleteUser(core.getSelectedItemId());
 
             }
-            settingsedit.commit();
+            settingsedit.apply();
             //dbHelper.open();
             Bundle res = dbHelper.getCore(core.getSelectedItemId());
 

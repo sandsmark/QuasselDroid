@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -609,6 +610,7 @@ public class MainActivity extends ActionBarActivity {
             detailFragment.setMenuVisibility(false);
         }
 
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         public void setupDrawer() {
             leftDrawer = (DrawerLayout) findViewById(R.id.main_drawer);
             rightDrawer = (DrawerLayout) findViewById(R.id.nick_drawer);
@@ -822,6 +824,7 @@ public class MainActivity extends ActionBarActivity {
             return wrappedToolbar.findViewById(R.id.actionTitleArea).isClickable();
         }
 
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         public void setTitleClickable(boolean clickable) {
             wrappedToolbar.findViewById(R.id.actionTitleArea).setClickable(clickable);
             if (clickable) {

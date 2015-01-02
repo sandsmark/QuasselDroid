@@ -580,8 +580,7 @@ public class BufferFragment extends Fragment implements Serializable {
                 color = ThemeUtil.Color.bufferStateTemp;
             }
 
-            Drawable imageDrawable = getResources().getDrawable(drawable);
-            holder.stateView.setImageDrawable(imageDrawable);
+            holder.stateView.setImageResource(drawable);
             holder.stateView.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
