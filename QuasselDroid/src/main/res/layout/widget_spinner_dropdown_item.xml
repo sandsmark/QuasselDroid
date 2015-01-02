@@ -4,6 +4,7 @@
     style="@style/Widget.AppCompat.Light.DropDownItem.Spinner"
     android:textAppearance="@style/TextAppearance.AppCompat.Menu"
     android:textColor="@color/primary_text_default_material_light"
+    android:background="@color/background_floating_material_light"
     android:singleLine="true"
     android:layout_width="match_parent"
     android:layout_height="?attr/dropdownListPreferredItemHeight"
