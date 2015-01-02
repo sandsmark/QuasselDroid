@@ -54,7 +54,8 @@
     <string name="hint_join_network">Network</string>
     <string name="hint_autocomplete">Autocomplete button</string>
     <string name="hint_status">Status</string>
-    <string name="hint_topic">Enter a topic for the channel</string>
+    <string name="hint_topic">Channel topic</string>
+    <string name="hint_topic_edit">Enter a topic for the channel</string>
     <string name="hint_core_name">Name</string>
     <string name="hint_core_address">Address</string>
     <string name="hint_core_port">Port</string>

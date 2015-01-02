@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.idunnololz.widgets.AnimatedExpandableListView
+<com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/buffer_list"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:choiceMode="singleChoice"
-    android:dividerHeight="0dip"/>
+    android:dividerHeight="0dip"
+    app:headerView="@layout/widget_buffer_header"/>

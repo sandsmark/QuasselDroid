@@ -27,15 +27,19 @@ import android.app.Activity;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.graphics.drawable.DrawableCompat;
+<<<<<<< HEAD
 import android.support.v7.internal.view.menu.MenuBuilder;
+=======
+>>>>>>> Updated UI again
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,6 +54,7 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,10 +74,12 @@ import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.gui.PreferenceView;
+import com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
@@ -92,8 +99,10 @@ public class BufferFragment extends Fragment implements Serializable {
     private static final String ITEM_POSITION_KEY = "itempos";
     private static final String LIST_POSITION_KEY = "listpos";
 
+    private static final Set<Predicate<Buffer>> DEFAULT_FITLERS = BufferCollectionHelper.FILTER_SET_VISIBLE;
+
     BufferListAdapter bufferListAdapter;
-    AnimatedExpandableListView bufferList;
+    XMLHeaderAnimatedExpandableListView bufferList;
     Spinner filterSpinner;
 
     private int restoreListPosition = 0;
@@ -122,21 +131,33 @@ public class BufferFragment extends Fragment implements Serializable {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_buffers, container, false);
-        bufferList = (AnimatedExpandableListView) root.findViewById(R.id.buffer_list);
+        Toolbar toolbar;
 
-        Toolbar toolbar = (Toolbar) inflater.inflate(R.layout.widget_buffer_header, null, false);
+        View root = inflater.inflate(R.layout.fragment_buffers, container, false);
+
+        bufferList = (XMLHeaderAnimatedExpandableListView) root.findViewById(R.id.buffer_list);
+        if (bufferList.hasHeaderView()) {
+            toolbar = (Toolbar) bufferList.getHeaderView();
+        } else {
+            toolbar = (Toolbar) root.findViewById(R.id.buffer_toolbar);
+        }
+
+        ArrayAdapter adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_spinner_item,BufferCollectionHelper.FILTER_NAMES);
+        adapter.setDropDownViewResource(R.layout.widget_spinner_dropdown_item);
         filterSpinner = (Spinner) toolbar.findViewById(R.id.filter_spinner);
-        filterSpinner.setAdapter(new ArrayAdapter<>(getActivity(),R.layout.support_simple_spinner_dropdown_item,BufferCollectionHelper.FILTER_NAMES));
+        filterSpinner.setAdapter(adapter);
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (BufferCollectionHelper.LIST_FILTERS.size()<position||BufferCollectionHelper.LIST_FILTERS.get(position)==null)
+                    onNothingSelected(parent);
+
                 bufferListAdapter.setFilters(BufferCollectionHelper.LIST_FILTERS.get(position));
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                bufferListAdapter.setFilters(BufferCollectionHelper.FILTER_SET_VISIBLE);
+                bufferListAdapter.setFilters(DEFAULT_FITLERS);
             }
         });
         filterSpinner.setSelection(1);
@@ -162,8 +183,6 @@ public class BufferFragment extends Fragment implements Serializable {
                 return false;
             }
         });
-
-        bufferList.addHeaderView(toolbar);
 
         return root;
     }
@@ -465,7 +484,7 @@ public class BufferFragment extends Fragment implements Serializable {
         private LayoutInflater inflater;
         private Activity activity;
 
-        private Set<Predicate<Buffer>> filters;
+        private Set<Predicate<Buffer>> filters = DEFAULT_FITLERS;
 
         public BufferListAdapter(Activity activity) {
             this.inflater = LayoutInflater.from(activity);
