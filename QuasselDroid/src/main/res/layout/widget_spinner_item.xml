@@ -2,6 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
     style="@style/Widget.AppCompat.DropDownItem.Spinner"
+    android:textAppearance="@style/TextAppearance.AppCompat.Menu"
     android:textColor="@color/primary_text_default_material_dark"
     android:singleLine="true"
     android:layout_width="match_parent"
