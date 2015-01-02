@@ -49,10 +49,14 @@ public class HideEventsDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                 IrcMessage.Type type = IrcMessage.Type.valueOf(IrcMessage.Type.getFilterList()[which]);
-                if (isChecked)
-                    BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), type, true));
-                else
-                    BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), type, false));
+                
+                // If the type is a join or quit, additionally apply the same action to the Netsplit versions
+                if (type == IrcMessage.Type.Join)
+                    BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), IrcMessage.Type.NetsplitJoin, isChecked));
+                else if (type == IrcMessage.Type.Quit)
+                    BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), IrcMessage.Type.NetsplitQuit, isChecked));
+
+                BusProvider.getInstance().post(new FilterMessagesEvent(getBufferId(), type, isChecked));
             }
         });
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
