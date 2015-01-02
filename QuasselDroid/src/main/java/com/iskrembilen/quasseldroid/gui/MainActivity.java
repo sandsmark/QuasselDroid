@@ -829,7 +829,7 @@ public class MainActivity extends ActionBarActivity {
                     this.wrappedToolbar.findViewById(R.id.actionTitleArea).setBackground(selectableItemBackground);
                 } else {
                     this.wrappedToolbar.findViewById(R.id.actionTitleArea).setBackgroundDrawable(selectableItemBackground);
-                }g
+                }
             } else {
                 this.wrappedToolbar.findViewById(R.id.actionTitleArea).setBackgroundResource(android.R.color.transparent);
             }
