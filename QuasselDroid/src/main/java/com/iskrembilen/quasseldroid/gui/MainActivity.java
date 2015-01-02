@@ -23,8 +23,10 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -54,6 +56,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
@@ -65,7 +68,9 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
+import com.iskrembilen.quasseldroid.events.OpenIRCLinkEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.TopicViewDialog;
 import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
@@ -73,7 +78,6 @@ import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -168,6 +172,40 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    @Subscribe
+    public void onOpenIRCLink(final OpenIRCLinkEvent event) {
+        NetworkCollection networks = NetworkCollection.getInstance();
+        Network network = networks.getNetwork(event.data.getHost());
+        if (network!=null) {
+            Buffer buffer = network.getBuffers().getBuffer(event.data.getPath());
+            if (buffer != null) {
+                BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
+            } else {
+                AlertDialog.Builder b = new AlertDialog.Builder(this);
+                b.setMessage("Add Buffer "+event.data.getPath()+" to your core?");
+                b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        BusProvider.getInstance().post(new JoinChannelEvent(event.data.getHost(), event.data.getPath()));
+                    }
+                });
+                b.setNegativeButton("No",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                b.create().show();
+            }
+        } else {
+            AlertDialog.Builder b = new AlertDialog.Builder(this);
+            b.setMessage(event.data.getScheme()+"\n"+event.data.getHost()+"\n"+event.data.getPath());
+            b.setCancelable(true);
+            b.create().show();
+        }
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -189,6 +227,21 @@ public class MainActivity extends ActionBarActivity {
             openedBuffer = in.getInt(BUFFER_STATE);
         if (in.containsKey(DRAWER_SELECTION))
             openedDrawer = in.getInt(DRAWER_SELECTION);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent!=null) {
+            Log.d(TAG, "Intent: " + intent.getIntExtra("extraBufferId", -1) + " " + intent.getDataString());
+
+            int requestedBuffer = intent.getIntExtra("extraBufferId", -1);
+            if (requestedBuffer == -99) {
+                openedDrawer = Gravity.START;
+            } else if (requestedBuffer != -1) {
+                openedBuffer = requestedBuffer;
+            }
+            loadBufferAndDrawerState();
+        }
     }
 
     @Override
