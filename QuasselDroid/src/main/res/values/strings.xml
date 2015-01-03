@@ -19,7 +19,7 @@
     <!-- ACTIONS -->
 
     <string name="action_about">About</string>
-    <string name="action_preferences">Preferences</string>
+    <string name="action_preferences">Settings</string>
     <string name="action_manage_cores">Manage cores</string>
     <string name="action_join_channel">Join Channel</string>
     <string name="action_hide_events">Hide Events</string>
