@@ -64,6 +64,9 @@ public class QuasseldroidNotificationManager {
                 highlightedBuffers.remove(bufferId);
                 if (highlightedBuffers.size() == 0) {
                     notifyConnected(false);
+                } else if (!connected) {
+                    notifyConnected(false);
+                    pendingHighlightNotification = true;
                 } else {
                     notifyHighlights();
                 }
