@@ -197,11 +197,14 @@ public class MainActivity extends ActionBarActivity {
         if (intent!=null) {
             Log.d(TAG, "Intent: " + intent.getIntExtra("extraBufferId", -1) + " " + intent.getDataString());
 
-            int requestedBuffer = intent.getIntExtra("extraBufferId", -1);
-            if (requestedBuffer == -99) {
+            int requestOpenBuffer = intent.getIntExtra("extraBufferId", -1);
+            boolean requestOpenDrawer = intent.getBooleanExtra("extraDrawer", false);
+            if (requestOpenBuffer != -1) {
+                openedBuffer = requestOpenBuffer;
+            }
+
+            if (requestOpenDrawer) {
                 openedDrawer = Gravity.START;
-            } else if (requestedBuffer != -1) {
-                openedBuffer = requestedBuffer;
             }
             loadBufferAndDrawerState();
         }

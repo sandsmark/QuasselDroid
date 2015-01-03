@@ -200,12 +200,13 @@ public class QuasseldroidNotificationManager {
                         lastMessage.content));
             }
 
-            int extraBufferId = -1;
+            int openBuffer = -1;
+            boolean openDrawer = false;
 
             if (highlightedBuffers.size() == 1 && highlightedMessages.get(highlightedBuffers.get(0)).size() == 1) {
                 IrcMessage message = highlightedMessages.get(highlightedBuffers.get(0)).get(0);
 
-                extraBufferId = message.bufferInfo.id;
+                openBuffer = message.bufferInfo.id;
 
                 builder.setContentTitle(message.bufferInfo.name)
                         .setContentText(MessageUtil.parseStyleCodes(context, String.format("%s: %s", message.getNick(), message.content), displayColors));
@@ -255,7 +256,7 @@ public class QuasseldroidNotificationManager {
                 // Moves the expanded layout object into the notification object.
                 builder.setStyle(inboxStyle);
 
-                extraBufferId = buffer.getInfo().id;
+                openBuffer = buffer.getInfo().id;
             } else {
                 builder.setContentTitle(context.getText(R.string.app_name))
                         .setContentText(
@@ -312,19 +313,20 @@ public class QuasseldroidNotificationManager {
                 // Moves the expanded layout object into the notification object.
                 builder.setStyle(inboxStyle);
 
-                extraBufferId = -99;
+                openBuffer = -1;
+                openDrawer = true;
             }
 
             builder.setColor(ThemeUtil.Color.chatHighlight);
 
             Intent launch = new Intent(context, MainActivity.class);
-            launch.putExtra("extraBufferId", extraBufferId);
+            launch.putExtra("extraBufferId", openBuffer);
+            launch.putExtra("extraDrawer", openDrawer);
 
             Uri.Builder uriBuilder = new Uri.Builder();
             uriBuilder.scheme("content");
             uriBuilder.path(Quasseldroid.class.getCanonicalName());
-            uriBuilder.appendPath("buffer");
-            uriBuilder.appendPath(String.valueOf(extraBufferId));
+            uriBuilder.appendPath("open-buffer");
             launch.setData(uriBuilder.build());
 
             Log.d(QuasseldroidNotificationManager.class.getSimpleName(), "Notification/Intent: " + launch.getIntExtra("extraBufferId", -2));
