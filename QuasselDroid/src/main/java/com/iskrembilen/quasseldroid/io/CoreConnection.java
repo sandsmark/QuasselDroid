@@ -58,6 +58,7 @@ import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
@@ -422,9 +423,10 @@ public final class CoreConnection {
     public void connect() throws UnknownHostException, IOException, GeneralSecurityException, CertificateException, NewCertificateException, EmptyQVariantException, UnsupportedProtocolException {
         updateInitProgress("Connecting...");
         // START CREATE SOCKETS
-        SocketFactory factory = (SocketFactory) SocketFactory.getDefault();
-        socket = (Socket) factory.createSocket(address, port);
+        //SocketFactory factory = (SocketFactory) SocketFactory.getDefault();
+        socket = new Socket();
         socket.setKeepAlive(true);
+        socket.connect(new InetSocketAddress(address, port), 10000);
         outStream = new QDataOutputStream(socket.getOutputStream());
         inStream = new QDataInputStream(socket.getInputStream());
         // END CREATE SOCKETS
@@ -466,8 +468,9 @@ public final class CoreConnection {
             //This means that the core supports only the legacy handshake, so reopen the connection
             //and try again.
             updateInitProgress("Legacy core detected, falling back to legacy handshake...");
-            socket = (Socket) factory.createSocket(address, port);
+            socket = new Socket();
             socket.setKeepAlive(true);
+            socket.connect(new InetSocketAddress(address, port), 10000);
             outStream = new QDataOutputStream(socket.getOutputStream());
             inStream = new QDataInputStream(socket.getInputStream());
         }
@@ -635,6 +638,7 @@ public final class CoreConnection {
                 List<QVariant<?>> packedFunc = new LinkedList<QVariant<?>>();
                 packedFunc.add(new QVariant<Integer>(RequestType.HeartBeat.getValue(), QVariantType.Int));
                 packedFunc.add(new QVariant<Calendar>(Calendar.getInstance(), QVariantType.Time));
+                Log.d(TAG, "Sending heartbeat");
                 try {
                     sendQVariantList(packedFunc);
                 } catch (IOException e) {
@@ -658,6 +662,17 @@ public final class CoreConnection {
 
     public void closeConnection() {
         readThread.running = false; //tell the while loop to quit
+        Thread closeThread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    if (socket != null)
+                        socket.close();
+                } catch (IOException e) {
+                    Log.w(TAG, "IOException while closing socket", e);
+                }
+            }
+        });
+        closeThread.start();
     }
 
     /**
@@ -829,7 +844,7 @@ public final class CoreConnection {
     private class ReadThread extends Thread {
         boolean running = false;
 
-        CountDownTimer checkAlive = new CountDownTimer(180000, 180000) {
+        CountDownTimer checkAlive = new CountDownTimer(45000, 45000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 //Do nothing, no use
