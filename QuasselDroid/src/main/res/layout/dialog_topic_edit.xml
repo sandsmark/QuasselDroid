@@ -6,5 +6,5 @@
     android:padding="16dp"
     android:textAppearance="@style/TextAppearance.AppCompat.Menu"
     android:id="@+id/dialog_topic_text"
-    android:hint="@string/hint_topic"
+    android:hint="@string/dialog_hint_topic"
     android:inputType="text" />
