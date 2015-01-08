@@ -107,7 +107,7 @@
     </plurals>
 
     <string name="notification_you_have_been_highlighted">You have been highlighted</string>
-    <string name="notification_hightlights_on_buffers">%1$s inNo %2$s</string>
+    <string name="notification_hightlights_on_buffers">%1$s in %2$s</string>
 
     <string name="notification_connecting">Connecting to core</string>
     <string name="notification_connected">Connected to core</string>
