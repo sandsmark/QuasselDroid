@@ -37,7 +37,7 @@
     <string name="action_core_edit">Edit core</string>
     <string name="action_core_delete">Delete core</string>
 
-    <!-- might be deleteable soon, definitely after #220 has been merged -->
+    <!-- TODO: Delete this after #220 has been merged -->
     <string name="action_hidden_display">Show hidden Buffers</string>
     <string name="action_hidden_hide">Hide hidden Buffers</string>
 
