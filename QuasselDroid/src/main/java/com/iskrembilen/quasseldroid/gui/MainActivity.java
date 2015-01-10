@@ -54,6 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
@@ -65,6 +66,7 @@ import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
+import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
 import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.TopicViewDialog;
@@ -73,7 +75,6 @@ import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -189,6 +190,24 @@ public class MainActivity extends ActionBarActivity {
             openedBuffer = in.getInt(BUFFER_STATE);
         if (in.containsKey(DRAWER_SELECTION))
             openedDrawer = in.getInt(DRAWER_SELECTION);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent!=null) {
+            Log.d(TAG, "Intent: " + intent.getIntExtra("extraBufferId", -1) + " " + intent.getDataString());
+
+            int requestOpenBuffer = intent.getIntExtra("extraBufferId", -1);
+            boolean requestOpenDrawer = intent.getBooleanExtra("extraDrawer", false);
+            if (requestOpenBuffer != -1) {
+                openedBuffer = requestOpenBuffer;
+            }
+
+            if (requestOpenDrawer) {
+                openedDrawer = Gravity.START;
+            }
+            loadBufferAndDrawerState();
+        }
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SyncAdapterType;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -20,12 +21,13 @@ import android.util.SparseArray;
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.Network;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
-import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class QuasseldroidNotificationManager {
 
     android.app.NotificationManager notifyManager;
     private boolean connected = false;
-    private Notification pendingHighlightNotification;
+    private boolean pendingHighlightNotification;
 
     public QuasseldroidNotificationManager(Context context) {
         this.context = context;
@@ -62,6 +64,9 @@ public class QuasseldroidNotificationManager {
                 highlightedBuffers.remove(bufferId);
                 if (highlightedBuffers.size() == 0) {
                     notifyConnected(false);
+                } else if (!connected) {
+                    notifyConnected(false);
+                    pendingHighlightNotification = true;
                 } else {
                     notifyHighlights();
                 }
@@ -72,9 +77,8 @@ public class QuasseldroidNotificationManager {
     private void notifyConnected(boolean withPhysicalNotifications) {
         int defaults = 0;
         connected = true;
-        if(pendingHighlightNotification != null) {
-            notifyManager.notify(R.id.NOTIFICATION, pendingHighlightNotification);
-            pendingHighlightNotification = null;
+        if (pendingHighlightNotification) {
+            notifyHighlights();
         } else {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                     .setSmallIcon(R.drawable.stat_normal)
@@ -144,99 +148,100 @@ public class QuasseldroidNotificationManager {
     }
 
     public void addMessage(IrcMessage message) {
-        // If the buffer in question isn’t in the list of highlighted buffers, add it
-        if (!highlightedBuffers.contains(message.bufferInfo.id)) {
-            highlightedBuffers.add(message.bufferInfo.id);
-            // If the buffer has had no highlights yet, add a new list of highlights
-            if (highlightedMessages.get(message.bufferInfo.id)==null)
-                highlightedMessages.put(message.bufferInfo.id, new ArrayList<IrcMessage>());
+        synchronized (highlightedBuffers) {
+            // If the buffer in question isn’t in the list of highlighted buffers, add it
+            if (!highlightedBuffers.contains(message.bufferInfo.id)) {
+                highlightedBuffers.add(message.bufferInfo.id);
+                // If the buffer has had no highlights yet, add a new list of highlights
+                if (highlightedMessages.get(message.bufferInfo.id) == null)
+                    highlightedMessages.put(message.bufferInfo.id, new ArrayList<IrcMessage>());
+            }
+            if (!highlightedMessages.get(message.bufferInfo.id).contains(message))
+                highlightedMessages.get(message.bufferInfo.id).add(message);
         }
-        if (!highlightedMessages.get(message.bufferInfo.id).contains(message))
-            highlightedMessages.get(message.bufferInfo.id).add(message);
 
         lastMessage = message;
 
-        notifyHighlights();
+        if (connected)
+            notifyHighlights();
+        else
+            pendingHighlightNotification = true;
     }
 
     int getHighlightedMessageCount() {
-        int res = 0;
-        for (Integer bufferId : highlightedBuffers) {
-            res += highlightedMessages.get(bufferId).size();
+        synchronized (highlightedBuffers) {
+            int res = 0;
+            for (Integer bufferId : highlightedBuffers) {
+                res += highlightedMessages.get(bufferId).size();
+            }
+            return res;
         }
-        return res;
     }
 
     public void notifyHighlights() {
-        if (!connected)
-            return;
+        synchronized (highlightedMessages) {
 
-        boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text),true);
+            boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text), true);
 
-        int defaults = 0;
+            int defaults = 0;
 
-        Resources res = context.getResources();
+            Resources res = context.getResources();
 
-        int highlightedMessageCount = getHighlightedMessageCount();
+            int highlightedMessageCount = getHighlightedMessageCount();
 
-        // Building the base notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setSmallIcon(R.drawable.stat_highlight)
-                .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setWhen(System.currentTimeMillis())
-                .setNumber(highlightedMessageCount);
+            // Building the base notification
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            builder.setSmallIcon(R.drawable.stat_highlight)
+                    .setOngoing(true)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setWhen(System.currentTimeMillis())
+                    .setNumber(highlightedMessageCount);
 
-        if (lastMessage!=null) {
-            builder.setTicker(String.format("%s : %s",
-                    lastMessage.getNick(),
-                    lastMessage.content));
-        }
+            if (lastMessage != null) {
+                builder.setTicker(String.format("%s : %s",
+                        lastMessage.getNick(),
+                        lastMessage.content));
+            }
 
-        if (highlightedBuffers.size()==1 && highlightedMessages.get(highlightedBuffers.get(0)).size()==1) {
-            IrcMessage message = highlightedMessages.get(highlightedBuffers.get(0)).get(0);
+            int openBuffer = -1;
+            boolean openDrawer = false;
 
-            builder.setContentTitle(message.bufferInfo.name)
-                   .setContentText(MessageUtil.parseStyleCodes(context,String.format("%s: %s",message.getNick(),message.content),displayColors));
-        } else {
-            builder.setContentTitle(context.getText(R.string.app_name))
-                   .setContentText(
-                           String.format(
-                                   res.getString(R.string.notification_hightlights_on_buffers),
-                                   res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
-                                   res.getQuantityString(R.plurals.notification_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size())));
+            if (highlightedBuffers.size() == 1 && highlightedMessages.get(highlightedBuffers.get(0)).size() == 1) {
+                IrcMessage message = highlightedMessages.get(highlightedBuffers.get(0)).get(0);
 
-            NotificationCompat.InboxStyle inboxStyle =
-                    new NotificationCompat.InboxStyle();
+                openBuffer = message.bufferInfo.id;
 
-            // Sets a title for the Inbox in expanded layout
-            inboxStyle.setBigContentTitle(
-                    String.format(
-                            res.getString(R.string.notification_hightlights_on_buffers),
-                            res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
-                            res.getQuantityString(R.plurals.notification_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size())));
+                builder.setContentTitle(message.bufferInfo.name)
+                        .setContentText(MessageUtil.parseStyleCodes(context, String.format("%s: %s", message.getNick(), message.content), displayColors));
+            } else if (highlightedBuffers.size() == 1) {
+                NetworkCollection networks = NetworkCollection.getInstance();
+                Buffer buffer = networks.getBufferById(highlightedBuffers.get(0));
+                List<IrcMessage> messages = highlightedMessages.get(highlightedBuffers.get(0));
 
-            // Moves events into the expanded layout
-            for (Integer bufferId : highlightedBuffers) {
-                Buffer buffer = NetworkCollection.getInstance().getBufferById(bufferId);
-                List<IrcMessage> messages = highlightedMessages.get(bufferId);
+                builder.setContentTitle(buffer.getInfo().name)
+                        .setContentText(
+                                String.format(
+                                        res.getString(R.string.notification_hightlights_on_buffers),
+                                        res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
+                                        buffer.getInfo().name));
 
-                if (messages.size()==1) {
-                    IrcMessage m = messages.get(0);
-                    SpannableString s;
-                    if (m.bufferInfo.type== BufferInfo.Type.QueryBuffer) {
-                        s = MessageUtil.parseStyleCodes(context,String.format("%s: %s",m.getNick(),m.content),displayColors);
-                        s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                    } else {
-                        s = MessageUtil.parseStyleCodes(context,String.format("%s %s: %s",m.bufferInfo.name,m.getNick(),m.content),displayColors);
-                        s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.bufferInfo.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                    }
-                    inboxStyle.addLine(s);
-                } else if (buffer.getInfo().type== BufferInfo.Type.QueryBuffer) {
+                NotificationCompat.InboxStyle inboxStyle =
+                        new NotificationCompat.InboxStyle();
+
+                // Sets a title for the Inbox in expanded layout
+                inboxStyle.setBigContentTitle(
+                        String.format(
+                                res.getString(R.string.notification_hightlights_on_buffers),
+                                res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
+                                buffer.getInfo().name));
+
+                // Moves events into the expanded layout
+
+                if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
                     SpannableString s;
 
                     for (IrcMessage m : messages) {
-                        s = MessageUtil.parseStyleCodes(context,String.format("%s: %s",m.getNick(),m.content),displayColors);
+                        s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
                         s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                         inboxStyle.addLine(s);
                     }
@@ -247,50 +252,120 @@ public class QuasseldroidNotificationManager {
 
                     inboxStyle.addLine(s);
                     for (IrcMessage m : messages) {
-                        inboxStyle.addLine(String.format("  %s: %s",m.getNick(),m.content));
+                        inboxStyle.addLine(String.format("  %s: %s", m.getNick(), m.content));
                     }
                 }
+
+                // Moves the expanded layout object into the notification object.
+                builder.setStyle(inboxStyle);
+
+                openBuffer = buffer.getInfo().id;
+            } else {
+                builder.setContentTitle(context.getText(R.string.app_name))
+                        .setContentText(
+                                String.format(
+                                        res.getString(R.string.notification_hightlights_on_buffers),
+                                        res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
+                                        res.getQuantityString(R.plurals.notification_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size())));
+
+                NotificationCompat.InboxStyle inboxStyle =
+                        new NotificationCompat.InboxStyle();
+
+                // Sets a title for the Inbox in expanded layout
+                inboxStyle.setBigContentTitle(
+                        String.format(
+                                res.getString(R.string.notification_hightlights_on_buffers),
+                                res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
+                                res.getQuantityString(R.plurals.notification_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size())));
+
+                // Moves events into the expanded layout
+                for (Integer bufferId : highlightedBuffers) {
+                    Buffer buffer = NetworkCollection.getInstance().getBufferById(bufferId);
+                    List<IrcMessage> messages = highlightedMessages.get(bufferId);
+
+                    if (messages.size() == 1) {
+                        IrcMessage m = messages.get(0);
+                        SpannableString s;
+                        if (m.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
+                            s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
+                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        } else {
+                            s = MessageUtil.parseStyleCodes(context, String.format("%s %s: %s", m.bufferInfo.name, m.getNick(), m.content), displayColors);
+                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.bufferInfo.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        }
+                        inboxStyle.addLine(s);
+                    } else if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+                        SpannableString s;
+
+                        for (IrcMessage m : messages) {
+                            s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
+                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                            inboxStyle.addLine(s);
+                        }
+                    } else {
+                        SpannableStringBuilder s = new SpannableStringBuilder(buffer.getInfo().name);
+                        s.append(":");
+                        s.setSpan(new StyleSpan(Typeface.BOLD), 0, buffer.getInfo().name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                        inboxStyle.addLine(s);
+                        for (IrcMessage m : messages) {
+                            inboxStyle.addLine(String.format("  %s: %s", m.getNick(), m.content));
+                        }
+                    }
+                }
+                // Moves the expanded layout object into the notification object.
+                builder.setStyle(inboxStyle);
+
+                openBuffer = -1;
+                openDrawer = true;
             }
-            // Moves the expanded layout object into the notification object.
-            builder.setStyle(inboxStyle);
-        }
 
-        builder.setColor(ThemeUtil.Color.chatHighlight);
+            builder.setColor(ThemeUtil.Color.chatHighlight);
 
-        Intent launch = new Intent(context, MainActivity.class);
-        launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
-        builder.setContentIntent(contentIntent);
+            Intent launch = new Intent(context, MainActivity.class);
+            launch.putExtra("extraBufferId", openBuffer);
+            launch.putExtra("extraDrawer", openDrawer);
 
-        if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
-                !preferences.getBoolean(context.getString(R.string.has_focus), true) &&
-                preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+            Uri.Builder uriBuilder = new Uri.Builder();
+            uriBuilder.scheme("content");
+            uriBuilder.path(Quasseldroid.class.getCanonicalName());
+            uriBuilder.appendPath("open-buffer");
+            launch.setData(uriBuilder.build());
 
-            Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
-            if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
-            else builder.setSound(ringtone);
-        } else if (!preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), true) &&
-                preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+            Log.d(QuasseldroidNotificationManager.class.getSimpleName(), "Notification/Intent: " + launch.getIntExtra("extraBufferId", -2));
 
-            Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
-            if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
-            else builder.setSound(ringtone);
-        }
-        if (preferences.getBoolean(context.getString(R.string.preference_notification_light), false))
-            defaults |= Notification.DEFAULT_LIGHTS;
-        if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), false))
-            defaults |= Notification.DEFAULT_VIBRATE;
+            launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent contentIntent = PendingIntent.getActivity(context, highlightedMessages.hashCode(), launch, 0);
+            builder.setContentIntent(contentIntent);
 
-        if (defaults != 0) builder.setDefaults(defaults);
+            if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
+                    !preferences.getBoolean(context.getString(R.string.has_focus), true) &&
+                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
 
-        // Send the notification.
-        if(!connected) {
-            pendingHighlightNotification = builder.build();
-        } else {
+                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
+                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                else builder.setSound(ringtone);
+            } else if (!preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), true) &&
+                    preferences.getBoolean(context.getString(R.string.preference_notification_sound), false)) {
+
+                Uri ringtone = Uri.parse(preferences.getString(context.getString(R.string.preference_notification_sound_file), ""));
+                if (ringtone.equals(Uri.EMPTY)) defaults |= Notification.DEFAULT_SOUND;
+                else builder.setSound(ringtone);
+            }
+            if (preferences.getBoolean(context.getString(R.string.preference_notification_light), false))
+                defaults |= Notification.DEFAULT_LIGHTS;
+            if (preferences.getBoolean(context.getString(R.string.preference_notification_vibrate), false))
+                defaults |= Notification.DEFAULT_VIBRATE;
+
+            if (defaults != 0) builder.setDefaults(defaults);
+
+            // Send the notification.
             notifyManager.notify(R.id.NOTIFICATION, builder.build());
-        }
 
-        lastMessage = null;
+            lastMessage = null;
+
+            pendingHighlightNotification = false;
+        }
     }
 
     @Subscribe
@@ -304,7 +379,6 @@ public class QuasseldroidNotificationManager {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(context.getResources().getString(R.string.preference_notify_hide_persistence))
-                    && pendingHighlightNotification==null
                     && connected
                     && highlightedMessages.size()==0) {
                 notifyConnected(false);
