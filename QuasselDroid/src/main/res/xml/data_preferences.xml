@@ -84,9 +84,9 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/preference_wake_lock"
-            android:summary="Use more battery when you turn off the screen, to keep connections alive"
-            android:title="Use a wake-lock to inhibit sleep" />
+            android:key="@string/preference_wakelock"
+            android:summary="@string/preference_summary_wakelock"
+            android:title="@string/preference_title_wakelock" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_category_reconnect" >
