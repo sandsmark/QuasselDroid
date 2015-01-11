@@ -279,7 +279,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void loadBufferAndDrawerState() {
-        Log.d(TAG,"Saving state: BUFFER="+openedBuffer+"; DRAWER="+openedDrawer);
+        Log.d(TAG,"Loading state: BUFFER="+openedBuffer+"; DRAWER="+openedDrawer);
         NetworkCollection networks = NetworkCollection.getInstance();
         if (networks != null) {
             if (openedBuffer == -1 || networks.getBufferById(openedBuffer) == null) {
@@ -850,7 +850,7 @@ public class MainActivity extends ActionBarActivity {
         LEFT,
         RIGHT,
         BOTH,
-        NONE;
+        NONE
     }
 
 }
