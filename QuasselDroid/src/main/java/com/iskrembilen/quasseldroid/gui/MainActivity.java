@@ -630,7 +630,6 @@ public class MainActivity extends ActionBarActivity {
                      */
                     public void onDrawerClosed(View drawerView) {
                         updateBufferRead();
-                        updateBufferRead();
                         ((BufferFragment) manager.bufferFragment).finishActionMode();
                         setTitleAndMenu();
                     }

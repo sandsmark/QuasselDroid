@@ -8,4 +8,12 @@
         android:icon="@drawable/ic_nick_list"
         android:orderInCategory="100"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_preferences"
+        android:title="@string/action_preferences"
+        android:orderInCategory="10" />
+    <item
+        android:id="@+id/menu_disconnect"
+        android:title="@string/action_disconnect"
+        android:orderInCategory="11" />
 </menu>

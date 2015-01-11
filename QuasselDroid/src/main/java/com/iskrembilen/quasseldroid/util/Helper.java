@@ -54,4 +54,13 @@ public class Helper {
         }
         return res.toArray(new CharSequence[res.size()]);
     }
+
+    public static int getStatusBarHeight(Context ctx) {
+        int result = 0;
+        int resourceId = ctx.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = ctx.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
 }

@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_join_channel"
         android:title="@string/action_join_channel"
-        android:orderInCategory="1" />
-    <item
-        android:id="@+id/menu_preferences"
-        android:title="@string/action_preferences"
-        android:orderInCategory="10" />
-    <item
-        android:id="@+id/menu_disconnect"
-        android:title="@string/action_disconnect"
-        android:orderInCategory="11" />
+        android:icon="@drawable/ic_add"
+        android:orderInCategory="1"
+        app:showAsAction="always" />
 </menu>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView
+<!--<com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/buffer_list"
@@ -8,4 +8,20 @@
     android:layout_gravity="start"
     android:choiceMode="singleChoice"
     android:dividerHeight="0dip"
-    app:headerView="@layout/widget_buffer_header"/>
+    app:headerView="@layout/widget_buffer_header"/>-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/widget_buffer_header" />
+
+    <com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView
+        android:id="@+id/buffer_list"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:dividerHeight="0dip"/>
+</LinearLayout>

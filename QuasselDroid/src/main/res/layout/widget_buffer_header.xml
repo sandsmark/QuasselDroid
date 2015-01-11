@@ -2,9 +2,9 @@
 <android.support.v7.widget.Toolbar
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/buffer_toolbar"
-    android:paddingTop="@dimen/status_bar_height"
     android:layout_height="wrap_content"
     android:minHeight="@dimen/abc_action_bar_default_height_material"
+    android:paddingTop="@dimen/status_bar_height"
     style="@style/Widget.Toolbar">
     <Spinner
         style="@style/SpinnerButton.Dark"

@@ -23,16 +23,20 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.test.suitebuilder.annotation.Suppress;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -71,6 +75,7 @@ import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
@@ -131,6 +136,14 @@ public class BufferFragment extends Fragment implements Serializable {
             toolbar = (Toolbar) bufferList.getHeaderView();
         } else {
             toolbar = (Toolbar) root.findViewById(R.id.buffer_toolbar);
+        }
+
+        if (toolbar.getPaddingTop()==getResources().getDimension(R.dimen.status_bar_height)) {
+            toolbar.setPadding(
+                    toolbar.getPaddingLeft(),
+                    Math.round(Helper.getStatusBarHeight(getActivity())),
+                    toolbar.getPaddingRight(),
+                    toolbar.getPaddingBottom());
         }
 
         ArrayAdapter adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_spinner_item,BufferCollectionHelper.FILTER_NAMES);

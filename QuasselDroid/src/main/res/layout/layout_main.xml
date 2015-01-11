@@ -51,7 +51,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:fitsSystemWindows="true"
-            android:background="?attr/backgroundColor"
             android:name="com.iskrembilen.quasseldroid.gui.fragments.BufferFragment"
             tools:layout="@layout/fragment_buffers" />
 
