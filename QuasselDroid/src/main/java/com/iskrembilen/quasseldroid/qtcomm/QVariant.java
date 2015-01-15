@@ -23,11 +23,12 @@
 package com.iskrembilen.quasseldroid.qtcomm;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 
-public class QVariant<T extends Object> {
+public class QVariant<T extends Object> implements Serializable {
     T data;
     DataStreamVersion version;
     QVariantType type = QVariantType.Invalid;
@@ -176,6 +177,7 @@ public class QVariant<T extends Object> {
                 }
                 ret.append(" )");
                 return ret.toString();
+            case StringList:
             case List:
                 StringBuilder r = new StringBuilder("( ");
                 List<Object> list = (List<Object>) data;
@@ -186,9 +188,21 @@ public class QVariant<T extends Object> {
                 r.append(" )");
                 return r.toString();
             case UserType:
-                return userTypeName + data;
+                return data.toString();
             default:
                 return "/" + type.toString() + " [ " + data.toString() + " ]/";
         }
+    }
+
+    public String niceString() {
+        StringBuilder r = new StringBuilder("QVariant(");
+        if (type==QVariantType.UserType && userTypeName!=null && !userTypeName.trim().equals(""))
+            r.append(userTypeName);
+        else
+            r.append(type.value);
+        r.append(", ");
+        r.append(toString());
+        r.append(")");
+        return r.toString();
     }
 }

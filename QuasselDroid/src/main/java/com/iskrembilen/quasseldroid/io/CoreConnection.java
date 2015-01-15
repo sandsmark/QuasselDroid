@@ -23,7 +23,6 @@ package com.iskrembilen.quasseldroid.io;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -31,12 +30,14 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.AbsListView;
+import android.util.SparseArray;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferCollection;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.CoreInfo;
+import com.iskrembilen.quasseldroid.Identity;
+import com.iskrembilen.quasseldroid.IdentityCollection;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
@@ -51,9 +52,7 @@ import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
-import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
@@ -379,6 +378,53 @@ public final class CoreConnection {
         }
     }
 
+    public void requestUpdateIdentity(int identityId, String method, QVariant<?> data) {
+        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+        retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<String>("Identity", QVariantType.String));
+        retFunc.add(new QVariant<String>(String.valueOf(identityId), QVariantType.String));
+        retFunc.add(new QVariant<String>(method, QVariantType.String));
+        retFunc.add(data);
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while updating identity", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
+    public void requestCreateIdentity(int identityId, QVariant<?> identity, QVariant<?> ssldata) {
+        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+        retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariantType.Int));
+
+        retFunc.add(new QVariant<String>("2identityCreated(Identity)", QVariantType.String));
+        retFunc.add(new QVariant<Map<String,?>>(new HashMap<String,Object>(),"Identity"));
+
+        Log.d(TAG,retFunc.toString());
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while updating identity", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
+    public void requestRemoveIdentity(int identityId) {
+        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
+        retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<String>("2identityRemoved(IdentityId)", QVariantType.String));
+        retFunc.add(new QVariant<Integer>(identityId, QVariantType.Int));
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while updating identity", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
     /**
      * Sends an IRC message to a given buffer
      *
@@ -581,11 +627,19 @@ public final class CoreConnection {
 		}*/
 
         Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
+
         List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
         networks = new HashMap<Integer, Network>(networkIds.size());
         for (QVariant<?> networkId : networkIds) {
             Integer id = (Integer) networkId.getData();
             networks.put(id, new Network(id));
+        }
+
+        List<QVariant<?>> identities = (List<QVariant<?>>) sessionState.get("Identities").getData();
+        List<Identity> identityList = new ArrayList<>(identities.size());
+        IdentityCollection.getInstance().clear();
+        for (QVariant<?> identityRaw : identities) {
+            IdentityCollection.getInstance().putIdentity(Identity.fromQVariant(identityRaw));
         }
 
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
@@ -696,6 +750,13 @@ public final class CoreConnection {
         HeartBeat(5),
         HeartBeatReply(6);
 
+        static SparseArray<RequestType> types = new SparseArray<>(6);
+        static {
+            for (RequestType t : RequestType.values()) {
+                types.put(t.value,t);
+            }
+        }
+
         // Below this line; java sucks. Hard.
         int value;
 
@@ -708,11 +769,7 @@ public final class CoreConnection {
         }
 
         public static RequestType getForVal(int val) {
-            for (RequestType type : values()) {
-                if (type.value == val)
-                    return type;
-            }
-            return Invalid;
+            return types.get(val,Invalid);
         }
     }
 
@@ -791,8 +848,8 @@ public final class CoreConnection {
         inStream.readUInt(32);
         QVariant<Map<String, QVariant<?>>> v = (QVariant<Map<String, QVariant<?>>>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
-        Map<String, QVariant<?>> ret = (Map<String, QVariant<?>>) v.getData();
-        //		System.out.println(ret.toString());
+        Map<String, QVariant<?>> ret = v.getData();
+
         if (!readThread.running)
             throw new IOException(); //Stops crashing while connecting if we are told to disconnect, so 2 instances are not reading the network
         return ret;
@@ -807,8 +864,8 @@ public final class CoreConnection {
         inStream.readUInt(32); // Length
         QVariant<List<QVariant<?>>> v = (QVariant<List<QVariant<?>>>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
-        List<QVariant<?>> ret = (List<QVariant<?>>) v.getData();
-        //		System.out.println(ret.toString());
+        List<QVariant<?>> ret = v.getData();
+
         return ret;
     }
 
@@ -1298,7 +1355,7 @@ public final class CoreConnection {
 						 * There are several objects that we don't care about (at the moment).
 						 */
                             else {
-                                Log.i(TAG, "Unparsed InitData: " + className + "(" + objectName + ").");
+                                Log.i(TAG, "UNHANDLED: Unparsed InitData: " + className + "(" + objectName + ").");
                             }
                             break;
 						/*
@@ -1659,8 +1716,13 @@ public final class CoreConnection {
                                 msg.obj = true;
                                 msg.sendToTarget();
 
+                            } else if (className.equals("Identity") && function.equals("update")) {
+                                Log.d(TAG, "Sync: Identity -> update");
+
+                                Message msg = handler.obtainMessage(R.id.UPDATE_IDENTITY, packedFunc.remove(0));
+                                msg.sendToTarget();
                             } else {
-                                Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
+                                Log.i(TAG, "UNHANDLED: Unparsed Sync request: " + className + "::" + function);
                             }
 
                             break;
@@ -1669,6 +1731,7 @@ public final class CoreConnection {
 						 * Remote procedure calls are direct calls that are not associated with any objects.
 						 */
                         case RpcCall:
+
                             // Contains a normalized function signature; see QMetaObject::normalizedSignature, I guess.
                             String functionName = packedFunc.remove(0).toString();
 	
@@ -1742,12 +1805,20 @@ public final class CoreConnection {
                                 int networkId = ((Integer) packedFunc.remove(0).getData());
                                 networks.remove(networkId);
                                 handler.obtainMessage(R.id.NETWORK_REMOVED, networkId, 0).sendToTarget();
+                            } else if (functionName.equals("2identityCreated(Identity)")) {
+                                Log.d(TAG, "RpcCall: " + "2identityCreated(Identity)");
+                                Message msg = handler.obtainMessage(R.id.CREATE_IDENTITY, packedFunc.remove(0));
+                                msg.sendToTarget();
+                            } else if (functionName.equals("2identityRemoved(IdentityId)")) {
+                                Log.d(TAG, "RpcCall: " + "2identityRemoved(IdentityId)");
+                                Message msg = handler.obtainMessage(R.id.REMOVE_IDENTITY, packedFunc.remove(0));
+                                msg.sendToTarget();
                             } else {
-                                Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
+                                Log.i(TAG, "UNHANDLED: RpcCall: " + functionName + " (" + packedFunc + ").");
                             }
                             break;
                         default:
-                            Log.i(TAG, "Unhandled request type: " + type.name());
+                            Log.i(TAG, "UNHANDLED: request type: " + type.name());
                     }
                     long end = System.currentTimeMillis();
                     if (end - start > 500) {

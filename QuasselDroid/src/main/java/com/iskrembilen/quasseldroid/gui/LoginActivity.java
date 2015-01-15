@@ -261,7 +261,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_preferences:
-                Intent i = new Intent(LoginActivity.this, PreferenceView.class);
+                Intent i = new Intent(LoginActivity.this, PreferenceActivity.class);
                 startActivity(i);
                 break;
         }

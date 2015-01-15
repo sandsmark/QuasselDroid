@@ -51,9 +51,10 @@ public class TopicEditDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        View dialog = getActivity().getLayoutInflater().inflate(R.layout.dialog_topic_edit, null);
-        final EditText topicField = (EditText) dialog.findViewById(R.id.dialog_topic_text);
+        View dialog = getActivity().getLayoutInflater().inflate(R.layout.dialog_simple_edit, null);
+        final EditText topicField = (EditText) dialog.findViewById(R.id.dialog_simple_text);
         this.topicField = topicField;
+        topicField.setHint(R.string.hint_topic_edit);
         topicField.setText(topic);
 
         builder.setView(dialog).setTitle(name);

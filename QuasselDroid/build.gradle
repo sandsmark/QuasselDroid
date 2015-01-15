@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url 'http://repo1.maven.org/maven2' }
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.0.0'
@@ -17,11 +17,13 @@ dependencies {
     compile group: 'com.android.support', name: 'support-v4', version: '21.0.3'
     compile group: 'com.android.support', name: 'appcompat-v7', version: '21.0.3'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
+    compile group: 'asia.ivity.android', name: 'drag-sort-listview', version: '1.0'
 }
 if(project.hasProperty("Android.signing")
         && new File((String) project.property("Android.signing") + ".gradle").exists()) {
     apply from: project.property("Android.signing") + ".gradle";
 }
+
 android {
     compileSdkVersion 21
     buildToolsVersion '21.1.2'

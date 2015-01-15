@@ -24,6 +24,7 @@
     <string name="action_join_channel">Join Channel</string>
     <string name="action_hide_events">Hide Events</string>
     <string name="action_unhide">Make Visible</string>
+    <string name="action_nick_list">Channel userlist</string>
 
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disconnect</string>
@@ -56,6 +57,7 @@
     <string name="hint_status">Status</string>
     <string name="hint_topic">Channel topic</string>
     <string name="hint_topic_edit">Enter a topic for the channel</string>
+    <string name="hint_nick_edit">Enter a nickname</string>
     <string name="hint_core_name">Name</string>
     <string name="hint_core_address">Address</string>
     <string name="hint_core_port">Port</string>
@@ -70,6 +72,8 @@
     <string name="dialog_title_channel">Join Channel</string>
     <string name="dialog_title_core_add">Add new Core</string>
     <string name="dialog_title_core_edit">Edit Core</string>
+    <string name="dialog_title_nick_add">Add nickname</string>
+    <string name="dialog_title_nick_edit">Edit nickname</string>
     <string name="dialog_title_error">Error</string>
 
     <string name="dialog_action_cancel">Cancel</string>
@@ -223,5 +227,4 @@
 
         <string name="preference_title_notification_connect_sound_file">Connection sound</string>
         <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
-    <string name="action_nick_list">Channel userlist</string>
 </resources>

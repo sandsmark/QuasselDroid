@@ -23,20 +23,17 @@
 
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.content.Intent;
-import android.os.Build;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.test.suitebuilder.annotation.Suppress;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -69,7 +66,7 @@ import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
-import com.iskrembilen.quasseldroid.gui.PreferenceView;
+import com.iskrembilen.quasseldroid.gui.PreferenceActivity;
 import com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
@@ -177,7 +174,7 @@ public class BufferFragment extends Fragment implements Serializable {
                         else showJoinChannelDialog();
                         return true;
                     case R.id.menu_preferences:
-                        Intent i = new Intent(getActivity(), PreferenceView.class);
+                        Intent i = new Intent(getActivity(), PreferenceActivity.class);
                         startActivity(i);
                         return true;
                     case R.id.menu_disconnect:
@@ -197,6 +194,7 @@ public class BufferFragment extends Fragment implements Serializable {
         bufferListAdapter = new BufferListAdapter(getActivity());
         bufferList.setAdapter(bufferListAdapter);
         bufferList.setDividerHeight(0);
+        bufferList.setGroupIndicator(getResources().getDrawable(android.R.color.transparent));
 
         bufferList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
@@ -477,6 +475,7 @@ public class BufferFragment extends Fragment implements Serializable {
     public static class ViewHolderGroup {
         public TextView statusView;
         public int networkId;
+        public ImageView indicatorView;
     }
 
     public void setNetworks(NetworkCollection networks) {
@@ -645,6 +644,7 @@ public class BufferFragment extends Fragment implements Serializable {
                         }
                     }
                 });
+                holder.indicatorView = (ImageView) convertView.findViewById(R.id.buffer_list_item_indicator);
                 holder.statusView.setOnLongClickListener(null); //Apparently need this so long click propagates to parent
                 convertView.setTag(holder);
             } else {
@@ -652,6 +652,17 @@ public class BufferFragment extends Fragment implements Serializable {
             }
             Network entry = getGroup(groupPosition);
             holder.networkId = entry.getId();
+
+            TypedArray ta = getActivity().obtainStyledAttributes(new int[]{R.attr.ic_collapse, R.attr.ic_expand});
+            Drawable collapse = ta.getDrawable(0);
+            Drawable expand = ta.getDrawable(1);
+            ta.recycle();
+
+            if (isExpanded)
+                holder.indicatorView.setImageDrawable(collapse);
+            else
+                holder.indicatorView.setImageDrawable(expand);
+
             holder.statusView.setText(entry.getName());
             holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
             BufferUtils.setBufferViewStatus(getActivity(), entry.getStatusBuffer(), holder.statusView);

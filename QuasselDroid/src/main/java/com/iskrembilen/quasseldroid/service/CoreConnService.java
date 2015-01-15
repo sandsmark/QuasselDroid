@@ -50,8 +50,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.BufferInfo;
+import com.iskrembilen.quasseldroid.Identity;
+import com.iskrembilen.quasseldroid.IdentityCollection;
 import com.iskrembilen.quasseldroid.IrcMessage;
 import com.iskrembilen.quasseldroid.IrcUser;
 import com.iskrembilen.quasseldroid.Network;
@@ -64,6 +64,7 @@ import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.RequestCreateIdentityEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
@@ -79,12 +80,17 @@ import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.QueryUserEvent;
+import com.iskrembilen.quasseldroid.events.RequestRemoveIdentityEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
+import com.iskrembilen.quasseldroid.events.RequestUpdateIdentityEvent;
+import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
+import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.qtcomm.QVariant;
+import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.squareup.otto.Produce;
@@ -92,6 +98,7 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Observer;
 
@@ -299,6 +306,21 @@ public class CoreConnService extends Service {
 
     public void sendMessage(int bufferId, String message) {
         coreConn.sendMessage(bufferId, message);
+    }
+
+    @Subscribe
+    public void onRequestUpdateIdentity(RequestUpdateIdentityEvent event) {
+        coreConn.requestUpdateIdentity(event.identityId, event.method, event.data);
+    }
+
+    @Subscribe
+    public void onRequestCreateIdentity(RequestCreateIdentityEvent event) {
+        coreConn.requestCreateIdentity(event.identityId, event.identity, null);
+    }
+
+    @Subscribe
+    public void onRequestRemoveIdentity(RequestRemoveIdentityEvent event) {
+        coreConn.requestRemoveIdentity(event.identityId);
     }
 
     public void queryUser(int bufferId, String nick) {
@@ -782,6 +804,28 @@ public class CoreConnService extends Service {
                         }
                     }
                     break;
+                case R.id.UPDATE_IDENTITY:
+                case R.id.CREATE_IDENTITY:
+                    try {
+                        Identity identity = Identity.fromQVariant((QVariant<?>) msg.obj);
+                        IdentityCollection.getInstance().putIdentity(identity);
+                        BusProvider.getInstance().post(new UpdateIdentityEvent(identity));
+                    } catch (EmptyQVariantException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case R.id.REMOVE_IDENTITY:
+                    try {
+                        if (((QVariant<?>) msg.obj).getType()== QVariantType.Map) {
+                            IdentityCollection.getInstance().removeIdentity(Identity.fromQVariant((QVariant<HashMap>) msg.obj));
+                        } else if (((QVariant<?>) msg.obj).getType()== QVariantType.Int) {
+                            IdentityCollection.getInstance().removeIdentity(((QVariant<Integer>) msg.obj).getData());
+                        } else {
+                            Log.d(TAG,"Encountered unknown identity type while sync:"+((QVariant<?>) msg.obj).getType().name());
+                        }
+                    } catch (EmptyQVariantException e) {
+                        e.printStackTrace();
+                    }
             }
         }
     }

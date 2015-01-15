@@ -23,8 +23,8 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -32,13 +32,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.iskrembilen.quasseldroid.Identity;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.dialogs.AboutDialog;
 import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
-public class PreferenceView extends ActionBarActivity {
-    private String TAG = PreferenceView.class.getSimpleName();
+public class PreferenceActivity extends ActionBarActivity {
+    private String TAG = PreferenceActivity.class.getSimpleName();
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
@@ -74,6 +75,9 @@ public class PreferenceView extends ActionBarActivity {
         switch (mi.getItemId()) {
             case android.R.id.home:
                 finish();
+                return true;
+            case R.id.menu_identities:
+                startActivity(new Intent(this, IdentityListActivity.class));
                 return true;
             case R.id.menu_about:
                 new AboutDialog().show(getFragmentManager(),TAG);

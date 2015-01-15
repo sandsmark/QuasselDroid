@@ -46,29 +46,44 @@
                     android:scaleType="fitCenter" />
             </LinearLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="@string/hint_identity_username"/>
             <EditText
                 android:id="@+id/usernameField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|fill_horizontal"
-                android:layout_weight="1"
-                android:hint="@string/hint_identity_username"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="8dp"
+                android:textSize="16sp"
                 android:singleLine="true"
-                android:inputType="textNoSuggestions">
-
-                <requestFocus />
-            </EditText>
+                android:inputType="textNoSuggestions" />
 
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="@string/hint_identity_password"/>
             <EditText
                 android:id="@+id/passwordField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|fill_horizontal"
-                android:layout_weight="1"
-                android:hint="@string/hint_identity_password"
-                android:inputType="textPassword"
-                android:singleLine="true"/>
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="8dp"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:inputType="textPassword" />
 
             <CheckBox
                 android:id="@+id/remember_me_checkbox"
@@ -81,18 +96,16 @@
         </LinearLayout>
     </ScrollView>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/connect_layout"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical" >
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dip"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="4dip"
-            android:layout_marginRight="4dip"
             android:background="?android:attr/dividerVertical" />
 
         <Button
@@ -102,6 +115,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:text="@string/action_connect" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>
