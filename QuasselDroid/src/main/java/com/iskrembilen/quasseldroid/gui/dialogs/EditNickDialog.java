@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,8 @@ public class EditNickDialog extends DialogFragment {
     private int pos;
     private boolean add;
 
+    private OnResultListener<String> listener;
+
     protected EditText editText;
 
     public static EditNickDialog newInstance(int pos, int identityId) {
@@ -41,7 +44,7 @@ public class EditNickDialog extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(@NonNull Bundle savedInstanceState) {
         pos = getArguments().getInt("pos");
         identityId = getArguments().getInt("identityId");
         add = pos==-1;
@@ -68,21 +71,23 @@ public class EditNickDialog extends DialogFragment {
                 dialog.cancel();
             }
         });
-        builder.setPositiveButton(getString(R.string.dialog_action_save),new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.dialog_action_save), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Identity identity = IdentityCollection.getInstance().getIdentity(identityId);
-                List<String> nicks = identity.getNicks();
-                if (add) {
-                    nicks.add(editText.getText().toString());
-                } else {
-                    nicks.set(pos,editText.getText().toString());
-                }
-                identity.setNicks(nicks);
+                if (listener!=null)
+                    listener.onClick(editText.getText().toString());
                 dialog.dismiss();
             }
         });
         builder.setView(dialog);
         return builder.create();
+    }
+
+    public void setOnResultListener(OnResultListener<String> listener) {
+        this.listener = listener;
+    }
+
+    public static interface OnResultListener<T> {
+        public void onClick(T result);
     }
 }

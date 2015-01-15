@@ -2,9 +2,11 @@
 <resources>
     <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="drawable_oval">@drawable/oval_ripple</item>
     </style>
     <style name="Theme.QuasselDroid.Base.Dark" parent="Theme.AppCompat">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="drawable_oval">@drawable/oval_ripple</item>
     </style>
     <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.QuasselDroid.Material.Light">
         <item name="windowActionBar">false</item>

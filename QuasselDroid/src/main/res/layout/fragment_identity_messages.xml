@@ -19,12 +19,12 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Kick Reason"/>
+            android:text="@string/identity_kick_reason"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
-                android:id="@+id/identity_kickReason"
+                android:id="@+id/identity_kick_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -41,12 +41,12 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Part Reason"/>
+            android:text="@string/identity_part_reason"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
-                android:id="@+id/identity_partReason"
+                android:id="@+id/identity_part_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -63,12 +63,12 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Quit Reason"/>
+            android:text="@string/identity_quit_reason"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <EditText
-                android:id="@+id/identity_quitReason"
+                android:id="@+id/identity_quit_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -85,16 +85,16 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Away Reason"/>
+            android:text="@string/identity_away_reason"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <CheckBox
-                android:id="@+id/identity_awayReasonEnabled"
+                android:id="@+id/identity_away_reason_enabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <EditText
-                android:id="@+id/identity_awayReason"
+                android:id="@+id/identity_away_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -111,16 +111,16 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Away Nickname"/>
+            android:text="@string/identity_away_nickname"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <CheckBox
-                android:id="@+id/identity_awayNickEnabled"
+                android:id="@+id/identity_away_nick_enabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <EditText
-                android:id="@+id/identity_awayNick"
+                android:id="@+id/identity_away_nick"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -137,16 +137,16 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Auto Away Time"/>
+            android:text="@string/identity_auto_away_time"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <CheckBox
-                android:id="@+id/identity_autoAwayEnabled"
+                android:id="@+id/identity_auto_away_enabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <EditText
-                android:id="@+id/identity_autoAwayTime"
+                android:id="@+id/identity_auto_away_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -163,16 +163,16 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Auto Away Reason"/>
+            android:text="@string/identity_auto_away_reason"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <CheckBox
-                android:id="@+id/identity_autoAwayReasonEnabled"
+                android:id="@+id/identity_auto_away_reason_enabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <EditText
-                android:id="@+id/identity_autoAwayReason"
+                android:id="@+id/identity_auto_away_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
@@ -183,7 +183,7 @@
         </LinearLayout>
 
         <CheckBox
-            android:id="@+id/identity_detachAwayEnabled"
+            android:id="@+id/identity_detach_away_enabled"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
@@ -191,7 +191,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:textSize="16sp"
-            android:text="Detach Away Enabled"/>
+            android:text="@string/identity_detach_away_enabled"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -200,16 +200,16 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:text="Detach Away Reason"/>
+            android:text="@string/identity_detach_away_reason"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <CheckBox
-                android:id="@+id/identity_detachAwayReasonEnabled"
+                android:id="@+id/identity_detach_away_reason_enabled"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <EditText
-                android:id="@+id/identity_detachAwayReason"
+                android:id="@+id/identity_detach_away_reason"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"

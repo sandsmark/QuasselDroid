@@ -5,4 +5,6 @@
 
     <dimen name="status_bar_height">0dp</dimen>
     <dimen name="toast_offset">8dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_diameter">56dp</dimen>
 </resources>

@@ -1,12 +1,17 @@
 package com.iskrembilen.quasseldroid;
 
+import android.util.Log;
+
 import com.iskrembilen.quasseldroid.events.RequestCreateIdentityEvent;
 import com.iskrembilen.quasseldroid.events.RequestUpdateIdentityEvent;
+import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
+import com.iskrembilen.quasseldroid.gui.IdentityActivity;
 import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -196,136 +201,143 @@ public class Identity {
     }
 
     public void setIdentityName (String identityName) {
-        if (this.identityName==identityName)
+        if (this.identityName.equals(identityName))
             return;
 
         this.identityName = identityName;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setRealName (String realName) {
-        if (this.realName==realName)
+        if (this.realName.equals(realName))
             return;
 
         this.realName = realName;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAwayNick (String awayNick) {
-        if (this.awayNick==awayNick)
+        if (this.awayNick.equals(awayNick))
             return;
 
         this.awayNick = awayNick;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAwayReason (String awayReason) {
-        if (this.awayReason==awayReason)
+        if (this.awayReason.equals(awayReason))
             return;
 
         this.awayReason = awayReason;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAutoAwayReason (String autoAwayReason) {
-        if (this.autoAwayReason==autoAwayReason)
+        if (this.autoAwayReason.equals(autoAwayReason))
             return;
 
         this.autoAwayReason = autoAwayReason;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setDetachAwayReason (String detachAwayReason) {
-        if (this.detachAwayReason==detachAwayReason)
+        if (this.detachAwayReason.equals(detachAwayReason))
             return;
 
         this.detachAwayReason = detachAwayReason;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setIdent (String ident) {
-        if (this.ident==ident)
+        if (this.ident.equals(ident))
             return;
 
         this.ident = ident;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setKickReason (String kickReason) {
-        if (this.kickReason==kickReason)
+        if (this.kickReason.equals(kickReason))
             return;
 
         this.kickReason = kickReason;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setPartReason (String partReason) {
-        if (this.partReason==partReason)
+        if (this.partReason.equals(partReason))
             return;
 
         this.partReason = partReason;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setQuitReason (String quitReason) {
-        if (this.quitReason==quitReason)
+        if (this.quitReason.equals(quitReason))
             return;
 
         this.quitReason = quitReason;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setIdentityId (int identityId) {
         if (this.identityId==identityId)
             return;
 
         this.identityId = identityId;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAutoAwayTime (int autoAwayTime) {
         if (this.autoAwayTime==autoAwayTime)
             return;
 
         this.autoAwayTime = autoAwayTime;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAwayNickEnabled (boolean awayNickEnabled) {
         if (this.awayNickEnabled==awayNickEnabled)
             return;
 
         this.awayNickEnabled = awayNickEnabled;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAwayReasonEnabled (boolean awayReasonEnabled) {
         if (this.awayReasonEnabled==awayReasonEnabled)
             return;
 
         this.awayReasonEnabled = awayReasonEnabled;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAutoAwayEnabled (boolean autoAwayEnabled) {
         if (this.autoAwayEnabled==autoAwayEnabled)
             return;
 
         this.autoAwayEnabled = autoAwayEnabled;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setAutoAwayReasonEnabled (boolean autoAwayReasonEnabled) {
         if (this.autoAwayReasonEnabled==autoAwayReasonEnabled)
             return;
 
         this.autoAwayReasonEnabled = autoAwayReasonEnabled;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setDetachAwayEnabled (boolean detachAwayEnabled) {
         if (this.detachAwayEnabled==detachAwayEnabled)
             return;
 
         this.detachAwayEnabled = detachAwayEnabled;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setDetachAwayReasonEnabled (boolean detachAwayReasonEnabled) {
         if (this.detachAwayReasonEnabled==detachAwayReasonEnabled)
             return;
 
         this.detachAwayReasonEnabled = detachAwayReasonEnabled;
-        BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        sendEvents();
     }
     public void setNicks (List<String> nicks) {
-        if (this.nicks==nicks)
+        if (this.nicks.equals(nicks))
             return;
 
         this.nicks = nicks;
+        Log.d(IdentityActivity.class.getSimpleName(),nicks.toString());
+        sendEvents();
+    }
+
+    private void sendEvents() {
+        Log.d(Identity.class.getSimpleName(),"Sending Events");
         BusProvider.getInstance().post(new RequestUpdateIdentityEvent(this.identityId, "requestUpdate", this.toQVariant()));
+        BusProvider.getInstance().post(new UpdateIdentityEvent(this));
     }
 }

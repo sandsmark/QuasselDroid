@@ -379,11 +379,12 @@ public final class CoreConnection {
     }
 
     public void requestUpdateIdentity(int identityId, String method, QVariant<?> data) {
-        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-        retFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
-        retFunc.add(new QVariant<String>("Identity", QVariantType.String));
-        retFunc.add(new QVariant<String>(String.valueOf(identityId), QVariantType.String));
-        retFunc.add(new QVariant<String>(method, QVariantType.String));
+        Log.d(TAG,"Requesting identity updated: "+identityId);
+        List<QVariant<?>> retFunc = new LinkedList<>();
+        retFunc.add(new QVariant<>(RequestType.Sync.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<>("Identity", QVariantType.String));
+        retFunc.add(new QVariant<>(String.valueOf(identityId), QVariantType.String));
+        retFunc.add(new QVariant<>(method, QVariantType.String));
         retFunc.add(data);
 
         try {
@@ -395,11 +396,11 @@ public final class CoreConnection {
     }
 
     public void requestCreateIdentity(int identityId, QVariant<?> identity, QVariant<?> ssldata) {
-        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-        retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariantType.Int));
+        List<QVariant<?>> retFunc = new LinkedList<>();
+        retFunc.add(new QVariant<>(RequestType.RpcCall.getValue(), QVariantType.Int));
 
-        retFunc.add(new QVariant<String>("2identityCreated(Identity)", QVariantType.String));
-        retFunc.add(new QVariant<Map<String,?>>(new HashMap<String,Object>(),"Identity"));
+        retFunc.add(new QVariant<>("2identityCreated(Identity)", QVariantType.String));
+        retFunc.add(new QVariant<>(new HashMap<String,Object>(),"Identity"));
 
         Log.d(TAG,retFunc.toString());
 
@@ -412,10 +413,10 @@ public final class CoreConnection {
     }
 
     public void requestRemoveIdentity(int identityId) {
-        List<QVariant<?>> retFunc = new LinkedList<QVariant<?>>();
-        retFunc.add(new QVariant<Integer>(RequestType.RpcCall.getValue(), QVariantType.Int));
-        retFunc.add(new QVariant<String>("2identityRemoved(IdentityId)", QVariantType.String));
-        retFunc.add(new QVariant<Integer>(identityId, QVariantType.Int));
+        List<QVariant<?>> retFunc = new LinkedList<>();
+        retFunc.add(new QVariant<>(RequestType.RpcCall.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<>("2identityRemoved(IdentityId)", QVariantType.String));
+        retFunc.add(new QVariant<>(identityId, QVariantType.Int));
 
         try {
             sendQVariantList(retFunc);

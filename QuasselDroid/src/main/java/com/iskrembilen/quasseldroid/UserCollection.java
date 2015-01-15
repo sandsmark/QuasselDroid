@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid;
 
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -16,8 +17,8 @@ public class UserCollection extends Observable implements Observer {
     private Map<IrcMode, ArrayList<IrcUser>> uniqueUsers;
 
     public UserCollection() {
-        users = new HashMap<IrcMode, ArrayList<IrcUser>>();
-        uniqueUsers = new HashMap<IrcMode, ArrayList<IrcUser>>();
+        users = new HashMap<>();
+        uniqueUsers = new HashMap<>();
         for (IrcMode mode : IrcMode.values()) {
             users.put(mode, new ArrayList<IrcUser>());
             uniqueUsers.put(mode, new ArrayList<IrcUser>());
@@ -27,11 +28,7 @@ public class UserCollection extends Observable implements Observer {
     public void addUser(IrcUser user, String modes) {
         for (IrcMode mode : IrcMode.values()) {
             if (modes.contains(mode.shortModeName)) {
-                if (addUserToModeList(mode, user)) {
-                    //Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.nick+".");
-                } else {
-                    //Log.e(TAG, "User "+user.nick+" already has mode "+mode.modeName+".");
-                }
+                addUserToModeList(mode, user);
             }
         }
         updateUniqueUsersSortedByMode();
@@ -43,11 +40,7 @@ public class UserCollection extends Observable implements Observer {
         for (Pair<IrcUser, String> user : usersWithModes) {
             for (IrcMode mode : IrcMode.values()) {
                 if (user.second.contains(mode.shortModeName)) {
-                    if (addUserToModeList(mode, user.first)) {
-                        //Log.e(TAG, "Mode "+mode.modeName+" added to user "+user.first.nick+".");
-                    } else {
-                        //Log.e(TAG, "User "+user.nick+" already has mode "+mode.modeName+".");
-                    }
+                    addUserToModeList(mode, user.first);
                 }
             }
             user.first.addObserver(this);
@@ -57,7 +50,10 @@ public class UserCollection extends Observable implements Observer {
     }
 
     private boolean addUserToModeList(IrcMode mode, IrcUser user) {
-        if (users.get(mode).contains(user)) {
+        if (user==null) {
+            Log.e(TAG, "NULL user added with mode " + mode.name());
+            return false;
+        } else if (users.get(mode).contains(user)) {
             return false;
         } else {
             users.get(mode).add(user);
@@ -69,11 +65,7 @@ public class UserCollection extends Observable implements Observer {
 
     public void removeUser(IrcUser user) {
         for (IrcMode mode : IrcMode.values()) {
-            if (removeUserFromModeList(mode, user)) {
-                //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
-            } else {
-                //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
-            }
+            removeUserFromModeList(mode, user);
         }
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
     }
@@ -81,11 +73,7 @@ public class UserCollection extends Observable implements Observer {
     public void removeUsers(ArrayList<IrcUser> users) {
         for (IrcUser user : users) {
             for (IrcMode mode : IrcMode.values()) {
-                if (removeUserFromModeList(mode, user)) {
-                    //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
-                } else {
-                    //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
-                }
+                removeUserFromModeList(mode, user);
             }
         }
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);

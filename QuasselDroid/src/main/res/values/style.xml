@@ -65,8 +65,13 @@
         <item name="drawerArrowStyle">@style/Widget.DrawerArrowToggle</item>
     </style>
 
-    <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar" />
-    <style name="Theme.QuasselDroid.Base.Dark" parent="Theme.AppCompat" />
+    <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="drawable_oval">@drawable/oval</item>
+    </style>
+
+    <style name="Theme.QuasselDroid.Base.Dark" parent="Theme.AppCompat">
+        <item name="drawable_oval">@drawable/oval</item>
+    </style>
 
     <style name="PopupMenu.Quasseldroid.Light" parent="@style/Widget.AppCompat.Light.ListPopupWindow"/>
     <style name="PopupMenu.Quasseldroid.Dark" parent="@style/Widget.AppCompat.ListPopupWindow"/>

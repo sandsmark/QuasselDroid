@@ -227,4 +227,18 @@
 
         <string name="preference_title_notification_connect_sound_file">Connection sound</string>
         <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
+
+    <string name="identity_tab_nicks">Names</string>
+    <string name="identity_tab_advanced">Advanced</string>
+        <string name="identity_kick_reason">Kick Reason</string>
+        <string name="identity_part_reason">Part Reason</string>
+        <string name="identity_quit_reason">Quit Reason</string>
+        <string name="identity_away_reason">Away Reason</string>
+        <string name="identity_away_nickname">Away Nickname</string>
+        <string name="identity_auto_away_time">Auto Away Time</string>
+        <string name="identity_auto_away_reason">Auto Away Reason</string>
+        <string name="identity_detach_away_enabled">Detach Away Enabled</string>
+        <string name="identity_detach_away_reason">Detach Away Reason</string>
+    <string name="identity_ident">Ident</string>
+    <string name="action_add_nick">Add Nick</string>
 </resources>
