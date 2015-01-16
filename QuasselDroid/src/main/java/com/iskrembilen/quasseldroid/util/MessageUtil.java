@@ -11,6 +11,7 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
@@ -42,6 +43,8 @@ public class MessageUtil {
 
         boolean preferenceNickCaseSensitive = preferences.getBoolean("preference_nick_highlight_case_sensitive",false);
 
+        Log.d(MessageUtil.class.getSimpleName(), "nicks case sensitive: " + preferenceNickCaseSensitive);
+
         // TODO: Cache this (per network)
         Network net = NetworkCollection.getInstance().getNetworkById(msg.bufferInfo.networkId);
         if (net!=null && !net.getNick().isEmpty()) {
@@ -57,7 +60,9 @@ public class MessageUtil {
             }
 
             for (String nickname : nickList) {
-                Pattern nickRegExp = Pattern.compile("(^|\\W)" + Pattern.quote(nickname) + "(\\W|$)", preferenceNickCaseSensitive ? 0 : Pattern.UNICODE_CASE);
+                int flags = Pattern.CASE_INSENSITIVE;
+                if (preferenceNickCaseSensitive) flags = 0;
+                Pattern nickRegExp = Pattern.compile("(^|\\W)" + Pattern.quote(nickname) + "(\\W|$)", flags);
                 Matcher matcher = nickRegExp.matcher(msg.content);
                 if (matcher.find()) {
                     msg.setFlag(IrcMessage.Flag.Highlight);

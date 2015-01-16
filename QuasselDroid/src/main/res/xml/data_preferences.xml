@@ -117,20 +117,20 @@
             android:dependency="@string/preference_reconnect_wifi" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Highlight">
+    <PreferenceCategory android:title="@string/preference_category_highlight">
 
         <ListPreference
             android:defaultValue="current"
-            android:dialogTitle="Highlight Nicks"
+            android:dialogTitle="@string/preference_dialog_highlight_type"
             android:entries="@array/entries_highlight_preference"
             android:entryValues="@array/entryvalues_highlight_preference"
-            android:key="preference_nick_highlight_type"
-            android:title="Highlight Nicks" />
+            android:key="@string/preference_highlight_type"
+            android:title="@string/preference_title_highlight_type" />
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="preference_nick_highlight_case_sensitive"
-            android:title="Case sensitive nicks" />
+            android:key="@string/perference_highlight_casesensitive"
+            android:title="@string/perference_title_highlight_casesensitive" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/preference_category_notifications">

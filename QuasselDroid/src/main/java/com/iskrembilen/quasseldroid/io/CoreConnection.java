@@ -1140,9 +1140,13 @@ public final class CoreConnection {
                                             ArrayList<Pair<IrcUser, String>> usersToAdd = new ArrayList<Pair<IrcUser, String>>();
                                             for (Entry<String, QVariant<?>> nick : userModes.entrySet()) {
                                                 IrcUser user = userTempMap.get(nick.getKey());
-                                                //TODO: Replace this with a less ugly hack
+                                                // TODO: Replace this with a less ugly hack
                                                 if (user == null)
                                                     user = userTempMap.get(nick.getKey().replace("(^[\\\\d-]+|[^A-Za-z0-9\\x5b-\\x60\\x7b-\\x7d])",""));
+
+                                                // If the user is still null, switch to the next
+                                                if (user == null)
+                                                    continue;
 
                                                 usersToAdd.add(new Pair<IrcUser, String>(user, (String) nick.getValue().getData()));
                                             }

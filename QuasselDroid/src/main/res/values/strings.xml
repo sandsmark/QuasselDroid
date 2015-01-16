@@ -6,6 +6,8 @@
     <string name="title_lag">%1$s%2$s</string>
     <string name="unit_milliseconds">ms</string>
     <string name="unit_seconds">s</string>
+    <string name="timeformat_long">hh:mm:ss</string>
+    <string name="timeformat_short">hh:mm</string>
     <string name="has_focus" translatable="false">hasfocus</string>
 
     <!-- APPLICATION -->
@@ -142,11 +144,16 @@
         <string name="preference_summary_theme">The application theme</string>
         <string name="preference_title_theme">Theme</string>
         <string name="preference_theme" translatable="false">selectedtheme</string>
+            <string name="theme_light">Light</string>
+            <string name="theme_dark">Dark</string>
 
         <string name="preference_dialog_timestamp">Show Seconds in Timestamp</string>
         <string name="preference_summary_timestamp">When should the Timestamp contain seconds</string>
         <string name="preference_title_timestamp">Timestamp</string>
         <string name="preference_timestamp" translatable="false">timestamp_seconds</string>
+            <string name="timestamp_always">Always</string>
+            <string name="timestamp_orientation">Screen Size</string>
+            <string name="timestamp_never">Never</string>
 
         <string name="preference_dialog_fontsize">Choose fontsize for the chat</string>
         <string name="preference_summary_fontsize">The fontsize of the chat</string>
@@ -208,6 +215,17 @@
         <string name="preference_title_reconnect_interval">Reconnect interval</string>
         <string name="preference_reconnect_interval" translatable="false">reconnectInterval</string>
 
+    <string name="preference_category_highlight">Highlight</string>
+        <string name="preference_dialog_highlight_type">Highlight Nicks</string>
+        <string name="preference_title_highlight_type">Highlight Nicks</string>
+        <string name="preference_highlight_type" translatable="false">preference_highlight_type</string>
+            <string name="highlight_all">All nicks from identity</string>
+            <string name="highlight_current">Current nick</string>
+            <string name="highlight_none">None</string>
+
+        <string name="perference_title_highlight_casesensitive">Case sensitive nicks</string>
+        <string name="perference_highlight_casesensitive" translatable="false">preference_nick_highlight_case_sensitive</string>
+
     <string name="preference_category_notifications">Notifications</string>
         <string name="preference_title_notify_connect">Notify on connect</string>
         <string name="preference_notify_connect" translatable="false">notifyconnect</string>
@@ -247,6 +265,4 @@
         <string name="identity_auto_away_reason">Auto Away Reason</string>
         <string name="identity_detach_away_enabled">Detach Away Enabled</string>
         <string name="identity_detach_away_reason">Detach Away Reason</string>
-    <string name="timeformat_long">hh:mm:ss</string>
-    <string name="timeformat_short">hh:mm</string>
 </resources>
