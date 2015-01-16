@@ -200,7 +200,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             if (requestOpenDrawer) {
-                openedDrawer = Gravity.START;
+                openedDrawer = Side.LEFT;
             }
             loadBufferAndDrawerState();
         }
