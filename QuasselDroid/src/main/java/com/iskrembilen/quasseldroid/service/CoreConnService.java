@@ -432,12 +432,12 @@ public class CoreConnService extends Service {
                         }
 
                         /**
-                         * Check if we are highlighted in the message, TODO: Add
+                         * Check if we are highlighted in the message,
                          * support for custom highlight masks
                          */
                         for (IrcMessage curMessage : messageList) {
                             if (!buffer.hasMessage(curMessage)) {
-                                MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
+                                MessageUtil.processMessage(getBaseContext(), notificationManager, curMessage);
                             } else {
                                 Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
                             }
@@ -459,10 +459,10 @@ public class CoreConnService extends Service {
 
                     if (!buffer.hasMessage(message)) {
                         /**
-                         * Check if we are highlighted in the message, TODO: Add
+                         * Check if we are highlighted in the message,
                          * support for custom highlight masks
                          */
-                        MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
+                        MessageUtil.processMessage(getBaseContext(), notificationManager, message);
 
                         buffer.addMessage(message);
 
@@ -511,9 +511,7 @@ public class CoreConnService extends Service {
                     buffer = networks.getBufferById(msg.arg1);
                     if (buffer != null) {
                         buffer.setLastSeenMessage(msg.arg2);
-                        //if(buffer.hasUnseenHighlight()) {FIXME
                         notificationManager.notifyHighlightsRead(buffer.getInfo().id);
-                        //}
                     } else {
                         Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
                     }
@@ -706,7 +704,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
                     if (user == null) {
-                        Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick");
+                        Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick to " + bundle.getString("newNick"));
                         return;
                     }
                     user.changeNick(bundle.getString("newNick"));
@@ -768,6 +766,9 @@ public class CoreConnService extends Service {
                     break;
                 case R.id.SET_NETWORK_CURRENT_SERVER:
                     networks.getNetworkById(msg.arg1).setServer((String) msg.obj);
+                    break;
+                case R.id.SET_NETWORK_IDENTITY:
+                    networks.getNetworkById(msg.arg1).setIdentityId((int) msg.obj);
                     break;
                 case R.id.RENAME_BUFFER:
                     networks.getBufferById(msg.arg1).setName((String) msg.obj);

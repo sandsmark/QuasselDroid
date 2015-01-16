@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <item name="DIALOG_ADD_CORE" type="id" />
     <item name="DIALOG_EDIT_CORE" type="id" />
     <item name="DIALOG_DELETE_CORE" type="id" />
@@ -69,4 +68,5 @@
     <item name="UPDATE_IDENTITY" type="id" />
     <item name="CREATE_IDENTITY" type="id" />
     <item name="REMOVE_IDENTITY" type="id" />
+    <item name="SET_NETWORK_IDENTITY" type="id" />
 </resources>

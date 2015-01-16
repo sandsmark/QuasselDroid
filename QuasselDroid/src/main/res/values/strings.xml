@@ -247,4 +247,6 @@
         <string name="identity_auto_away_reason">Auto Away Reason</string>
         <string name="identity_detach_away_enabled">Detach Away Enabled</string>
         <string name="identity_detach_away_reason">Detach Away Reason</string>
+    <string name="timeformat_long">hh:mm:ss</string>
+    <string name="timeformat_short">hh:mm</string>
 </resources>

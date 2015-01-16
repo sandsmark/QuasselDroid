@@ -1,7 +1,9 @@
 package com.iskrembilen.quasseldroid.util;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -9,53 +11,125 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
 
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
+import com.iskrembilen.quasseldroid.Identity;
+import com.iskrembilen.quasseldroid.IdentityCollection;
 import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.Network;
+import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageUtil {
     private static final String TAG = MessageUtil.class.getSimpleName();
 
+    public static void checkForHighlight(Context ctx, IrcMessage msg) {
+        if (((msg.type!=IrcMessage.Type.Plain) && (msg.type!=IrcMessage.Type.Notice) && (msg.type!=IrcMessage.Type.Action)) ||
+            (msg.flags==IrcMessage.Flag.Self.getValue()))
+            return;
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx.getApplicationContext());
+
+        String highlightNickPreference = preferences.getString("preference_nick_highlight_type","current");
+        String highlightNickPreferenceAll = ctx.getResources().getStringArray(R.array.entryvalues_highlight_preference)[0];
+        String highlightNickPreferenceCurrent = ctx.getResources().getStringArray(R.array.entryvalues_highlight_preference)[1];
+
+        boolean preferenceNickCaseSensitive = preferences.getBoolean("preference_nick_highlight_case_sensitive",false);
+
+        // TODO: Cache this (per network)
+        Network net = NetworkCollection.getInstance().getNetworkById(msg.bufferInfo.networkId);
+        if (net!=null && !net.getNick().isEmpty()) {
+            List<String> nickList = new ArrayList<>(1);
+            if (highlightNickPreference.equals(highlightNickPreferenceCurrent)) {
+                nickList.add(net.getNick());
+            } else if (highlightNickPreference.equals(highlightNickPreferenceAll)) {
+                Identity myIdentity = IdentityCollection.getInstance().getIdentity(net.getIdentityId());
+                if (myIdentity!=null)
+                    nickList = myIdentity.getNicks();
+                if (!nickList.contains(net.getNick()))
+                    nickList.add(net.getNick());
+            }
+
+            for (String nickname : nickList) {
+                Pattern nickRegExp = Pattern.compile("(^|\\W)" + Pattern.quote(nickname) + "(\\W|$)", preferenceNickCaseSensitive ? 0 : Pattern.UNICODE_CASE);
+                Matcher matcher = nickRegExp.matcher(msg.content);
+                if (matcher.find()) {
+                    msg.setFlag(IrcMessage.Flag.Highlight);
+                    return;
+                }
+            }
+
+            // Custom highlight rules
+/*
+            for (int i = 0; i < _highlightRules.count(); i++) {
+                const HighlightRule &rule = _highlightRules.at(i);
+                if (!rule.isEnabled)
+                    continue;
+
+                if (rule.chanName.size() > 0 && rule.chanName.compare(".*") != 0) {
+                    if (rule.chanName.startsWith("!")) {
+                        QRegExp rx(rule.chanName.mid(1), Qt::CaseInsensitive);
+                        if (rx.exactMatch(msg.bufferInfo().bufferName()))
+                            continue;
+                    }
+                    else {
+                        QRegExp rx(rule.chanName, Qt::CaseInsensitive);
+                        if (!rx.exactMatch(msg.bufferInfo().bufferName()))
+                            continue;
+                    }
+                }
+
+                QRegExp rx;
+                if (rule.isRegExp) {
+                    rx = QRegExp(rule.name, rule.caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+                }
+                else {
+                    rx = QRegExp("(^|\\W)" + QRegExp::escape(rule.name) + "(\\W|$)", rule.caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+                }
+                bool match = (rx.indexIn(msg.contents()) >= 0);
+                if (match) {
+                    msg.setFlags(msg.flags() | Message::Highlight);
+                    return;
+                }
+            }
+*/
+        }
+    }
+
     /**
      * Checks if there is a highlight in the message and then sets the flag of
      * that message to highlight
      *
-     * @param buffer  the buffer the message belongs to
+     * @param ctx the context from which the preferences will be taken
+     * @param notificationManager the NotificationManager that will receive a notification if highlighted
      * @param message the message to check
      */
-    public static void checkMessageForHighlight(QuasseldroidNotificationManager notificationManager, String nick, Buffer buffer, IrcMessage message) {
-        if (message.type == IrcMessage.Type.Plain || message.type == IrcMessage.Type.Action) {
-            if (nick == null) {
-                Log.e(TAG, "Nick is null in check message for highlight");
+    public static void processMessage(Context ctx, QuasseldroidNotificationManager notificationManager, IrcMessage message) {
+        checkForHighlight(ctx,message);
+
+        // All messages that match a highlight pattern or are in queries will trigger a notification
+        if (message.isHighlighted() || message.bufferInfo.type == BufferInfo.Type.QueryBuffer && !message.isSelf()) {
+            // Server messages with an empty sender in queries are "x is away: ..." messages
+            // (I've found no exception to that rule in my 13-million-message database)
+            // We can ignore them safely
+            if (message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
                 return;
-            } else if (nick.equals("")) return;
-            Pattern regexHighlight = Pattern.compile(".*(?<!(\\w|\\d))" + Pattern.quote(nick) + "(?!(\\w|\\d)).*", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = regexHighlight.matcher(message.content);
-            if (matcher.find()) {
-                message.setFlag(IrcMessage.Flag.Highlight);
-                // FIXME: move to somewhere proper
-            }
-        }
 
-        if (
-            ((message.isHighlighted()) ||
-                (
-                    buffer.getInfo().type == BufferInfo.Type.QueryBuffer &&
-                        !message.isSelf() &&
-                        // Server messages with an empty sender in queries are "x is away: ..." messages
-                        // (I've found no exception to that rule in my 13-million-message database)
-                        !(message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
-                )
-            ) && (!buffer.isDisplayed() && buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
-            ) {
-            notificationManager.addMessage(message);
+            Buffer buffer = NetworkCollection.getInstance().getBufferById(message.bufferInfo.id);
 
+            // We want to ignore the currently focused buffer
+            if (buffer.isDisplayed())
+                return;
+
+            // If the message wasn’t read yet, we want to add a notification
+            if (buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
+                notificationManager.addMessage(message);
         }
     }
 

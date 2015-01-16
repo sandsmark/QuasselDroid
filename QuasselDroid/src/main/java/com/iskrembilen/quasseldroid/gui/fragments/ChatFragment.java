@@ -121,17 +121,17 @@ public class ChatFragment extends Fragment implements Serializable {
         String timeType = preferences.getString(getResources().getString(R.string.preference_timestamp),"orientation");
 
         if (timeType.equalsIgnoreCase("always")) {
-            timeFormat = "%02d:%02d:%02d";
+            timeFormat = getString(R.string.timeformat_long);
         } else if (timeType.equalsIgnoreCase("never")) {
-            timeFormat = "%02d:%02d";
+            timeFormat = getString(R.string.timeformat_short);
         } else if (timeType.equalsIgnoreCase("orientation")) {
             if (getActivity().getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE) {
-                timeFormat = "%02d:%02d:%02d";
+                timeFormat = getString(R.string.timeformat_long);
             } else {
-                timeFormat = "%02d:%02d";
+                timeFormat = getString(R.string.timeformat_short);
             }
         } else {
-            timeFormat = "%02d:%02d";
+            timeFormat = getString(R.string.timeformat_short);
         }
         Log.d(TAG,"Setting time format to include seconds: "+ timeType + ", resulting format: "+ timeFormat);
     }

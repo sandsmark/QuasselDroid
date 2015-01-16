@@ -53,6 +53,7 @@ public class Network extends Observable implements Observer, Comparable<Network>
     private Boolean isConnected;
     private int latency;
     private String server;
+    private int identityId;
 
     public Network(int networkId) {
         this.networkId = networkId;
@@ -75,6 +76,14 @@ public class Network extends Observable implements Observer, Comparable<Network>
         statusBuffer.addObserver(this);
         this.setChanged();
         notifyObservers();
+    }
+
+    public void setIdentityId(int identityId) {
+        this.identityId = identityId;
+    }
+
+    public int getIdentityId() {
+        return identityId;
     }
 
     public int getId() {

@@ -82,7 +82,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -118,7 +117,6 @@ public final class CoreConnection {
     private boolean initComplete;
     private int networkInitsLeft;
     private boolean networkInitComplete;
-    private LinkedList<List<QVariant<?>>> packageQueue;
     private String errorMessage;
 
     private int bufferViewId;
@@ -130,7 +128,6 @@ public final class CoreConnection {
     private boolean usingCompression = false;
 
     private ExecutorService outputExecutor;
-
 
     public CoreConnection(long coreId, String address, int port, String username,
                           String password, String clientVersion, Handler serviceHandler,
@@ -962,7 +959,7 @@ public final class CoreConnection {
         public String doRun() throws EmptyQVariantException {
             this.running = true;
             errorMessage = null;
-            packageQueue = new LinkedList<List<QVariant<?>>>();
+            LinkedList<List<QVariant<?>>> packageQueue = new LinkedList<List<QVariant<?>>>();
 
             try {
                 connect();
@@ -1086,11 +1083,13 @@ public final class CoreConnection {
                                 Network network = networks.get(networkId);
 
                                 Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
+                                Log.d(TAG, "InitData: Network-init: "+initMap.keySet());
                                 // Store the network name and associated nick for "our" user
                                 network.setNick((String) initMap.get("myNick").getData());
                                 network.setName((String) initMap.get("networkName").getData());
                                 network.setLatency((Integer) initMap.get("latency").getData());
                                 network.setServer((String) initMap.get("currentServer").getData());
+                                network.setIdentityId((Integer) initMap.get("identityId").getData());
                                 boolean isConnected = (Boolean) initMap.get("isConnected").getData();
                                 if (isConnected) network.setConnected(true);
                                 else network.setConnectionState(ConnectionState.Disconnected);
@@ -1099,7 +1098,6 @@ public final class CoreConnection {
 
                                 //we got enough info to tell service we are parsing network
                                 Log.i(TAG, "Started parsing network " + network.getName());
-                                updateInitProgress("Receiving network: " + network.getName());
 
                                 // Horribly nested maps
                                 Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
@@ -1142,17 +1140,10 @@ public final class CoreConnection {
                                             ArrayList<Pair<IrcUser, String>> usersToAdd = new ArrayList<Pair<IrcUser, String>>();
                                             for (Entry<String, QVariant<?>> nick : userModes.entrySet()) {
                                                 IrcUser user = userTempMap.get(nick.getKey());
-                                                if (user == null) {
-                                                    Log.e(TAG, "Channel has nick that is does not match any user on the network: " + nick);
-                                                    //TODO: WHY THE FUCK IS A  USER NULL HERE? HAPPENS ON MY OWN CORE, BUT NOT ON DEBUG CORE CONNECTED TO SAME CHANNEL. QUASSEL BUG? WHAT TO DO ABOUT IT
+                                                //TODO: Replace this with a less ugly hack
+                                                if (user == null)
+                                                    user = userTempMap.get(nick.getKey().replace("(^[\\\\d-]+|[^A-Za-z0-9\\x5b-\\x60\\x7b-\\x7d])",""));
 
-                                                    //this sync request did not seem to do anything
-                                                    //
-                                                    //												sendInitRequest("IrcUser", network.getId()+"/" +nick.getKey());
-                                                    continue;
-                                                    //
-
-                                                }
                                                 usersToAdd.add(new Pair<IrcUser, String>(user, (String) nick.getValue().getData()));
                                             }
                                             buffer.getUsers().addUsers(usersToAdd);
@@ -1418,10 +1409,9 @@ public final class CoreConnection {
 
                                         if (!buffer.hasMessage(msg)) {
                                             /**
-                                             * Check if we are highlighted in the message, TODO: Add
-                                             * support for custom highlight masks
+                                             * Check if we are highlighted in the message
                                              */
-                                            MessageUtil.checkMessageForHighlight(notificationManager, networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
+                                            MessageUtil.processMessage(applicationContext, notificationManager, msg);
                                             buffer.addBacklogMessage(msg);
                                         } else {
                                             Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
@@ -1511,6 +1501,11 @@ public final class CoreConnection {
                                 String networkName = (String) packedFunc.remove(0).getData();
                                 int networkId = Integer.parseInt(objectName);
                                 handler.obtainMessage(R.id.SET_NETWORK_NAME, networkId, 0, networkName).sendToTarget();
+                            } else if (className.equals("Network") && function.equals("setIdentity")) {
+                                Log.d(TAG, "Sync: Network -> setIdentity: "+packedFunc.remove(0).getData());
+                                int identityId = (Integer) packedFunc.remove(0).getData();
+                                int networkId = Integer.parseInt(objectName);
+                                handler.obtainMessage(R.id.SET_NETWORK_IDENTITY, networkId, 0, identityId).sendToTarget();
                             } else if (className.equals("Network") && function.equals("setCurrentServer")) {
                                 Log.d(TAG, "Sync: Network -> setCurrentServer");
                                 String currentServer = (String) packedFunc.remove(0).getData();

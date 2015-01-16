@@ -28,6 +28,7 @@ import android.text.Spannable;
 
 import com.iskrembilen.quasseldroid.util.SenderColorHelper;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -93,7 +94,7 @@ public class IrcMessage implements Comparable<IrcMessage> {
         }
     }
 
-    public Date timestamp; //TODO: timezones, Java bleh as usual
+    public Date timestamp;
     public int messageId;
     public BufferInfo bufferInfo;
     public Spannable content;
@@ -116,7 +117,7 @@ public class IrcMessage implements Comparable<IrcMessage> {
 
 
     public String getTime(String format) {
-        return String.format(format, timestamp.getHours(), timestamp.getMinutes(), timestamp.getSeconds());
+        return new SimpleDateFormat(format).format(timestamp);
     }
 
     public void setSender(String sender) {

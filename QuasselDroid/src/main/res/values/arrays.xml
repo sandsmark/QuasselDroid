@@ -36,6 +36,17 @@
         <item>never</item>
     </string-array>
 
+    <string-array name="entries_highlight_preference">
+        <item>All nicks from identity</item>
+        <item>Current nicks</item>
+        <item>None</item>
+    </string-array>
+    <string-array name="entryvalues_highlight_preference">
+        <item>all</item>
+        <item>current</item>
+        <item>none</item>
+    </string-array>
+
     <string-array name="author_names">
         <item>Frederik M. J. Vestre (freqmod)</item>
         <item>Martin "Java Sucks" Sandsmark (sandsmark)</item>
