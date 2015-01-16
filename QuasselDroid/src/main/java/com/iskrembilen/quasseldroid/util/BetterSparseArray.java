@@ -3,18 +3,14 @@ package com.iskrembilen.quasseldroid.util;
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
-import org.apache.http.MethodNotSupportedException;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
-public class BetterSparseArray<E> extends SparseArray<E> implements Map {
+public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,E> {
     public BetterSparseArray() {
         this(10);
     }
@@ -51,10 +47,10 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map {
      */
     @NonNull
     @Override
-    public Set<Entry> entrySet() {
-        Set<Entry> set = new HashSet<>(size());
+    public Set<Entry<Integer, E>> entrySet() {
+        Set<Entry<Integer, E>> set = new HashSet<>(size());
         for (int i = 0; i < size(); i++) {
-            set.add(new SparseArrayEntry<E>(keyAt(i),valueAt(i)));
+            set.add(new SparseArrayEntry<>(keyAt(i),valueAt(i)));
         }
         return set;
     }
@@ -139,7 +135,7 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map {
      */
     @NonNull
     @Override
-    public Set keySet() {
+    public Set<Integer> keySet() {
         Set<Integer> set = new HashSet<>(size());
         for (int i = 0; i < size(); i++) {
             set.add(keyAt(i));
@@ -162,9 +158,9 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map {
      *                                       not support {@code null} keys or values.
      */
     @Override
-    public E put(Object key, Object value) {
-        super.put((int) key, (E) value);
-        return (E) value;
+    public E put(Integer key, E value) {
+        super.put(key, value);
+        return value;
     }
 
     /**
@@ -179,8 +175,10 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map {
      *                                       support {@code null} keys or values.
      */
     @Override
-    public void putAll(Map map) {
-        throw new IllegalArgumentException("Can’t add to SparseArray with a map");
+    public void putAll(Map<? extends Integer, ? extends E> map) {
+        for (Entry<? extends Integer, ? extends E> entry : map.entrySet()) {
+            put(entry.getKey(),entry.getValue());
+        }
     }
 
     /**
@@ -193,6 +191,9 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map {
      */
     @Override
     public E remove(Object key) {
+        if (!(key instanceof Integer))
+            throw new UnsupportedOperationException();
+
         E value = super.get((int) key);
         super.remove((int) key);
         return value;
@@ -201,66 +202,10 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map {
     @NonNull
     @Override
     public Collection<E> values() {
-        List<E> values = new ArrayList<E>(size());
+        List<E> values = new ArrayList<>(size());
         for (int i = 0; i<size(); i++) {
             values.add(valueAt(i));
         }
         return values;
-    }
-
-    public class SparseArrayIterator<E> implements Iterator<E> {
-
-        private SparseArray<E> mArray;
-        private int mCursor = -1;
-        private boolean mCursorNowhere = true;
-
-        public SparseArrayIterator(SparseArray<E> array) {
-            mArray = array;
-        }
-
-        /**
-         * @return {@link SparseArray#keyAt(int)} using the index of the last object
-         *         returned by <code>next</code> or <code>previous</code>.
-         * @throws IllegalStateException
-         *             If <code>next</code> or <code>previous</code> have not been
-         *             called, or <code>remove</code> has already been called after
-         *             the last call to <code>next</code> or <code>previous</code>.
-         */
-        public int currentKey() {
-            if (!mCursorNowhere) {
-                return mArray.keyAt(mCursor);
-            } else {
-                throw new IllegalStateException();
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return mCursor < mArray.size() - 1;
-        }
-
-        @Override
-        public E next() {
-            if (hasNext()) {
-                if (mCursorNowhere) {
-                    mCursorNowhere = false;
-                }
-                mCursor++;
-                return mArray.get(currentKey());
-            } else {
-                throw new NoSuchElementException();
-            }
-        }
-
-        @Override
-        public void remove() {
-            if (!mCursorNowhere) {
-                mArray.remove(currentKey());
-                mCursorNowhere = true;
-                mCursor--;
-            } else {
-                throw new IllegalStateException();
-            }
-        }
     }
 }
