@@ -36,7 +36,7 @@
 
     <color name="buffer_highlight_color_light">#ffab00</color>
     <color name="buffer_unread_color_light">#1976d2</color>
-    <color name="buffer_activity_color_light">#00c853</color>
+    <color name="buffer_activity_color_light">#6BB84D</color>
     <color name="buffer_read_color_light">#333333</color>
     <color name="buffer_parted_color_light">#999999</color>
     <color name="buffer_status_active_light">#0097a7</color>
@@ -64,7 +64,7 @@
 
     <color name="buffer_highlight_color_dark">#ffab00</color>
     <color name="buffer_unread_color_dark">#1976d2</color>
-    <color name="buffer_activity_color_dark">#00c853</color>
+    <color name="buffer_activity_color_dark">#6BB84D</color>
     <color name="buffer_read_color_dark">#dddddd</color>
     <color name="buffer_parted_color_dark">#888888</color>
     <color name="buffer_status_active_dark">#0097a7</color>
