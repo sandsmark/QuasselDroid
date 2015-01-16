@@ -1,5 +1,3 @@
-
-
 package com.iskrembilen.quasseldroid.gui.dialogs;
 
 import android.app.AlertDialog;
@@ -58,18 +56,12 @@ public class TopicViewDialog extends DialogFragment {
     }
 
     @Override
-<<<<<<< HEAD
     public Dialog getDialog() {
         return mDialog;
     }
 
     @Override
     public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-=======
-    public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        topic = getArguments().getCharSequence("topic");
-        name = getArguments().getString("name");
->>>>>>> Fixed bugs, cleaned up the code
         id = getArguments().getInt("id");
         mBuffer = NetworkCollection.getInstance().getBufferById(id);
 

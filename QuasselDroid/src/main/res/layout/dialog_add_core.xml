@@ -6,22 +6,52 @@
     android:orientation="vertical"
     android:padding="16dip">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/hint_core_name"/>
     <EditText
         android:id="@+id/dialog_name_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:hint="@string/hint_core_name"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="16sp"
         android:singleLine="true" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/hint_core_address"/>
     <EditText
         android:id="@+id/dialog_address_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textUri"
-        android:hint="@string/hint_core_address"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="16sp"
         android:singleLine="true" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/hint_core_port"/>
     <EditText
         android:id="@+id/dialog_port_field"
         android:layout_width="match_parent"
@@ -29,6 +59,9 @@
         android:inputType="number"
         android:maxLength="5"
         android:singleLine="true"
-        android:hint="@string/hint_core_port"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="16sp"
         android:text="@string/default_port" />
 </LinearLayout>

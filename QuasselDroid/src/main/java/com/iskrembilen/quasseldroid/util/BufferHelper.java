@@ -49,7 +49,7 @@ public class BufferHelper {
         new AlertDialog.Builder(context)
                 .setTitle(R.string.dialog_title_delete_buffer)
                 .setMessage(R.string.dialog_message_delete_buffer)
-                .setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.action_yes, new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -57,7 +57,7 @@ public class BufferHelper {
                     }
 
                 })
-                .setNegativeButton(R.string.dialog_action_no, null)
+                .setNegativeButton(R.string.action_no, null)
                 .show();
     }
 }

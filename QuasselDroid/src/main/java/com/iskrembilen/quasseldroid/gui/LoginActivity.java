@@ -302,7 +302,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
                 builder.setView(root);
                 builder.setTitle(getResources().getString(R.string.dialog_title_core_add));
-                builder.setPositiveButton(getResources().getString(R.string.dialog_action_save), new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(getResources().getString(R.string.action_save), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String name = nameField.getText().toString().trim();
@@ -319,7 +319,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                         dialogInterface.dismiss();
                     }
                 });
-                builder.setNegativeButton(getResources().getString(R.string.dialog_action_cancel), new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         nameField.setText("");
@@ -336,13 +336,13 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setMessage(certificateMessage + "\n" + hashedCert)
                         .setCancelable(false)
-                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.storeCertificate(hashedCert, core.getSelectedItemId());
                                 onConnect.onClick(null);
                             }
                         })
-                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -354,13 +354,13 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 builder.setTitle(getResources().getString(R.string.dialog_title_delete_buffer))
                         .setMessage(getResources().getString(R.string.dialog_message_delete_buffer))
                         .setCancelable(false)
-                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.deleteCore(core.getSelectedItemId());
                                 updateCoreSpinner();
                             }
                         })
-                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }

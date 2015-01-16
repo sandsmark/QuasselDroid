@@ -3,6 +3,9 @@ package com.iskrembilen.quasseldroid.gui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +23,23 @@ public class AboutDialog extends DialogFragment {
 
         View dialog = inflater.inflate(R.layout.dialog_about, null);
         LinearLayout authorList = (LinearLayout) dialog.findViewById(R.id.authors);
+
+        View github = dialog.findViewById(R.id.link_github);
+        View community = dialog.findViewById(R.id.link_community);
+        github.getBackground().setColorFilter(getResources().getColor(R.color.material_blue_grey_900), PorterDuff.Mode.SRC_IN);
+        github.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.app_link_github))));
+            }
+        });
+        community.getBackground().setColorFilter(getResources().getColor(R.color.primary), PorterDuff.Mode.SRC_IN);
+        community.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getResources().getString(R.string.app_link_community))));
+            }
+        });
 
         String[] authorNames = getResources().getStringArray(R.array.author_names);
         String[] authorDescriptions = getResources().getStringArray(R.array.author_descriptions);

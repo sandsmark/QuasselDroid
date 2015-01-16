@@ -60,13 +60,13 @@ public class TopicEditDialog extends DialogFragment {
         topicField.setText(topic);
 
         builder.setView(dialog).setTitle(name);
-        builder.setPositiveButton(getString(R.string.dialog_action_close),new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.action_close),new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        builder.setNeutralButton(getString(R.string.dialog_action_save),new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(getString(R.string.action_save),new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 BusProvider.getInstance().post(new SendMessageEvent(id, "/topic "+topicField.getText().toString()));

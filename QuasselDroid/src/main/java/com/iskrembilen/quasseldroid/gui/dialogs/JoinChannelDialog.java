@@ -50,7 +50,7 @@ public class JoinChannelDialog extends DialogFragment {
 
         builder.setView(dialog)
                 .setTitle(getResources().getString(R.string.dialog_title_channel))
-                .setPositiveButton(getResources().getString(R.string.dialog_action_join), new DialogInterface.OnClickListener() {
+                .setPositiveButton(getResources().getString(R.string.action_join), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String channelName = channelNameField.getText().toString().trim();
@@ -62,7 +62,7 @@ public class JoinChannelDialog extends DialogFragment {
                             Toast.makeText(getActivity(),R.string.dialog_message_join_no_channel,Toast.LENGTH_SHORT).show();
                         }
                     }
-                }).setNegativeButton(getResources().getString(R.string.dialog_action_cancel), new DialogInterface.OnClickListener() {
+                }).setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 getDialog().dismiss();

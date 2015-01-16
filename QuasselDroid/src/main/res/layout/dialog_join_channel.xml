@@ -6,17 +6,41 @@
     android:orientation="vertical"
     android:padding="16dip">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/hint_join_channel"/>
     <Spinner
         android:id="@+id/dialog_join_channel_network_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:textSize="16sp"
         android:hint="@string/hint_join_network"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/hint_join_channel"/>
     <EditText
         android:id="@+id/dialog_join_channel_channel_name_field"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textUri"
-        android:singleLine="true"
-        android:hint="@string/hint_join_channel" />
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="16sp"
+        android:inputType="textUri" />
 </LinearLayout>

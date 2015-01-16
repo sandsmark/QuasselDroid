@@ -20,19 +20,15 @@
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
             android:text="@string/identity_kick_reason"/>
-        <LinearLayout
+        <EditText
+            android:id="@+id/identity_kick_reason"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/identity_kick_reason"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:layout_marginBottom="8dp"
-                android:textSize="16sp"
-                android:inputType="textMultiLine" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:inputType="textMultiLine" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -42,19 +38,15 @@
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
             android:text="@string/identity_part_reason"/>
-        <LinearLayout
+        <EditText
+            android:id="@+id/identity_part_reason"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/identity_part_reason"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:layout_marginBottom="8dp"
-                android:textSize="16sp"
-                android:inputType="textMultiLine" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:inputType="textMultiLine" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -64,19 +56,15 @@
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
             android:text="@string/identity_quit_reason"/>
-        <LinearLayout
+        <EditText
+            android:id="@+id/identity_quit_reason"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/identity_quit_reason"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:layout_marginBottom="8dp"
-                android:textSize="16sp"
-                android:inputType="textMultiLine" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:inputType="textMultiLine" />
 
         <TextView
             android:layout_width="wrap_content"

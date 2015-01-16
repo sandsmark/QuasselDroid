@@ -11,11 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-import com.iskrembilen.quasseldroid.Identity;
 import com.iskrembilen.quasseldroid.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
-
-import java.util.List;
 
 public class EditNickDialog extends DialogFragment {
 
@@ -72,7 +69,7 @@ public class EditNickDialog extends DialogFragment {
                 dialog.cancel();
             }
         });
-        builder.setPositiveButton(getString(R.string.dialog_action_save), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.action_save), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (listener!=null)
