@@ -52,6 +52,7 @@ import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
 import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
 import com.iskrembilen.quasseldroid.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
+import com.iskrembilen.quasseldroid.util.BetterSparseArray;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
@@ -630,7 +631,7 @@ public final class CoreConnection {
         Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
 
         List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
-        networks = new HashMap<Integer, Network>(networkIds.size());
+        networks = new BetterSparseArray<>(networkIds.size());
         for (QVariant<?> networkId : networkIds) {
             Integer id = (Integer) networkId.getData();
             networks.put(id, new Network(id));
@@ -645,6 +646,7 @@ public final class CoreConnection {
 
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
         buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
+
         QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
         ArrayList<Integer> bufferIds = new ArrayList<Integer>();
         for (QVariant<?> bufferInfoQV : bufferInfos) {

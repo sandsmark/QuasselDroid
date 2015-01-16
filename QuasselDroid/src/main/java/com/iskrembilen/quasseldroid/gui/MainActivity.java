@@ -421,7 +421,7 @@ public class MainActivity extends ActionBarActivity {
     public void onConnectionChanged(ConnectionChangedEvent event) {
         if (event.status == Status.Disconnected) {
             Log.d(TAG, "Connection status is disconnected");
-            if (event.reason != "") {
+            if (!event.reason.trim().equals("")) {
                 removeDialog(R.id.DIALOG_CONNECTING);
                 Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
             }

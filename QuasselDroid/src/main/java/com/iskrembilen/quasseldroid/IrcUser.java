@@ -23,6 +23,8 @@
 
 package com.iskrembilen.quasseldroid;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -53,7 +55,7 @@ public class IrcUser extends Observable implements Comparable<IrcUser> {
     }
 
     @Override
-    public int compareTo(IrcUser another) {
+    public int compareTo(@NonNull IrcUser another) {
         return this.nick.compareToIgnoreCase(another.nick);
     }
 }

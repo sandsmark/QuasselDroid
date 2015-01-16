@@ -33,14 +33,14 @@ public class QChar implements QMetaTypeSerializer<Character> {
     @Override
     public void serialize(QDataOutputStream stream, Character data,
                           DataStreamVersion version) throws IOException {
-        stream.writeUInt(data.charValue(), 16);
+        stream.writeUInt(data, 16);
 
     }
 
     @Override
     public Character deserialize(QDataInputStream stream,
                                  DataStreamVersion version) throws IOException {
-        return Character.valueOf((char) stream.readUInt(16));
+        return (char) stream.readUInt(16);
     }
 
 }

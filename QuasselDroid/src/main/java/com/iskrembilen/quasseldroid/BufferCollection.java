@@ -29,7 +29,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
-import com.iskrembilen.quasseldroid.util.Helper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,8 +62,6 @@ public class BufferCollection extends Observable implements Observer {
         updateBufferList();
         buffer.addObserver(this);
         notifyObservers();
-
-        android.view.MenuItem x;
     }
 
     private void putBuffer(Buffer buffer) {

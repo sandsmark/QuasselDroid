@@ -136,11 +136,7 @@ public class QuasselDbHelper {
     public boolean hasCores() {
         Cursor c = db.query(CORE_TABLE, new String[]{KEY_ID, KEY_NAME}, null, null, null, null, null);
         boolean hasCores;
-        if (c != null && c.getCount() > 0) {
-            hasCores = true;
-        } else {
-            hasCores = false;
-        }
+        hasCores = (c != null && c.getCount() > 0);
 
         if (c != null) c.close();
         return hasCores;
@@ -246,7 +242,8 @@ public class QuasselDbHelper {
             return;
         StringBuilder list = new StringBuilder("(");
         for (int id : bufferids) {
-            list.append(id + ",");
+            list.append(id);
+            list.append(",");
         }
         list.deleteCharAt(list.length() - 1);
         list.append(")");

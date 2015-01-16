@@ -43,8 +43,7 @@ public class QDataInputStream extends DataInputStream {
                 return readLong();
             case 32:
                 readFully(buf);
-                long ret = ((buf[0] & 255) << 24 | (buf[1] & 255) << 16 | (buf[2] & 255) << 8 | (buf[3] & 255)) & 0xFFFFFFFFL;
-                return ret;
+                return ((buf[0] & 255) << 24 | (buf[1] & 255) << 16 | (buf[2] & 255) << 8 | (buf[3] & 255)) & 0xFFFFFFFFL;
             case 16:
                 return readUnsignedShort();
             case 8:

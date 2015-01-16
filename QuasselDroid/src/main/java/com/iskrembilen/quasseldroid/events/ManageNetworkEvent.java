@@ -2,7 +2,7 @@ package com.iskrembilen.quasseldroid.events;
 
 public class ManageNetworkEvent {
     public enum NetworkAction {
-        CONNECT, DISCONNECT;
+        CONNECT, DISCONNECT
     }
 
     public final int networkId;

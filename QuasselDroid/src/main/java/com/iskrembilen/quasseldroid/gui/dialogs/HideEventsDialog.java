@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 
 import com.iskrembilen.quasseldroid.Buffer;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 
 public class HideEventsDialog extends DialogFragment {
 
-    public static HideEventsDialog newInstance(Buffer buffer) {
+    public static @NonNull HideEventsDialog newInstance(Buffer buffer) {
         HideEventsDialog fragment = new HideEventsDialog();
 
         String[] filterList = IrcMessage.Type.getFilterList();
@@ -40,7 +42,7 @@ public class HideEventsDialog extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getResources().getString(R.string.dialog_title_events));
 

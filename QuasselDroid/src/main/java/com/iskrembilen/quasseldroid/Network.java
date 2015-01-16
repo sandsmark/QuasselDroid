@@ -1,9 +1,6 @@
 package com.iskrembilen.quasseldroid;
 
-<<<<<<< HEAD
-=======
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
->>>>>>> Updated UI, added ability to customize filters
 import com.iskrembilen.quasseldroid.util.Helper;
 
 import java.util.ArrayList;

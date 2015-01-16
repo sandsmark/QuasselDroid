@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid;
 
+import android.support.annotation.NonNull;
 import android.text.Spannable;
 
 import com.iskrembilen.quasseldroid.util.SenderColorHelper;
@@ -92,8 +93,6 @@ public class IrcMessage implements Comparable<IrcMessage> {
         }
     }
 
-    ;
-
     public Date timestamp; //TODO: timezones, Java bleh as usual
     public int messageId;
     public BufferInfo bufferInfo;
@@ -106,8 +105,8 @@ public class IrcMessage implements Comparable<IrcMessage> {
 
 
     @Override
-    public int compareTo(IrcMessage other) {
-        return ((Integer) messageId).compareTo((Integer) other.messageId);
+    public int compareTo(@NonNull IrcMessage other) {
+        return ((Integer) messageId).compareTo(other.messageId);
     }
 
     @Override
@@ -145,10 +144,7 @@ public class IrcMessage implements Comparable<IrcMessage> {
     }
 
     public boolean isHighlighted() {
-        if (((flags & Flag.Highlight.value) != 0) && ((flags & Flag.Self.value) == 0)) {
-            return true;
-        }
-        return false;
+        return (((flags & Flag.Highlight.value) != 0) && ((flags & Flag.Self.value) == 0));
     }
 
     public boolean isSelf() {

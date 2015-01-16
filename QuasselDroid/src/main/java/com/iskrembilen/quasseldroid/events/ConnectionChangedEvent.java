@@ -3,7 +3,7 @@ package com.iskrembilen.quasseldroid.events;
 public class ConnectionChangedEvent {
 
     public enum Status {
-        Connected, Connecting, Disconnected;
+        Connected, Connecting, Disconnected
     }
 
     public final Status status;

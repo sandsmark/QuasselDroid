@@ -30,7 +30,7 @@ class CustomTrustManager implements javax.net.ssl.X509TrustManager {
      * decisions to it, and fall back to the logic in this class if the
      * default X509TrustManager doesn't trust it.
      */
-    X509TrustManager defaultTrustManager;
+    private X509TrustManager defaultTrustManager;
 
     CustomTrustManager(CoreConnection coreConnection) throws GeneralSecurityException {
         this.coreConnection = coreConnection;

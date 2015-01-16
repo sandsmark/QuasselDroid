@@ -134,10 +134,10 @@ public class CoreConnService extends Service {
     private final IBinder binder = new LocalBinder();
     private boolean requestedDisconnect;
 
-    IncomingHandler incomingHandler;
-    Handler reconnectHandler;
+    private IncomingHandler incomingHandler;
+    private Handler reconnectHandler;
 
-    SharedPreferences preferences;
+    private SharedPreferences preferences;
 
     private NetworkCollection networks;
 
@@ -212,7 +212,7 @@ public class CoreConnService extends Service {
                 } else if (key.equals(getString(R.string.preference_wake_lock))) {
                     preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
                     if (!preferenceUseWakeLock) releaseWakeLockIfExists();
-                    else if (preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
+                    else if (isConnected()) acquireWakeLockIfEnabled();
                 } else if (key.equals(getString(R.string.preference_reconnect))) {
                     preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
                 } else if (key.equals(getString(R.string.preference_reconnect_wifi))) {
@@ -253,8 +253,6 @@ public class CoreConnService extends Service {
 
     /**
      * Handle the data in the intent, and use it to connect with CoreConnect
-     *
-     * @param intent
      */
     private void handleIntent(Intent intent) {
         if (coreConn != null) {
@@ -408,7 +406,7 @@ public class CoreConnService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg == null || coreConn == null || disabled == true) {
+            if (msg == null || coreConn == null || disabled) {
                 return;
             }
             Buffer buffer;
@@ -901,8 +899,7 @@ public class CoreConnService extends Service {
     };
 
     public boolean isInitComplete() {
-        if (coreConn == null) return false;
-        return coreConn.isInitComplete();
+        return (coreConn != null) && coreConn.isInitComplete();
     }
 
     public Network getNetworkById(int networkId) {

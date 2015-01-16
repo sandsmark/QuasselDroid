@@ -36,6 +36,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.PopupMenu;
@@ -269,7 +270,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     }
 
     @Override
-    protected void onPrepareDialog(int id, Dialog dialog) {
+    protected void onPrepareDialog(int id, @NonNull Dialog dialog) {
         switch (id) {
             case R.id.DIALOG_ADD_CORE:
                 portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
@@ -464,7 +465,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
             finish();
         } else if (event.status == Status.Disconnected) {
             dismissLoginDialog();
-            if (event.reason != "") {
+            if (!event.reason.trim().equals("")) {
                 Toast.makeText(LoginActivity.this, event.reason, Toast.LENGTH_LONG).show();
             }
         }

@@ -20,7 +20,7 @@
  */
 package com.iskrembilen.quasseldroid.qtcomm;
 
-public class QMetaType<T extends Object> extends Object {
+public class QMetaType<T> {
     public enum Type {
         //%s/\(\S\+\) = \(\d\+\),/\1(\2),\r/g
         // these are merged with QVariant
@@ -130,8 +130,6 @@ public class QMetaType<T extends Object> extends Object {
             return value;
         }
     }
-
-    ;
 
     int id;
     String name;

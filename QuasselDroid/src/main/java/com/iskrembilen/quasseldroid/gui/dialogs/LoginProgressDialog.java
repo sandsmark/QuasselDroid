@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 
 import com.iskrembilen.quasseldroid.R;
@@ -27,7 +29,7 @@ public class LoginProgressDialog extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         ProgressDialog prog = new ProgressDialog(getActivity());
         prog.setMessage(getResources().getString(R.string.notification_connecting));
         setCancelable(true);

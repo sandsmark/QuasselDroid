@@ -84,10 +84,7 @@ public class UserCollection extends Observable implements Observer {
             for (IrcUser user : users.get(mode)) {
                 if (user.nick.equals(nick)) {
                     if (removeUserFromModeList(mode, user)) {
-                        //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
                         break;
-                    } else {
-                        //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                     }
                 }
             }
@@ -101,10 +98,7 @@ public class UserCollection extends Observable implements Observer {
                 for (IrcUser user : users.get(mode)) {
                     if (user.nick.equals(nick)) {
                         if (removeUserFromModeList(mode, user)) {
-                            //Log.e(TAG, "Mode "+mode.modeName+" was removed from user "+nick+".");
                             break;
-                        } else {
-                            //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                         }
                     }
                 }
@@ -128,10 +122,7 @@ public class UserCollection extends Observable implements Observer {
         for (IrcMode ircMode : IrcMode.values()) {
             if (mode.equals(ircMode.shortModeName)) {
                 if (addUserToModeList(ircMode, user)) {
-                    //Log.e(TAG, "Mode " + ircMode.modeName + " added to user " + user.nick);
                     break;
-                } else {
-                    //Log.e(TAG, "User "+user.nick+" already has mode "+mode.modeName+".");
                 }
             }
         }
@@ -147,10 +138,7 @@ public class UserCollection extends Observable implements Observer {
         for (IrcMode ircMode : IrcMode.values()) {
             if (mode.equals(ircMode.shortModeName)) {
                 if (removeUserFromModeList(ircMode, user)) {
-                    //Log.e(TAG, "Mode " + ircMode.modeName + " removed from user " + user.nick+".");
                     break;
-                } else {
-                    //Log.e(TAG, "User "+user.nick+" was not found with mode "+mode.modeName+".");
                 }
             }
         }

@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
@@ -177,12 +178,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return true if the message should be filtered, false if it shouldn't
      */
     public boolean isMessageFiltered(IrcMessage msg) {
-        if (filterTypes.contains(msg.type)) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return (filterTypes.contains(msg.type));
     }
 
     /**
@@ -232,20 +228,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return true if buffer has unseen highlights, otherwise false
      */
     public boolean hasUnseenHighlight() {
-        if (backlog.size() != 0 && lastSeenMessage != 0 && lastHighlightMessageId > lastSeenMessage) {
-            return true;
-        }
-        return false;
+        return (backlog.size() != 0 && lastSeenMessage != 0 && lastHighlightMessageId > lastSeenMessage);
     }
 
     /**
      * Checks if the buffer has any unread messages, not including joins/parts/quits etc
      */
     public boolean hasUnreadMessage() {
-        if (backlog.size() != 0 && lastSeenMessage != 0 && lastPlainMessageId > lastSeenMessage) {
-            return true;
-        }
-        return false;
+        return (backlog.size() != 0 && lastSeenMessage != 0 && lastPlainMessageId > lastSeenMessage);
     }
 
     /**
@@ -255,13 +245,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      */
     public boolean hasUnreadActivity() {
         //Last message in the backlog has a bigger messageId than the last seen message
-        if (backlog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < backlog.get(backlog.size() - 1).messageId) {
-            return true;
-        }
-        if (lastSeenMessage == -1)
-            return true;
-
-        return false;
+        return ((backlog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < backlog.get(backlog.size() - 1).messageId) ||
+                (lastSeenMessage == -1));
     }
 
     /**
@@ -284,11 +269,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         this.markerLineMessage = markerLineMessage;
         for (IrcMessage msg : backlog) {
             if (msg.messageId == markerLineMessage) {
-                if (isMessageFiltered(msg)) {
-                    isMarkerLineFiltered = true;
-                } else {
-                    isMarkerLineFiltered = false;
-                }
+                isMarkerLineFiltered = isMessageFiltered(msg);
             }
         }
         this.setChanged();
@@ -372,7 +353,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     /**
      * Get the size of the hole backlog unfiltered. Used in request more backlog for instance to know the size of the buffer we have
      *
-     * @return
+     * @return int
      */
     public int getUnfilteredSize() {
         return backlog.size();
@@ -457,7 +438,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     }
 
     @Override
-    public int compareTo(Buffer another) {
+    public int compareTo(@NonNull Buffer another) {
         return BufferUtils.compareBuffers(this, another);
     }
 
@@ -493,8 +474,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
     /**
      * Add a new IrcMessage type that this buffer should filter(hidden type)
-     *
-     * @param type
      */
     public void addFilterType(IrcMessage.Type type) {
         filterTypes.add(type);
@@ -529,9 +508,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         dbHelper.open();
         IrcMessage.Type[] filteredEvents = dbHelper.getHiddenEvents(getInfo().id);
         if (filteredEvents != null) {
-            for (IrcMessage.Type filter : filteredEvents) {
-                this.filterTypes.add(filter);
-            }
+            Collections.addAll(filterTypes,filteredEvents);
         }
         dbHelper.close();
         filterBuffer();

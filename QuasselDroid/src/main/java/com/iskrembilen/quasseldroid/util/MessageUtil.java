@@ -97,8 +97,6 @@ public class MessageUtil {
             fg = -1;
             bg = -1;
 
-            endSearchOffset = start + 1;
-
             // Colors?
             if (start == -1) {
                 start = content.indexOf(colorIndicator);

@@ -32,7 +32,7 @@ public class DetailFragment extends Fragment implements Serializable {
     private TextView realname;
     private TextView status;
 
-    NicksObserver observer = new NicksObserver();
+    private NicksObserver observer = new NicksObserver();
 
     public static DetailFragment newInstance() {
         return new DetailFragment();
@@ -54,11 +54,6 @@ public class DetailFragment extends Fragment implements Serializable {
         realname = (TextView) root.findViewById(R.id.detail_about);
         status = (TextView) root.findViewById(R.id.detail_status);
         return root;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -114,7 +109,6 @@ public class DetailFragment extends Fragment implements Serializable {
 
     void updateView() {
         if (networks.getBufferById(bufferId).getInfo().type == BufferInfo.Type.QueryBuffer) {
-            Network network = networks.getNetworkById(networks.getBufferById(bufferId).getInfo().networkId);
             IrcUser user = observer.user;
 
             if (user != null) {

@@ -1,13 +1,9 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class QuasselPreferenceFragment extends PreferenceFragment {
 

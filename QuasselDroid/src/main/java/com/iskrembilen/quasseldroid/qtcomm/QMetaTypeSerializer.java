@@ -24,7 +24,7 @@ package com.iskrembilen.quasseldroid.qtcomm;
 import java.io.IOException;
 
 
-public interface QMetaTypeSerializer<T extends Object> {
+public interface QMetaTypeSerializer<T> {
     public void serialize(QDataOutputStream stream, T data, DataStreamVersion version) throws IOException;
 
     public T deserialize(QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException;

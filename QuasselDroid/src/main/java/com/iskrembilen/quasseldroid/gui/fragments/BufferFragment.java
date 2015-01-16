@@ -94,9 +94,9 @@ public class BufferFragment extends Fragment implements Serializable {
 
     private static final Set<Predicate<Buffer>> DEFAULT_FITLERS = BufferCollectionHelper.FILTER_SET_VISIBLE;
 
-    BufferListAdapter bufferListAdapter;
-    XMLHeaderAnimatedExpandableListView bufferList;
-    Spinner filterSpinner;
+    private BufferListAdapter bufferListAdapter;
+    private XMLHeaderAnimatedExpandableListView bufferList;
+    private Spinner filterSpinner;
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
@@ -393,11 +393,6 @@ public class BufferFragment extends Fragment implements Serializable {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save position of first visible item
@@ -451,8 +446,6 @@ public class BufferFragment extends Fragment implements Serializable {
     /**
      * Check if a buffer is already existing and switch to it
      * If not a QueryUserEvent is created so the CoreConnService queries the user
-     *
-     * @param event
      */
     @Subscribe
     public void onUserClicked(UserClickedEvent event) {
@@ -535,7 +528,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            ViewHolderChild holder = null;
+            ViewHolderChild holder;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderChild)) {
                 convertView = inflater.inflate(R.layout.widget_buffer_single, null);
                 holder = new ViewHolderChild();
@@ -628,7 +621,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-            ViewHolderGroup holder = null;
+            ViewHolderGroup holder;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderGroup)) {
                 convertView = inflater.inflate(R.layout.widget_buffer_group, null);
                 holder = new ViewHolderGroup();

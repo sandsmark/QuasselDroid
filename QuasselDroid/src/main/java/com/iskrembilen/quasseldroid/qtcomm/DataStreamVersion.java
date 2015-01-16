@@ -47,4 +47,4 @@ public enum DataStreamVersion {
     public int getValue() {
         return value;
     }
-};
+}

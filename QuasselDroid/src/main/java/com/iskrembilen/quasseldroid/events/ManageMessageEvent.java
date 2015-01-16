@@ -2,7 +2,7 @@ package com.iskrembilen.quasseldroid.events;
 
 public class ManageMessageEvent {
     public enum MessageAction {
-        MARKER_LINE, LAST_SEEN;
+        MARKER_LINE, LAST_SEEN
     }
 
     public final int bufferId;

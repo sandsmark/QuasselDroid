@@ -74,10 +74,10 @@ import java.util.Observer;
 
 public class ChatFragment extends Fragment implements Serializable {
 
-    public static final String BUFFER_ID = "bufferid";
+    private static final String BUFFER_ID = "bufferid";
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String BUFFER_NAME = "buffername";
-    SharedPreferences preferences;
+    private SharedPreferences preferences;
     private BacklogAdapter adapter;
     private ListView backlogList;
     private EditText inputField;
@@ -439,7 +439,6 @@ public class ChatFragment extends Fragment implements Serializable {
 
         public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
             inflater = LayoutInflater.from(context);
-
         }
 
         public void setBuffer(Buffer buffer, NetworkCollection networks) {
@@ -469,7 +468,7 @@ public class ChatFragment extends Fragment implements Serializable {
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder = null;
+            ViewHolder holder;
 
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.widget_backlog, null);
@@ -607,7 +606,6 @@ public class ChatFragment extends Fragment implements Serializable {
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kick:
-                    nick = "";
                     String reason = "";
 
                     int nickEnd = entry.content.toString().indexOf(" ");

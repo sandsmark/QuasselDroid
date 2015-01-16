@@ -1,7 +1,5 @@
 package com.iskrembilen.quasseldroid.util;
 
-import android.util.Log;
-
 import com.google.common.base.Predicate;
 import com.iskrembilen.quasseldroid.Buffer;
 

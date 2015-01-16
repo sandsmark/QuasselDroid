@@ -3,7 +3,6 @@ package com.iskrembilen.quasseldroid.gui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,7 +13,6 @@ import com.iskrembilen.quasseldroid.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.RemoveIdentityEvent;
 import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
-import com.iskrembilen.quasseldroid.gui.dialogs.AboutDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.squareup.otto.Subscribe;
 

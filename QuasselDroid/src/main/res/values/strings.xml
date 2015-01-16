@@ -241,4 +241,7 @@
         <string name="identity_detach_away_reason">Detach Away Reason</string>
     <string name="identity_ident">Ident</string>
     <string name="action_add_nick">Add Nick</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_identities">Identities</string>
+    <string name="identity_real_name">Real Name</string>
 </resources>

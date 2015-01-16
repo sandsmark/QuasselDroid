@@ -1,16 +1,18 @@
 package com.iskrembilen.quasseldroid;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.widget.TextView;
 
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
 public class BufferUtils {
-    public static int compareBuffers(Buffer buffer1, Buffer buffer2) {
+    public static int compareBuffers(@NonNull Buffer buffer1, @NonNull Buffer buffer2) {
         if (!(buffer1.isTemporarilyHidden() || buffer1.isPermanentlyHidden()) && (buffer2.isTemporarilyHidden() || buffer2.isPermanentlyHidden()))
             return -1;
         if ((buffer1.isTemporarilyHidden() || buffer1.isPermanentlyHidden()) && !(buffer2.isTemporarilyHidden() || buffer2.isPermanentlyHidden()))
             return 1;
+        // FIXME: (buffer2.isTemporarilyHidden() || buffer2.isPermanentlyHidden()) will always be true at this point
         if ((buffer1.isTemporarilyHidden() || buffer1.isPermanentlyHidden()) && (buffer2.isTemporarilyHidden() || buffer2.isPermanentlyHidden())) {
             if (buffer1.getInfo().type != buffer2.getInfo().type)
                 return buffer1.getInfo().type.value - buffer2.getInfo().type.value;
@@ -23,6 +25,7 @@ public class BufferUtils {
             return 1;
         if (!buffer1.isTemporarilyHidden() && buffer2.isTemporarilyHidden())
             return -1;
+        // FIXME: buffer2.isPermanentlyHidden() will always be true at this point
         if ((buffer1.isPermanentlyHidden() && buffer2.isPermanentlyHidden()) || (buffer1.isTemporarilyHidden() && buffer2.isTemporarilyHidden())) {
             return buffer1.getInfo().name.compareToIgnoreCase(buffer2.getInfo().name);
         }

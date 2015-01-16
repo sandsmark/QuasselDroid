@@ -19,8 +19,7 @@ public class ConnectingFragment extends Fragment implements Serializable {
     private TextView progressTextView;
 
     public static ConnectingFragment newInstance() {
-        ConnectingFragment f = new ConnectingFragment();
-        return f;
+        return new ConnectingFragment();
     }
 
     @Override

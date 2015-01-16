@@ -32,7 +32,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.iskrembilen.quasseldroid.Identity;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.gui.dialogs.AboutDialog;
 import com.iskrembilen.quasseldroid.gui.fragments.QuasselPreferenceFragment;

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +39,7 @@ public class JoinChannelDialog extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(@NonNull Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
@@ -53,7 +54,7 @@ public class JoinChannelDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String channelName = channelNameField.getText().toString().trim();
-                        if (channelName != null && !channelName.trim().equalsIgnoreCase("")) {
+                        if (!channelName.trim().equalsIgnoreCase("")) {
                             String networkSelected = (String) networkSpinner.getSelectedItem();
                             BusProvider.getInstance().post(new JoinChannelEvent(networkSelected, channelName));
                             dismiss();

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class QVariant<T extends Object> implements Serializable {
+public class QVariant<T> implements Serializable {
     T data;
     DataStreamVersion version;
     QVariantType type = QVariantType.Invalid;
@@ -65,14 +65,11 @@ public class QVariant<T extends Object> implements Serializable {
     }
 
     public boolean isValid() {
-        if (type == QVariantType.Invalid)
-            return false;
-        if (data == null)
-            return false;
-        return true;
+        return (type != QVariantType.Invalid &&
+                data != null);
     }
 
-    public static class QVariantSerializer<U extends Object> implements QMetaTypeSerializer<QVariant<U>> {
+    public static class QVariantSerializer<U> implements QMetaTypeSerializer<QVariant<U>> {
         public QVariantSerializer() {
 
         }
@@ -130,7 +127,6 @@ public class QVariant<T extends Object> implements Serializable {
             return ret;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void serialize(QDataOutputStream stream, QVariant<U> data, DataStreamVersion version) throws IOException {
             stream.writeUInt(data.type.getValue(), 32);

@@ -68,7 +68,7 @@ public class QMap<T, V> implements QMetaTypeSerializer<Map<T, V>> {
         valueSerializer = QMetaTypeRegistry.instance().getTypeForName(valueType).getSerializer();
         int len = (int) stream.readUInt(32);
         for (int i = 0; i < len; i++) {
-            map.put((T) keySerializer.deserialize(stream, version), (V) valueSerializer.deserialize(stream, version));
+            map.put(keySerializer.deserialize(stream, version), valueSerializer.deserialize(stream, version));
         }
         return map;
     }

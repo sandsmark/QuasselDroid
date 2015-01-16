@@ -1,6 +1,5 @@
 package com.iskrembilen.quasseldroid.gui.base;
 
-import android.app.FragmentManager;
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.util.Log;

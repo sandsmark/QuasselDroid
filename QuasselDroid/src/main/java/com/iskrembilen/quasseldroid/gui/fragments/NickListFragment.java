@@ -34,8 +34,6 @@ public class NickListFragment extends Fragment implements Serializable {
     private AnimatedExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
-    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
-    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
     private final String TAG = NickListFragment.class.getSimpleName();
     public String topic;
 

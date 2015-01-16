@@ -54,7 +54,7 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
         serializer = (QMetaTypeSerializer<T>) QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();
 
         for (int i = 0; i < len; i++) {
-            list.add((T) serializer.deserialize(stream, version));
+            list.add(serializer.deserialize(stream, version));
         }
         return list;
     }
