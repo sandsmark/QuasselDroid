@@ -541,8 +541,8 @@ public class BufferFragment extends Fragment implements Serializable {
             }
             Buffer entry = getChild(groupPosition, childPosition);
 
-            int color = ThemeUtil.Color.bufferParted;
-            int drawable = R.drawable.ic_status;
+            int color = ThemeUtil.Color.bufferStateAway;
+            int drawable = R.drawable.ic_status_offline;
 
             switch (entry.getInfo().type) {
                 case StatusBuffer:
@@ -550,8 +550,8 @@ public class BufferFragment extends Fragment implements Serializable {
                     holder.bufferView.setText(entry.getInfo().name);
                     if (entry.isActive()) {
                         color = ThemeUtil.Color.bufferStateActive;
+                        drawable = R.drawable.ic_status_channel;
                     }
-                    drawable = R.drawable.ic_status_channel;
                     break;
                 case QueryBuffer:
                     String nick = entry.getInfo().name;
@@ -561,11 +561,13 @@ public class BufferFragment extends Fragment implements Serializable {
                         }
                     } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
                         color = ThemeUtil.Color.bufferStateAway;
+                        drawable = R.drawable.ic_status;
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }
                     } else {
                         color = ThemeUtil.Color.bufferStateActive;
+                        drawable = R.drawable.ic_status;
                         if (!entry.isActive()) {
                             entry.setActive(true);
                         }

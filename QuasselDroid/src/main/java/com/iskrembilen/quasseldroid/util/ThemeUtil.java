@@ -65,7 +65,6 @@ public class ThemeUtil {
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_light);
             Color.bufferStateActive = resources.getColor(R.color.buffer_status_active_light);
             Color.bufferStateAway = resources.getColor(R.color.buffer_status_away_light);
-            Color.bufferStateParted = resources.getColor(R.color.buffer_status_parted_light);
 
             nickBackgrounds = new int[] {
                     resources.getColor(R.color.nick_owner_light),
@@ -100,7 +99,6 @@ public class ThemeUtil {
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_dark);
             Color.bufferStateActive = resources.getColor(R.color.buffer_status_active_dark);
             Color.bufferStateAway = resources.getColor(R.color.buffer_status_away_dark);
-            Color.bufferStateParted = resources.getColor(R.color.buffer_status_parted_dark);
 
             nickBackgrounds = new int[] {
                     resources.getColor(R.color.nick_owner_dark),
@@ -138,8 +136,7 @@ public class ThemeUtil {
                 bufferStateTemp,
                 bufferStatePerm,
                 bufferStateActive,
-                bufferStateAway,
-                bufferStateParted;
+                bufferStateAway;
 
         public static int defColor;
     }
