@@ -549,7 +549,20 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Notice:
-                    holder.msgView.setText(entry.content);
+                    if (entry.isSelf() || entry.isHighlighted()) {
+                        color = ThemeUtil.Color.chatPlain;
+                    } else {
+                        color = entry.getSenderColor();
+                    }
+                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false)) {
+                        nickSpan = new SpannableString(TextUtils.concat("[", entry.getNick(), "]"));
+                    } else {
+                        nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
+                    }
+                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+
+                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
@@ -704,10 +717,11 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.msgView.setTextColor(ThemeUtil.Color.chatPlain);
                     holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false))
-                        nickSpan = new SpannableString(TextUtils.concat("<",entry.getNick(),">"));
-                    else
+                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false)) {
+                        nickSpan = new SpannableString(TextUtils.concat("<", entry.getNick(), ">"));
+                    } else {
                         nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
+                    }
                     nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                     nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
