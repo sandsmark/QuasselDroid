@@ -73,7 +73,6 @@ import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BufferHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
 import java.io.Serializable;
@@ -84,9 +83,6 @@ import java.util.Set;
 
 public class BufferFragment extends Fragment implements Serializable {
 
-    public static final String BUFFER_ID_EXTRA = "bufferid";
-    public static final String BUFFER_NAME_EXTRA = "buffername";
-
     private static final String TAG = BufferFragment.class.getSimpleName();
 
     private static final String ITEM_POSITION_KEY = "itempos";
@@ -96,19 +92,18 @@ public class BufferFragment extends Fragment implements Serializable {
 
     private BufferListAdapter bufferListAdapter;
     private XMLHeaderAnimatedExpandableListView bufferList;
-    private Spinner filterSpinner;
 
     private int restoreListPosition = 0;
     private int restoreItemPosition = 0;
 
-    private ActionModeData actionModeData = new ActionModeData();
+    private final ActionModeData actionModeData = new ActionModeData();
 
     public static BufferFragment newInstance() {
         return new BufferFragment();
     }
 
     public void finishActionMode() {
-        if (actionModeData!=null && actionModeData.actionMode!=null) actionModeData.actionMode.finish();
+        if (actionModeData.actionMode!=null) actionModeData.actionMode.finish();
     }
 
     @Override
@@ -145,12 +140,12 @@ public class BufferFragment extends Fragment implements Serializable {
 
         ArrayAdapter adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_spinner_item,BufferCollectionHelper.FILTER_NAMES);
         adapter.setDropDownViewResource(R.layout.widget_spinner_dropdown_item);
-        filterSpinner = (Spinner) toolbar.findViewById(R.id.filter_spinner);
+        Spinner filterSpinner = (Spinner) toolbar.findViewById(R.id.filter_spinner);
         filterSpinner.setAdapter(adapter);
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (BufferCollectionHelper.LIST_FILTERS.size()<position||BufferCollectionHelper.LIST_FILTERS.get(position)==null)
+                if (BufferCollectionHelper.LIST_FILTERS.size() < position || BufferCollectionHelper.LIST_FILTERS.get(position) == null)
                     onNothingSelected(parent);
 
                 bufferListAdapter.setFilters(BufferCollectionHelper.LIST_FILTERS.get(position));
@@ -462,7 +457,6 @@ public class BufferFragment extends Fragment implements Serializable {
     public static class ViewHolderChild {
         public TextView bufferView;
         public ImageView stateView;
-        public View parent;
     }
 
     public static class ViewHolderGroup {
@@ -477,8 +471,8 @@ public class BufferFragment extends Fragment implements Serializable {
 
     public class BufferListAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter implements Observer {
         private NetworkCollection networks;
-        private LayoutInflater inflater;
-        private Activity activity;
+        private final LayoutInflater inflater;
+        private final Activity activity;
 
         private Set<Predicate<Buffer>> filters = DEFAULT_FITLERS;
 
@@ -488,22 +482,21 @@ public class BufferFragment extends Fragment implements Serializable {
         }
 
         public void setNetworks(NetworkCollection networks) {
-            if (this.networks!=null) this.networks.deleteObserver(this);
-
-            this.networks = networks;
-            if (networks == null)
-                return;
-            networks.addObserver(this);
-
-            update();
+            update(networks);
         }
 
         @Override
         public void update(Observable observable, Object data) {
-            update();
+            update(NetworkCollection.getInstance());
         }
 
-        public void update() {
+        public void update(NetworkCollection networks) {
+            if (this.networks!=null) this.networks.deleteObserver(this);
+
+            this.networks = networks;
+            if (networks != null)
+                networks.addObserver(this);
+
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -528,69 +521,28 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            ViewHolderChild holder;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderChild)) {
-                convertView = inflater.inflate(R.layout.widget_buffer_single, null);
-                holder = new ViewHolderChild();
-                holder.parent = convertView;
-                holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
-                holder.stateView = (ImageView) convertView.findViewById(R.id.buffer_status);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolderChild) convertView.getTag();
+                convertView = createChild(parent);
             }
+            ViewHolderChild holder = (ViewHolderChild) convertView.getTag();
             Buffer entry = getChild(groupPosition, childPosition);
 
-            int color = ThemeUtil.Color.bufferStateAway;
-            int drawable = R.drawable.ic_status_offline;
+            holder.stateView.setImageDrawable(BufferUtils.getBufferIcon(getActivity(), entry));
+            holder.stateView.setColorFilter(BufferUtils.getBufferIconColor(getActivity(), entry), PorterDuff.Mode.SRC_IN);
+            holder.bufferView.setText(entry.getInfo().name);
 
-            switch (entry.getInfo().type) {
-                case StatusBuffer:
-                case ChannelBuffer:
-                    holder.bufferView.setText(entry.getInfo().name);
-                    if (entry.isActive()) {
-                        color = ThemeUtil.Color.bufferStateActive;
-                        drawable = R.drawable.ic_status_channel;
-                    }
-                    break;
-                case QueryBuffer:
-                    String nick = entry.getInfo().name;
-                    if (!networks.getNetworkById(entry.getInfo().networkId).hasNick(nick)) {
-                        if (entry.isActive()) {
-                            entry.setActive(false);
-                        }
-                    } else if (networks.getNetworkById(entry.getInfo().networkId).getUserByNick(nick).away) {
-                        color = ThemeUtil.Color.bufferStateAway;
-                        drawable = R.drawable.ic_status;
-                        if (!entry.isActive()) {
-                            entry.setActive(true);
-                        }
-                    } else {
-                        color = ThemeUtil.Color.bufferStateActive;
-                        drawable = R.drawable.ic_status;
-                        if (!entry.isActive()) {
-                            entry.setActive(true);
-                        }
-                    }
-
-                    holder.bufferView.setText(nick);
-
-                    break;
-                case GroupBuffer:
-                case InvalidBuffer:
-                    holder.bufferView.setText("XXXX " + entry.getInfo().name);
-            }
-
-            if(entry.isPermanentlyHidden()){
-                color = ThemeUtil.Color.bufferStatePerm;
-            } else if (entry.isTemporarilyHidden()) {
-                color = ThemeUtil.Color.bufferStateTemp;
-            }
-
-            holder.stateView.setImageResource(drawable);
-            holder.stateView.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            BufferUtils.setBufferActive(entry);
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
+            return convertView;
+        }
+
+        private View createChild(ViewGroup parent) {
+            View convertView = inflater.inflate(R.layout.widget_buffer_single, parent, false);
+            ViewHolderChild holder = new ViewHolderChild();
+            holder.bufferView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
+            holder.stateView = (ImageView) convertView.findViewById(R.id.buffer_status);
+            convertView.setTag(holder);
             return convertView;
         }
 
@@ -689,7 +641,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
         public void setFilters(Set<Predicate<Buffer>> filters) {
             this.filters = filters;
-            update();
+            update(networks);
         }
     }
 

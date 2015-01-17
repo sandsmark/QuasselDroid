@@ -10,8 +10,8 @@ import java.util.Observer;
 
 public class NetworkCollection extends Observable implements Observer {
     private static final String TAG = NetworkCollection.class.getSimpleName();
-    List<Network> networkList = new ArrayList<>();
-    SparseArray<Network> networkMap = new SparseArray<Network>();
+    private List<Network> networkList = new ArrayList<>();
+    private SparseArray<Network> networkMap = new SparseArray<Network>();
 
     private static NetworkCollection instance;
 
@@ -84,6 +84,7 @@ public class NetworkCollection extends Observable implements Observer {
         networkMap.remove(networkId);
         networkList.remove(network);
         network.deleteObservers();
+        networkList.remove(network);
         Collections.sort(networkList);
         setChanged();
         notifyObservers();
@@ -92,6 +93,5 @@ public class NetworkCollection extends Observable implements Observer {
     public void clear() {
         networkList.clear();
         networkMap.clear();
-
     }
 }

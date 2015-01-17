@@ -36,6 +36,7 @@ public class ThemeUtil {
                 resources.getColor(R.color.nick_user_color)
         };
         Color.defColor = resources.getColor(R.color.nick_user_color);
+        Color.transparent = resources.getColor(android.R.color.transparent);
 
         for (int i = 0; i<16; i++) {
             messageColor.put(resources.getColor(MessageUtil.mircCodeToColor(i)),i);
@@ -60,6 +61,7 @@ public class ThemeUtil {
             Color.bufferHighlight = resources.getColor(R.color.buffer_highlight_color_light);
             Color.bufferUnread = resources.getColor(R.color.buffer_unread_color_light);
             Color.bufferActivity = resources.getColor(R.color.buffer_activity_color_light);
+            Color.bufferFocused = resources.getColor(R.color.accent);
 
             Color.bufferStateTemp = resources.getColor(R.color.buffer_status_temp_light);
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_light);
@@ -94,6 +96,7 @@ public class ThemeUtil {
             Color.bufferHighlight = resources.getColor(R.color.buffer_highlight_color_dark);
             Color.bufferUnread = resources.getColor(R.color.buffer_unread_color_dark);
             Color.bufferActivity = resources.getColor(R.color.buffer_activity_color_dark);
+            Color.bufferFocused = resources.getColor(R.color.accent);
 
             Color.bufferStateTemp = resources.getColor(R.color.buffer_status_temp_dark);
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_dark);
@@ -130,7 +133,8 @@ public class ThemeUtil {
                 bufferHighlight,
                 bufferUnread,
                 bufferActivity,
-                bufferRead;
+                bufferRead,
+                bufferFocused;
 
         public static int
                 bufferStateTemp,
@@ -139,6 +143,7 @@ public class ThemeUtil {
                 bufferStateAway;
 
         public static int defColor;
+        public static int transparent;
     }
 
     public static int getNickColor(IrcMode mode) {

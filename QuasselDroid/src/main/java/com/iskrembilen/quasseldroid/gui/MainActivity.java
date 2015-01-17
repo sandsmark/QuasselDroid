@@ -112,6 +112,10 @@ public class MainActivity extends ActionBarActivity {
 
     private boolean connectionEstablished = false;
 
+    public int getOpenedBuffer() {
+        return this.openedBuffer;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity created");
