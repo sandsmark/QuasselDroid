@@ -83,6 +83,7 @@ public class NetworkCollection extends Observable implements Observer {
     public void removeNetwork(int networkId) {
         Network network = networkMap.get(networkId);
         networkMap.remove(networkId);
+        networkList.remove(network);
         network.deleteObservers();
         Collections.sort(networkList);
         setChanged();
