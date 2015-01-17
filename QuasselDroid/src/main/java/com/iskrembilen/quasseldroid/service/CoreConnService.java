@@ -346,6 +346,11 @@ public class CoreConnService extends Service {
         incomingHandler = null;
         if(Quasseldroid.status != Status.Disconnected) {
             BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
+        }else{
+            // The only time this could conceivably happen is if Android tells us the network is
+            // disconnected while we are connecting.  In that case, let the user know the connection
+            // was not successful.
+            BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected,"Connection failed!"));
         }
     }
 
