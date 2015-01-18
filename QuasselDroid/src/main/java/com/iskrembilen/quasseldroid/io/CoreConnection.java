@@ -97,7 +97,6 @@ public final class CoreConnection {
     private SwitchableInflaterInputStream inflater;
 
     private Map<Integer, Buffer> buffers;
-    private Map<String, Buffer> emptyBuffers;
     private CoreInfo coreInfo;
     private Map<Integer, Network> networks;
 
@@ -589,7 +588,6 @@ public final class CoreConnection {
 
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
         buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
-        emptyBuffers = new HashMap<>();
         QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
         ArrayList<Integer> bufferIds = new ArrayList<Integer>();
         for (QVariant<?> bufferInfoQV : bufferInfos) {
@@ -1204,18 +1202,13 @@ public final class CoreConnection {
                                 String topic = (String) map.get("topic").getData();
                                 String[] tmp = objectName.split("/", 2);
                                 int networkId = Integer.parseInt(tmp[0]);
-                                boolean found = false;
-                                for (Buffer buffer : buffers.values()) {
-                                    if (buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
-                                        found = true;
-                                        Message msg = handler.obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
-                                        msg.sendToTarget();
-                                        msg = handler.obtainMessage(R.id.SET_BUFFER_ACTIVE, buffer.getInfo().id, 0, true);
-                                        msg.sendToTarget();
-                                        break;
-                                    }
-                                }
-                                if (!found) {
+                                if (networks.get(networkId).getBuffers().hasBuffer(bufferName)) {
+                                    Buffer buffer = networks.get(networkId).getBuffers().getBuffer(bufferName);
+                                    Message msg = handler.obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                    msg.sendToTarget();
+                                    msg = handler.obtainMessage(R.id.SET_BUFFER_ACTIVE, buffer.getInfo().id, 0, true);
+                                    msg.sendToTarget();
+                                } else {
                                     Log.e(TAG, "Could not find buffer for IrcChannel initData");
                                 }
                             } else if (className.equals("BufferViewManager")) {
@@ -1566,16 +1559,11 @@ public final class CoreConnection {
                                 String bufferName = tmp[1];
 
                                 String topic = (String) packedFunc.remove(0).getData();
-                                boolean found = false;
-                                for (Buffer buffer : buffers.values()) {
-                                    if (buffer.getInfo().name.equalsIgnoreCase(bufferName) && buffer.getInfo().networkId == networkId) {
-                                        found = true;
-                                        Message msg = handler.obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
-                                        msg.sendToTarget();
-                                        break;
-                                    }
-                                }
-                                if (!found) {
+                                if (networks.get(networkId).getBuffers().hasBuffer(bufferName)) {
+                                    Buffer buffer = networks.get(networkId).getBuffers().getBuffer(bufferName);
+                                    Message msg = handler.obtainMessage(R.id.CHANNEL_TOPIC_CHANGED, networkId, buffer.getInfo().id, topic);
+                                    msg.sendToTarget();
+                                } else {
                                     Log.e(TAG, "Could not find buffer for IrcChannel setTopic");
                                 }
                             } else if (className.equals("BufferSyncer") && function.equals("setLastSeenMsg")) {
