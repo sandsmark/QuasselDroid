@@ -1,5 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
+import com.iskrembilen.quasseldroid.util.Helper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,6 +119,8 @@ public class Network extends Observable implements Observer, Comparable<Network>
             nickUserMap.put(user.nick, user);
             user.addObserver(this);
         }
+
+        updateTopic();
     }
 
 
@@ -289,8 +293,10 @@ public class Network extends Observable implements Observer, Comparable<Network>
     }
 
     private void updateTopic(){
-        if(statusBuffer!=null){
-            statusBuffer.setTopic("");
+        if(statusBuffer != null){
+            statusBuffer.setTopic(networkName + " (" + server + ") | "
+                    + Quasseldroid.context.getResources().getString(R.string.users) + ": "
+                    + userList.size() + " | " + Helper.formatLatency(latency, Quasseldroid.context.getResources()));
         }
     }
 

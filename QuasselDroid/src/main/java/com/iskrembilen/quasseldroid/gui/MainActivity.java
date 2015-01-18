@@ -165,7 +165,7 @@ public class MainActivity extends ActionBarActivity {
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
         if (event.bufferId==openedBuffer) {
             topic = NetworkCollection.getInstance().getBufferById(openedBuffer).getTopic();
-            updateSubtitle();
+            setTitleAndMenu();
         }
     }
 
@@ -390,7 +390,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void showDetailPopup() {
-        TopicViewDialog.newInstance(topic, NetworkCollection.getInstance().getBufferById(openedBuffer).getInfo().name, openedBuffer).show(getSupportFragmentManager(), TAG);
+        TopicViewDialog.newInstance(openedBuffer).show(getSupportFragmentManager(), TAG);
     }
 
     @Subscribe
@@ -467,9 +467,10 @@ public class MainActivity extends ActionBarActivity {
                     topic = buffer.getTopic();
                     break;
                 case StatusBuffer:
-                    bufferHasTopic = false;
+                    bufferHasTopic = true;
                     manager.lockDrawer(Gravity.END, true);
                     actionbar.setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
+                    topic = buffer.getTopic();
                     break;
                 case ChannelBuffer:
                     bufferHasTopic = true;

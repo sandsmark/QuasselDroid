@@ -85,6 +85,8 @@
     <string name="checkbox_remember_me">Remember me</string>
     <string name="not_available">Not available now</string>
 
+    <string name="users">Users</string>
+
     <!-- ALERTS -->
 
     <string name="message_ssl_changed">The core SSL certificate has changed, do you trust the new one?</string>
