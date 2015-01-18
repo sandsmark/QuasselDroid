@@ -1,6 +1,7 @@
 package com.iskrembilen.quasseldroid;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -15,6 +16,7 @@ public class Quasseldroid extends Application {
     private static final String TAG = Quasseldroid.class.getSimpleName();
     public static Status status;
     public Bundle savedInstanceState;
+    public static Context context;
 
     @Override
     public void onCreate() {
@@ -25,6 +27,7 @@ public class Quasseldroid extends Application {
         //Load current theme
         ThemeUtil.initTheme(this);
         BusProvider.getInstance().register(this);
+        context = this;
     }
 
     @Subscribe
