@@ -148,7 +148,7 @@ public class UserCollection extends Observable implements Observer {
             }
         }
         updateUniqueUsersSortedByMode();
-        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+        update(null,null);
     }
 
     public void removeModeFromUser(IrcUser user, String mode) {
@@ -167,7 +167,7 @@ public class UserCollection extends Observable implements Observer {
             }
         }
         updateUniqueUsersSortedByMode();
-        notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
+        update(null,null);
     }
 
     public ArrayList<IrcUser> getUniqueUsers() {
