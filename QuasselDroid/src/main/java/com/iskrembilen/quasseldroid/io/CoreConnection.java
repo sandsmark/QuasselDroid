@@ -898,10 +898,14 @@ public final class CoreConnection {
         handler.obtainMessage(R.id.INIT_DONE).sendToTarget();
     }
 
-    private class ReadThread extends Thread {
-        boolean running = false;
+    // FIXME: FIX THIS MONSTER
+    // TODO: Abandon hope all ye who enter this place.
 
-        CountDownTimer checkAlive = new CountDownTimer(45000, 45000) {
+    private class ReadThread extends Thread {
+        public static final int TIMEOUT = 45000;
+        private boolean running = false;
+
+        private CountDownTimer checkAlive = new CountDownTimer(TIMEOUT, TIMEOUT) {
             @Override
             public void onTick(long millisUntilFinished) {
                 //Do nothing, no use
@@ -1083,7 +1087,6 @@ public final class CoreConnection {
                                 Network network = networks.get(networkId);
 
                                 Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-                                Log.d(TAG, "InitData: Network-init: "+initMap.keySet());
                                 // Store the network name and associated nick for "our" user
                                 network.setNick((String) initMap.get("myNick").getData());
                                 network.setName((String) initMap.get("networkName").getData());
@@ -1353,7 +1356,7 @@ public final class CoreConnection {
 						 * There are several objects that we don't care about (at the moment).
 						 */
                             else {
-                                Log.i(TAG, "UNHANDLED: Unparsed InitData: " + className + "(" + objectName + ").");
+                                Log.e(TAG, "UNHANDLED: Unparsed InitData: " + className + "(" + objectName + ").");
                             }
                             break;
 						/*
@@ -1631,6 +1634,7 @@ public final class CoreConnection {
                                 Log.d(TAG, "Sync: BufferSyncer -> setLastSeenMsg");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
                                 int msgId = (Integer) packedFunc.remove(0).getData();
+
                                 Message msg = handler.obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
                                 msg.arg1 = bufferId;
                                 msg.arg2 = msgId;
@@ -1724,7 +1728,7 @@ public final class CoreConnection {
                                 Message msg = handler.obtainMessage(R.id.UPDATE_IDENTITY, packedFunc.remove(0));
                                 msg.sendToTarget();
                             } else {
-                                Log.i(TAG, "UNHANDLED: Unparsed Sync request: " + className + "::" + function);
+                                Log.e(TAG, "UNHANDLED: Unparsed Sync request: " + className + "::" + function);
                             }
 
                             break;
@@ -1816,11 +1820,11 @@ public final class CoreConnection {
                                 Message msg = handler.obtainMessage(R.id.REMOVE_IDENTITY, packedFunc.remove(0));
                                 msg.sendToTarget();
                             } else {
-                                Log.i(TAG, "UNHANDLED: RpcCall: " + functionName + " (" + packedFunc + ").");
+                                Log.e(TAG, "UNHANDLED: RpcCall: " + functionName + " (" + packedFunc + ").");
                             }
                             break;
                         default:
-                            Log.i(TAG, "UNHANDLED: request type: " + type.name());
+                            Log.e(TAG, "UNHANDLED: request type: " + type.name());
                     }
                     long end = System.currentTimeMillis();
                     if (end - start > 500) {

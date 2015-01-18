@@ -24,9 +24,11 @@
 package com.iskrembilen.quasseldroid;
 
 import android.support.annotation.NonNull;
+import android.text.SpannableString;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
+import com.iskrembilen.quasseldroid.util.BetterSparseArray;
 
 import java.util.ArrayList;
 import java.util.Collections;

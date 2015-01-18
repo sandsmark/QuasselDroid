@@ -15,6 +15,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -68,7 +69,9 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -87,7 +90,7 @@ public class ChatFragment extends Fragment implements Serializable {
     private int bufferId = -1;
     private boolean connected;
     private NetworkCollection networks;
-    private String timeFormat;
+    private String userFormat;
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
@@ -118,22 +121,14 @@ public class ChatFragment extends Fragment implements Serializable {
     }
 
     public void updateTimeFormat() {
-        String timeType = preferences.getString(getResources().getString(R.string.preference_timestamp),"orientation");
+        userFormat = preferences.getString(getResources().getString(R.string.preference_timestamp),"");
+    }
 
-        if (timeType.equalsIgnoreCase("always")) {
-            timeFormat = getString(R.string.timeformat_long);
-        } else if (timeType.equalsIgnoreCase("never")) {
-            timeFormat = getString(R.string.timeformat_short);
-        } else if (timeType.equalsIgnoreCase("orientation")) {
-            if (getActivity().getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE) {
-                timeFormat = getString(R.string.timeformat_long);
-            } else {
-                timeFormat = getString(R.string.timeformat_short);
-            }
-        } else {
-            timeFormat = getString(R.string.timeformat_short);
-        }
-        Log.d(TAG,"Setting time format to include seconds: "+ timeType + ", resulting format: "+ timeFormat);
+    public java.text.DateFormat getTimeFormatter() {
+        if (userFormat.isEmpty())
+            return DateFormat.getTimeFormat(getActivity());
+        else
+            return new SimpleDateFormat(userFormat);
     }
 
     @Override
@@ -497,7 +492,7 @@ public class ChatFragment extends Fragment implements Serializable {
 
             IrcMessage entry = this.getItem(position);
             holder.messageID = entry.messageId;
-            holder.timeView.setText(entry.getTime(timeFormat));
+            holder.timeView.setText(entry.getTime(getTimeFormatter()));
 
             if (!preferences.getBoolean(getString(R.string.preference_colored_text), false)) {
                 entry.content = new SpannableString(entry.content.toString());

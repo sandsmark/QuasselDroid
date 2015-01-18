@@ -28,9 +28,11 @@ import android.text.Spannable;
 
 import com.iskrembilen.quasseldroid.util.SenderColorHelper;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 public class IrcMessage implements Comparable<IrcMessage> {
     public enum Type {
@@ -116,8 +118,8 @@ public class IrcMessage implements Comparable<IrcMessage> {
     }
 
 
-    public String getTime(String format) {
-        return new SimpleDateFormat(format).format(timestamp);
+    public String getTime(DateFormat format) {
+        return format.format(timestamp);
     }
 
     public void setSender(String sender) {

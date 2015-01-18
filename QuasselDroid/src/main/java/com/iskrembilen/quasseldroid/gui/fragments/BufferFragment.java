@@ -463,6 +463,7 @@ public class BufferFragment extends Fragment implements Serializable {
         public TextView statusView;
         public int networkId;
         public ImageView indicatorView;
+        public View bufferDivider;
     }
 
     public void setNetworks(NetworkCollection networks) {
@@ -577,26 +578,10 @@ public class BufferFragment extends Fragment implements Serializable {
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
             ViewHolderGroup holder;
             if (convertView == null || !(convertView.getTag() instanceof ViewHolderGroup)) {
-                convertView = inflater.inflate(R.layout.widget_buffer_group, null);
-                holder = new ViewHolderGroup();
-                holder.statusView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
-                holder.statusView.setOnClickListener(new OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        if (getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
-                            openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
-                        } else { //TODO: maybe show the chatActivity but have it be empty, logo or something
-                            Toast.makeText(getActivity(), "Not Available", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                holder.indicatorView = (ImageView) convertView.findViewById(R.id.buffer_list_item_indicator);
-                holder.statusView.setOnLongClickListener(null); //Apparently need this so long click propagates to parent
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolderGroup) convertView.getTag();
+                convertView = createGroup();
             }
+
+            holder = (ViewHolderGroup) convertView.getTag();
             Network entry = getGroup(groupPosition);
             holder.networkId = entry.getId();
 
@@ -605,15 +590,48 @@ public class BufferFragment extends Fragment implements Serializable {
             Drawable expand = ta.getDrawable(1);
             ta.recycle();
 
-            if (isExpanded)
+            if (isExpanded) {
                 holder.indicatorView.setImageDrawable(collapse);
-            else
+            } else {
                 holder.indicatorView.setImageDrawable(expand);
+            }
+
+            // Hide seperator after a closed group, if own group is closed as well
+            // http://www.google.com/design/spec/components/list-controls.html#list-controls-types-of-list-controls
+            if ( groupPosition==0 ) {
+                holder.bufferDivider.setVisibility(View.GONE);
+            } else if (isExpanded || getGroup(groupPosition-1).isOpen()) {
+                holder.bufferDivider.setVisibility(View.VISIBLE);
+            } else {
+                holder.bufferDivider.setVisibility(View.INVISIBLE);
+            }
 
             holder.statusView.setText(entry.getName());
             holder.statusView.setTag(groupPosition); //Used in click listener to know what item this is
             BufferUtils.setBufferViewStatus(getActivity(), entry.getStatusBuffer(), holder.statusView);
 
+            return convertView;
+        }
+
+        private View createGroup() {
+            View convertView = inflater.inflate(R.layout.widget_buffer_group, null);
+            ViewHolderGroup holder = new ViewHolderGroup();
+            holder.statusView = (TextView) convertView.findViewById(R.id.buffer_list_item_name);
+            holder.statusView.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if (getGroup((Integer) v.getTag()).getStatusBuffer() != null) {
+                        openBuffer(getGroup((Integer) v.getTag()).getStatusBuffer());
+                    } else { //TODO: maybe show the chatActivity but have it be empty, logo or something
+                        Toast.makeText(getActivity(), "Not Available", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            holder.indicatorView = (ImageView) convertView.findViewById(R.id.buffer_list_item_indicator);
+            holder.statusView.setOnLongClickListener(null); //Apparently need this so long click propagates to parent
+            holder.bufferDivider = convertView.findViewById(R.id.buffer_divider);
+            convertView.setTag(holder);
             return convertView;
         }
 

@@ -147,13 +147,11 @@
             <string name="theme_light">Light</string>
             <string name="theme_dark">Dark</string>
 
-        <string name="preference_dialog_timestamp">Show Seconds in Timestamp</string>
-        <string name="preference_summary_timestamp">When should the Timestamp contain seconds</string>
-        <string name="preference_title_timestamp">Timestamp</string>
-        <string name="preference_timestamp" translatable="false">timestamp_seconds</string>
-            <string name="timestamp_always">Always</string>
-            <string name="timestamp_orientation">Screen Size</string>
-            <string name="timestamp_never">Never</string>
+        <string name="preference_dialog_timestamp">Select Time format</string>
+        <string name="preference_summary_timestamp">How should the time be displayed?</string>
+        <string name="preference_message_timestamp">Select a custom timeformat. If left empty will use system default</string>
+        <string name="preference_title_timestamp">Time Format</string>
+        <string name="preference_timestamp" translatable="false">timestamp</string>
 
         <string name="preference_dialog_fontsize">Choose fontsize for the chat</string>
         <string name="preference_summary_fontsize">The fontsize of the chat</string>

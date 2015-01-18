@@ -25,17 +25,6 @@
         <item>dark</item>
     </string-array>
 
-    <string-array name="entries_timestamp_preference">
-        <item>@string/timestamp_always</item>
-        <item>@string/timestamp_orientation</item>
-        <item>@string/timestamp_never</item>
-    </string-array>
-    <string-array name="entryvalues_timestamp_preference">
-        <item>always</item>
-        <item>orientation</item>
-        <item>never</item>
-    </string-array>
-
     <string-array name="entries_highlight_preference">
         <item>@string/highlight_all</item>
         <item>@string/highlight_current</item>

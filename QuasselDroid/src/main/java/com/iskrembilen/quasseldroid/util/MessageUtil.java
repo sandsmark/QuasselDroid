@@ -43,8 +43,6 @@ public class MessageUtil {
 
         boolean preferenceNickCaseSensitive = preferences.getBoolean("preference_nick_highlight_case_sensitive",false);
 
-        Log.d(MessageUtil.class.getSimpleName(), "nicks case sensitive: " + preferenceNickCaseSensitive);
-
         // TODO: Cache this (per network)
         Network net = NetworkCollection.getInstance().getNetworkById(msg.bufferInfo.networkId);
         if (net!=null && !net.getNick().isEmpty()) {
