@@ -53,9 +53,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
@@ -75,6 +72,10 @@ import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
 import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
+import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.Helper;
@@ -157,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
         if (event.bufferId==openedBuffer) {
-            topic = NetworkCollection.getInstance().getBufferById(openedBuffer).getTopic();
+            topic = Client.getInstance().getNetworks().getBufferById(openedBuffer).getTopic();
             setTitleAndMenu();
         }
     }
@@ -194,7 +195,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             if (requestOpenDrawer) {
-                openedDrawer = Gravity.START;
+                openedDrawer = Side.LEFT;
             }
             loadBufferAndDrawerState();
         }
@@ -235,11 +236,11 @@ public class MainActivity extends ActionBarActivity {
             return;
         }
 
-        if (Quasseldroid.status == Status.Disconnected) {
+        if (Client.getInstance().status == Status.Disconnected) {
             Log.d(TAG, "Status is disconnected when resuming activity");
             returnToLogin();
             return;
-        } else if (Quasseldroid.status == Status.Connected) {
+        } else if (Client.getInstance().status == Status.Connected) {
             loadBufferAndDrawerState();
             connectionEstablished = true;
         }
@@ -249,7 +250,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void loadBufferAndDrawerState() {
-        NetworkCollection networks = NetworkCollection.getInstance();
+        NetworkCollection networks = Client.getInstance().getNetworks();
         if (networks != null) {
             if (openedBuffer == -1 || networks.getBufferById(openedBuffer) == null) {
                 Log.d(TAG, "Loading state: Empty");
@@ -326,7 +327,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_preferences:
-                Intent i = new Intent(MainActivity.this, PreferenceView.class);
+                Intent i = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(i);
                 return true;
             case R.id.menu_disconnect:
@@ -415,7 +416,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onBufferOpened(BufferOpenedEvent event) {
-        NetworkCollection networks = NetworkCollection.getInstance();
+        NetworkCollection networks = Client.getInstance().getNetworks();
 
         if (event.bufferId != -1
                 && networks.getBufferById(event.bufferId)!=null
@@ -430,7 +431,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     private void setTitleAndMenu() {
-        NetworkCollection networks = NetworkCollection.getInstance();
+        NetworkCollection networks = Client.getInstance().getNetworks();
         Buffer buffer = networks.getBufferById(openedBuffer);
 
         manager.chatFragment.setMenuVisibility(true);
@@ -510,28 +511,28 @@ public class MainActivity extends ActionBarActivity {
                     chatFragment = manager.findFragmentById(R.id.main_content_container);
                 else
                     chatFragment = ChatFragment.newInstance();
-                ((ChatFragment) chatFragment).setNetworks(NetworkCollection.getInstance());
+                ((ChatFragment) chatFragment).setNetworks(Client.getInstance().getNetworks());
             }
             if (nickFragment==null) {
                 if (manager.findFragmentById(R.id.right_drawer) instanceof NickListFragment)
                     nickFragment = manager.findFragmentById(R.id.right_drawer);
                 else
                     nickFragment = NickListFragment.newInstance();
-                ((NickListFragment) nickFragment).setNetworks(NetworkCollection.getInstance());
+                ((NickListFragment) nickFragment).setNetworks(Client.getInstance().getNetworks());
             }
             if (detailFragment==null) {
                 if (manager.findFragmentById(R.id.right_drawer) instanceof DetailFragment)
                     detailFragment = manager.findFragmentById(R.id.right_drawer);
                 else
                     detailFragment = DetailFragment.newInstance();
-                ((DetailFragment) detailFragment).setNetworks(NetworkCollection.getInstance());
+                ((DetailFragment) detailFragment).setNetworks(Client.getInstance().getNetworks());
             }
             if (bufferFragment==null) {
                 if (manager.findFragmentById(R.id.left_drawer) instanceof BufferFragment)
                     bufferFragment = manager.findFragmentById(R.id.left_drawer);
                 else
                     bufferFragment = BufferFragment.newInstance();
-                ((BufferFragment) bufferFragment).setNetworks(NetworkCollection.getInstance());
+                ((BufferFragment) bufferFragment).setNetworks(Client.getInstance().getNetworks());
             }
         }
 
@@ -720,11 +721,11 @@ public class MainActivity extends ActionBarActivity {
         }
 
         public boolean isSubtitleVisible() {
-            return wrappedToolbar.findViewById(R.id.subtitle).getVisibility() == View.VISIBLE;
+            return wrappedToolbar.findViewById(R.id.action_bar_subtitle).getVisibility() == View.VISIBLE;
         }
 
         public void setSubtitleVisible(boolean subtitleVisibility) {
-            wrappedToolbar.findViewById(R.id.subtitle).setVisibility(
+            wrappedToolbar.findViewById(R.id.action_bar_subtitle).setVisibility(
                     subtitleVisibility ? View.VISIBLE
                             : View.GONE
             );
@@ -743,11 +744,11 @@ public class MainActivity extends ActionBarActivity {
         }
 
         public CharSequence getSubtitle() {
-            return ((TextView) wrappedToolbar.findViewById(R.id.subtitle)).getText();
+            return ((TextView) wrappedToolbar.findViewById(R.id.action_bar_subtitle)).getText();
         }
 
         public void setSubtitle(CharSequence subtitle) {
-            ((TextView) wrappedToolbar.findViewById(R.id.subtitle)).setText(subtitle);
+            ((TextView) wrappedToolbar.findViewById(R.id.action_bar_subtitle)).setText(subtitle);
         }
 
         public boolean isTitleClickable() {
@@ -771,7 +772,7 @@ public class MainActivity extends ActionBarActivity {
         LEFT,
         RIGHT,
         BOTH,
-        NONE;
+        NONE
     }
 
 }

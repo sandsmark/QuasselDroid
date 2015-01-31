@@ -18,6 +18,7 @@ public class IgnoreListFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        /*
         for (IgnoreListManager.IgnoreListItem item : Client.getInstance().getIgnoreListManager().getIgnoreList()) {
             SwitchPreference pref = new SwitchPreference(this);
             pref.setTitle(item.getRule());
@@ -25,7 +26,7 @@ public class IgnoreListFragment extends PreferenceFragment {
             screen.addPreference(pref);
         }
 
-        setPreferenceScreen(screen);
+        setPreferenceScreen(screen);*/
     }
 
 
