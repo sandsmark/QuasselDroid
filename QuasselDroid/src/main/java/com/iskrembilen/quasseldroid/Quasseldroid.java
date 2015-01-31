@@ -15,11 +15,13 @@ import com.squareup.otto.Subscribe;
 
 public class Quasseldroid extends Application {
     public Bundle savedInstanceState;
-    public static Context context;
+    public static Context applicationContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        applicationContext = getApplicationContext();
 
         //Populate the preferences with default values if this has not been done before
         PreferenceManager.setDefaultValues(this, R.xml.preference_appearance, true);
@@ -28,16 +30,5 @@ public class Quasseldroid extends Application {
 
         //Load current theme
         ThemeUtil.initTheme(this);
-<<<<<<< HEAD
-        BusProvider.getInstance().register(this);
-        context = this;
-    }
-
-    @Subscribe
-    public void onConnectionChanged(ConnectionChangedEvent event) {
-        Log.d(TAG, "Changing connection status to: " + event.status);
-        status = event.status;
-=======
->>>>>>> Reworked the protcol, added automated syncing
     }
 }

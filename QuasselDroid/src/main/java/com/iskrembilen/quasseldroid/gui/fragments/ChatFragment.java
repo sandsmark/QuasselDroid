@@ -509,7 +509,6 @@ public class ChatFragment extends Fragment implements Serializable {
             boolean detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
             boolean parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
             boolean nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
-            boolean fancyModes = true;
 
             switch (entry.type) {
                 case Action:
@@ -518,7 +517,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
 
                     SpannableString contentSpan = MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors);
-                    contentSpan = new SpannableString(TextUtils.concat(MessageFormattingHelper.formatNick(entry, fancyModes, false), " ", contentSpan));
+                    contentSpan = new SpannableString(TextUtils.concat(MessageFormattingHelper.formatNick(entry, new String[] {"<",">"}, false), " ", contentSpan));
                     SpanUtils.setFullSpan(contentSpan, new StyleSpan(Typeface.ITALIC));
                     holder.msgView.setText(contentSpan);
                     break;
@@ -539,20 +538,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Notice:
-                    if (entry.isSelf() || entry.isHighlighted()) {
-                        color = ThemeUtil.Color.chatPlain;
-                    } else {
-                        color = entry.getSenderColor();
-                    }
-                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false)) {
-                        nickSpan = new SpannableString(TextUtils.concat("[", entry.getNick(), "]"));
-                    } else {
-                        nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
-                    }
-                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-
-                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setText(TextUtils.concat(MessageFormattingHelper.formatNick(entry, new String[] {"[","]"}, nickBrackets), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
@@ -700,7 +686,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.msgView.setTextColor(ThemeUtil.Color.chatPlain);
                     holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    holder.msgView.setText(TextUtils.concat(MessageFormattingHelper.formatNick(entry, fancyModes, nickBrackets), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setText(TextUtils.concat(MessageFormattingHelper.formatNick(entry, new String[] {"<",">"}, nickBrackets), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
 
                     holder.parent.setBackgroundColor(android.graphics.Color.TRANSPARENT);
                     break;

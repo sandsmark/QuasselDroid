@@ -11,15 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-<<<<<<< HEAD
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.NetworkCollection;
-=======
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
-import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
->>>>>>> Reworked the UI slightly
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -51,19 +45,16 @@ public class TopicViewDialog extends DialogFragment {
 
     @Subscribe
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
-<<<<<<< HEAD
         if (event.bufferId == id) {
             mDialog.setTitle(mBuffer.getInfo().name);
             setTopic(mBuffer.getTopic());
         }
-=======
         Buffer buffer = Client.getInstance().getNetworks().getBufferById(event.bufferId);
         setTopic(buffer.getTopic());
->>>>>>> Reworked the UI slightly
     }
 
     public void setTopic(CharSequence topic) {
-        ((TextView) getDialog().findViewById(R.id.dialog_topic_text)).setText(topic);
+        ((TextView) getDialog().findViewById(R.id.dialog_simple_text)).setText(topic);
     }
 
     @Override
@@ -74,24 +65,24 @@ public class TopicViewDialog extends DialogFragment {
     @Override
     public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         id = getArguments().getInt("id");
-        mBuffer = NetworkCollection.getInstance().getBufferById(id);
+        mBuffer = Client.getInstance().getNetworks().getBufferById(id);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_topic_view, null);
-        TextView topicField = (TextView) view.findViewById(R.id.dialog_topic_text);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_simple_view, null);
+        TextView topicField = (TextView) view.findViewById(R.id.dialog_simple_text);
         topicField.setText(mBuffer.getTopic());
 
         builder.setView(view)
                 .setTitle(mBuffer.getInfo().name)
-                .setPositiveButton(getString(R.string.dialog_action_close), new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.action_close), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setNeutralButton(getString(R.string.dialog_action_edit), new DialogInterface.OnClickListener() {
+                .setNeutralButton(getString(R.string.action_edit), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         TopicEditDialog.newInstance(mBuffer.getTopic(),mBuffer.getInfo().name,id).show(getFragmentManager(),TAG);

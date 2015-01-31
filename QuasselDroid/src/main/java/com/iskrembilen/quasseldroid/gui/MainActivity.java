@@ -732,7 +732,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         public CharSequence getTitle() {
-            return ((TextView) wrappedToolbar.findViewById(R.id.title)).getText();
+            return ((TextView) wrappedToolbar.findViewById(R.id.action_bar_title)).getText();
         }
 
         public void setOnTitleClickListener(View.OnClickListener listener) {
@@ -740,7 +740,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         public void setTitle(CharSequence subtitle) {
-            ((TextView) wrappedToolbar.findViewById(R.id.title)).setText(subtitle);
+            ((TextView) wrappedToolbar.findViewById(R.id.action_bar_title)).setText(subtitle);
         }
 
         public CharSequence getSubtitle() {

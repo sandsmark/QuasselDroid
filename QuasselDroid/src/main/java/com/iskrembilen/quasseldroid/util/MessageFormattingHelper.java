@@ -56,12 +56,11 @@ public class MessageFormattingHelper {
 
     }
 
-    public static CharSequence formatNick(IrcMessage entry, boolean fancyPrefix, boolean nickBrackets) {
+    public static CharSequence formatNick(IrcMessage entry, String[] nickBrackets, boolean useBrackets) {
         Network network = Client.getInstance().getNetworks().getNetworkById(entry.bufferInfo.networkId);
         Buffer buffer = network.getBuffers().getBuffer(entry.bufferInfo.id);
         IrcUser user = network.getUserByNick(entry.getNick());
 
-        Spannable nickPrefix;
         Spannable nickSpan;
 
         nickSpan = new SpannableString(entry.getNick());
@@ -74,16 +73,10 @@ public class MessageFormattingHelper {
         else
             SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(entry.getNick())));
 
-        if (user==null || !buffer.getUsers().getUniqueUsers().contains(user)) {
-            nickPrefix = new SpannableString("×");
-            // ← ⇐ →
-        }
-
-        if (nickBrackets) {
-            return TextUtils.concat("<", nickSpan, ">");
-        } else {
+        if (useBrackets)
+            return TextUtils.concat(nickBrackets[0], nickSpan, nickBrackets[1]);
+        else
             return nickSpan;
-        }
     }
 
     public static CharSequence formatNick(Context ctx, String nick, boolean reduced) {

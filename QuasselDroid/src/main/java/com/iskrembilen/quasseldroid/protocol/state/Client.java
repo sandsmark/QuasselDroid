@@ -1,5 +1,6 @@
 package com.iskrembilen.quasseldroid.protocol.state;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;

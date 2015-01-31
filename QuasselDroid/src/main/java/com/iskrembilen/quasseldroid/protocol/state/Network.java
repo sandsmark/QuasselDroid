@@ -2,6 +2,7 @@ package com.iskrembilen.quasseldroid.protocol.state;
 
 import android.support.annotation.NonNull;
 
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.protocol.state.serializers.Syncable;
@@ -172,18 +173,10 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
     }
 
 
-<<<<<<< HEAD:QuasselDroid/src/main/java/com/iskrembilen/quasseldroid/Network.java
-    public void setUserList(List<IrcUser> userList) {
-        if (userList != null && userList.size() > 0) {
-            for (IrcUser user : userList) {
-                user.deleteObserver(this);
-            }
-=======
     public void setUserList(@NonNull List<IrcUser> userList) {
         for (IrcUser user : userList) {
             user.deleteObserver(this);
             user.unregister();
->>>>>>> Reworked the protcol, added automated syncing:QuasselDroid/src/main/java/com/iskrembilen/quasseldroid/protocol/state/Network.java
         }
         this.userList = userList;
         nickUserMap.clear();
@@ -365,9 +358,9 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
 
     private void updateTopic(){
         if(statusBuffer != null){
-            statusBuffer.setTopic(networkName + " (" + server + ") | "
-                    + Quasseldroid.context.getResources().getString(R.string.users) + ": "
-                    + userList.size() + " | " + Helper.formatLatency(latency, Quasseldroid.context.getResources()));
+            statusBuffer.setTopic(networkName + " (" + currentServer + ") | "
+                    + Quasseldroid.applicationContext.getResources().getString(R.string.users) + ": "
+                    + userList.size() + " | " + Helper.formatLatency(latency, Quasseldroid.applicationContext.getResources()));
         }
     }
 
