@@ -121,7 +121,7 @@ public class QuasseldroidNotificationManager {
 
     private boolean checkPending() {
         if (pendingHighlightNotification && getHighlightedMessageCount()==0)
-            pendingHighlightNotification = false;git statu
+            pendingHighlightNotification = false;
 
         return pendingHighlightNotification;
     }
