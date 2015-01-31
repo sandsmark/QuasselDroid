@@ -1,6 +1,6 @@
 package com.iskrembilen.quasseldroid.events;
 
-import com.iskrembilen.quasseldroid.qtcomm.QVariant;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
 
 public class RequestCreateIdentityEvent {
     public final int identityId;

@@ -1,6 +1,6 @@
 package com.iskrembilen.quasseldroid.events;
 
-import com.iskrembilen.quasseldroid.IrcMessage.Type;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage.Type;
 
 public class FilterMessagesEvent {
 

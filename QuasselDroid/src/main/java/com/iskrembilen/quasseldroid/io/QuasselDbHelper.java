@@ -32,7 +32,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
 
 public class QuasselDbHelper {
     public static final String KEY_ID = "_id";
@@ -116,20 +116,16 @@ public class QuasselDbHelper {
         dbHelper = null;
     }
 
-    public void addCore(String name, String address, int port) {
-        try {
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_NAME, name);
-            initialValues.put(KEY_ADDRESS, address);
-            initialValues.put(KEY_PORT, port);
-            db.insert(CORE_TABLE, null, initialValues);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void addCore(String name, String address, int port) throws SQLException {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_NAME, name);
+        initialValues.put(KEY_ADDRESS, address);
+        initialValues.put(KEY_PORT, port);
+        db.insert(CORE_TABLE, null, initialValues);
     }
 
 
-    public void deleteCore(long rowId) {
+    public void deleteCore(long rowId) throws SQLException {
         db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
     }
 
@@ -159,7 +155,7 @@ public class QuasselDbHelper {
         return b;
     }
 
-    public void updateCore(long rowId, String name, String address, int port) {
+    public void updateCore(long rowId, String name, String address, int port) throws SQLException {
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, name);
         args.put(KEY_ADDRESS, address);
@@ -168,17 +164,13 @@ public class QuasselDbHelper {
         //TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we get problems if names are the same
     }
 
-    public void storeCertificate(String certificateHash, long coreId) {
-        try {
-            ContentValues value = new ContentValues();
-            value.put(KEY_CERTIFICATE, certificateHash);
-            value.put(KEY_COREIDREFERENCE, coreId);
-            long res = db.insert(CERTIFICATE_TABLE, null, value);
-            if (res == -1) {
-                db.replace(CERTIFICATE_TABLE, null, value);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void storeCertificate(String certificateHash, long coreId) throws SQLException {
+        ContentValues value = new ContentValues();
+        value.put(KEY_CERTIFICATE, certificateHash);
+        value.put(KEY_COREIDREFERENCE, coreId);
+        long res = db.insert(CERTIFICATE_TABLE, null, value);
+        if (res == -1) {
+            db.replace(CERTIFICATE_TABLE, null, value);
         }
     }
 
@@ -193,30 +185,22 @@ public class QuasselDbHelper {
         return cert;
     }
 
-    public void addHiddenEvent(IrcMessage.Type event, int bufferId) {
-        try {
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_EVENT, event.name());
-            initialValues.put(KEY_BUFFERID, bufferId);
-            db.insert(HIDDENEVENTS_TABLE, null, initialValues);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void addHiddenEvent(IrcMessage.Type event, int bufferId) throws SQLException {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_EVENT, event.name());
+        initialValues.put(KEY_BUFFERID, bufferId);
+        db.insert(HIDDENEVENTS_TABLE, null, initialValues);
     }
 
-    public void addUser(String userName, String password, long coreId) {
-        try {
-            db.delete(USER_TABLE, KEY_COREIDREFERENCE + "=" + coreId, null);
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_USERNAME, userName);
-            initialValues.put(KEY_PASSWORD, password);
-            initialValues.put(KEY_COREIDREFERENCE, coreId);
-            long res = db.insert(USER_TABLE, null, initialValues);
-            if (res == -1) {
-                db.replace(USER_TABLE, null, initialValues);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void addUser(String userName, String password, long coreId) throws SQLException {
+        db.delete(USER_TABLE, KEY_COREIDREFERENCE + "=" + coreId, null);
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_USERNAME, userName);
+        initialValues.put(KEY_PASSWORD, password);
+        initialValues.put(KEY_COREIDREFERENCE, coreId);
+        long res = db.insert(USER_TABLE, null, initialValues);
+        if (res == -1) {
+            db.replace(USER_TABLE, null, initialValues);
         }
     }
 
@@ -272,12 +256,4 @@ public class QuasselDbHelper {
         }
         return events;
     }
-
-    /**
-     * ONLY USED FOR TESTING!
-     */
-    public SQLiteDatabase getDatabase() {
-        return db;
-    }
-
 }

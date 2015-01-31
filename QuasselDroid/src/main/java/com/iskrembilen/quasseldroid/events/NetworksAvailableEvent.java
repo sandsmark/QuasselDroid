@@ -1,6 +1,6 @@
 package com.iskrembilen.quasseldroid.events;
 
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 
 public class NetworksAvailableEvent {
 

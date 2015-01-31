@@ -1,6 +1,6 @@
 package com.iskrembilen.quasseldroid.events;
 
-import com.iskrembilen.quasseldroid.Identity;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
 
 public class UpdateIdentityEvent {
     public final Identity identity;

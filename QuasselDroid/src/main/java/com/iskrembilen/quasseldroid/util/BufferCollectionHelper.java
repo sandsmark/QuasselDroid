@@ -1,7 +1,7 @@
 package com.iskrembilen.quasseldroid.util;
 
 import com.google.common.base.Predicate;
-import com.iskrembilen.quasseldroid.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 
 import java.util.ArrayList;
 import java.util.Comparator;

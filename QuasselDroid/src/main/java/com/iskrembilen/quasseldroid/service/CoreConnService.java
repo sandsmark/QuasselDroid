@@ -42,21 +42,22 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.Identity;
-import com.iskrembilen.quasseldroid.IdentityCollection;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.Network.ConnectionState;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.events.RequestRemoteSyncEvent;
+import com.iskrembilen.quasseldroid.protocol.packets.Request;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.Network;
+import com.iskrembilen.quasseldroid.protocol.state.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
@@ -83,12 +84,11 @@ import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.RequestRemoveIdentityEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
-import com.iskrembilen.quasseldroid.events.RequestUpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
-import com.iskrembilen.quasseldroid.qtcomm.QVariant;
-import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
@@ -98,8 +98,8 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
 
 /**
@@ -266,7 +266,7 @@ public class CoreConnService extends Service {
         port = connectData.getInt("port");
         username = connectData.getString("username");
         password = connectData.getString("password");
-        networks = NetworkCollection.getInstance();
+        networks = Client.getInstance().getNetworks();
         networks.clear();
 
         acquireWakeLockIfEnabled();
@@ -307,8 +307,8 @@ public class CoreConnService extends Service {
     }
 
     @Subscribe
-    public void onRequestUpdateIdentity(RequestUpdateIdentityEvent event) {
-        coreConn.requestUpdateIdentity(event.identityId, event.method, event.data);
+    public void onRequestRemoteSync(RequestRemoteSyncEvent event) {
+        coreConn.requestRemoteSync(event);
     }
 
     @Subscribe
@@ -366,7 +366,7 @@ public class CoreConnService extends Service {
             incomingHandler.removeCallbacksAndMessages(null);
         }
         incomingHandler = null;
-        if(Quasseldroid.status != Status.Disconnected) {
+        if(Client.getInstance().status != Status.Disconnected) {
             BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
         }else{
             // The only time this could conceivably happen is if Android tells us the network is
@@ -383,7 +383,7 @@ public class CoreConnService extends Service {
             disconnectFromCore();
         }
         notificationManager = new QuasseldroidNotificationManager(this);
-        networks = NetworkCollection.getInstance();
+        networks = Client.getInstance().getNetworks();
         networks.clear();
         incomingHandler = new IncomingHandler();
         acquireWakeLockIfEnabled();
@@ -405,7 +405,7 @@ public class CoreConnService extends Service {
         public boolean disabled = false;
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(android.os.Message msg) {
             if (msg == null || coreConn == null || disabled) {
                 return;
             }
@@ -513,7 +513,7 @@ public class CoreConnService extends Service {
                         buffer.setLastSeenMessage(msg.arg2);
                         notificationManager.notifyHighlightsRead(buffer.getInfo().id);
                     } else {
-                        Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
+                        Log.e(TAG, "Getting last seen message for buffer we don't have " + msg.arg1);
                     }
                     break;
                 case R.id.SET_MARKERLINE_TO_SERVICE:
@@ -524,7 +524,7 @@ public class CoreConnService extends Service {
                     if (buffer != null) {
                         buffer.setMarkerLineMessage(msg.arg2);
                     } else {
-                        Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
+                        Log.e(TAG, "Getting markerlinemessage for buffer we don't have " + msg.arg1);
                     }
                     break;
 
@@ -568,7 +568,13 @@ public class CoreConnService extends Service {
                         user.away = bundle.getBoolean("away");
                         user.awayMessage = bundle.getString("awayMessage");
                         user.ircOperator = bundle.getString("ircOperator");
-                        user.channels = (ArrayList<String>) bundle.getSerializable("channels");
+
+                        if (bundle.getSerializable("channels")==null)
+                            user.channels = new ArrayList<>();
+                        else
+                            user.channels = (List<String>) bundle.getSerializable("channels");
+
+
                         user.notifyObservers();
                     } else {
                         Log.e(TAG, "User not found for new user info");
@@ -579,27 +585,14 @@ public class CoreConnService extends Service {
                     /**
                      * Buffer order changed so set the new one
                      */
-                    //---- start debug stuff
-//				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
-//				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
-//				ArrayList<Integer> c = new ArrayList<Integer>();
-//				for(Network net : networks.getNetworkList()) {
-//					c.add(net.getStatusBuffer().getInfo().id);
-//					for(Buffer buf : net.getBuffers().getBufferList(true)) {
-//						c.add(buf.getInfo().id);
-//					}
-//				}
-//				Collections.sort(a);
-//				Collections.sort(b);
-//				Collections.sort(c);
-                    //---- end debug stuff
-
-                    if (networks == null)
+                    if (networks == null) {
                         throw new RuntimeException("Networks are null when setting buffer order");
-                    if (networks.getBufferById(msg.arg1) == null)
+                    } else if (networks.getBufferById(msg.arg1) == null) {
+                        Log.w(TAG, "Got buffer info for non-existent buffer id: " + msg.arg1);
                         return;
-                    //throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
-                    networks.getBufferById(msg.arg1).setOrder(msg.arg2);
+                    } else {
+                        networks.getBufferById(msg.arg1).setOrder(msg.arg2);
+                    }
                     break;
 
                 case R.id.SET_BUFFER_TEMP_HIDDEN:
@@ -696,19 +689,6 @@ public class CoreConnService extends Service {
                     }
                     //Did not find buffer in the network, something is wrong
                     Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
-                case R.id.USER_CHANGEDNICK:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        Log.e(TAG, "Could not find network with id " + msg.arg1 + " for changing a user nick");
-                        return;
-                    }
-                    bundle = (Bundle) msg.obj;
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
-                    if (user == null) {
-                        Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick to " + bundle.getString("newNick"));
-                        return;
-                    }
-                    user.changeNick(bundle.getString("newNick"));
-                    break;
                 case R.id.USER_ADD_MODE:
                     if (networks.getNetworkById(msg.arg1) == null) {
                         System.err.println("Unable to find buffer for message");
@@ -746,7 +726,7 @@ public class CoreConnService extends Service {
                     networks.getNetworkById(msg.arg1).setConnected((Boolean) msg.obj);
                     break;
                 case R.id.SET_MY_NICK:
-                    networks.getNetworkById(msg.arg1).setNick((String) msg.obj);
+                    networks.getNetworkById(msg.arg1).setMyNick((String) msg.obj);
                     break;
                 case R.id.REMOVE_BUFFER:
                     BusProvider.getInstance().post(new BufferRemovedEvent(msg.arg2));
@@ -762,52 +742,23 @@ public class CoreConnService extends Service {
                     networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
                     break;
                 case R.id.SET_NETWORK_NAME:
-                    networks.getNetworkById(msg.arg1).setName((String) msg.obj);
+                    networks.getNetworkById(msg.arg1).setNetworkName((String) msg.obj);
                     break;
                 case R.id.SET_NETWORK_CURRENT_SERVER:
-                    networks.getNetworkById(msg.arg1).setServer((String) msg.obj);
+                    networks.getNetworkById(msg.arg1).setCurrentServer((String) msg.obj);
                     break;
                 case R.id.SET_NETWORK_IDENTITY:
-                    networks.getNetworkById(msg.arg1).setIdentityId((int) msg.obj);
+                    networks.getNetworkById(msg.arg1).setIdentity((int) msg.obj);
                     break;
                 case R.id.RENAME_BUFFER:
                     networks.getBufferById(msg.arg1).setName((String) msg.obj);
                     break;
-                case R.id.SET_USER_SERVER:
-                    bundle = (Bundle) msg.obj;
-                    Network networkServer = networks.getNetworkById(msg.arg1);
-                    if (networkServer != null) {
-                        IrcUser userServer = networkServer.getUserByNick(bundle.getString("nick"));
-                        if (userServer != null) {
-                            userServer.server = bundle.getString("server");
-                        }
-                    }
-                    break;
-                case R.id.SET_USER_REALNAME:
-                    bundle = (Bundle) msg.obj;
-                    Network networkRealName = networks.getNetworkById(msg.arg1);
-                    if (networkRealName != null) {
-                        IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
-                        if (userRealName != null) {
-                            userRealName.realName = bundle.getString("realname");
-                        }
-                    }
-                    break;
-                case R.id.SET_USER_AWAY:
-                    bundle = (Bundle) msg.obj;
-                    Network networkAway = networks.getNetworkById(msg.arg1);
-                    if (networkAway != null) {
-                        IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
-                        if (userAway != null) {
-                            userAway.away = bundle.getBoolean("away");
-                        }
-                    }
-                    break;
-                case R.id.UPDATE_IDENTITY:
                 case R.id.CREATE_IDENTITY:
                     try {
-                        Identity identity = Identity.fromQVariant((QVariant<?>) msg.obj);
-                        IdentityCollection.getInstance().putIdentity(identity);
+                        Identity identity = new Identity();
+                        identity.fromVariantMap((QVariant<Map<String,QVariant<?>>>)msg.obj);
+
+                        Client.getInstance().getIdentities().putIdentity(identity);
                         BusProvider.getInstance().post(new UpdateIdentityEvent(identity));
                     } catch (EmptyQVariantException e) {
                         e.printStackTrace();
@@ -816,15 +767,21 @@ public class CoreConnService extends Service {
                 case R.id.REMOVE_IDENTITY:
                     try {
                         if (((QVariant<?>) msg.obj).getType()== QVariantType.Map) {
-                            IdentityCollection.getInstance().removeIdentity(Identity.fromQVariant((QVariant<HashMap>) msg.obj));
+                            Identity identity = new Identity();
+                            identity.fromVariantMap((QVariant<Map<String,QVariant<?>>>)msg.obj);
+                            Client.getInstance().getIdentities().removeIdentity(identity.getIdentityId());
+                            Client.getInstance().getObjects().removeObject("Identity", String.valueOf(identity.getIdentityId()));
                         } else if (((QVariant<?>) msg.obj).getType()== QVariantType.Int) {
-                            IdentityCollection.getInstance().removeIdentity(((QVariant<Integer>) msg.obj).getData());
+                            Client.getInstance().getIdentities().removeIdentity(((QVariant<Integer>) msg.obj).getData());
                         } else {
                             Log.d(TAG,"Encountered unknown identity type while sync:"+((QVariant<?>) msg.obj).getType().name());
                         }
                     } catch (EmptyQVariantException e) {
                         e.printStackTrace();
                     }
+                case R.id.DIRECT_MESSAGE:
+                    Request p = (Request) msg.obj;
+                    p.apply();
             }
         }
     }
