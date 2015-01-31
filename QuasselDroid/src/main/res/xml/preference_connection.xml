@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_fetch_to_last_seen"
+        android:summaryOn="@string/preference_summary_on_fetch_to_last_seen"
+        android:summaryOff="@string/preference_summary_off_fetch_to_last_seen"
+        android:title="@string/preference_title_fetch_to_last_seen"
+        android:disableDependentsState="true" />
+
+    <EditTextPreference
+        android:defaultValue="10"
+        android:key="@string/preference_initial_backlog_limit"
+        android:numeric="integer"
+        android:summary="@string/preference_summary_initial_backlog_limit"
+        android:title="@string/preference_title_initial_backlog_limit"
+        android:dependency="@string/preference_fetch_to_last_seen" />
+
+    <EditTextPreference
+        android:defaultValue="20"
+        android:key="@string/preference_dynamic_backlog"
+        android:numeric="integer"
+        android:summary="@string/preference_summary_dynamic_backlog"
+        android:title="@string/preference_title_dynamic_backlog" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_wake_lock"
+        android:summary="@string/preference_wakelock_summary"
+        android:title="@string/preference_wakelock_title" />
+
+    <PreferenceCategory android:title="@string/preference_category_reconnect">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect"
+            android:summaryOn="@string/preference_summary_on_reconnect"
+            android:summaryOff="@string/preference_summary_off_reconnect"
+            android:title="@string/preference_title_reconnect"
+            android:disableDependentsState="false" />
+        <EditTextPreference
+            android:defaultValue="5"
+            android:key="@string/preference_reconnect_interval"
+            android:numeric="integer"
+            android:summary="@string/preference_summary_reconnect_interval"
+            android:title="@string/preference_title_reconnect_interval"
+            android:dependency="@string/preference_reconnect" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_wifi"
+            android:summaryOn="@string/preference_summary_on_reconnect_wifi"
+            android:summaryOff="@string/preference_summary_off_reconnect_wifi"
+            android:title="@string/preference_title_wifi"
+            android:dependency="@string/preference_reconnect" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_metered"
+            android:summaryOn="@string/preference_summary_on_metered"
+            android:summaryOff="@string/preference_summary_off_metered"
+            android:title="@string/preference_title_metered"
+            android:dependency="@string/preference_reconnect_wifi" />
+    </PreferenceCategory>
+</PreferenceScreen>

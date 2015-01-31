@@ -62,6 +62,7 @@ import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.LoginProgressDialog;
+import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
@@ -78,17 +79,16 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     public static final String PREFS_ACCOUNT = "AccountPreferences";
     public static final String PREFS_CORE = "coreSelection";
 
-    SharedPreferences settings;
-    QuasselDbHelper dbHelper;
+    private SharedPreferences settings;
+    private QuasselDbHelper dbHelper;
 
-    Spinner core;
-    EditText usernameField;
-    EditText passwordField;
-    CheckBox rememberMe;
-    Button connect;
-    EditText portField;
-    EditText nameField;
-    EditText addressField;
+    private Spinner core;
+    private EditText usernameField;
+    private EditText passwordField;
+    private CheckBox rememberMe;
+    private EditText portField;
+    private EditText nameField;
+    private EditText addressField;
 
     private String hashedCert;//ugly
     private int currentTheme;
@@ -161,7 +161,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         if (core.getCount() > settings.getInt(PREFS_CORE, 0))
             core.setSelection(settings.getInt(PREFS_CORE, 0));
 
-        connect = (Button) findViewById(R.id.connect_button);
+        Button connect = (Button) findViewById(R.id.connect_button);
         connect.setOnClickListener(onConnect);
     }
 
@@ -262,7 +262,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_preferences:
-                Intent i = new Intent(LoginActivity.this, PreferenceActivity.class);
+                Intent i = new Intent(LoginActivity.this, SettingsActivity.class);
                 startActivity(i);
                 break;
         }

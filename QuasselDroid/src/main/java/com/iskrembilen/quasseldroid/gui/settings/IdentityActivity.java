@@ -1,4 +1,4 @@
-package com.iskrembilen.quasseldroid.gui;
+package com.iskrembilen.quasseldroid.gui.settings;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +24,8 @@ import android.widget.EditText;
 import android.widget.TabHost;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.Identity;
-import com.iskrembilen.quasseldroid.IdentityCollection;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
+import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.EditNickDialog;
@@ -231,7 +231,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
 
         public @NonNull DragSortController buildController(DragSortListView dslv) {
             DragSortController controller = new DragSortController(dslv);
-            controller.setDragHandleId(R.id.drag_handle);
+            controller.setDragHandleId(R.id.list_drag_handle);
             controller.setRemoveEnabled(true);
             controller.setSortEnabled(true);
             controller.setDragInitMode(DragSortController.ON_DRAG);
@@ -251,7 +251,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
             initElements(root);
 
             View header = inflater.inflate(R.layout.fragment_identity_nicks_header, nickList, false);
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_identity_nick,R.id.text);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_identity_nick, R.id.text);
             nicks = new ArrayList<>();
 
             nickList.addHeaderView(header);
@@ -302,7 +302,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
                  */
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                    EditNickDialog dialog = EditNickDialog.newInstance(position, identityId);
+                    EditNickDialog dialog = EditNickDialog.newInstance(position-nickList.getHeaderViewsCount(), identityId);
                     dialog.setOnResultListener(new EditNickDialog.OnResultListener<String>() {
                         @Override
                         public void onClick(String result) {

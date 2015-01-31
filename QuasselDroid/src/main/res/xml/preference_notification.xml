@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_notify_hide_persistence"
+        android:title="@string/preference_title_notify_hide_persistence"
+        android:summaryOn="@string/preference_summary_on_notify_hide_persistence"
+        android:summaryOff="@string/preference_summary_off_notify_hide_persistence"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_notify_connect"
+        android:title="@string/preference_title_notify_connect" />
+
+    <SwitchPreference
+        android:key="@string/preference_notification_vibrate"
+        android:title="@string/preference_title_notification_vibrate" />
+
+    <SwitchPreference
+        android:key="@string/preference_notification_light"
+        android:title="@string/preference_title_notification_light" />
+
+    <SwitchPreference
+        android:key="@string/preference_notification_sound"
+        android:title="@string/preference_title_notification_sound" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_notification_sound_active"
+        android:title="@string/preference_title_notification_sound_active" />
+
+    <RingtonePreference
+        android:key="@string/preference_notification_sound_file"
+        android:ringtoneType="notification"
+        android:showDefault="true"
+        android:showSilent="true"
+        android:title="@string/preference_title_notification_sound_file"/>
+
+    <RingtonePreference
+        android:key="@string/preference_notification_connect_sound_file"
+        android:ringtoneType="notification"
+        android:showDefault="true"
+        android:showSilent="true"
+        android:title="@string/preference_title_notification_connect_sound_file"/>
+
+    <PreferenceCategory android:title="@string/preference_category_highlight">
+
+        <ListPreference
+            android:defaultValue="current"
+            android:dialogTitle="@string/preference_dialog_highlight_type"
+            android:entries="@array/entries_highlight_preference"
+            android:entryValues="@array/entryvalues_highlight_preference"
+            android:key="@string/preference_highlight_type"
+            android:title="@string/preference_title_highlight_type" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/perference_highlight_casesensitive"
+            android:title="@string/perference_title_highlight_casesensitive" />
+    </PreferenceCategory>
+</PreferenceScreen>

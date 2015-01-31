@@ -69,4 +69,6 @@
     <item name="CREATE_IDENTITY" type="id" />
     <item name="REMOVE_IDENTITY" type="id" />
     <item name="SET_NETWORK_IDENTITY" type="id" />
+    <item name="DIRECT_MESSAGE" type="id" />
+    <item name="RPC_MESSAGE" type="id" />
 </resources>

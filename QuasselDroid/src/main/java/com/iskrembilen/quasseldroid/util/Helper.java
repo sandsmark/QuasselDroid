@@ -7,8 +7,9 @@ import com.iskrembilen.quasseldroid.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
 public class Helper {
 
@@ -24,11 +25,6 @@ public class Helper {
             latency = String.valueOf((int) number);
         }
         return String.format(res.getString(R.string.title_lag), latency, unit);
-    }
-
-    public static Map<String,String> parseModeChange(String modechange) {
-        //TODO: Implement proper UserModeChange parser
-        return null;
     }
 
     public static CharSequence[] split(CharSequence string, String pattern) {
@@ -49,5 +45,32 @@ public class Helper {
             result = ctx.getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    public static String appendCamelCase(String... rawStrings)  {
+        return appendCamelCase(Locale.US, rawStrings);
+    }
+
+    public static String appendCamelCase(Locale l, String... rawStrings) {
+        if (rawStrings.length==1)
+            return rawStrings[0];
+
+        String[] strings = Arrays.copyOfRange(rawStrings, 1, rawStrings.length);
+        StringBuilder builder = new StringBuilder(rawStrings[0]);
+        for (String s : strings) {
+            builder.append(s.substring(0,1).toUpperCase(l));
+            builder.append(s.substring(1));
+        }
+
+        return builder.toString();
+    }
+
+    public static String printSlice(Object[] slice) {
+        StringBuilder builder = new StringBuilder("[ ");
+        for (Object o : slice) {
+            builder.append(o.toString()+", ");
+        }
+        builder.append(" ]");
+        return builder.toString();
     }
 }

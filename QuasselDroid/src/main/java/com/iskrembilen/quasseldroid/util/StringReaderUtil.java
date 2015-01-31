@@ -23,7 +23,7 @@ package com.iskrembilen.quasseldroid.util;
 
 import android.util.Log;
 
-import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QDataInputStream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

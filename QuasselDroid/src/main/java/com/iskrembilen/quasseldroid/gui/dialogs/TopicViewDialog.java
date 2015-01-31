@@ -11,9 +11,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+<<<<<<< HEAD
 import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.BufferInfo;
 import com.iskrembilen.quasseldroid.NetworkCollection;
+=======
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
+>>>>>>> Reworked the UI slightly
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -45,10 +51,15 @@ public class TopicViewDialog extends DialogFragment {
 
     @Subscribe
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
+<<<<<<< HEAD
         if (event.bufferId == id) {
             mDialog.setTitle(mBuffer.getInfo().name);
             setTopic(mBuffer.getTopic());
         }
+=======
+        Buffer buffer = Client.getInstance().getNetworks().getBufferById(event.bufferId);
+        setTopic(buffer.getTopic());
+>>>>>>> Reworked the UI slightly
     }
 
     public void setTopic(CharSequence topic) {

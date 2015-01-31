@@ -10,12 +10,12 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.idunnololz.widgets.AnimatedExpandableListView;
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.IrcMode;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMode;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection;
+import com.iskrembilen.quasseldroid.protocol.state.UserCollection;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
@@ -231,8 +231,8 @@ public class NickListFragment extends Fragment implements Serializable {
             }
             Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
             convertView.setBackgroundColor(ThemeUtil.getNickBg(group.first));
-            holder.nameView.setTextColor(ThemeUtil.getNickColor(group.first));
-            holder.countView.setTextColor(ThemeUtil.getNickColor(group.first));
+            holder.nameView.setTextColor(ThemeUtil.getModeColor(group.first));
+            holder.countView.setTextColor(ThemeUtil.getModeColor(group.first));
 
             if (group.second.size() < 1) {
                 convertView.setVisibility(View.GONE);
@@ -242,7 +242,7 @@ public class NickListFragment extends Fragment implements Serializable {
                 convertView.setVisibility(View.VISIBLE);
                 holder.nameView.setVisibility(View.VISIBLE);
                 holder.countView.setVisibility(View.VISIBLE);
-                holder.nameView.setText(group.first.modeName);
+                holder.nameView.setText(getResources().getQuantityString(group.first.modeName, group.second.size()));
                 holder.countView.setText(group.first.icon + " " + group.second.size());
             }
             return convertView;

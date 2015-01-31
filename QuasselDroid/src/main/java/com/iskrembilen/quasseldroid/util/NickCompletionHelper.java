@@ -3,7 +3,7 @@ package com.iskrembilen.quasseldroid.util;
 import android.widget.EditText;
 import android.widget.Filter;
 
-import com.iskrembilen.quasseldroid.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
 
 import java.util.ArrayList;
 import java.util.List;

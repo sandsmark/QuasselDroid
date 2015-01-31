@@ -6,7 +6,7 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.SparseIntArray;
 
-import com.iskrembilen.quasseldroid.IrcMode;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMode;
 import com.iskrembilen.quasseldroid.R;
 
 public class ThemeUtil {
@@ -67,6 +67,7 @@ public class ThemeUtil {
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_light);
             Color.bufferStateActive = resources.getColor(R.color.buffer_status_active_light);
             Color.bufferStateAway = resources.getColor(R.color.buffer_status_away_light);
+            Color.bufferStateParted = resources.getColor(R.color.buffer_status_parted_light);
 
             nickBackgrounds = new int[] {
                     resources.getColor(R.color.nick_owner_light),
@@ -76,6 +77,8 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_voice_light),
                     resources.getColor(R.color.nick_user_light)
             };
+
+            Color.nickSelfColor = resources.getColor(R.color.nick_self_light);
 
             nickConstants = new double[] {0.7, 0.5};
         } else if (themeName.equals("dark")) {
@@ -102,6 +105,7 @@ public class ThemeUtil {
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_dark);
             Color.bufferStateActive = resources.getColor(R.color.buffer_status_active_dark);
             Color.bufferStateAway = resources.getColor(R.color.buffer_status_away_dark);
+            Color.bufferStateParted = resources.getColor(R.color.buffer_status_parted_dark);
 
             nickBackgrounds = new int[] {
                     resources.getColor(R.color.nick_owner_dark),
@@ -111,6 +115,8 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_voice_dark),
                     resources.getColor(R.color.nick_user_dark)
             };
+
+            Color.nickSelfColor = resources.getColor(R.color.nick_self_dark);
 
             nickConstants = new double[] {0.84, 0.71};
         } else {
@@ -140,13 +146,16 @@ public class ThemeUtil {
                 bufferStateTemp,
                 bufferStatePerm,
                 bufferStateActive,
-                bufferStateAway;
+                bufferStateAway,
+                bufferStateParted;
+
+        public static int nickSelfColor;
 
         public static int defColor;
         public static int transparent;
     }
 
-    public static int getNickColor(IrcMode mode) {
+    public static int getModeColor(IrcMode mode) {
         switch (mode) {
             case OWNER:
                 return nickColors[0];
@@ -161,7 +170,7 @@ public class ThemeUtil {
             case USER:
                 return nickColors[5];
             default:
-                return Color.defColor;
+                return Color.nickSelfColor;
         }
     }
 

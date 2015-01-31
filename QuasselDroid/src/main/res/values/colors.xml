@@ -41,6 +41,7 @@
     <color name="buffer_parted_color_light">#999999</color>
     <color name="buffer_status_active_light">#0097a7</color>
     <color name="buffer_status_away_light">#888888</color>
+    <color name="buffer_status_parted_light">#888888</color>
     <color name="buffer_status_perm_light">#b71c1c</color>
     <color name="buffer_status_temp_light">#ffab00</color>
     <color name="buffer_invalid_light">#ff333333</color>
@@ -51,6 +52,7 @@
     <color name="nick_halfop_light">#fff3e0</color>
     <color name="nick_voice_light">#f1f8e9</color>
     <color name="nick_user_light">#e7e9fd</color>
+    <color name="nick_self_light">@color/chat_line_plain_light</color>
 
     <color name="chat_line_plain_light">@android:color/primary_text_light</color>
     <color name="chat_line_action_light">@android:color/secondary_text_light</color>
@@ -68,6 +70,7 @@
     <color name="buffer_parted_color_dark">#888888</color>
     <color name="buffer_status_active_dark">#0097a7</color>
     <color name="buffer_status_away_dark">#888888</color>
+    <color name="buffer_status_parted_dark">#888888</color>
     <color name="buffer_status_perm_dark">#b71c1c</color>
     <color name="buffer_status_temp_dark">#ffab00</color>
     <color name="buffer_invalid_dark">#ffcccccc</color>
@@ -78,6 +81,7 @@
     <color name="nick_halfop_dark">#ff734b39</color>
     <color name="nick_voice_dark">#ff283623</color>
     <color name="nick_user_dark">#ff2a3e4d</color>
+    <color name="nick_self_dark">@color/chat_line_plain_dark</color>
 
     <color name="chat_line_plain_dark">@android:color/primary_text_dark</color>
     <color name="chat_line_action_dark">@android:color/secondary_text_dark</color>

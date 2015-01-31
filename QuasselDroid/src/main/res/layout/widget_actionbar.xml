@@ -18,7 +18,7 @@
         <TextView
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:id="@+id/title"
+            android:id="@+id/action_bar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
@@ -28,7 +28,7 @@
         <TextView
             android:ellipsize="end"
             android:singleLine="true"
-            android:id="@+id/subtitle"
+            android:id="@+id/action_bar_subtitle"
             android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

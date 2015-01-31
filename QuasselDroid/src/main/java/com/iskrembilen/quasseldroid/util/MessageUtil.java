@@ -11,15 +11,14 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.Identity;
-import com.iskrembilen.quasseldroid.IdentityCollection;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
+import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.Network;
 import com.iskrembilen.quasseldroid.R;
 
 import java.util.ArrayList;
@@ -44,17 +43,17 @@ public class MessageUtil {
         boolean preferenceNickCaseSensitive = preferences.getBoolean("preference_nick_highlight_case_sensitive",false);
 
         // TODO: Cache this (per network)
-        Network net = NetworkCollection.getInstance().getNetworkById(msg.bufferInfo.networkId);
-        if (net!=null && !net.getNick().isEmpty()) {
+        Network net = Client.getInstance().getNetworks().getNetworkById(msg.bufferInfo.networkId);
+        if (net!=null && !net.getMyNick().isEmpty()) {
             List<String> nickList = new ArrayList<>(1);
             if (highlightNickPreference.equals(highlightNickPreferenceCurrent)) {
-                nickList.add(net.getNick());
+                nickList.add(net.getMyNick());
             } else if (highlightNickPreference.equals(highlightNickPreferenceAll)) {
-                Identity myIdentity = IdentityCollection.getInstance().getIdentity(net.getIdentityId());
+                Identity myIdentity = IdentityCollection.getInstance().getIdentity(net.identityId);
                 if (myIdentity!=null)
                     nickList = myIdentity.getNicks();
-                if (!nickList.contains(net.getNick()))
-                    nickList.add(net.getNick());
+                if (!nickList.contains(net.getMyNick()))
+                    nickList.add(net.getMyNick());
             }
 
             for (String nickname : nickList) {
@@ -124,7 +123,7 @@ public class MessageUtil {
             if (message.type == IrcMessage.Type.Server && message.getSender().length() == 0)
                 return;
 
-            Buffer buffer = NetworkCollection.getInstance().getBufferById(message.bufferInfo.id);
+            Buffer buffer = Client.getInstance().getNetworks().getBufferById(message.bufferInfo.id);
 
             // We want to ignore the currently focused buffer
             if (buffer.isDisplayed())

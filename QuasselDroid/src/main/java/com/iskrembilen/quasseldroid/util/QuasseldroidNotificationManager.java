@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SyncAdapterType;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -18,11 +17,11 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
@@ -214,7 +213,7 @@ public class QuasseldroidNotificationManager {
                 builder.setContentTitle(message.bufferInfo.name)
                         .setContentText(MessageUtil.parseStyleCodes(context, String.format("%s: %s", message.getNick(), message.content), displayColors));
             } else if (highlightedBuffers.size() == 1) {
-                NetworkCollection networks = NetworkCollection.getInstance();
+                NetworkCollection networks = Client.getInstance().getNetworks();
                 Buffer buffer = networks.getBufferById(highlightedBuffers.get(0));
                 List<IrcMessage> messages = highlightedMessages.get(highlightedBuffers.get(0));
 
@@ -280,7 +279,7 @@ public class QuasseldroidNotificationManager {
 
                 // Moves events into the expanded layout
                 for (Integer bufferId : highlightedBuffers) {
-                    Buffer buffer = NetworkCollection.getInstance().getBufferById(bufferId);
+                    Buffer buffer = Client.getInstance().getNetworks().getBufferById(bufferId);
                     List<IrcMessage> messages = highlightedMessages.get(bufferId);
 
                     if (messages.size() == 1) {

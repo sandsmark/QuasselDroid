@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-import com.iskrembilen.quasseldroid.IdentityCollection;
+import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
 
 public class EditNickDialog extends DialogFragment {

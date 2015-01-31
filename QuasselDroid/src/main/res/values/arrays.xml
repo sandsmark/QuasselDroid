@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="entries_fontsize_preference">
-        <item>@string/fontsize_tiny</item>
-        <item>@string/fontsize_small</item>
-        <item>@string/fontsize_normal</item>
-        <item>@string/fontsize_big</item>
-        <item>@string/fontsize_huge</item>
-    </string-array>
     <string-array name="entryvalues_fontsize_preference">
         <item>10</item>
         <item>12</item>
@@ -16,40 +9,15 @@
         <item>18</item>
     </string-array>
 
-    <string-array name="entries_theme_preference">
-        <item>@string/theme_light</item>
-        <item>@string/theme_dark</item>
-    </string-array>
     <string-array name="entryvalues_theme_preference">
         <item>light</item>
         <item>dark</item>
     </string-array>
 
-    <string-array name="entries_highlight_preference">
-        <item>@string/highlight_all</item>
-        <item>@string/highlight_current</item>
-        <item>@string/highlight_none</item>
-    </string-array>
     <string-array name="entryvalues_highlight_preference">
         <item>all</item>
         <item>current</item>
         <item>none</item>
-    </string-array>
-
-    <string-array name="author_names">
-        <item>Frederik M. J. Vestre (freqmod)</item>
-        <item>Martin "Java Sucks" Sandsmark (sandsmark)</item>
-        <item>Magnus Fjell (magnuf)</item>
-        <item>Ken Børge Viktil (Kenji)</item>
-        <item>Janne Koschinski (justJanne)</item>
-    </string-array>
-
-    <string-array name="author_descriptions">
-        <item>(Initial qdatastream deserialization attempts)</item>
-        <item>(Protocol implementation, (de)serializers, project (de)moralizer)</item>
-        <item>(GUI, Android stuff)</item>
-        <item>(GUI, Android stuff)</item>
-        <item>(GUI, Bugfixes and Android stuff)</item>
     </string-array>
 
 </resources>

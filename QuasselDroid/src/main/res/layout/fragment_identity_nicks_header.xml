@@ -18,6 +18,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
+            android:labelFor="@+id/identity_realname"
             android:text="@string/identity_real_name"/>
         <EditText
             android:id="@+id/identity_realname"
@@ -36,6 +37,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
+            android:labelFor="@+id/identity_ident"
             android:text="@string/identity_ident"/>
         <EditText
             android:id="@+id/identity_ident"

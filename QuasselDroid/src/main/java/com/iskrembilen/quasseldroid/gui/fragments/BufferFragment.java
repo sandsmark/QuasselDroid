@@ -53,11 +53,13 @@ import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.idunnololz.widgets.AnimatedExpandableListView;
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.BufferUtils;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
+import com.iskrembilen.quasseldroid.protocol.state.BufferUtils;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.Network;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferListFontSizeChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
@@ -66,7 +68,6 @@ import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.QueryUserEvent;
 import com.iskrembilen.quasseldroid.events.UserClickedEvent;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
-import com.iskrembilen.quasseldroid.gui.PreferenceActivity;
 import com.iskrembilen.quasseldroid.gui.base.XMLHeaderAnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.gui.dialogs.JoinChannelDialog;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
@@ -168,13 +169,6 @@ public class BufferFragment extends Fragment implements Serializable {
                             Toast.makeText(getActivity(), getString(R.string.not_available), Toast.LENGTH_SHORT).show();
                         else showJoinChannelDialog();
                         return true;
-                    case R.id.menu_preferences:
-                        Intent i = new Intent(getActivity(), PreferenceActivity.class);
-                        startActivity(i);
-                        return true;
-                    case R.id.menu_disconnect:
-                        BusProvider.getInstance().post(new DisconnectCoreEvent());
-                        return true;
                 }
                 return false;
             }
@@ -214,7 +208,6 @@ public class BufferFragment extends Fragment implements Serializable {
         });
 
         initActionMenu();
-
     }
 
     private void initActionMenu() {
@@ -488,7 +481,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public void update(Observable observable, Object data) {
-            update(NetworkCollection.getInstance());
+            update(Client.getInstance().getNetworks());
         }
 
         public void update(NetworkCollection networks) {

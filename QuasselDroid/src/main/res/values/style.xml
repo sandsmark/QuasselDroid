@@ -45,7 +45,6 @@
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">@color/accent</item>
 
-
         <item name="windowActionModeOverlay">true</item>
 
         <item name="listSelector">@drawable/selectable_item_dark</item>
@@ -102,4 +101,28 @@
     <style name="Widget.Base"/>
     <style name="Widget"/>
 
+    <!-- The attributes are overridden here because the x-large or large resources may have
+     changed the margins and background in the parent PreferencePanel style. -->
+    <style name="PreferencePanel">
+        <item name="android:layout_marginLeft">0dip</item>
+        <item name="android:layout_marginRight">0dip</item>
+        <item name="android:layout_marginTop">0dip</item>
+        <item name="android:layout_marginBottom">0dip</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="PreferenceHeaderList">
+        <item name="android:paddingLeft">@dimen/preference_screen_header_padding_side_material</item>
+        <item name="android:paddingRight">@dimen/preference_screen_header_padding_side_material</item>
+        <item name="android:scrollbarStyle">@integer/preference_screen_header_scrollbarStyle</item>
+    </style>
+
+    <style name="PreferenceHeaderPanel">
+        <item name="android:layout_marginLeft">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginRight">@dimen/preference_screen_side_margin_negative</item>
+        <item name="android:paddingTop">@dimen/preference_screen_header_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/preference_screen_header_vertical_padding</item>
+    </style>
+
+    <dimen name="preference_screen_header_padding_side_material">0dip</dimen>
 </resources>

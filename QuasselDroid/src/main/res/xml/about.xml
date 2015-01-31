@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:title="QuasselDroid"
+        android:summary=""
+        android:key="version"
+        android:selectable="false" />
+    <Preference
+        android:selectable="false"
+        android:summary="@string/app_description_long" />
+
+    <PreferenceCategory
+        android:title="@string/title_links">
+        <Preference
+            android:title="@string/app_link_github_title">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="@string/app_link_github" />
+        </Preference>
+        <Preference
+            android:title="@string/app_link_community_title">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="@string/app_link_community" />
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/title_authors">
+        <Preference
+            android:title="Frederik M. J. Vestre (freqmod)"
+            android:summary="(Initial qdatastream deserialization attempts)"
+            android:selectable="false" />
+        <Preference
+            android:title="Martin “Java Sucks” Sandsmark (sandsmark)"
+            android:summary="(Protocol implementation, (de)serializers, project (de)moralizer)"
+            android:selectable="false" />
+        <Preference
+            android:title="Magnus Fjell (magnuf)"
+            android:summary="(GUI, Android stuff)"
+            android:selectable="false" />
+        <Preference
+            android:title="Ken Børge Viktil (Kenji)"
+            android:summary="(GUI, Android stuff)"
+            android:selectable="false" />
+        <Preference
+            android:title="Janne Koschinski (justJanne)"
+            android:summary="(GUI, Bugfixes and Android stuff)"
+            android:selectable="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -30,13 +30,10 @@
             android:windowSoftInputMode="stateHidden"
             android:launchMode="singleTask"/>
         <activity
-            android:name=".gui.PreferenceActivity"
+            android:name=".gui.settings.SettingsActivity"
             android:label="@string/app_name"/>
         <activity
-            android:name=".gui.IdentityActivity"
-            android:label="@string/app_name"/>
-        <activity
-            android:name=".gui.IdentityListActivity"
+            android:name=".gui.settings.IdentityActivity"
             android:label="@string/app_name"/>
         <activity
             android:name=".gui.MainActivity"

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="light"
+        android:dialogTitle="@string/preference_dialog_theme"
+        android:entries="@array/entries_theme_preference"
+        android:entryValues="@array/entryvalues_theme_preference"
+        android:key="@string/preference_theme"
+        android:summary="@string/preference_summary_theme"
+        android:title="@string/preference_title_theme" />
+
+    <EditTextPreference
+        android:defaultValue=""
+        android:dialogTitle="@string/preference_dialog_timestamp"
+        android:dialogMessage="@string/preference_message_timestamp"
+        android:key="@string/preference_timestamp"
+        android:summary="@string/preference_summary_timestamp"
+        android:title="@string/preference_title_timestamp" />
+
+    <ListPreference
+        android:defaultValue="14"
+        android:dialogTitle="@string/preference_dialog_fontsize"
+        android:entries="@array/entries_fontsize_preference"
+        android:entryValues="@array/entryvalues_fontsize_preference"
+        android:key="@string/preference_fontsize"
+        android:summary="@string/preference_summary_fontsize"
+        android:title="@string/preference_title_fontsize" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/preference_colored_text"
+        android:summaryOn="@string/preference_summary_on_colored_text"
+        android:summaryOff="@string/preference_summary_off_colored_text"
+        android:title="@string/preference_title_colored_text" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_nickbrackets"
+        android:summaryOn="@string/preference_summary_on_nickbrackets"
+        android:summaryOff="@string/preference_summary_off_nickbrackets"
+        android:title="@string/preference_title_nickbrackets" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_hostname"
+        android:summaryOn="@string/preference_summary_on_hostname"
+        android:summaryOff="@string/preference_summary_off_hostname"
+        android:title="@string/preference_title_hostname" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_lag"
+        android:summaryOn="@string/preference_summary_on_lag"
+        android:summaryOff="@string/preference_summary_off_lag"
+        android:title="@string/preference_title_lag" />
+</PreferenceScreen>

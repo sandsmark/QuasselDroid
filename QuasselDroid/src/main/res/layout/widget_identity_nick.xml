@@ -14,13 +14,12 @@
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
         android:paddingBottom="20dp"
-        android:ellipsize="end"
         android:singleLine="true"
         android:layout_gravity="start|center_vertical"
         android:textSize="16sp"/>
 
     <ImageView
-        android:id="@+id/drag_handle"
+        android:id="@+id/list_drag_handle"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginLeft="24dp"
