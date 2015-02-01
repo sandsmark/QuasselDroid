@@ -87,4 +87,20 @@ public class Helper {
 
         return builder.toString();
     }
+
+    public static String printSlice(Object[] idlist) {
+        StringBuilder builder = new StringBuilder("[");
+        for (Object o : idlist) {
+            builder.append(o.toString()).append(", ");
+        }
+        return builder.append("]").toString();
+    }
+
+    public static String printSlice(int[] idlist) {
+        StringBuilder builder = new StringBuilder("[");
+        for (Object o : idlist) {
+            builder.append(o.toString()).append(", ");
+        }
+        return builder.append("]").toString();
+    }
 }

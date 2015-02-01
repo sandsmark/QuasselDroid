@@ -55,7 +55,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * The message id of the message that was on top of the screen when this buffer was last displayed
      * used to remember position when going back to a buffer
      */
-    private int topMessageShown = 0;
+    private int topMessageShown = -1;
     /**
      * Quassel variable, represents the last message seen on a buffer
      */

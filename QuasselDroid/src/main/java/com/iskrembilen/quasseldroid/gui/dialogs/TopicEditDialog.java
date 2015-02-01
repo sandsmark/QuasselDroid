@@ -26,7 +26,10 @@ package com.iskrembilen.quasseldroid.gui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -76,11 +79,16 @@ public class TopicEditDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+
         View dialog = getActivity().getLayoutInflater().inflate(R.layout.dialog_simple_edit, null);
         final EditText topicField = (EditText) dialog.findViewById(R.id.dialog_simple_text);
         this.topicField = topicField;
         topicField.setHint(R.string.hint_topic_edit);
         topicField.setText(topic);
+        if (preferences.getBoolean(getString(R.string.preference_monospace), false)) {
+            topicField.setTypeface(Typeface.MONOSPACE);
+        }
 
         builder.setView(dialog).setTitle(name);
         builder.setPositiveButton(getString(R.string.action_close),new DialogInterface.OnClickListener() {

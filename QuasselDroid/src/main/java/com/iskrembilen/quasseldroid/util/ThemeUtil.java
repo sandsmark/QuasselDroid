@@ -73,11 +73,12 @@ public class ThemeUtil {
             Color.chatPlain = resources.getColor(R.color.chat_line_plain_light);
             Color.chatError = resources.getColor(R.color.chat_line_error_light);
             Color.chatAction = resources.getColor(R.color.chat_line_action_light);
+            Color.chatServer = resources.getColor(R.color.chat_line_server_light);
             Color.chatTimestamp = resources.getColor(R.color.chat_line_timestamp_light);
             Color.chatHighlight = resources.getColor(R.color.chat_line_highlight_light);
 
-            Color.chatActionBg = resources.getColor(R.color.chat_bg_action_light);
-            Color.chatPlainBg = R.color.chat_line_plain_light;
+            Color.chatServerBg = resources.getColor(R.color.chat_bg_action_light);
+            Color.chatPlainBg = resources.getColor(android.R.color.transparent);
 
             Color.bufferRead = resources.getColor(R.color.buffer_read_color_light);
             Color.bufferParted = resources.getColor(R.color.buffer_parted_color_light);
@@ -111,11 +112,12 @@ public class ThemeUtil {
             Color.chatPlain = resources.getColor(R.color.chat_line_plain_dark);
             Color.chatError = resources.getColor(R.color.chat_line_error_dark);
             Color.chatAction = resources.getColor(R.color.chat_line_action_dark);
+            Color.chatServer = resources.getColor(R.color.chat_line_server_dark);
             Color.chatTimestamp = resources.getColor(R.color.chat_line_timestamp_dark);
             Color.chatHighlight = resources.getColor(R.color.chat_line_highlight_dark);
 
-            Color.chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
-            Color.chatPlainBg = R.color.chat_line_plain_dark;
+            Color.chatServerBg = resources.getColor(R.color.chat_bg_action_dark);
+            Color.chatPlainBg = resources.getColor(android.R.color.transparent);
 
             Color.bufferRead = resources.getColor(R.color.buffer_read_color_dark);
             Color.bufferParted = resources.getColor(R.color.buffer_parted_color_dark);
@@ -151,10 +153,11 @@ public class ThemeUtil {
         public static int
                 chatPlain,
                 chatAction,
+                chatServer,
                 chatError,
                 chatHighlight,
                 chatTimestamp,
-                chatActionBg,
+                chatServerBg,
                 chatPlainBg;
 
         public static int

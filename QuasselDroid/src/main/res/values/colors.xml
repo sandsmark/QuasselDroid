@@ -65,16 +65,17 @@
     <color name="buffer_status_temp_light">#ffab00</color>
     <color name="buffer_invalid_light">#ff333333</color>
 
-    <color name="nick_owner_light">#fff9c4</color>
-    <color name="nick_admin_light">#f3e5f5</color>
-    <color name="nick_operator_light">#fde0dc</color>
-    <color name="nick_halfop_light">#fff3e0</color>
-    <color name="nick_voice_light">#f1f8e9</color>
-    <color name="nick_user_light">#e7e9fd</color>
+    <color name="nick_owner_light">#20fbc02d</color>
+    <color name="nick_admin_light">#20512da8</color>
+    <color name="nick_operator_light">#20d01716</color>
+    <color name="nick_halfop_light">#20f57c00</color>
+    <color name="nick_voice_light">#20689f38</color>
+    <color name="nick_user_light">#00888888</color>
     <color name="nick_self_light">@color/chat_line_plain_light</color>
 
     <color name="chat_line_plain_light">@android:color/primary_text_light</color>
-    <color name="chat_line_action_light">@android:color/secondary_text_light</color>
+    <color name="chat_line_action_light">#1a237e</color>
+    <color name="chat_line_server_light">@android:color/secondary_text_light</color>
     <color name="chat_line_error_light">#d63838</color>
     <color name="chat_line_highlight_light">#ff9100</color>
     <color name="chat_line_timestamp_light">@android:color/tertiary_text_light</color>
@@ -94,16 +95,17 @@
     <color name="buffer_status_temp_dark">#ffab00</color>
     <color name="buffer_invalid_dark">#ffcccccc</color>
 
-    <color name="nick_owner_dark">#ff785a42</color>
-    <color name="nick_admin_dark">#ff2d2945</color>
-    <color name="nick_operator_dark">#ff572e2e</color>
-    <color name="nick_halfop_dark">#ff734b39</color>
-    <color name="nick_voice_dark">#ff283623</color>
-    <color name="nick_user_dark">#ff2a3e4d</color>
+    <color name="nick_owner_dark">#20fbc02d</color>
+    <color name="nick_admin_dark">#20512da8</color>
+    <color name="nick_operator_dark">#20d01716</color>
+    <color name="nick_halfop_dark">#20f57c00</color>
+    <color name="nick_voice_dark">#20689f38</color>
+    <color name="nick_user_dark">#00888888</color>
     <color name="nick_self_dark">@color/chat_line_plain_dark</color>
 
     <color name="chat_line_plain_dark">@android:color/primary_text_dark</color>
-    <color name="chat_line_action_dark">@android:color/secondary_text_dark</color>
+    <color name="chat_line_action_dark">#7986cb</color>
+    <color name="chat_line_server_dark">@android:color/secondary_text_dark</color>
     <color name="chat_line_error_dark">#d63838</color>
     <color name="chat_line_highlight_dark">#E68D1A</color>
     <color name="chat_line_timestamp_dark">@android:color/tertiary_text_dark</color>

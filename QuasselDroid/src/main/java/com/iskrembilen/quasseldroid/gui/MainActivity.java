@@ -448,7 +448,7 @@ public class MainActivity extends ActionBarActivity {
                     topic = buffer.getTopic();
                     break;
                 case StatusBuffer:
-                    bufferHasTopic = false;
+                    bufferHasTopic = true;
                     manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     actionbar.setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
                     topic = buffer.getTopic();

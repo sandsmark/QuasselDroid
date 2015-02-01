@@ -306,38 +306,40 @@ public class QuasseldroidNotificationManager {
                                 res.getQuantityString(R.plurals.notification_x_highlights, highlightedMessageCount, highlightedMessageCount),
                                 res.getQuantityString(R.plurals.notification_on_x_buffers, highlightedBuffers.size(), highlightedBuffers.size())));
 
-                // Moves events into the expanded layout
-                for (Integer bufferId : highlightedBuffers) {
-                    Buffer buffer = Client.getInstance().getNetworks().getBufferById(bufferId);
-                    List<IrcMessage> messages = highlightedMessages.get(bufferId);
+                synchronized (highlightedBuffers) {
+                    // Moves events into the expanded layout
+                    for (Integer bufferId : highlightedBuffers) {
+                        Buffer buffer = Client.getInstance().getNetworks().getBufferById(bufferId);
+                        List<IrcMessage> messages = highlightedMessages.get(bufferId);
 
-                    if (messages.size() == 1) {
-                        IrcMessage m = messages.get(0);
-                        SpannableString s;
-                        if (m.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
-                            s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
-                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        } else {
-                            s = MessageUtil.parseStyleCodes(context, String.format("%s %s: %s", m.bufferInfo.name, m.getNick(), m.content), displayColors);
-                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.bufferInfo.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        }
-                        inboxStyle.addLine(s);
-                    } else if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-                        SpannableString s;
-
-                        for (IrcMessage m : messages) {
-                            s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
-                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        if (messages.size() == 1) {
+                            IrcMessage m = messages.get(0);
+                            SpannableString s;
+                            if (m.bufferInfo.type == BufferInfo.Type.QueryBuffer) {
+                                s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
+                                s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                            } else {
+                                s = MessageUtil.parseStyleCodes(context, String.format("%s %s: %s", m.bufferInfo.name, m.getNick(), m.content), displayColors);
+                                s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.bufferInfo.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                            }
                             inboxStyle.addLine(s);
-                        }
-                    } else {
-                        SpannableStringBuilder s = new SpannableStringBuilder(buffer.getInfo().name);
-                        s.append(":");
-                        s.setSpan(new StyleSpan(Typeface.BOLD), 0, buffer.getInfo().name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        } else if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+                            SpannableString s;
 
-                        inboxStyle.addLine(s);
-                        for (IrcMessage m : messages) {
-                            inboxStyle.addLine(String.format("  %s: %s", m.getNick(), m.content));
+                            for (IrcMessage m : messages) {
+                                s = MessageUtil.parseStyleCodes(context, String.format("%s: %s", m.getNick(), m.content), displayColors);
+                                s.setSpan(new StyleSpan(Typeface.BOLD), 0, m.getNick().length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                                inboxStyle.addLine(s);
+                            }
+                        } else {
+                            SpannableStringBuilder s = new SpannableStringBuilder(buffer.getInfo().name);
+                            s.append(":");
+                            s.setSpan(new StyleSpan(Typeface.BOLD), 0, buffer.getInfo().name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                            inboxStyle.addLine(s);
+                            for (IrcMessage m : messages) {
+                                inboxStyle.addLine(String.format("  %s: %s", m.getNick(), m.content));
+                            }
                         }
                     }
                 }
@@ -349,6 +351,11 @@ public class QuasseldroidNotificationManager {
             }
 
             builder.setColor(ThemeUtil.Color.chatHighlight);
+            if (hasDirectMessage()) {
+                builder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
+            } else {
+                builder.setCategory(NotificationCompat.CATEGORY_SOCIAL);
+            }
 
             Intent launch = new Intent(context, MainActivity.class);
             launch.putExtra("extraBufferId", openBuffer);
@@ -396,6 +403,20 @@ public class QuasseldroidNotificationManager {
 
             pendingHighlightNotification = false;
         }
+    }
+
+    private boolean hasDirectMessage() {
+        NetworkCollection networks = Client.getInstance().getNetworks();
+        synchronized (highlightedBuffers) {
+            for (Integer bufferId : highlightedBuffers) {
+                Buffer buffer = networks.getBufferById(bufferId);
+
+                // TODO: Maybe add Groupbuffer here as well?
+                if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer)
+                    return true;
+            }
+        }
+        return false;
     }
 
     @Subscribe

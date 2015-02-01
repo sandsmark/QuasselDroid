@@ -23,9 +23,14 @@
 
 package com.iskrembilen.quasseldroid.gui.settings;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
@@ -36,10 +41,26 @@ import de.kuschku.uilib.preferences.ActionBarPreferenceActivity;
 public class SettingsActivity extends ActionBarPreferenceActivity implements Toolbar.OnMenuItemClickListener{
     CharSequence parentTitle;
 
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeUtil.theme);
         parentTitle = getResources().getString(R.string.action_preferences);
+
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(getString(R.string.preference_theme))) {
+                    ThemeUtil.initTheme(SettingsActivity.this);
+
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    recreate();
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            }
+        };
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).registerOnSharedPreferenceChangeListener(listener);
 
         super.onCreate(savedInstanceState);
     }

@@ -26,7 +26,10 @@ package com.iskrembilen.quasseldroid.gui.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -93,12 +96,23 @@ public class TopicViewDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+
         View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_simple_view, null);
         TextView topicField = (TextView) view.findViewById(R.id.dialog_simple_text);
         topicField.setText(mBuffer.getTopic());
+        if (preferences.getBoolean(getString(R.string.preference_monospace), false)) {
+            topicField.setTypeface(Typeface.MONOSPACE);
+        }
+
+        String bufferName;
+        if (mBuffer.getInfo().type== BufferInfo.Type.StatusBuffer)
+            bufferName = Client.getInstance().getNetworks().getNetworkById(mBuffer.getInfo().networkId).getName();
+        else
+            bufferName = mBuffer.getInfo().name;
 
         builder.setView(view)
-                .setTitle(mBuffer.getInfo().name)
+                .setTitle(bufferName)
                 .setPositiveButton(getString(R.string.action_close), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

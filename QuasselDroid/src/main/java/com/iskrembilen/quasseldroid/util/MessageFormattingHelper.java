@@ -111,7 +111,7 @@ public class MessageFormattingHelper {
             if (nick.equals(self))
                 SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(ThemeUtil.Color.nickSelfColor));
             else if (reduced)
-                SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick, 1.5F, 0.5F)));
+                SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick, 1.4F, 0.4F)));
             else
                 SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick)));
 
