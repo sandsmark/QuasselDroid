@@ -1,8 +1,8 @@
 /*
     QuasselDroid - Quassel client for Android
-    Copyright (C) 2011 Ken Børge Viktil
-    Copyright (C) 2011 Magnus Fjell
-    Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
     This program is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -82,8 +82,6 @@ import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-
-import java.lang.reflect.Field;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -660,7 +658,7 @@ public class MainActivity extends ActionBarActivity {
         public Side getOpenDrawer() {
             if (leftDrawer!=null && leftDrawer.isDrawerVisible(Gravity.START))
                 return Side.LEFT;
-            else if (rightDrawer.isDrawerVisible(Gravity.RIGHT))
+            else if (rightDrawer.isDrawerVisible(Gravity.END))
                 return Side.RIGHT;
             else
                 return Side.NONE;

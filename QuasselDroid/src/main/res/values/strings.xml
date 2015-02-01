@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <resources>
     <!-- CONSTANTS -->
 
     <string name="default_port" translatable="false">4242</string>
-    <string name="title_lag">%1$s%2$s</string>
-    <string name="unit_milliseconds">ms</string>
-    <string name="unit_seconds">s</string>
-    <string name="timeformat_long">hh:mm:ss</string>
-    <string name="timeformat_short">hh:mm</string>
+    <string name="title_lag" translatable="false">%1$s%2$s</string>
+    <string name="unit_milliseconds" translatable="false">ms</string>
+    <string name="unit_seconds" translatable="false">s</string>
     <string name="has_focus" translatable="false">hasfocus</string>
 
     <!-- APPLICATION -->
@@ -57,6 +77,10 @@
     <string name="action_unhide">Make Visible</string>
     <string name="action_hide_temp">Hide Temporarily</string>
     <string name="action_hide_perm">Hide Permanently</string>
+
+    <string name="next_button_label">Next</string>
+    <string name="skip_button_label">Skip</string>
+    <string name="back_button_label">Back</string>
 
     <!-- UI STUFF -->
 
@@ -148,15 +172,12 @@
     <!-- MESSAGES -->
 
     <string name="message_join">%1$s joined</string>
-    <string name="message_leave">"%1$s left: "</string>
-    <string name="message_quit">"%1$s quit: "</string>
-    <string name="message_kill">"%1$s was killed: "</string>
-    <string name="message_kick">%1$s has kicked %2$s from %3$s: %4$s</string>
+    <string name="message_leave">"%1$s left: %2$s"</string>
+    <string name="message_quit">"%1$s quit: %2$s"</string>
+    <string name="message_kill">"%1$s was killed: %2$s"</string>
+    <string name="message_kick">%1$s has kicked %2$s: %3$s</string>
     <string name="message_mode">Mode %1$s by %2$s</string>
     <string name="message_nick_self">You changed your nick to %1$s</string>
     <string name="message_nick_other">%1$s is now known as %2$s</string>
     <string name="message_daychange">Day changed to %1$s</string>
-    <string name="next_button_label">Next</string>
-    <string name="skip_button_label">Skip</string>
-    <string name="back_button_label">Back</string>
 </resources>

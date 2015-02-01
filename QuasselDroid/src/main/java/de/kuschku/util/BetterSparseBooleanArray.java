@@ -1,7 +1,29 @@
-package com.iskrembilen.quasseldroid.util;
+/*
+    Copyright © 2015 Janne Koschinski
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
+package de.kuschku.util;
 
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,12 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,E> {
-    public BetterSparseArray() {
+public class BetterSparseBooleanArray extends SparseBooleanArray implements Map<Integer,Boolean> {
+    public BetterSparseBooleanArray() {
         this(10);
     }
 
-    public BetterSparseArray(int initialCapacity) {
+    public BetterSparseBooleanArray(int initialCapacity) {
         super(initialCapacity);
     }
 
@@ -35,7 +57,7 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,
         if (value==null)
             return false;
 
-        return indexOfValue((E) value) > 0;
+        return indexOfValue((Boolean) value) > 0;
     }
 
     /**
@@ -47,8 +69,8 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,
      */
     @NonNull
     @Override
-    public Set<Entry<Integer, E>> entrySet() {
-        Set<Entry<Integer, E>> set = new HashSet<>(size());
+    public Set<Entry<Integer, Boolean>> entrySet() {
+        Set<Entry<Integer, Boolean>> set = new HashSet<>(size());
         for (int i = 0; i < size(); i++) {
             set.add(new SparseArrayEntry<>(keyAt(i),valueAt(i)));
         }
@@ -110,7 +132,7 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,
      * if no mapping for the specified key is found.
      */
     @Override
-    public E get(Object key) {
+    public Boolean get(Object key) {
         return get((int) key);
     }
 
@@ -158,7 +180,7 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,
      *                                       not support {@code null} keys or values.
      */
     @Override
-    public E put(Integer key, E value) {
+    public Boolean put(Integer key, Boolean value) {
         super.put(key, value);
         return value;
     }
@@ -175,8 +197,8 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,
      *                                       support {@code null} keys or values.
      */
     @Override
-    public void putAll(Map<? extends Integer, ? extends E> map) {
-        for (Entry<? extends Integer, ? extends E> entry : map.entrySet()) {
+    public void putAll(Map<? extends Integer, ? extends Boolean> map) {
+        for (Entry<? extends Integer, ? extends Boolean> entry : map.entrySet()) {
             put(entry.getKey(),entry.getValue());
         }
     }
@@ -190,19 +212,19 @@ public class BetterSparseArray<E> extends SparseArray<E> implements Map<Integer,
      * @throws UnsupportedOperationException if removing from this {@code Map} is not supported.
      */
     @Override
-    public E remove(Object key) {
+    public Boolean remove(Object key) {
         if (!(key instanceof Integer))
             throw new UnsupportedOperationException();
 
-        E value = super.get((int) key);
-        super.remove((int) key);
+        Boolean value = super.get((int) key);
+        super.delete((int) key);
         return value;
     }
 
     @NonNull
     @Override
-    public Collection<E> values() {
-        List<E> values = new ArrayList<>(size());
+    public Collection<Boolean> values() {
+        List<Boolean> values = new ArrayList<>(size());
         for (int i = 0; i<size(); i++) {
             values.add(valueAt(i));
         }

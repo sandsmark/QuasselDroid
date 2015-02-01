@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.util;
 
 import android.content.Context;
@@ -56,44 +79,60 @@ public class MessageFormattingHelper {
 
     }
 
+    public static class NickFormatter {
+        private boolean useBrackets;
+        private String self;
+        private String[] defaultBrackets;
+
+        public NickFormatter(boolean useBrackets, String self, String[] defaultBrackets) {
+            this.useBrackets = useBrackets;
+            this.self = self;
+            this.defaultBrackets = defaultBrackets;
+        }
+
+        public CharSequence formatNick(String nick) {
+            return formatNick(nick, false);
+        }
+
+        public CharSequence formatNick(String nick, String[] brackets) {
+            return formatNick(nick, false, brackets);
+        }
+
+        public CharSequence formatNick(String nick, boolean reduced) {
+            return formatNick(nick, reduced, defaultBrackets);
+        }
+
+        public CharSequence formatNick(String nick, boolean reduced, String[] brackets) {
+            Spannable nickSpan;
+
+            nickSpan = new SpannableString(nick);
+            SpanUtils.setFullSpan(nickSpan, new StyleSpan(Typeface.BOLD));
+
+            if (nick.equals(self))
+                SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(ThemeUtil.Color.nickSelfColor));
+            else if (reduced)
+                SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick, 1.5F, 0.5F)));
+            else
+                SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick)));
+
+            if (useBrackets)
+                return TextUtils.concat(brackets[0], nickSpan, brackets[1]);
+            else
+                return nickSpan;
+        }
+    }
+
     public static CharSequence formatNick(IrcMessage entry, String[] nickBrackets, boolean useBrackets) {
-        Network network = Client.getInstance().getNetworks().getNetworkById(entry.bufferInfo.networkId);
-        Buffer buffer = network.getBuffers().getBuffer(entry.bufferInfo.id);
-        IrcUser user = network.getUserByNick(entry.getNick());
+        String self = Client.getInstance().getNetworks().getNetworkById(entry.bufferInfo.networkId).getMyNick();
+        boolean reduced = entry.isHighlighted();
 
-        Spannable nickSpan;
-
-        nickSpan = new SpannableString(entry.getNick());
-        SpanUtils.setFullSpan(nickSpan, new StyleSpan(Typeface.BOLD));
-
-        if (network.getMyNick().equals(entry.getNick()))
-            SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(ThemeUtil.Color.nickSelfColor));
-        else if (entry.isHighlighted())
-            SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(entry.getNick(), 0.5F, 0.5F)));
-        else
-            SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(entry.getNick())));
-
-        if (useBrackets)
-            return TextUtils.concat(nickBrackets[0], nickSpan, nickBrackets[1]);
-        else
-            return nickSpan;
+        return new NickFormatter(useBrackets, self, new String[] {"<",">"}).formatNick(entry.getNick(), reduced);
     }
 
     public static CharSequence formatNick(Context ctx, String nick, boolean reduced) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        boolean nickBrackets = preferences.getBoolean(ctx.getString(R.string.preference_nickbrackets), false);
-        Spannable nickSpan = new SpannableString(nick);
-        SpanUtils.setFullSpan(nickSpan, new StyleSpan(Typeface.BOLD));
+        boolean useBrackets = preferences.getBoolean(ctx.getString(R.string.preference_nickbrackets), false);
 
-        if (reduced)
-            SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick, 0.5F, 0.5F)));
-        else
-            SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick)));
-
-        if (nickBrackets) {
-            return TextUtils.concat("<",nickSpan, ">");
-        } else {
-            return nickSpan;
-        }
+        return new NickFormatter(useBrackets, null, new String[] {"<",">"}).formatNick(nick);
     }
 }

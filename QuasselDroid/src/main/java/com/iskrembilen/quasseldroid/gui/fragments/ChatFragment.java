@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.annotation.TargetApi;
@@ -97,6 +120,11 @@ public class ChatFragment extends Fragment implements Serializable {
     private String userFormat;
 
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+    
+    private boolean detailedActions;
+    private boolean nickBrackets;
+    private boolean parseColors;
+    private boolean monospace;
 
     public static ChatFragment newInstance() {
         return new ChatFragment();
@@ -113,16 +141,39 @@ public class ChatFragment extends Fragment implements Serializable {
             bufferId = savedInstanceState.getInt(BUFFER_ID);
         }
 
+        detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
+        parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
+        nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
+        monospace = preferences.getBoolean(getString(R.string.preference_monospace), false);
+
         sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 Log.d(TAG,"Updated: "+key);
                 if (key.equals(getString(R.string.preference_timestamp))) {
                     updateTimeFormat();
+                } else if (key.equals(getString(R.string.preference_hostname))) {
+                    detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_colored_text))) {
+                    parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_nickbrackets))) {
+                    nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_monospace))) {
+                    monospace = preferences.getBoolean(getString(R.string.preference_monospace), false);
+                    updateInputField();
+                    adapter.notifyDataSetChanged();
                 }
             }
         };
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+    }
+
+    private void updateInputField() {
+        if (monospace) inputField.setTypeface(Typeface.MONOSPACE);
+        else inputField.setTypeface(Typeface.DEFAULT);
     }
 
     public void updateTimeFormat() {
@@ -145,6 +196,7 @@ public class ChatFragment extends Fragment implements Serializable {
         autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
 
         updateTimeFormat();
+        updateInputField();
 
         backlogList.setAdapter(adapter);
         backlogList.setOnScrollListener(new BacklogScrollListener(5));
@@ -506,18 +558,29 @@ public class ChatFragment extends Fragment implements Serializable {
             Spannable spannable;
             String rawText;
             String nick;
-            boolean detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
-            boolean parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
-            boolean nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
+            String hostmask = "";
+
+
+            if (monospace) {
+                holder.msgView.setTypeface(Typeface.MONOSPACE);
+                holder.timeView.setTypeface(Typeface.MONOSPACE);
+            } else {
+                holder.msgView.setTypeface(Typeface.DEFAULT);
+                holder.timeView.setTypeface(Typeface.DEFAULT);
+            }
+
+            if (detailedActions)
+                hostmask = " ("+entry.getHostmask()+") ";
+
+            MessageFormattingHelper.NickFormatter formatter = new MessageFormattingHelper.NickFormatter(nickBrackets, networks.getNetworkById(entry.bufferInfo.networkId).getMyNick(), new String[] {"<", ">"});
 
             switch (entry.type) {
                 case Action:
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.msgView.setTypeface(Typeface.DEFAULT);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
 
                     SpannableString contentSpan = MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors);
-                    contentSpan = new SpannableString(TextUtils.concat(MessageFormattingHelper.formatNick(entry, new String[] {"<",">"}, false), " ", contentSpan));
+                    contentSpan = new SpannableString(TextUtils.concat(formatter.formatNick(entry.getNick()), " ", contentSpan));
                     SpanUtils.setFullSpan(contentSpan, new StyleSpan(Typeface.ITALIC));
                     holder.msgView.setText(contentSpan);
                     break;
@@ -538,77 +601,67 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Notice:
-                    holder.msgView.setText(TextUtils.concat(MessageFormattingHelper.formatNick(entry, new String[] {"[","]"}, nickBrackets), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setText(TextUtils.concat(
+                            formatter.formatNick(entry.getNick(), new String[] {"[","]"}),
+                            " ",
+                            MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     break;
                 case Join:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getResources().getString(R.string.message_join), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(spannable);
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_join),
+                            TextUtils.concat(formatter.formatNick(nick), hostmask)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Part:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getString(R.string.message_leave), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_leave),
+                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Quit:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getString(R.string.message_quit), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_quit),
+                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kill:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getString(R.string.message_kill), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kill),
+                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kick:
-                    String reason = "";
-
+                    CharSequence reasonSequence;
                     int nickEnd = entry.content.toString().indexOf(" ");
                     if (nickEnd >= 0) {
-                        nick = entry.content.toString().substring(0, nickEnd);
-                        reason = " (" + entry.content.toString().substring(nickEnd + 1) + ")";
+                        nick = entry.content.subSequence(0, nickEnd).toString();
+                        reasonSequence = MessageUtil.parseStyleCodes(getActivity(), entry.content.subSequence(nickEnd, entry.content.length()).toString(), parseColors);
                     } else {
                         nick = entry.content.toString();
+                        reasonSequence = "";
                     }
 
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-
-                    rawText = String.format(getString(R.string.message_kick), entry.getNick(), nick, entry.bufferInfo.name, reason);
-
-                    int color_nick;
-                    if (nick.equalsIgnoreCase(entry.getSender())) {
-                        color_nick = entry.getSenderColor();
-                    } else {
-                        color_nick = MessageFormattingHelper.getSenderColor(nick);
-                    }
-
-                    CharSequence parsedText = MessageUtil.parseStyleCodes(getActivity(),rawText,parseColors);
-                    spannable = new SpannableString(parsedText);
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    spannable.setSpan(new ForegroundColorSpan(color_nick), parsedText.toString().indexOf(nick), parsedText.toString().indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(spannable);
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kick),
+                            formatter.formatNick(entry.getNick()),
+                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            reasonSequence));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
@@ -618,19 +671,14 @@ public class ChatFragment extends Fragment implements Serializable {
                     SpannableStringBuilder builder = new SpannableStringBuilder();
                     CharSequence nickSpannable = MessageFormattingHelper.formatNick(getActivity(), entry.getNick(), true);
                     if (raw.length==2) {
-                        builder.append(raw[0]);
-                        builder.append(" ");
-                        builder.append(raw[1]);
-                        builder.append(" ");
+                        builder.append(raw[0]).append(" ");
+                        builder.append(raw[1]).append(" ");
                         spannable = new SpannableString(builder);
                     } else {
-                        builder.append(raw[0]);
-                        builder.append(" ");
-                        builder.append(raw[1]);
-                        builder.append(" ");
+                        builder.append(raw[0]).append(" ");
+                        builder.append(raw[1]).append(" ");
                         for (String s : Arrays.copyOfRange(raw, 2, raw.length)) {
-                            builder.append(MessageFormattingHelper.formatNick(getActivity(), s, true));
-                            builder.append(", ");
+                            builder.append(MessageFormattingHelper.formatNick(getActivity(), s, true)).append(", ");
                         }
                         spannable = new SpannableString(builder.subSequence(0,builder.length()-", ".length()));
                     }
@@ -642,17 +690,12 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Nick:
                     if (entry.getNick().equals(entry.content.toString())) {
                         rawText = String.format(getString(R.string.message_nick_self), entry.content.toString());
-                        spannable = new SpannableString(rawText);
-                        holder.msgView.setText(spannable);
+                        holder.msgView.setText(new SpannableString(rawText));
                     } else {
-                        rawText = String.format(getString(R.string.message_nick_other), entry.getNick(), entry.content.toString());
-                        spannable = new SpannableString(rawText);
-                        spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        CharSequence text = SpanFormatter.format(getString(R.string.message_nick_other),
+                                formatter.formatNick(entry.getNick()), formatter.formatNick(entry.content.toString()));
 
-                        int color_new = MessageFormattingHelper.getSenderColor(entry.content.toString());
-
-                        spannable.setSpan(new ForegroundColorSpan(color_new), rawText.lastIndexOf(entry.content.toString()), rawText.lastIndexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                        holder.msgView.setText(spannable);
+                        holder.msgView.setText(text);
                     }
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
@@ -684,9 +727,8 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Plain:
                 default:
                     holder.msgView.setTextColor(ThemeUtil.Color.chatPlain);
-                    holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    holder.msgView.setText(TextUtils.concat(MessageFormattingHelper.formatNick(entry, new String[] {"<",">"}, nickBrackets), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setText(TextUtils.concat(formatter.formatNick(entry.getNick(), entry.isHighlighted()), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
 
                     holder.parent.setBackgroundColor(android.graphics.Color.TRANSPARENT);
                     break;

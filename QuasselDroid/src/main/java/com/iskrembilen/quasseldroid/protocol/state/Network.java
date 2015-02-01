@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.protocol.state;
 
 import android.support.annotation.NonNull;
@@ -7,6 +30,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.protocol.state.serializers.Syncable;
 import com.iskrembilen.quasseldroid.protocol.state.serializers.SyncableObject;
+import de.kuschku.util.BetterSparseArray;
 import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.Helper;
 
@@ -27,7 +51,7 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
         Reconnecting(4),
         Disconnecting(5);
         private int value;
-        static final Map<Integer, ConnectionState> intToStateMap = new HashMap<Integer, ConnectionState>();
+        static final Map<Integer, ConnectionState> intToStateMap = new BetterSparseArray<>();
 
         static {
             for (ConnectionState type : ConnectionState.values()) {
@@ -78,7 +102,7 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
     private List<String>    ServerList;
 
     @Syncable(type=QVariantType.Bool)
-    private boolean useAutoReconnect;
+    private boolean         useAutoReconnect;
     @Syncable(type=QVariantType.UShort)
     private short           autoReconnectRetries;
     @Syncable(type=QVariantType.Int)
