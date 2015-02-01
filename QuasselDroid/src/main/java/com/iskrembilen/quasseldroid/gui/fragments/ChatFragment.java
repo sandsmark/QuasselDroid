@@ -63,6 +63,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.iskrembilen.quasseldroid.gui.dialogs.EditNickDialog;
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
@@ -83,7 +84,6 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.FormattingHelper;
 import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
@@ -119,7 +119,7 @@ public class ChatFragment extends Fragment implements Serializable {
     private boolean connected;
     private NetworkCollection networks;
     private String userFormat;
-    
+
     private boolean detailedActions;
     private boolean nickBrackets;
     private boolean parseColors;
@@ -382,15 +382,15 @@ public class ChatFragment extends Fragment implements Serializable {
 
             //Don't save position if list is at bottom
             if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
-                adapter.buffer.setTopMessageShown(0);
+                adapter.buffer.setTopMessageShown(-1);
             } else {
                 adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+                adapter.storeScrollState();
             }
             if (adapter.buffer.getUnfilteredSize() != 0) {
                 BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
                 BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize() - 1).messageId, MessageAction.LAST_SEEN));
             }
-
         }
     }
 
@@ -407,6 +407,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     updateMarkerLine();
                 }
                 adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+                adapter.storeScrollState();
             }
             adapter.clearBuffer();
             Buffer buffer = networks.getBufferById(bufferId);
@@ -515,6 +516,11 @@ public class ChatFragment extends Fragment implements Serializable {
             buffer.addObserver(this);
             notifyDataSetChanged();
             backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
+        }
+
+        public void storeScrollState() {
+            View v = backlogList.getChildAt(0);
+            buffer.setScrollState((v == null) ? 0 : (v.getTop() - backlogList.getPaddingTop()));
         }
 
         @Override
@@ -786,6 +792,15 @@ public class ChatFragment extends Fragment implements Serializable {
 
         }
 
+        private int indexOf(int messageid) {
+            for (int i = 0; i < adapter.getCount(); i++) {
+                if (adapter.getItemId(i) == messageid) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         /**
          * Returns the messageid for the ircmessage that is currently at the top of the screen
          */
@@ -806,7 +821,17 @@ public class ChatFragment extends Fragment implements Serializable {
             backlogList.setAdapter(adapter);
             for (int i = 0; i < adapter.getCount(); i++) {
                 if (adapter.getItemId(i) == messageid) {
-                    backlogList.setSelectionFromTop(i, 5);
+                    backlogList.setSelectionFromTop(i, buffer.getScrollState());
+                    break;
+                }
+            }
+        }
+
+        public void scrollToFirstUnread() {
+            int messageid = buffer.getLastSeenMessage();
+            for (int i = 0; i < adapter.getCount(); i++) {
+                if (adapter.getItemId(i) == messageid) {
+                    backlogList.smoothScrollToPosition(i);
                     break;
                 }
             }

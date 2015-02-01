@@ -56,6 +56,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * used to remember position when going back to a buffer
      */
     private int topMessageShown = -1;
+    public int scrollState = 0;
     /**
      * Quassel variable, represents the last message seen on a buffer
      */
