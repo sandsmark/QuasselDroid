@@ -56,7 +56,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * used to remember position when going back to a buffer
      */
     private int topMessageShown = -1;
-    public int scrollState = 0;
+    // This is a very bad idea, storing scroll state in here directly :/
+    // I just couldn’t find any other solution yet.
+    // TODO: Do this properly
+    private int scrollState = 0;
     /**
      * Quassel variable, represents the last message seen on a buffer
      */
@@ -378,6 +381,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 //	public void setNicks(List<String> nicks) {
 //		this.nicks = nicks;
 //	}
+
+    public int getScrollState() {
+        return scrollState;
+    }
+
+    public void setScrollState(int scrollState) {
+        this.scrollState = scrollState;
+    }
 
     /**
      * Get the list of nicks for this buffer
