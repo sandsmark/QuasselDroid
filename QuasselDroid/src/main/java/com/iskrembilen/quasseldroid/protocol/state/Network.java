@@ -290,8 +290,11 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
 
 
     public void onUserParted(String nick, String bufferName) {
-        // FIXME: Sometimes this is null, especially onUserQuit
         IrcUser user = nickUserMap.get(nick);
+        // The user already was removed
+        if (user==null)
+            return;
+
         if (user.channels.contains(bufferName)) {
             user.channels.remove(bufferName);
         }
@@ -304,8 +307,6 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
                 break;
             }
         }
-
-        updateTopic();
     }
 
 
