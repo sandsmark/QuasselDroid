@@ -84,7 +84,7 @@ public class Client implements Observer {
     @Override
     public void update(Observable observable, Object data) {
         if (observable == ignoreListManager) {
-            networks.updateFiltered();
+            networks.updateIgnore();
         }
     }
 

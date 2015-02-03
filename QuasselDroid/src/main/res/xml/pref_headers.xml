@@ -41,7 +41,7 @@
         android:title="@string/preference_category_identities" />
 
     <header android:fragment="com.iskrembilen.quasseldroid.gui.settings.IgnoreListFragment"
-        android:title="Ignore List" />
+        android:title="@string/preference_category_ignore_list" />
 
     <header android:fragment="com.iskrembilen.quasseldroid.gui.settings.AboutFragment"
         android:title="@string/preference_category_about">

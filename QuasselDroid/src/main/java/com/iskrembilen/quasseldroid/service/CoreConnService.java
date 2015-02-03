@@ -443,6 +443,7 @@ public class CoreConnService extends Service {
                             }
                         }
                         buffer.addBacklogMessages(messageList);
+                        buffer.setBacklogPending(false);
                     }
                     break;
                 case R.id.NEW_MESSAGE_TO_SERVICE:

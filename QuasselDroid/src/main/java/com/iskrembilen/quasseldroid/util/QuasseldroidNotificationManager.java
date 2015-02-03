@@ -412,7 +412,7 @@ public class QuasseldroidNotificationManager {
                 Buffer buffer = networks.getBufferById(bufferId);
 
                 // TODO: Maybe add Groupbuffer here as well?
-                if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer)
+                if (buffer != null && buffer.getInfo() != null && buffer.getInfo().type == BufferInfo.Type.QueryBuffer)
                     return true;
             }
         }

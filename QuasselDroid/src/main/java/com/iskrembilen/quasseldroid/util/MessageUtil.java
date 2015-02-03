@@ -34,6 +34,7 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
@@ -72,7 +73,7 @@ public class MessageUtil {
             if (highlightNickPreference.equals(highlightNickPreferenceCurrent)) {
                 nickList.add(net.getMyNick());
             } else if (highlightNickPreference.equals(highlightNickPreferenceAll)) {
-                Identity myIdentity = IdentityCollection.getInstance().getIdentity(net.identityId);
+                Identity myIdentity = Client.getInstance().getIdentities().getIdentity(net.identityId);
                 if (myIdentity!=null)
                     nickList = myIdentity.getNicks();
                 if (!nickList.contains(net.getMyNick()))
@@ -156,6 +157,9 @@ public class MessageUtil {
             if (buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
                 notificationManager.addMessage(message);
         }
+
+        // Set the message filtered if it matches ignore rules
+        message.setFiltered(Client.getInstance().getIgnoreListManager().matches(message));
     }
 
     /**

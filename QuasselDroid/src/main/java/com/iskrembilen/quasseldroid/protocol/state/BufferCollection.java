@@ -175,9 +175,9 @@ public class BufferCollection extends Observable implements Observer {
         notifyObservers();
     }
 
-    public void updateFiltered() {
+    public void updateIgnore() {
         for (Buffer buffer : getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
-            buffer.filterBuffer();
+            buffer.updateIgnore();
         }
     }
 }

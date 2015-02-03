@@ -398,7 +398,7 @@ public class Network extends SyncableObject implements Observer, Comparable<Netw
         return String.valueOf(networkId);
     }
 
-    public void updateFiltered() {
-        buffers.updateFiltered();
+    public void updateIgnore() {
+        buffers.updateIgnore();
     }
 }

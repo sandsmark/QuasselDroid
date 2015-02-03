@@ -47,6 +47,8 @@ import android.widget.EditText;
 import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.astuetz.PagerSlidingTabStrip;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.Identity;
 import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
@@ -61,12 +63,12 @@ import com.squareup.otto.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IdentityActivity extends ActionBarActivity implements TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+public class IdentityActivity extends ActionBarActivity {
     static final String TAG = IdentityActivity.class.getSimpleName();
 
     MyPageAdapter pageAdapter;
     private ViewPager mViewPager;
-    private TabHost mTabHost;
+    private PagerSlidingTabStrip tabStrip;
 
     NicksFragment nicksFragment;
     MessagesFragment messagesFragment;
@@ -85,13 +87,13 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
 
         // Tab Initialization
-        initialiseTabHost();
+        tabStrip = (PagerSlidingTabStrip) findViewById(android.R.id.tabs);
 
         // Fragments and ViewPager Initialization
         List<Fragment> fragments = getFragments();
-        pageAdapter = new MyPageAdapter(getSupportFragmentManager(), fragments);
+        pageAdapter = new MyPageAdapter(getSupportFragmentManager(), fragments, new String[] {getString(R.string.identity_tab_nicks), getString(R.string.identity_tab_advanced)});
         mViewPager.setAdapter(pageAdapter);
-        mViewPager.setOnPageChangeListener(this);
+        tabStrip.setViewPager(mViewPager);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_check);
@@ -118,33 +120,6 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         return super.onCreateOptionsMenu(menu);
     }
 
-    // Method to add a TabHost
-    private static void AddTab(@NonNull IdentityActivity activity, @NonNull TabHost tabHost, @NonNull TabHost.TabSpec tabSpec) {
-        tabSpec.setContent(new ContentFactory(activity));
-        tabHost.addTab(tabSpec);
-    }
-
-    // Manages the Tab changes, synchronizing it with Pages
-    public void onTabChanged(@Nullable String tag) {
-        int pos = this.mTabHost.getCurrentTab();
-        this.mViewPager.setCurrentItem(pos);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int arg0) {
-    }
-
-    // Manages the Page changes, synchronizing it with Tabs
-    @Override
-    public void onPageScrolled(int arg0, float arg1, int arg2) {
-        int pos = this.mViewPager.getCurrentItem();
-        this.mTabHost.setCurrentTab(pos);
-    }
-
-    @Override
-    public void onPageSelected(int arg0) {
-    }
-
     private @NonNull List<Fragment> getFragments(){
         List<Fragment> fList = new ArrayList<>();
         Bundle bundle = new Bundle();
@@ -161,23 +136,19 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         return fList;
     }
 
-    // Tabs Creation
-    private void initialiseTabHost() {
-        mTabHost = (TabHost) findViewById(android.R.id.tabhost);
-        mTabHost.setup();
-
-        IdentityActivity.AddTab(this, this.mTabHost, this.mTabHost.newTabSpec(getResources().getString(R.string.identity_tab_nicks)).setIndicator(getResources().getString(R.string.identity_tab_nicks)));
-        IdentityActivity.AddTab(this, this.mTabHost, this.mTabHost.newTabSpec(getResources().getString(R.string.identity_tab_advanced)).setIndicator(getResources().getString(R.string.identity_tab_advanced)));
-
-        mTabHost.setOnTabChangedListener(this);
-    }
-
     public class MyPageAdapter extends FragmentPagerAdapter {
         private List<Fragment> fragments;
+        private String[] titles;
 
-        public MyPageAdapter(@NonNull FragmentManager fm, @NonNull List<Fragment> fragments) {
+        public MyPageAdapter(@NonNull FragmentManager fm, @NonNull List<Fragment> fragments, @NonNull String[] titles) {
             super(fm);
             this.fragments = fragments;
+            this.titles = titles;
+        }
+
+        @Override
+        public String getPageTitle(int position) {
+            return this.titles[position];
         }
 
         @Override
@@ -357,7 +328,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         }
 
         public void storeToIdentity() {
-            Identity identity = IdentityCollection.getInstance().getIdentity(identityId);
+            Identity identity = Client.getInstance().getIdentities().getIdentity(identityId);
 
             initElements(getView());
 
@@ -374,7 +345,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         }
 
         private void initData() {
-            Identity identity = IdentityCollection.getInstance().getIdentity(identityId);
+            Identity identity = Client.getInstance().getIdentities().getIdentity(identityId);
 
             if (identityId == -1) {
                 Log.d(TAG, "Identity empty");
@@ -436,7 +407,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         }
 
         public void storeToIdentity() {
-            Identity identity = IdentityCollection.getInstance().getIdentity(identityId);
+            Identity identity = Client.getInstance().getIdentities().getIdentity(identityId);
 
             identity.setAwayNick(awayNick.getText().toString());
             identity.setAwayReason(awayReason.getText().toString());
@@ -456,7 +427,7 @@ public class IdentityActivity extends ActionBarActivity implements TabHost.OnTab
         }
 
         private void initData() {
-            Identity identity = IdentityCollection.getInstance().getIdentity(identityId);
+            Identity identity = Client.getInstance().getIdentities().getIdentity(identityId);
             if (identityId == -1) {
                 Log.d(TAG, "Identity empty");
                 Toast.makeText(getActivity().getApplicationContext(),"Error: Identity could not be found",Toast.LENGTH_SHORT).show();

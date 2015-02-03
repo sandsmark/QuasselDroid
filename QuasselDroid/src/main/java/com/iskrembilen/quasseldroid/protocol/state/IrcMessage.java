@@ -33,10 +33,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class IrcMessage implements Comparable<IrcMessage> {
-    private boolean filtered;
+    private boolean filtered = false;
 
     public boolean isFiltered() {
-        return filtered;
+        return filtered && ((flags & Flag.Self.value) == 0);
     }
 
     public enum Type {

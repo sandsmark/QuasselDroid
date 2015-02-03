@@ -49,11 +49,7 @@ public class HideEventsDialog extends DialogFragment {
         boolean[] checked = new boolean[filterList.length];
         ArrayList<IrcMessage.Type> filters = buffer.getFilters();
         for (int i = 0; i < checked.length; i++) {
-            if (filters.contains(IrcMessage.Type.valueOf(filterList[i]))) {
-                checked[i] = true;
-            } else {
-                checked[i] = false;
-            }
+            checked[i] = (filters.contains(IrcMessage.Type.valueOf(filterList[i])));
         }
 
         Bundle args = new Bundle();

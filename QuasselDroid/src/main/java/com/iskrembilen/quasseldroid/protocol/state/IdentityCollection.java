@@ -38,12 +38,6 @@ public class IdentityCollection {
     private SparseArray<Identity> identities = new SparseArray<>();
     private Set<Integer> ids = new LinkedHashSet<>();
 
-    private static IdentityCollection instance = new IdentityCollection();
-
-    public static IdentityCollection getInstance() {
-        return instance;
-    }
-
     public void clear() {
         Log.d(TAG, "clear");
         identities.clear();

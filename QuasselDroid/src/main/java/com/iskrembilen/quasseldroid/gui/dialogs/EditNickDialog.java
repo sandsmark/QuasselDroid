@@ -34,6 +34,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
 
@@ -79,7 +80,7 @@ public class EditNickDialog extends DialogFragment {
         this.editText = editText;
 
         if (!add)
-            editText.setText(IdentityCollection.getInstance().getIdentity(identityId).getNicks().get(pos));
+            editText.setText(Client.getInstance().getIdentities().getIdentity(identityId).getNicks().get(pos));
 
         if (add)
             builder.setTitle(R.string.dialog_title_nick_add);

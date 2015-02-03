@@ -344,7 +344,6 @@ public final class CoreConnection {
         if (buffers.get(buffer).getUnfilteredSize() == 0) {
             requestBacklog(buffer, -1, -1, amount);
         } else {
-//			Log.e(TAG, "GETTING: "+buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId);
             requestBacklog(buffer, -1, buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId, amount);
         }
     }
@@ -643,13 +642,13 @@ public final class CoreConnection {
 
         List<QVariant<?>> identities = (List<QVariant<?>>) sessionState.get("Identities").getData();
         List<Identity> identityList = new ArrayList<>(identities.size());
-        IdentityCollection.getInstance().clear();
+        Client.getInstance().getIdentities().clear();
         Identity identity;
         for (QVariant<?> identityRaw : identities) {
             identity = new Identity();
             identity.fromVariantMap((QVariant<Map<String,QVariant<?>>>) identityRaw);
 
-            IdentityCollection.getInstance().putIdentity(identity);
+            Client.getInstance().getIdentities().putIdentity(identity);
         }
 
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
@@ -1344,7 +1343,7 @@ public final class CoreConnection {
                                 }
                                 updateInitDone();
                             } else if (className.equals("IgnoreListManager")) {
-                                Client.getInstance().getIgnoreListManager().update((Map<String, QVariant>) packedFunc.get(0).getData());
+                                Client.getInstance().getIgnoreListManager().fromVariantMap((Map<String, QVariant<?>>) packedFunc.get(0).getData());
                             }
 						/*
 						 * There are several objects that we don't care about (at the moment).

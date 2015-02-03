@@ -37,12 +37,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
-public class IgnoreListManager extends SyncableObject {
+public class IgnoreListManager extends SyncableObject implements Observer {
     private static final String TAG = IgnoreListManager.class.getSimpleName();
 
     public List<IgnoreListItem> getIgnoreList() {
         return ignoreList;
+    }
+
+    /**
+     * This method is called if the specified {@code Observable} object's
+     * {@code notifyObservers} method is called (because the {@code Observable}
+     * object has been updated.
+     *
+     * @param observable the {@link java.util.Observable} object.
+     * @param data       the data passed to {@link java.util.Observable#notifyObservers(Object)}.
+     */
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.e("IgnoreList", "upfdate "+observable+ " "+ data);
+        sync("requestUpdate", toVariantMap());
     }
 
     public enum IgnoreType {
@@ -62,6 +78,10 @@ public class IgnoreListManager extends SyncableObject {
         }
         public static IgnoreType fromValue(int val) {
             return vals.get(val);
+        }
+
+        public int value() {
+            return val;
         }
     }
 
@@ -83,6 +103,10 @@ public class IgnoreListManager extends SyncableObject {
         public static StrictnessType fromValue(int val) {
             return vals.get(val);
         }
+
+        public int value() {
+            return val;
+        }
     }
 
     public enum ScopeType {
@@ -103,12 +127,86 @@ public class IgnoreListManager extends SyncableObject {
         public static ScopeType fromValue(int val) {
             return vals.get(val);
         }
+
+        public int value() {
+            return val;
+        }
     }
 
     @Syncable(type=QVariantType.List)
-    private List<IgnoreListItem> ignoreList = new ArrayList<>(0);
+    private final List<IgnoreListItem> ignoreList = new ArrayList<>(0);
 
-    public class IgnoreListItem {
+    public class IgnoreListItem extends Observable {
+        public IgnoreType getType() {
+            return type;
+        }
+
+        public void setType(IgnoreType type) {
+            this.type = type;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
+        public String getIgnoreRule() {
+            return ignoreRule;
+        }
+
+        public void setIgnoreRule(String ignoreRule) {
+            this.ignoreRule = ignoreRule;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
+        public boolean isRegEx() {
+            return isRegEx;
+        }
+
+        public void setRegEx(boolean isRegEx) {
+            this.isRegEx = isRegEx;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
+        public StrictnessType getStrictness() {
+            return strictness;
+        }
+
+        public void setStrictness(StrictnessType strictness) {
+            this.strictness = strictness;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
+        public ScopeType getScope() {
+            return scope;
+        }
+
+        public void setScope(ScopeType scope) {
+            this.scope = scope;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
+        public String getScopeRule() {
+            return scopeRule;
+        }
+
+        public void setScopeRule(String scopeRule) {
+            this.scopeRule = scopeRule;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
+        public RegExp getRegEx() {
+            return regEx;
+        }
+
+        public void setRegEx(RegExp regEx) {
+            this.regEx = regEx;
+            this.setChanged();
+            this.notifyObservers();
+        }
+
         IgnoreType type;
         String ignoreRule;
         boolean isRegEx;
@@ -149,41 +247,29 @@ public class IgnoreListManager extends SyncableObject {
         public boolean isActive() {
             return isActive;
         }
-    }
 
-    public QVariant<Map<String,QVariant>> initIgnoreList() {
-        Map<String,QVariant>     ignoreListMap  = new HashMap<>();
-        List<QVariant<IgnoreType>>     ignoreTypeList = new ArrayList<>(ignoreList.size());
-        List<QVariant<String>>         ignoreRuleList = new ArrayList<>(ignoreList.size());
-        List<QVariant<String>>         scopeRuleList  = new ArrayList<>(ignoreList.size());
-        List<QVariant<Boolean>>        isRegExList    = new ArrayList<>(ignoreList.size());
-        List<QVariant<ScopeType>>      scopeList      = new ArrayList<>(ignoreList.size());
-        List<QVariant<StrictnessType>> strictnessList = new ArrayList<>(ignoreList.size());
-        List<QVariant<Boolean>>        isActiveList   = new ArrayList<>(ignoreList.size());
-
-        for (int i = 0; i < ignoreList.size(); i++) {
-            ignoreTypeList.add(new QVariant<>(ignoreList.get(i).type,       "IgnoreType"));
-            ignoreRuleList.add(new QVariant<>(ignoreList.get(i).ignoreRule, QVariantType.String));
-            scopeRuleList .add(new QVariant<>(ignoreList.get(i).scopeRule,  QVariantType.String));
-            isRegExList   .add(new QVariant<>(ignoreList.get(i).isRegEx,    QVariantType.Bool));
-            scopeList     .add(new QVariant<>(ignoreList.get(i).scope,      "ScopeType"));
-            strictnessList.add(new QVariant<>(ignoreList.get(i).strictness, "StrictnessType"));
-            isActiveList  .add(new QVariant<>(ignoreList.get(i).isActive,   QVariantType.Bool));
+        public void setActive(boolean isActive) {
+            this.isActive = isActive;
+            this.setChanged();
+            this.notifyObservers();
         }
 
-        ignoreListMap.put("ignoreType", new QVariant<>(ignoreTypeList, QVariantType.List));
-        ignoreListMap.put("ignoreRule", new QVariant<>(ignoreRuleList, QVariantType.StringList));
-        ignoreListMap.put("scopeRule",  new QVariant<>(scopeRuleList,  QVariantType.List));
-        ignoreListMap.put("isRegEx",    new QVariant<>(isRegExList,    QVariantType.List));
-        ignoreListMap.put("scope",      new QVariant<>(scopeList,      QVariantType.List));
-        ignoreListMap.put("strictness", new QVariant<>(strictnessList, QVariantType.List));
-        ignoreListMap.put("isActive",   new QVariant<>(isActiveList,   QVariantType.List));
-
-        return new QVariant<>(ignoreListMap, QVariantType.Map);
+        public void setAttributes(IgnoreType type, String ignoreRule, boolean isRegEx, StrictnessType strictness, ScopeType scope, String scopeRule, boolean isActive) {
+            this.type = type;
+            this.ignoreRule = ignoreRule;
+            this.isRegEx = isRegEx;
+            this.strictness = strictness;
+            this.scope = scope;
+            this.scopeRule = scopeRule;
+            this.isActive = isActive;
+            this.setChanged();
+            this.notifyObservers();
+        }
     }
 
-    public void update(Map<String,QVariant> datamap) throws EmptyQVariantException {
-        Map<String,QVariant>           ignoreList = (Map<String, QVariant>)   datamap.get("IgnoreList").getData();
+    @Override
+    public void fromVariantMap(Map<String,QVariant<?>> map) throws EmptyQVariantException {
+        Map<String,QVariant>           ignoreList = (Map<String, QVariant>)   map.get("IgnoreList").getData();
         List<QVariant<Integer>>        ignoreType = (List<QVariant<Integer>>) ignoreList.get("ignoreType").getData();
         List<String>                   ignoreRule = (List<String>)            ignoreList.get("ignoreRule").getData();
         List<String>                   scopeRule  = (List<String>)            ignoreList.get("scopeRule").getData();
@@ -198,26 +284,76 @@ public class IgnoreListManager extends SyncableObject {
             Log.w(TAG, "Corrupted IgnoreList settings! (Count missmatch)");
         }
 
-        this.ignoreList.clear();
-        for (int i = 0; i < ignoreRule.size(); i++) {
-            this.ignoreList.add(
-                    new IgnoreListItem(
-                            IgnoreType.fromValue(ignoreType.get(i).getData()),
-                            ignoreRule.get(i),
-                            isRegEx.get(i).getData(),
-                            StrictnessType.fromValue(strictness.get(i).getData()),
-                            ScopeType.fromValue(scope.get(i).getData()),
-                            scopeRule.get(i),
-                            isActive.get(i).getData()));
+        synchronized (this.ignoreList) {
+            this.ignoreList.clear();
+
+            IgnoreListItem item;
+            for (int i = 0; i < ignoreRule.size(); i++) {
+                item = new IgnoreListItem(
+                        IgnoreType.fromValue(ignoreType.get(i).getData()),
+                        ignoreRule.get(i),
+                        isRegEx.get(i).getData(),
+                        StrictnessType.fromValue(strictness.get(i).getData()),
+                        ScopeType.fromValue(scope.get(i).getData()),
+                        scopeRule.get(i),
+                        isActive.get(i).getData());
+                item.addObserver(this);
+                this.ignoreList.add(item);
+            }
         }
         this.setChanged();
         this.notifyObservers();
     }
 
+
+    public void update(Map<String,QVariant<?>> datamap) throws EmptyQVariantException {
+        fromVariantMap(datamap);
+    }
+
+    @Override
+    public QVariant<Map<String,QVariant<?>>> toVariantMap() {
+        Map<String,QVariant<?>> ignoreList = new HashMap<>();
+
+        List<QVariant<Integer>>        ignoreType = new ArrayList<>(this.ignoreList.size());
+        List<String>                   ignoreRule = new ArrayList<>(this.ignoreList.size());
+        List<String>                   scopeRule  = new ArrayList<>(this.ignoreList.size());
+        List<QVariant<Boolean>>        isRegEx    = new ArrayList<>(this.ignoreList.size());
+        List<QVariant<Integer>>        scope      = new ArrayList<>(this.ignoreList.size());
+        List<QVariant<Integer>>        strictness = new ArrayList<>(this.ignoreList.size());
+        List<QVariant<Boolean>>        isActive   = new ArrayList<>(this.ignoreList.size());
+
+        for (IgnoreListItem item : this.ignoreList) {
+            ignoreType.add(new QVariant<>(item.type.val, QVariantType.Int));
+            ignoreRule.add(item.ignoreRule);
+            scopeRule.add(item.scopeRule);
+            isRegEx.add(new QVariant<>(item.isRegEx, QVariantType.Bool));
+            scope.add(new QVariant<>(item.scope.val, QVariantType.Int));
+            strictness.add(new QVariant<>(item.strictness.val, QVariantType.Int));
+            isActive.add(new QVariant<>(item.isActive, QVariantType.Bool));
+        }
+
+        ignoreList.put("ignoreType", new QVariant<>(ignoreType, QVariantType.List));
+        ignoreList.put("ignoreRule", new QVariant<>(ignoreRule, QVariantType.StringList));
+        ignoreList.put("scopeRule",  new QVariant<>(scopeRule,  QVariantType.StringList));
+        ignoreList.put("isRegEx",    new QVariant<>(isRegEx,    QVariantType.List));
+        ignoreList.put("scope",      new QVariant<>(scope,      QVariantType.List));
+        ignoreList.put("strictness", new QVariant<>(strictness, QVariantType.List));
+        ignoreList.put("isActive",   new QVariant<>(isActive,   QVariantType.List));
+
+        Map<String,QVariant<?>> datamap = new HashMap<>();
+        datamap.put("IgnoreList", new QVariant<Map>(ignoreList, QVariantType.Map));
+
+        return new QVariant<>(datamap,QVariantType.Map);
+    }
+
     public boolean matches(IrcMessage msg) {
         Network network = Client.getInstance().getNetworks().getNetworkById(msg.bufferInfo.networkId);
-        Buffer buffer = network.getBuffers().getBuffer(msg.bufferInfo.id);
-
+        Buffer buffer;
+        if (msg.bufferInfo.type==BufferInfo.Type.StatusBuffer) {
+            buffer = network.getStatusBuffer();
+        } else {
+            buffer = network.getBuffers().getBuffer(msg.bufferInfo.id);
+        }
 
         if (msg.type != IrcMessage.Type.Plain && msg.type != IrcMessage.Type.Action && msg.type != IrcMessage.Type.Notice)
             return false;
@@ -273,7 +409,7 @@ public class IgnoreListManager extends SyncableObject {
         IgnoreListItem newItem = new IgnoreListItem(IgnoreType.fromValue(type), ignoreRule, isRegEx, StrictnessType.fromValue(strictness), ScopeType.fromValue(scope), scopeRule, isActive);
         ignoreList.add(newItem);
 
-        sync(type, ignoreRule, isRegEx, strictness, scope, scopeRule, isActive);
+        sync("requestUpdate", toVariantMap());
     }
 
     public void removeIgnoreListItem(String ignoreRule)

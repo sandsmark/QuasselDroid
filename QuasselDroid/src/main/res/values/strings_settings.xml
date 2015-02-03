@@ -170,4 +170,33 @@
         <string name="identity_auto_away_reason">Auto Away Reason</string>
         <string name="identity_detach_away_enabled">Detach Away Enabled</string>
         <string name="identity_detach_away_reason">Detach Away Reason</string>
+
+    <string name="preference_category_ignore_list">Ignore List</string>
+        <string name="preference_ignoreitem_strictness">Strictness</string>
+        <string-array name="ignoreitem_strictness">
+            <item>Unmatched</item>
+            <item>Dynamic</item>
+            <item>Permanent</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_ruletype">Rule Type</string>
+        <string-array name="ignoreitem_ruletypes">
+            <item>Sender</item>
+            <item>Message</item>
+            <item>CTCP</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_rule">Ignore Rule</string>
+        <string-array name="ignoreitem_matching">
+            <item>Wildcard</item>
+            <item>Regular Expression</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_scope">Scope</string>
+        <string-array name="ignoreitem_scopeType">
+            <item>Global</item>
+            <item>Network</item>
+            <item>Channel</item>
+        </string-array>
+
 </resources>

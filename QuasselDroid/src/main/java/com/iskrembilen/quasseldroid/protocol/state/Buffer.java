@@ -146,9 +146,8 @@ public class Buffer extends Observable implements Comparable<Buffer> {
             lastPlainMessageId = message.messageId;
             this.setChanged();
         }
-
         insertMessageInBufferList(backlog, message);
-        if (filterTypes.size() != 0 && !isMessageFiltered(message)) {
+        if (!isMessageFiltered(message)) {
             if (isMarkerLineFiltered && getMarkerLineMessage() == message.messageId)
                 isMarkerLineFiltered = false;
             insertMessageInBufferList(filteredBacklog, message);
@@ -205,7 +204,6 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         for (IrcMessage message : messageList) {
             newBufferEntry(message);
         }
-        backlogPending = false;
         notifyObservers(R.id.BUFFERUPDATE_BACKLOG);
     }
 
@@ -233,14 +231,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return true if buffer has unseen highlights, otherwise false
      */
     public boolean hasUnseenHighlight() {
-        return (backlog.size() != 0 && lastSeenMessage != 0 && lastHighlightMessageId > lastSeenMessage);
+        return (filteredBacklog.size() != 0 && lastSeenMessage != 0 && lastHighlightMessageId > lastSeenMessage);
     }
 
     /**
      * Checks if the buffer has any unread messages, not including joins/parts/quits etc
      */
     public boolean hasUnreadMessage() {
-        return (backlog.size() != 0 && lastSeenMessage != 0 && lastPlainMessageId > lastSeenMessage);
+        return (filteredBacklog.size() != 0 && lastSeenMessage != 0 && lastPlainMessageId > lastSeenMessage);
     }
 
     /**
@@ -250,7 +248,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      */
     public boolean hasUnreadActivity() {
         //Last message in the backlog has a bigger messageId than the last seen message
-        return ((backlog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < backlog.get(backlog.size() - 1).messageId) ||
+        return ((filteredBacklog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < filteredBacklog.get(filteredBacklog.size() - 1).messageId) ||
                 (lastSeenMessage == -1));
     }
 
@@ -297,10 +295,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return the Ircmessage at pos
      */
     public IrcMessage getBacklogEntry(int pos) {
-        if (filterTypes.size() != 0) {
-            return filteredBacklog.get(pos);
-        }
-        return backlog.get(pos);
+        return filteredBacklog.get(pos);
     }
 
     /**
@@ -349,14 +344,11 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @return number of messages in buffer
      */
     public int getSize() {
-        if (filterTypes.size() != 0) {
-            return filteredBacklog.size();
-        }
-        return backlog.size();
+        return filteredBacklog.size();
     }
 
     /**
-     * Get the size of the hole backlog unfiltered. Used in request more backlog for instance to know the size of the buffer we have
+     * Get the size of the whole backlog unfiltered. Used in request more backlog for instance to know the size of the buffer we have
      *
      * @return int
      */
@@ -535,6 +527,17 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     public void filterBuffer() {
         filteredBacklog.clear();
         for (IrcMessage msg : backlog) {
+            if (!isMessageFiltered(msg)) {
+                if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = false;
+                filteredBacklog.add(msg);
+            } else if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = true;
+        }
+    }
+
+    public void updateIgnore() {
+        filteredBacklog.clear();
+        for (IrcMessage msg : backlog) {
+            msg.setFiltered(Client.getInstance().getIgnoreListManager().matches(msg));
             if (!isMessageFiltered(msg)) {
                 if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = false;
                 filteredBacklog.add(msg);

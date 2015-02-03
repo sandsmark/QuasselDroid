@@ -39,7 +39,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
@@ -63,13 +62,11 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.gui.dialogs.EditNickDialog;
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
 import com.iskrembilen.quasseldroid.protocol.state.IrcMessage.Type;
 import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
-import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
@@ -84,7 +81,6 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
@@ -102,6 +98,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.PriorityQueue;
+
+import de.kuschku.util.HelperUtils;
 
 public class ChatFragment extends Fragment implements Serializable {
 
@@ -250,7 +249,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
                         ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)))) {
                     if (!"" .equals(inputField.getText().toString().trim())) {
-                        for (CharSequence line : Helper.split(inputField.getText(),"\n")) {
+                        for (CharSequence line : HelperUtils.split(inputField.getText(), "\n")) {
                             BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, line.toString()));
                         }
                         InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
@@ -353,6 +352,7 @@ public class ChatFragment extends Fragment implements Serializable {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(BUFFER_ID, bufferId);
+        adapter.storeScrollState();
         super.onSaveInstanceState(outState);
     }
 
@@ -520,7 +520,7 @@ public class ChatFragment extends Fragment implements Serializable {
 
         public void storeScrollState() {
             View v = backlogList.getChildAt(0);
-            buffer.setScrollState((v == null) ? 0 : (v.getTop() - backlogList.getPaddingTop()));
+            if (buffer!=null) buffer.setScrollState((v == null) ? 0 : (v.getTop() - backlogList.getPaddingTop()));
         }
 
         @Override
@@ -851,8 +851,8 @@ public class ChatFragment extends Fragment implements Serializable {
         }
 
         public void getMoreBacklog() {
-            adapter.buffer.setBacklogPending(true);
-            BusProvider.getInstance().post(new GetBacklogEvent(adapter.getBufferId(), dynamicBacklogAmount));
+            buffer.setBacklogPending(true);
+            BusProvider.getInstance().post(new GetBacklogEvent(getBufferId(), dynamicBacklogAmount));
         }
 
         public void removeFilter(Type type) {

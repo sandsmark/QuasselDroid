@@ -44,6 +44,7 @@ public class NetworkCollection extends Observable implements Observer {
         Collections.sort(networkList);
         setChanged();
         notifyObservers();
+        Client.getInstance().getIgnoreListManager().addObserver(this);
     }
 
     public Network getNetwork(int location) {
@@ -86,9 +87,11 @@ public class NetworkCollection extends Observable implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
+        if (observable == Client.getInstance().getIgnoreListManager())
+            updateIgnore();
+
         setChanged();
         notifyObservers();
-
     }
 
     public void removeNetwork(int networkId) {
@@ -108,9 +111,9 @@ public class NetworkCollection extends Observable implements Observer {
         networkMap.clear();
     }
 
-    public void updateFiltered() {
+    public void updateIgnore() {
         for (Network network : networkList) {
-            network.updateFiltered();
+            network.updateIgnore();
         }
     }
 }

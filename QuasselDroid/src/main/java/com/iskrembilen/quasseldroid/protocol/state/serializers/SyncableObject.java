@@ -10,18 +10,17 @@ import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.Identity;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
+
+import de.kuschku.util.HelperUtils;
 
 public abstract class SyncableObject extends Observable {
 
@@ -178,7 +177,7 @@ public abstract class SyncableObject extends Observable {
                 Syncable annotation = method.getAnnotation(Syncable.class);
 
                 if (annotation==null || !annotation.name().isEmpty()) {
-                    remoteMethodName = Helper.appendCamelCase("request", callingMethod);
+                    remoteMethodName = HelperUtils.appendCamelCase("request", callingMethod);
                 } else {
                     remoteMethodName = annotation.name();
                 }
@@ -194,6 +193,10 @@ public abstract class SyncableObject extends Observable {
         }
 
         sync(new RequestRemoteSyncEvent(getClassName(), getObjectName(), remoteMethodName, args(args, paramTypes)));
+    }
+
+    protected void sync(String remoteMethodName, QVariant<?> args) {
+        sync(new RequestRemoteSyncEvent(getClassName(), getObjectName(), remoteMethodName, args));
     }
 
     private QVariantType[] extractTypes(Object[] objects) {
