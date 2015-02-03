@@ -597,8 +597,8 @@ public class MainActivity extends ActionBarActivity {
                         /**
                          * Called when a drawer has settled in a completely closed state.
                          */
+                        @Override
                         public void onDrawerClosed(View drawerView) {
-                            updateBufferRead();
                             updateBufferRead();
                             ((BufferFragment) manager.bufferFragment).finishActionMode();
                             setTitleAndMenu();
@@ -607,9 +607,17 @@ public class MainActivity extends ActionBarActivity {
                         /**
                          * Called when a drawer has settled in a completely open state.
                          */
+                        @Override
                         public void onDrawerOpened(View drawerView) {
                             manager.closeDrawer(Side.RIGHT);
                             setTitleAndMenu();
+                            manager.hideKeyboard();
+                        }
+
+                        @Override
+                        public void onDrawerSlide(View drawerView, float slideOffset) {
+                            // We set the offset here to zero to disable the animation in the toggle
+                            super.onDrawerSlide(drawerView, 0);
                         }
                     });
                     leftDrawer.setDrawerListener((extensibleDrawerToggle.getDrawerListener()));
