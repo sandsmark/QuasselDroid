@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -147,18 +148,19 @@ public class ChatFragment extends Fragment implements Serializable {
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getString(R.string.preference_timestamp))) {
-                    updateTimeFormat();
+                    initPreferences();
+                    adapter.notifyDataSetChanged();
                 } else if (key.equals(getString(R.string.preference_hostname))) {
-                    detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
+                    initPreferences();
                     adapter.notifyDataSetChanged();
                 } else if (key.equals(getString(R.string.preference_colored_text))) {
-                    parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
+                    initPreferences();
                     adapter.notifyDataSetChanged();
                 } else if (key.equals(getString(R.string.preference_nickbrackets))) {
-                    nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
+                    initPreferences();
                     adapter.notifyDataSetChanged();
                 } else if (key.equals(getString(R.string.preference_monospace))) {
-                    monospace = preferences.getBoolean(getString(R.string.preference_monospace), false);
+                    initPreferences();
                     updateInputField();
                     adapter.notifyDataSetChanged();
                 }
@@ -173,15 +175,14 @@ public class ChatFragment extends Fragment implements Serializable {
         parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
         nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
         monospace = preferences.getBoolean(getString(R.string.preference_monospace), false);
+        userFormat = preferences.getString(getResources().getString(R.string.preference_timestamp),"");
     }
 
     private void updateInputField() {
-        if (monospace) inputField.setTypeface(Typeface.MONOSPACE);
-        else inputField.setTypeface(Typeface.DEFAULT);
-    }
-
-    public void updateTimeFormat() {
-        userFormat = preferences.getString(getResources().getString(R.string.preference_timestamp),"");
+        if (monospace)
+            inputField.setTypeface(Typeface.MONOSPACE);
+        else
+            inputField.setTypeface(Typeface.DEFAULT);
     }
 
     public java.text.DateFormat getTimeFormatter() {
@@ -199,7 +200,7 @@ public class ChatFragment extends Fragment implements Serializable {
         inputField = (EditText) root.findViewById(R.id.chat_input_view);
         autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
 
-        updateTimeFormat();
+        initPreferences();
         updateInputField();
 
         backlogList.setAdapter(adapter);
@@ -317,6 +318,7 @@ public class ChatFragment extends Fragment implements Serializable {
     @Override
     public void onStart() {
         Log.d(TAG, "Starting fragment");
+        adapter.loadScrollState();
         super.onStart();
         dynamicBacklogAmount = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
         autoCompleteButton.setEnabled(false);
@@ -326,7 +328,20 @@ public class ChatFragment extends Fragment implements Serializable {
     }
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG, "detaching fragment");
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        Log.d(TAG, "attaching fragment");
+        super.onAttach(activity);
+    }
+
+    @Override
     public void onPause() {
+        adapter.storeScrollState();
         super.onPause();
         preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         Log.d(TAG, "pausing fragment");
@@ -334,14 +349,17 @@ public class ChatFragment extends Fragment implements Serializable {
 
     @Override
     public void onResume() {
+        Log.d(TAG, "resuming fragment");
         super.onResume();
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         initPreferences();
+        updateInputField();
     }
 
     @Override
     public void onStop() {
         Log.d(TAG, "Stopping fragment");
+        adapter.storeScrollState();
         super.onStop();
         if (Client.getInstance().status == ConnectionChangedEvent.Status.Connected && getUserVisibleHint()) updateRead();
         adapter.clearBuffer();
@@ -351,8 +369,8 @@ public class ChatFragment extends Fragment implements Serializable {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "saving fragment");
         outState.putInt(BUFFER_ID, bufferId);
-        adapter.storeScrollState();
         super.onSaveInstanceState(outState);
     }
 
@@ -380,11 +398,9 @@ public class ChatFragment extends Fragment implements Serializable {
         if (adapter.buffer != null) {
             adapter.buffer.setDisplayed(false);
 
-            //Don't save position if list is at bottom
             if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
-                adapter.buffer.setTopMessageShown(-1);
+                adapter.storeScrollState(0, 0);
             } else {
-                adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
                 adapter.storeScrollState();
             }
             if (adapter.buffer.getUnfilteredSize() != 0) {
@@ -406,7 +422,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 if (bufferId != adapter.buffer.getInfo().id) {
                     updateMarkerLine();
                 }
-                adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
+
                 adapter.storeScrollState();
             }
             adapter.clearBuffer();
@@ -426,11 +442,7 @@ public class ChatFragment extends Fragment implements Serializable {
             }
 
             //Move list to correct position
-            if (adapter.buffer.getTopMessageShown() == -1) {
-                backlogList.setSelection(adapter.getCount() - 1);
-            } else {
-                adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
-            }
+            adapter.loadScrollState();
         }
     }
 
@@ -518,9 +530,46 @@ public class ChatFragment extends Fragment implements Serializable {
             backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
         }
 
+
+        public void storeScrollState(int position, int scroll) {
+            String parent = Thread.currentThread().getStackTrace()[3].getMethodName();
+            int i = 4;
+            while (parent.equals("storeScrollState"))
+                parent = Thread.currentThread().getStackTrace()[i++].getMethodName();
+
+            if (buffer != null && backlogList.getChildCount()>0) {
+                buffer.setTopMessageShown(position);
+                buffer.setScrollState(scroll);
+                Log.e(TAG, "Success saving state " + position + " from "+ parent);
+            } else {
+                Log.e(TAG, "Error saving state " + position + " from "+ parent);
+            }
+        }
+
         public void storeScrollState() {
+            storeScrollState(getListTopMessageId(), getOffset());
+        }
+
+        private int getOffset() {
             View v = backlogList.getChildAt(0);
-            if (buffer!=null) buffer.setScrollState((v == null) ? 0 : (v.getTop() - backlogList.getPaddingTop()));
+            return (v == null) ? 0 : (v.getTop() - backlogList.getPaddingTop());
+        }
+
+        public void loadScrollState() {
+            String parent = Thread.currentThread().getStackTrace()[3].getMethodName();
+            int i = 4;
+            while (parent.equals("loadScrollState"))
+                parent = Thread.currentThread().getStackTrace()[i++].getMethodName();
+
+            if (buffer != null) {
+                if (buffer.getTopMessageShown() == 0) {
+                    backlogList.setSelection(getCount() - 1);
+                    Log.e(TAG, "Error loading state -1 from "+ parent);
+                } else {
+                    setListTopMessage(buffer.getTopMessageShown(),buffer.getScrollState());
+                    Log.e(TAG, "Success loading state " + buffer.getTopMessageShown() + " from "+ parent);
+                }
+            }
         }
 
         @Override
@@ -780,8 +829,9 @@ public class ChatFragment extends Fragment implements Serializable {
                     break;
                 case R.id.BUFFERUPDATE_BACKLOG:
                     int topId = getListTopMessageId();
+                    int scroll = getOffset();
                     notifyDataSetChanged();
-                    setListTopMessage(topId);
+                    setListTopMessage(topId, scroll);
                     break;
                 case R.id.BUFFERUPDATE_TOPICCHANGED:
                     notifyDataSetChanged();
@@ -807,7 +857,7 @@ public class ChatFragment extends Fragment implements Serializable {
         public int getListTopMessageId() {
             int topId;
             if (backlogList.getChildCount() == 0) {
-                topId = 0;
+                topId = -1;
             } else {
                 topId = ((ViewHolder) backlogList.getChildAt(0).getTag()).messageID;
             }
@@ -818,10 +868,14 @@ public class ChatFragment extends Fragment implements Serializable {
          * Sets what message from the adapter will be at the top of the visible screen
          */
         public void setListTopMessage(int messageid) {
+            setListTopMessage(messageid, 5);
+        }
+
+        public void setListTopMessage(int messageid, int scroll) {
             backlogList.setAdapter(adapter);
             for (int i = 0; i < adapter.getCount(); i++) {
                 if (adapter.getItemId(i) == messageid) {
-                    backlogList.setSelectionFromTop(i, buffer.getScrollState());
+                    backlogList.setSelectionFromTop(i, scroll);
                     break;
                 }
             }

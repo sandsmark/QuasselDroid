@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -52,6 +53,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.base.Predicate;
+import com.google.samples.apps.iosched.ui.widget.ScrimInsetsFrameLayout;
 import com.idunnololz.widgets.AnimatedExpandableListView;
 import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
@@ -98,6 +100,8 @@ public class BufferFragment extends Fragment implements Serializable {
     private int restoreItemPosition = 0;
 
     private final ActionModeData actionModeData = new ActionModeData();
+    private int statusBarHeight = 0;
+    private Toolbar toolbar;
 
     public static BufferFragment newInstance() {
         return new BufferFragment();
@@ -120,24 +124,17 @@ public class BufferFragment extends Fragment implements Serializable {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Toolbar toolbar;
-
         View root = inflater.inflate(R.layout.fragment_buffers, container, false);
 
         bufferList = (XMLHeaderAnimatedExpandableListView) root.findViewById(R.id.buffer_list);
+
         if (bufferList.hasHeaderView()) {
             toolbar = (Toolbar) bufferList.getHeaderView();
         } else {
             toolbar = (Toolbar) root.findViewById(R.id.buffer_toolbar);
         }
 
-        if (toolbar.getPaddingTop()==getResources().getDimension(R.dimen.status_bar_height)) {
-            toolbar.setPadding(
-                    toolbar.getPaddingLeft(),
-                    Math.round(Helper.getStatusBarHeight(getActivity())),
-                    toolbar.getPaddingRight(),
-                    toolbar.getPaddingBottom());
-        }
+        updateToolbarPadding();
 
         ArrayAdapter adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_spinner_item,BufferCollectionHelper.FILTER_NAMES);
         adapter.setDropDownViewResource(R.layout.widget_spinner_dropdown_item);
@@ -175,6 +172,19 @@ public class BufferFragment extends Fragment implements Serializable {
         });
 
         return root;
+    }
+
+    public void setStatusBarHeight(int statusBarHeight) {
+        this.statusBarHeight = statusBarHeight;
+        if (toolbar != null) updateToolbarPadding();
+    }
+
+    private void updateToolbarPadding() {
+        toolbar.setPadding(
+                toolbar.getPaddingLeft(),
+                statusBarHeight,
+                toolbar.getPaddingRight(),
+                toolbar.getPaddingBottom());
     }
 
     @Override

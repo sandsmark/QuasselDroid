@@ -46,7 +46,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     /**
      * List that holds all the Ircmessages we have gotten on this buffer.
      */
-    private ArrayList<IrcMessage> backlog = null;
+    private final ArrayList<IrcMessage> backlog;
     /**
      * Filtered version of the backlog, without hidden messages
      */
@@ -112,9 +112,9 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
     public Buffer(BufferInfo info, QuasselDbHelper dbHelper) {
         this.info = info;
-        backlog = new ArrayList<IrcMessage>();
-        filteredBacklog = new ArrayList<IrcMessage>();
-        filterTypes = new ArrayList<IrcMessage.Type>();
+        backlog = new ArrayList<>();
+        filteredBacklog = new ArrayList<>();
+        filterTypes = new ArrayList<>();
         users = new UserCollection();
         this.dbHelper = dbHelper;
 
@@ -159,7 +159,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     /**
      * Inserts a message into the correct position in a buffer
      */
-    private void insertMessageInBufferList(ArrayList<IrcMessage> list, IrcMessage msg) {
+    private void insertMessageInBufferList(final ArrayList<IrcMessage> list, IrcMessage msg) {
         if (list.isEmpty()) {
             list.add(msg);
             this.setChanged();
@@ -536,12 +536,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 
     public void updateIgnore() {
         filteredBacklog.clear();
-        for (IrcMessage msg : backlog) {
-            msg.setFiltered(Client.getInstance().getIgnoreListManager().matches(msg));
-            if (!isMessageFiltered(msg)) {
-                if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = false;
-                filteredBacklog.add(msg);
-            } else if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = true;
+        synchronized (backlog){
+            for (IrcMessage msg : backlog) {
+                msg.setFiltered(Client.getInstance().getIgnoreListManager().matches(msg));
+                if (!isMessageFiltered(msg)) {
+                    if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = false;
+                    filteredBacklog.add(msg);
+                } else if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = true;
+            }
         }
     }
 

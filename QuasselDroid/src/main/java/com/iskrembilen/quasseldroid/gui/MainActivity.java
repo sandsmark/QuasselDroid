@@ -30,6 +30,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -53,6 +54,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.samples.apps.iosched.ui.widget.ScrimInsetsFrameLayout;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
@@ -149,6 +151,14 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         };
+
+        ScrimInsetsFrameLayout insetLayout = (ScrimInsetsFrameLayout) findViewById(R.id.scrimInsetsFrameLayout);
+        if (insetLayout != null) insetLayout.setOnInsetsCallback(new ScrimInsetsFrameLayout.OnInsetsCallback() {
+            @Override
+            public void onInsetsChanged(Rect insets) {
+                ((BufferFragment) manager.bufferFragment).setStatusBarHeight(insets.top);
+            }
+        });
 
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener); //To avoid GC issues
     }

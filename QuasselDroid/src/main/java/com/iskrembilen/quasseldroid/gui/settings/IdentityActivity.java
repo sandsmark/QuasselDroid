@@ -296,6 +296,7 @@ public class IdentityActivity extends ActionBarActivity {
                  */
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                    // TODO: Refactor this into using the nicklist directly
                     EditNickDialog dialog = EditNickDialog.newInstance(position-nickList.getHeaderViewsCount(), identityId);
                     dialog.setOnResultListener(new EditNickDialog.OnResultListener<String>() {
                         @Override
