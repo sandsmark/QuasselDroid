@@ -398,11 +398,7 @@ public class ChatFragment extends Fragment implements Serializable {
         if (adapter.buffer != null) {
             adapter.buffer.setDisplayed(false);
 
-            if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
-                adapter.storeScrollState(0, 0);
-            } else {
-                adapter.storeScrollState();
-            }
+            adapter.storeScrollState();
             if (adapter.buffer.getUnfilteredSize() != 0) {
                 BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
                 BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize() - 1).messageId, MessageAction.LAST_SEEN));
@@ -547,7 +543,11 @@ public class ChatFragment extends Fragment implements Serializable {
         }
 
         public void storeScrollState() {
-            storeScrollState(getListTopMessageId(), getOffset());
+            if (backlogList.getLastVisiblePosition() == getCount() - 1) {
+                storeScrollState(0, 0);
+            } else {
+                storeScrollState(getListTopMessageId(), getOffset());
+            }
         }
 
         private int getOffset() {

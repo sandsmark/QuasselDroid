@@ -62,9 +62,11 @@ public class IgnoreItemActivity extends ActionBarActivity {
         if (!getIntent().hasExtra("ignoreId")) {
             finish();
             Toast.makeText(this, "Rule couldn’t be found", Toast.LENGTH_SHORT).show();
+        } else if (getIntent().getIntExtra("ignoreId", -1) == -1) {
+            item = null;
+        } else {
+            item = Client.getInstance().getIgnoreListManager().getIgnoreList().get(getIntent().getIntExtra("ignoreId", -1));
         }
-
-        item = Client.getInstance().getIgnoreListManager().getIgnoreList().get(getIntent().getIntExtra("ignoreId", -1));
 
         setContentView(R.layout.layout_ignoreitem);
 
@@ -86,10 +88,15 @@ public class IgnoreItemActivity extends ActionBarActivity {
         SpinnerAdapter scopeTypeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.ignoreitem_scopeType));
         scopeType.setAdapter(scopeTypeAdapter);
 
-        ruleType.setSelection(item.getType().ordinal());
-        strictness.setSelection(item.getStrictness().ordinal());
-        matching.setSelection(item.isRegEx() ? 1 : 0);
-        scopeType.setSelection(item.getScope().ordinal());
+        if (item!=null) {
+            ruleType.setSelection(item.getType().ordinal());
+            strictness.setSelection(item.getStrictness().ordinal());
+            matching.setSelection(item.isRegEx() ? 1 : 0);
+            scopeType.setSelection(item.getScope().ordinal());
+            ignoreRule.setText(item.getIgnoreRule());
+            scopeRule.setText(item.getScopeRule());
+        }
+
         scopeType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -103,9 +110,6 @@ public class IgnoreItemActivity extends ActionBarActivity {
             }
         });
         scopeRule.setEnabled(scopeType.getSelectedItemPosition() != IgnoreListManager.ScopeType.GLOBAL_SCOPE.value());
-
-        ignoreRule.setText(item.getIgnoreRule());
-        scopeRule.setText(item.getScopeRule());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_check);
@@ -134,9 +138,14 @@ public class IgnoreItemActivity extends ActionBarActivity {
         String dataIgnoreRule = ignoreRule.getText().toString();
         String dataScopeRule = scopeRule.getText().toString();
 
-        boolean originalIsActive = item.isActive();
-
-        item.setAttributes(dataRuleType, dataIgnoreRule, dataIsRegEx, dataStrictness, dataScopeType, dataScopeRule, originalIsActive);
+        if (item!=null) {
+            boolean originalIsActive = item.isActive();
+            item.setAttributes(dataRuleType, dataIgnoreRule, dataIsRegEx, dataStrictness, dataScopeType, dataScopeRule, originalIsActive);
+        } else {
+            boolean originalIsActive = false;
+            item = new IgnoreListManager.IgnoreListItem(dataRuleType, dataIgnoreRule, dataIsRegEx, dataStrictness, dataScopeType, dataScopeRule, originalIsActive);
+            Client.getInstance().getIgnoreListManager().addIgnoreListItem(item);
+        }
     }
 
     @Override

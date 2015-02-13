@@ -25,31 +25,30 @@ package com.iskrembilen.quasseldroid.gui.settings;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.common.base.Function;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
-import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
 import com.iskrembilen.quasseldroid.protocol.state.IgnoreListManager;
+import com.melnykov.fab.FloatingActionButton;
+import com.mobeta.android.dslv.DragSortController;
+import com.mobeta.android.dslv.DragSortListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,9 +58,20 @@ import java.util.Observer;
 
 public class IgnoreListFragment extends PreferenceFragment implements Observer {
 
-    ListView list;
+    DragSortListView list;
     SimpleListAdapter<IgnoreListManager.IgnoreListItem> adapter;
     private Formatter<IgnoreListManager.IgnoreListItem> formatter;
+
+    public @NonNull DragSortController buildController(DragSortListView dslv) {
+        DragSortController controller = new DragSortController(dslv);
+        controller.setDragHandleId(R.id.list_drag_handle);
+        controller.setRemoveEnabled(true);
+        controller.setSortEnabled(false);
+        controller.setDragInitMode(DragSortController.ON_DRAG);
+        controller.setRemoveMode(DragSortController.FLING_REMOVE);
+        controller.setBackgroundColor(Color.TRANSPARENT);
+        return controller;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,9 +80,9 @@ public class IgnoreListFragment extends PreferenceFragment implements Observer {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.layout_list, container, false);
+        View root = inflater.inflate(R.layout.fragment_ignorelist, container, false);
 
-        list = (ListView) root.findViewById(R.id.list);
+        list = (DragSortListView) root.findViewById(R.id.list);
         formatter = new Formatter<IgnoreListManager.IgnoreListItem>() {
             @Override
             public View format(IgnoreListManager.IgnoreListItem item, View holder, int position) {
@@ -97,10 +107,14 @@ public class IgnoreListFragment extends PreferenceFragment implements Observer {
                 });
             }
         };
+
         Client.getInstance().getIgnoreListManager().addObserver(this);
 
         initData();
 
+        DragSortController mController = buildController(list);
+        list.setFloatViewManager(mController);
+        list.setOnTouchListener(mController);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             /**
              * Callback method to be invoked when an item in this AdapterView has
@@ -117,14 +131,40 @@ public class IgnoreListFragment extends PreferenceFragment implements Observer {
              */
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.e("IgnoreList", "click "+view.getTag().toString());
                 Intent i = new Intent(getActivity(), IgnoreItemActivity.class);
-                i.putExtra("ignoreId", (int) view.getTag());
+                i.putExtra("ignoreId", position);
                 startActivity(i);
+            }
+        });
+        list.setRemoveListener(new DragSortListView.RemoveListener() {
+            @Override
+            public void remove(int i) {
+                String rule = Client.getInstance().getIgnoreListManager().getIgnoreList().get(i).getIgnoreRule();
+                Client.getInstance().getIgnoreListManager().removeIgnoreListItem(rule);
+                initData();
             }
         });
 
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_ignorelist, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.e("fragment", item.getTitle().toString());
+        switch (item.getItemId()) {
+            case R.id.menu_new_ignore:
+                Intent i = new Intent(getActivity(), IgnoreItemActivity.class);
+                i.putExtra("ignoreId", -1);
+                startActivity(i);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initData() {

@@ -86,6 +86,15 @@
         <item name="drawerArrowStyle">@style/Widget.DrawerArrowToggle</item>
     </style>
 
+    <style name="Theme.QuasselDroid.Material.Dark.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Dark">
+    </style>
+    <style name="Theme.QuasselDroid.Material.Light.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Light">
+    </style>
+    <style name="Theme.QuasselDroid.Material.Dark.NoActionBar.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Dark.NoActionBar">
+    </style>
+    <style name="Theme.QuasselDroid.Material.Light.NoActionBar.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Light.NoActionBar">
+    </style>
+
     <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="drawable_oval">@drawable/oval</item>
     </style>

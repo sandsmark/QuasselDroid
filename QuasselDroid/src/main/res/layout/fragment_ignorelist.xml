@@ -21,31 +21,19 @@
     GNU Lesser General Public License along with this program.  If not, see
     <http://www.gnu.org/licenses/>.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+<com.mobeta.android.dslv.DragSortListView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dslv="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <android.support.v7.widget.Toolbar
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/action_bar"
-        android:elevation="10dp"
-        style="@style/Widget.Toolbar">
-    </android.support.v7.widget.Toolbar>
-    <it.neokree.materialtabs.MaterialTabHost
-        android:id="@+id/tabs"
-        android:elevation="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        app:textColor="#FFFFFF"
-        app:primaryColor="?attr/colorPrimary"
-        app:accentColor="?attr/colorAccent" />
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
-    </android.support.v4.view.ViewPager>
-</LinearLayout>
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:dividerHeight="0dp"
+    dslv:drag_enabled="false"
+    dslv:collapsed_height="0dp"
+    dslv:drag_scroll_start="0.33"
+    dslv:max_drag_scroll_speed="0.5"
+    dslv:float_alpha="0.6"
+    dslv:slide_shuffle_speed="0.3"
+    dslv:track_drag_sort="false"
+    dslv:use_default_controller="true" />

@@ -78,6 +78,8 @@
     <string name="action_hide_temp">Hide Temporarily</string>
     <string name="action_hide_perm">Hide Permanently</string>
 
+    <string name="action_new_ignore">New Ignore Rule</string>
+
     <string name="next_button_label">Next</string>
     <string name="skip_button_label">Skip</string>
     <string name="back_button_label">Back</string>

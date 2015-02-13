@@ -115,9 +115,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity created");
-        setTheme(ThemeUtil.themeNoActionBar);
+        setTheme(ThemeUtil.themeNoActionBarDrawStatusBar);
         super.onCreate(savedInstanceState);
-        currentTheme = ThemeUtil.themeNoActionBar;
+        currentTheme = ThemeUtil.themeNoActionBarDrawStatusBar;
 
         setContentView(R.layout.layout_main);
 
@@ -232,7 +232,7 @@ public class MainActivity extends ActionBarActivity {
 
         BusProvider.getInstance().register(this);
 
-        if (ThemeUtil.themeNoActionBar != currentTheme) {
+        if (ThemeUtil.themeNoActionBarDrawStatusBar != currentTheme) {
             Log.d(TAG, "Changing theme");
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {

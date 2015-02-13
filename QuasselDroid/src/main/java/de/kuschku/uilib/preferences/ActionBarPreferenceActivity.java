@@ -24,11 +24,13 @@ import android.app.*;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.gui.settings.IgnoreListFragment;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -40,6 +42,9 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
+        Bundle initialArguments = getIntent().getBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.preference_actionbar);
@@ -49,11 +54,10 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
         actionbar = (Toolbar) findViewById(R.id.action_bar);
         mSinglePane = onIsHidingHeaders() || !onIsMultiPane();
 
-        String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
-
         if (!mSinglePane) {
             mPrefsContainer.setVisibility(View.VISIBLE);
         } else if (initialFragment != null) {
+            switchToHeader(initialFragment, initialArguments);
             findViewById(R.id.headers).setVisibility(View.GONE);
             mPrefsContainer.setVisibility(View.VISIBLE);
         }
@@ -111,11 +115,45 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
     private void switchToHeaderInner(String fragmentName, Bundle args) {
         getFragmentManager().popBackStack(BACK_STACK_PREFS,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        android.app.Fragment f = android.app.Fragment.instantiate(this, fragmentName, args);
+        final android.app.Fragment f = android.app.Fragment.instantiate(this, fragmentName, args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(R.id.prefs, f);
         transaction.commitAllowingStateLoss();
+
+        if (actionbar!=null) {
+            if (f instanceof IgnoreListFragment) {
+                Log.e("PA", "load menu for fragment");
+                actionbar.inflateMenu(R.menu.fragment_ignorelist);
+                actionbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Log.e("PA", menuItem.getTitle().toString());
+                        return f.onOptionsItemSelected(menuItem);
+                    }
+                });
+                actionbar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (v instanceof MenuItem) {
+                            MenuItem menuItem = (MenuItem) v;
+                            Log.e("PA", menuItem.getTitle().toString());
+                            f.onOptionsItemSelected(menuItem);
+                        }
+                    }
+                });
+            } else {
+                Log.e("PA", "load empty menu");
+                actionbar.inflateMenu(R.menu.empty);
+                actionbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Log.e("PA", menuItem.getTitle().toString());
+                        return false;
+                    }
+                });
+            }
+        }
     }
 
     private void setSelectedHeader(Header header) {
@@ -226,7 +264,6 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
 
     public boolean onMenuItemClick(MenuItem item) {
         if (item.getItemId() == R.id.home) {
-
             return true;
         } else {
             return false;

@@ -34,6 +34,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,14 +48,13 @@ import android.widget.EditText;
 import android.widget.TabHost;
 import android.widget.Toast;
 
-import com.astuetz.PagerSlidingTabStrip;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.Identity;
-import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.EditNickDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.melnykov.fab.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
@@ -63,12 +63,16 @@ import com.squareup.otto.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.neokree.materialtabs.MaterialTab;
+import it.neokree.materialtabs.MaterialTabHost;
+import it.neokree.materialtabs.MaterialTabListener;
+
 public class IdentityActivity extends ActionBarActivity {
     static final String TAG = IdentityActivity.class.getSimpleName();
 
     MyPageAdapter pageAdapter;
     private ViewPager mViewPager;
-    private PagerSlidingTabStrip tabStrip;
+    private MaterialTabHost tabStrip;
 
     NicksFragment nicksFragment;
     MessagesFragment messagesFragment;
@@ -77,6 +81,7 @@ public class IdentityActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(ThemeUtil.themeNoActionBar);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_identity);
 
@@ -87,13 +92,54 @@ public class IdentityActivity extends ActionBarActivity {
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
 
         // Tab Initialization
-        tabStrip = (PagerSlidingTabStrip) findViewById(android.R.id.tabs);
+        tabStrip = (MaterialTabHost) findViewById(R.id.tabs);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.action_bar);
+        setSupportActionBar(toolbar);
 
         // Fragments and ViewPager Initialization
         List<Fragment> fragments = getFragments();
         pageAdapter = new MyPageAdapter(getSupportFragmentManager(), fragments, new String[] {getString(R.string.identity_tab_nicks), getString(R.string.identity_tab_advanced)});
+        MaterialTabListener tabListener = new MaterialTabListener() {
+            @Override
+            public void onTabSelected(MaterialTab materialTab) {
+                mViewPager.setCurrentItem(materialTab.getPosition());
+                tabStrip.setSelectedNavigationItem(materialTab.getPosition());
+            }
+
+            @Override
+            public void onTabReselected(MaterialTab materialTab) {
+                mViewPager.setCurrentItem(materialTab.getPosition());
+                tabStrip.setSelectedNavigationItem(materialTab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(MaterialTab materialTab) {
+            }
+        };
         mViewPager.setAdapter(pageAdapter);
-        tabStrip.setViewPager(mViewPager);
+        for (int j = 0; j < pageAdapter.getCount(); j++) {
+            tabStrip.addTab(
+                    tabStrip.newTab()
+                            .setText(pageAdapter.getPageTitle(j))
+                            .setTabListener(tabListener)
+            );
+        }
+        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                tabStrip.setSelectedNavigationItem(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_check);
@@ -159,19 +205,6 @@ public class IdentityActivity extends ActionBarActivity {
         @Override
         public int getCount() {
             return this.fragments.size();
-        }
-    }
-
-    public static class ContentFactory implements TabHost.TabContentFactory {
-        private Context mContext;
-
-        public ContentFactory(@NonNull Context context){
-            mContext = context;
-        }
-
-        @Override
-        public @NonNull View createTabContent(@Nullable String tag) {
-            return new View(mContext);
         }
     }
 
@@ -241,7 +274,7 @@ public class IdentityActivity extends ActionBarActivity {
             if (savedInstanceState!=null)
                 fromBundle(savedInstanceState);
 
-            View root = inflater.inflate(R.layout.fragment_identity_nicks, container, false);
+            View root = inflater.inflate(R.layout.fragment_identity_nicklist, container, false);
             initElements(root);
 
             View header = inflater.inflate(R.layout.fragment_identity_nicks_header, nickList, false);
@@ -342,7 +375,7 @@ public class IdentityActivity extends ActionBarActivity {
             floatingAction =    (FloatingActionButton)  view.findViewById(R.id.fab);
             realName =          (EditText)              view.findViewById(R.id.identity_realname);
             ident =             (EditText)              view.findViewById(R.id.identity_ident);
-            nickList =          (DragSortListView)      view.findViewById(R.id.nickList);
+            nickList =          (DragSortListView)      view.findViewById(R.id.list);
         }
 
         private void initData() {

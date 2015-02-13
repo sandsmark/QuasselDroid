@@ -34,7 +34,7 @@ import com.iskrembilen.quasseldroid.R;
 
 public class ThemeUtil {
 
-    public static int theme, themeNoActionBar;
+    public static int theme, themeNoActionBar, themeDrawStatusBar, themeNoActionBarDrawStatusBar;
     public static int[] nickBackgrounds;
     public static int[] nickColors;
     public static double[] nickConstants;
@@ -68,7 +68,8 @@ public class ThemeUtil {
         if (themeName.equals("light")) {
             theme = R.style.Theme_QuasselDroid_Material_Light;
             themeNoActionBar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar;
-
+            themeDrawStatusBar = R.style.Theme_QuasselDroid_Material_Light_DrawOverStatusBar;
+            themeNoActionBarDrawStatusBar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar_DrawOverStatusBar;
 
             Color.chatPlain = resources.getColor(R.color.chat_line_plain_light);
             Color.chatError = resources.getColor(R.color.chat_line_error_light);
@@ -108,6 +109,8 @@ public class ThemeUtil {
         } else if (themeName.equals("dark")) {
             theme = R.style.Theme_QuasselDroid_Material_Dark;
             themeNoActionBar = R.style.Theme_QuasselDroid_Material_Dark_NoActionBar;
+            themeDrawStatusBar = R.style.Theme_QuasselDroid_Material_Dark_DrawOverStatusBar;
+            themeNoActionBarDrawStatusBar = R.style.Theme_QuasselDroid_Material_Dark_NoActionBar_DrawOverStatusBar;
 
             Color.chatPlain = resources.getColor(R.color.chat_line_plain_dark);
             Color.chatError = resources.getColor(R.color.chat_line_error_dark);

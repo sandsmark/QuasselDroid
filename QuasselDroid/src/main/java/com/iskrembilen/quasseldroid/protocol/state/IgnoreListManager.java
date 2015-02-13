@@ -57,7 +57,6 @@ public class IgnoreListManager extends SyncableObject implements Observer {
      */
     @Override
     public void update(Observable observable, Object data) {
-        Log.e("IgnoreList", "upfdate "+observable+ " "+ data);
         sync("requestUpdate", toVariantMap());
     }
 
@@ -136,7 +135,7 @@ public class IgnoreListManager extends SyncableObject implements Observer {
     @Syncable(type=QVariantType.List)
     private final List<IgnoreListItem> ignoreList = new ArrayList<>(0);
 
-    public class IgnoreListItem extends Observable {
+    public static class IgnoreListItem extends Observable {
         public IgnoreType getType() {
             return type;
         }
@@ -408,6 +407,17 @@ public class IgnoreListManager extends SyncableObject implements Observer {
 
         IgnoreListItem newItem = new IgnoreListItem(IgnoreType.fromValue(type), ignoreRule, isRegEx, StrictnessType.fromValue(strictness), ScopeType.fromValue(scope), scopeRule, isActive);
         ignoreList.add(newItem);
+
+        sync("requestUpdate", toVariantMap());
+    }
+
+    public void addIgnoreListItem(IgnoreListItem item)
+    {
+        if (contains(item.ignoreRule)) {
+            return;
+        }
+
+        ignoreList.add(item);
 
         sync("requestUpdate", toVariantMap());
     }
