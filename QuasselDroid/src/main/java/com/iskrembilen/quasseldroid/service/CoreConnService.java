@@ -840,7 +840,12 @@ public class CoreConnService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo info = cm.getNetworkInfo(intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1));
+            NetworkInfo info;
+            if (Build.VERSION.SDK_INT>Build.VERSION_CODES.JELLY_BEAN_MR1)
+                info = cm.getNetworkInfo(intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1));
+            else
+                info = cm.getActiveNetworkInfo();
+
             if(info.getState() == NetworkInfo.State.DISCONNECTED && isConnected()) {
                 Log.d(TAG, "Current network is unavailable, disconnect from core");
                 notificationManager.notifyDisconnected();
