@@ -245,7 +245,7 @@ public class MainActivity extends ActionBarActivity {
 
         if (Quasseldroid.status == Status.Disconnected) {
             Log.d(TAG, "Status is disconnected when resuming activity");
-            returnToLogin();
+            returnToLogin(true);
             return;
         } else if (Quasseldroid.status == Status.Connected) {
             loadBufferAndDrawerState();
@@ -401,15 +401,18 @@ public class MainActivity extends ActionBarActivity {
                 removeDialog(R.id.DIALOG_CONNECTING);
                 Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
             }
-            returnToLogin();
+            returnToLogin(false);
         }
     }
 
-    private void returnToLogin() {
+    private void returnToLogin(boolean skipAnimation) {
         Log.d(TAG, "Returning to login");
         finish();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (skipAnimation) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        }
         startActivity(intent);
     }
 
