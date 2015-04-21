@@ -1128,6 +1128,7 @@ public final class CoreConnection {
 
                                     ircUsers.add(user);
                                     userTempMap.put(user.nick, user);
+                                    user.register();
                                 }
                                 network.setUserList(ircUsers);
 

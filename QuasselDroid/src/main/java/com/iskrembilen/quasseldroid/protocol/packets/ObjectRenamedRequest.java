@@ -23,6 +23,8 @@
 
 package com.iskrembilen.quasseldroid.protocol.packets;
 
+import android.util.Log;
+
 import com.iskrembilen.quasseldroid.protocol.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
@@ -35,6 +37,7 @@ public class ObjectRenamedRequest implements RpcRequest {
     @Override
     public void apply() {
         Client.getInstance().getObjects().renameObject(className, oldObjectName, newObjectName);
+        Log.d("ObjectRenamedRequest", "rename object of type" + className + " from " + oldObjectName + " to " + newObjectName);
     }
 
     @Override

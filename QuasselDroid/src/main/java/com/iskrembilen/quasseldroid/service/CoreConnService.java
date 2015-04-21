@@ -560,6 +560,7 @@ public class CoreConnService extends Service {
                      * New IrcUser added
                      */
                     user = (IrcUser) msg.obj;
+                    user.register();
                     networks.getNetworkById(msg.arg1).onUserJoined(user);
                     break;
                 case R.id.NEW_USER_INFO:

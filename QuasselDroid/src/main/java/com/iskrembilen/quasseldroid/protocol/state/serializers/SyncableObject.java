@@ -95,6 +95,7 @@ public abstract class SyncableObject extends Observable {
 
     /** Initialize the object's state from a given QVariantMap.
      *  see toVariantMap for important information concerning this method.
+     *  @param map Map of field name to QVariant of value for the field
      */
     public void fromVariantMap(Map<String,QVariant<?>> map) throws EmptyQVariantException {
         // Iterate through all attributes of the class

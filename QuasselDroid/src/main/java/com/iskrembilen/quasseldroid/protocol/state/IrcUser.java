@@ -74,15 +74,13 @@ public class IrcUser extends SyncableObject implements Comparable<IrcUser> {
         return nick + " away: " + away + " Num chans: " + channels.size();
     }
 
-    public void changeNick(String newNick) {
-        nick = newNick;
+    public void changed(Object data) {
         this.setChanged();
-        notifyObservers(R.id.USER_CHANGEDNICK);
+        notifyObservers(data);
     }
 
-    public void notify(int id) {
-        this.setChanged();
-        notifyObservers(id);
+    public void changed() {
+        changed(null);
     }
 
     @Override
@@ -92,10 +90,13 @@ public class IrcUser extends SyncableObject implements Comparable<IrcUser> {
 
     public void setServer(String server) {
         this.server = server;
+        changed();
     }
 
     public void setNick(String nick) {
+        Client.getInstance().getObjects().renameObject(getClassName(), this.nick, nick);
         this.nick = nick;
+        changed();
     }
 
     public String getObjectName() {
@@ -104,13 +105,16 @@ public class IrcUser extends SyncableObject implements Comparable<IrcUser> {
 
     public void setAway(boolean away) {
         this.away = away;
+        changed();
     }
 
     public void setAwayMessage(String awayMessage) {
         this.awayMessage = awayMessage;
+        changed();
     }
 
     public void setRealName(String realName) {
         this.realName = realName;
+        changed();
     }
 }
