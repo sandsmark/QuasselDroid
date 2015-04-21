@@ -23,10 +23,11 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
+<!--    <item
         android:id="@+id/menu_new_ignore"
         android:icon="@drawable/ic_add"
         android:title="@string/action_new_ignore"
         app:showAsAction="always"
         android:orderInCategory="1" />
+-->
 </menu>
