@@ -46,9 +46,11 @@
     </style>
     <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.QuasselDroid.Material.Light">
         <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
     <style name="Theme.QuasselDroid.Material.Dark.NoActionBar" parent="Theme.QuasselDroid.Material.Dark">
         <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
     <style name="Widget.Toolbar" parent="Widget.Base.Toolbar">
         <item name="android:elevation">4dp</item>

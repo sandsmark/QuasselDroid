@@ -374,6 +374,10 @@ public class CoreConnService extends Service {
             // was not successful.
             BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected,"Connection failed!"));
         }
+        if (requestedDisconnect) {
+            Log.d(TAG, "Stopping Service");
+            stopSelf();
+        }
     }
 
     public void connectToCore() {

@@ -157,6 +157,7 @@ public class IgnoreListFragment extends PreferenceFragment implements Observer {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.e("fragment", item.getTitle().toString());
+/*
         switch (item.getItemId()) {
             case R.id.menu_new_ignore:
                 Intent i = new Intent(getActivity(), IgnoreItemActivity.class);
@@ -164,6 +165,7 @@ public class IgnoreListFragment extends PreferenceFragment implements Observer {
                 startActivity(i);
                 return true;
         }
+*/
         return super.onOptionsItemSelected(item);
     }
 
