@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -221,7 +223,7 @@ public class BufferFragment extends Fragment implements Serializable {
     }
 
     private void initActionMenu() {
-        actionModeData.actionModeCallbackNetwork = new ActionMode.Callback() {
+        actionModeData.actionModeCallbackNetwork = new CustomCallback() {
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -230,12 +232,23 @@ public class BufferFragment extends Fragment implements Serializable {
 
                 bufferList.setItemChecked(actionModeData.index, true);
 
+                Network network = bufferListAdapter.getGroup(groupPosition);
+                actionModeData.id = network.getId();
+                if (network.isConnected()) {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(false);
+                } else {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(true);
+                }
+
                 return true;
             }
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
+                actionModeData.actionMode = mode;
+                return true;
             }
 
             @Override
@@ -262,21 +275,55 @@ public class BufferFragment extends Fragment implements Serializable {
 
         };
 
-        actionModeData.actionModeCallbackBuffer = new ActionMode.Callback() {
+        actionModeData.actionModeCallbackBuffer = new CustomCallback() {
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 MenuInflater inflater = mode.getMenuInflater();
                 inflater.inflate(R.menu.context_buffer_channel, menu);
 
+                actionModeData.actionMode = mode;
+
                 bufferList.setItemChecked(actionModeData.index, true);
+
+                Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
+                actionModeData.id = buffer.getInfo().id;
+                if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+                } else if (buffer.isActive()) {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
+                } else {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
+                }
+
+                if(buffer.isPermanentlyHidden()) {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
+                } else if(buffer.isTemporarilyHidden()){
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
+                } else {
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
+                    actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(false);
+                }
 
                 return true;
             }
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
+                actionModeData.actionMode = mode;
+                return true;
             }
 
             @Override
@@ -321,58 +368,22 @@ public class BufferFragment extends Fragment implements Serializable {
             public boolean onItemLongClick(AdapterView<?> parent, View view,
                                            int position, long id) {
                 long packedPosition = bufferList.getExpandableListPosition(position);
-                int groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
-                int childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
 
+                actionModeData.actionModeCallbackBuffer.groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                actionModeData.actionModeCallbackBuffer.childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+                actionModeData.actionModeCallbackBuffer.type = ExpandableListView.getPackedPositionType(packedPosition);
+
+                actionModeData.actionModeCallbackNetwork.groupPosition = ExpandableListView.getPackedPositionGroup(packedPosition);
+                actionModeData.actionModeCallbackNetwork.childPosition = ExpandableListView.getPackedPositionChild(packedPosition);
+                actionModeData.actionModeCallbackNetwork.type = ExpandableListView.getPackedPositionType(packedPosition);
+
+                actionModeData.index = bufferList.getFlatListPosition(packedPosition);
                 if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
-                    Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
-
-                    actionModeData.index = bufferList.getFlatListPosition(packedPosition);
-                    actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackBuffer);
-                    actionModeData.id = buffer.getInfo().id;
-                    actionModeData.listItem = view;
-                    if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-                    } else if (buffer.isActive()) {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(false);
-                    } else {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_delete).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_join).setVisible(true);
-                    }
-
-                    if(buffer.isPermanentlyHidden()) {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
-                    } else if(buffer.isTemporarilyHidden()){
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(true);
-                    } else {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_perm).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_hide_temp).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_unhide).setVisible(false);
-                    }
+                    ((AppCompatActivity) getActivity()).startSupportActionMode(actionModeData.actionModeCallbackBuffer);
                 } else if (ExpandableListView.getPackedPositionType(packedPosition) == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
-                    Network network = bufferListAdapter.getGroup(groupPosition);
-                    actionModeData.index = bufferList.getFlatListPosition(packedPosition);
-                    actionModeData.actionMode = ((MainActivity) getActivity()).getSupportActionBar().startActionMode(actionModeData.actionModeCallbackNetwork);
-                    actionModeData.id = network.getId();
-                    actionModeData.listItem = view;
-                    if (network.isConnected()) {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(true);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(false);
-                    } else {
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_disconnect).setVisible(false);
-                        actionModeData.actionMode.getMenu().findItem(R.id.context_menu_connect).setVisible(true);
-                    }
+                    ((AppCompatActivity) getActivity()).startSupportActionMode(actionModeData.actionModeCallbackNetwork);
                 }
+                actionModeData.listItem = view;
                 return true;
             }
         });
@@ -671,7 +682,13 @@ public class BufferFragment extends Fragment implements Serializable {
         public int index;
         public View listItem;
         public ActionMode actionMode;
-        public ActionMode.Callback actionModeCallbackNetwork;
-        public ActionMode.Callback actionModeCallbackBuffer;
+        public CustomCallback actionModeCallbackNetwork;
+        public CustomCallback actionModeCallbackBuffer;
+    }
+
+    abstract class CustomCallback implements ActionMode.Callback {
+        public int type;
+        public int groupPosition;
+        public int childPosition;
     }
 }

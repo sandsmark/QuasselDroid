@@ -42,6 +42,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -50,6 +51,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,7 +87,7 @@ import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -94,6 +96,10 @@ public class MainActivity extends ActionBarActivity {
 
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+
+    public ClickableActionBar getActionbar() {
+        return actionbar;
+    }
 
     private ClickableActionBar actionbar;
 
@@ -116,6 +122,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity created");
         setTheme(ThemeUtil.themeNoActionBarDrawStatusBar);
+        supportRequestWindowFeature(Window.FEATURE_ACTION_MODE_OVERLAY);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.themeNoActionBarDrawStatusBar;
 
@@ -723,7 +730,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    class ClickableActionBar {
+    public class ClickableActionBar {
         Toolbar wrappedToolbar;
         Context context;
 
