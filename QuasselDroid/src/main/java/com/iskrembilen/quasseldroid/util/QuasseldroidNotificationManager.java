@@ -28,6 +28,7 @@ import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.InitProgressEvent;
 import com.iskrembilen.quasseldroid.gui.LoginActivity;
 import com.iskrembilen.quasseldroid.gui.MainActivity;
+import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
@@ -114,6 +115,13 @@ public class QuasseldroidNotificationManager {
             builder.setContentIntent(contentIntent);
 
             builder.setColor(context.getResources().getColor(R.color.primary));
+
+            Intent disconnect = new Intent(context, CoreConnService.class);
+            disconnect.putExtra("disconnect",true);
+
+            PendingIntent actionIntent = PendingIntent.getService(context,0,disconnect,0);
+
+            builder.addAction(R.drawable.ic_disconnect,context.getString(R.string.action_disconnect),actionIntent);
 
             // Send the notification.
             notifyManager.notify(R.id.NOTIFICATION, builder.build());

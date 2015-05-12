@@ -251,20 +251,22 @@ public class CoreConnService extends Service {
         if (coreConn != null) {
             this.disconnectFromCore();
         }
-        requestedDisconnect = false;
-        hasBeenConnected = false;
         Bundle connectData = intent.getExtras();
-        coreId = connectData.getLong("id");
-        address = connectData.getString("address");
-        port = connectData.getInt("port");
-        username = connectData.getString("username");
-        password = connectData.getString("password");
-        networks = NetworkCollection.getInstance();
-        networks.clear();
+        if (!connectData.containsKey("disconnect")) {
+            requestedDisconnect = false;
+            hasBeenConnected = false;
+            coreId = connectData.getLong("id");
+            address = connectData.getString("address");
+            port = connectData.getInt("port");
+            username = connectData.getString("username");
+            password = connectData.getString("password");
+            networks = NetworkCollection.getInstance();
+            networks.clear();
 
-        acquireWakeLockIfEnabled();
+            acquireWakeLockIfEnabled();
 
-        connectToCore();
+            connectToCore();
+        }
     }
 
     private void acquireWakeLockIfEnabled() {
