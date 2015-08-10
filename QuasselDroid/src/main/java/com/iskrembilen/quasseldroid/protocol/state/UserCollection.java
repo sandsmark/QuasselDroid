@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.protocol.state;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
 
@@ -48,7 +49,7 @@ public class UserCollection extends Observable implements Observer {
         }
     }
 
-    public void addUser(IrcUser user, String modes) {
+    public void addUser(@NonNull IrcUser user, @NonNull String modes) {
         for (IrcMode mode : IrcMode.values()) {
             if (modes.contains(mode.shortModeName)) {
                 addUserToModeList(mode, user);

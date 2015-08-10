@@ -54,6 +54,7 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class QuasseldroidNotificationManager {
 
@@ -61,13 +62,16 @@ public class QuasseldroidNotificationManager {
 
     private Context context;
     private SharedPreferences preferences;
-    private final List<Integer> highlightedBuffers = new ArrayList<Integer>();
-    private final SparseArray<List<IrcMessage>> highlightedMessages = new SparseArray<List<IrcMessage>>();
-    private IrcMessage lastMessage;
+    private final List<Integer> highlightedBuffers = new ArrayList<>();
+    private final SparseArray<List<IrcMessage>> highlightedMessages = new SparseArray<>();
+    private Stack<Integer> buffers = new Stack<>();
 
     android.app.NotificationManager notifyManager;
     private boolean connected = false;
     private boolean pendingHighlightNotification;
+    private PendingIntent contentIntent;
+
+    private int intentid = 0;
 
     public QuasseldroidNotificationManager(Context context) {
         this.context = context;
@@ -80,10 +84,12 @@ public class QuasseldroidNotificationManager {
     }
 
     public void notifyHighlightsRead(Integer bufferId) {
+        Log.d(getClass().getSimpleName(), String.format("Intent. Setting highlights read for buffer %d", bufferId));
         synchronized (highlightedBuffers) {
             if (highlightedBuffers.contains(bufferId)) {
                 highlightedMessages.remove(bufferId);
                 highlightedBuffers.remove(bufferId);
+                buffers.removeElement(bufferId);
                 if (highlightedBuffers.size() == 0) {
                     notifyConnected(false);
                 } else if (!connected) {
@@ -132,7 +138,8 @@ public class QuasseldroidNotificationManager {
 
             Intent launch = new Intent(context, MainActivity.class);
             launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
+            if (contentIntent != null) contentIntent.cancel();
+            contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
             builder.setContentIntent(contentIntent);
 
             builder.setColor(context.getResources().getColor(R.color.primary));
@@ -164,7 +171,8 @@ public class QuasseldroidNotificationManager {
 
         Intent launch = new Intent(context, MainActivity.class);
         launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
+        if (contentIntent != null) contentIntent.cancel();
+        contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
         builder.setContentIntent(contentIntent);
         builder.setColor(context.getResources().getColor(R.color.primary));
         return builder.build();
@@ -189,7 +197,12 @@ public class QuasseldroidNotificationManager {
                 highlightedMessages.get(message.bufferInfo.id).add(message);
         }
 
-        lastMessage = message;
+        if (buffers.contains(message.bufferInfo.id)) {
+            buffers.removeElement(message.bufferInfo.id);
+        }
+        buffers.push(message.bufferInfo.id);
+
+        Log.d(getClass().getSimpleName(), buffers.toString());
 
         pendingHighlightNotification = true;
 
@@ -225,19 +238,8 @@ public class QuasseldroidNotificationManager {
                     .setWhen(System.currentTimeMillis())
                     .setNumber(highlightedMessageCount);
 
-            if (lastMessage != null) {
-                builder.setTicker(String.format("%s : %s",
-                        lastMessage.getNick(),
-                        lastMessage.content));
-            }
-
-            int openBuffer = -1;
-            boolean openDrawer = false;
-
             if (highlightedBuffers.size() == 1 && highlightedMessages.get(highlightedBuffers.get(0)).size() == 1) {
                 IrcMessage message = highlightedMessages.get(highlightedBuffers.get(0)).get(0);
-
-                openBuffer = message.bufferInfo.id;
 
                 builder.setContentTitle(message.bufferInfo.name)
                         .setContentText(MessageUtil.parseStyleCodes(context, String.format("%s: %s", message.getNick(), message.content), displayColors));
@@ -286,8 +288,6 @@ public class QuasseldroidNotificationManager {
 
                 // Moves the expanded layout object into the notification object.
                 builder.setStyle(inboxStyle);
-
-                openBuffer = buffer.getInfo().id;
             } else {
                 builder.setContentTitle(context.getText(R.string.app_name))
                         .setContentText(
@@ -345,9 +345,6 @@ public class QuasseldroidNotificationManager {
                 }
                 // Moves the expanded layout object into the notification object.
                 builder.setStyle(inboxStyle);
-
-                openBuffer = -1;
-                openDrawer = true;
             }
 
             builder.setColor(ThemeUtil.Color.chatHighlight);
@@ -357,9 +354,13 @@ public class QuasseldroidNotificationManager {
                 builder.setCategory(NotificationCompat.CATEGORY_SOCIAL);
             }
 
+            Log.d(getClass().getSimpleName(), buffers.toString());
+
             Intent launch = new Intent(context, MainActivity.class);
-            launch.putExtra("extraBufferId", openBuffer);
-            launch.putExtra("extraDrawer", openDrawer);
+            launch.putExtra("extraBufferId", buffers.peek());
+            launch.putExtra("extraDrawer", false);
+            launch.putExtra("intentId", intentid);
+            intentid++;
 
             Uri.Builder uriBuilder = new Uri.Builder();
             uriBuilder.scheme("content");
@@ -367,11 +368,12 @@ public class QuasseldroidNotificationManager {
             uriBuilder.appendPath("open-buffer");
             launch.setData(uriBuilder.build());
 
-            Log.d(QuasseldroidNotificationManager.class.getSimpleName(), "Notification/Intent: " + launch.getIntExtra("extraBufferId", -2));
-
             launch.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent contentIntent = PendingIntent.getActivity(context, highlightedMessages.hashCode(), launch, 0);
+            if (contentIntent != null) contentIntent.cancel();
+            contentIntent = PendingIntent.getActivity(context, highlightedMessages.hashCode(), launch, 0);
             builder.setContentIntent(contentIntent);
+
+
 
             if (pendingHighlightNotification) {
                 if (preferences.getBoolean(context.getString(R.string.preference_notification_sound_active), false) &&
@@ -398,8 +400,6 @@ public class QuasseldroidNotificationManager {
 
             // Send the notification.
             notifyManager.notify(R.id.NOTIFICATION, builder.build());
-
-            lastMessage = null;
 
             pendingHighlightNotification = false;
         }
@@ -447,10 +447,13 @@ public class QuasseldroidNotificationManager {
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setWhen(System.currentTimeMillis());
 
+        // Clean up existing messages
+
         // The PendingIntent to launch our activity if the user selects this notification
         Intent launch = new Intent(context, LoginActivity.class);
         launch.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
+        if (contentIntent != null) contentIntent.cancel();
+        contentIntent = PendingIntent.getActivity(context, 0, launch, 0);
 
         // Set the info for the views that show in the notification panel.
         builder.setContentIntent(contentIntent);
@@ -458,5 +461,11 @@ public class QuasseldroidNotificationManager {
         builder.setColor(context.getResources().getColor(R.color.chat_line_error_dark));
         //Send the notification.
         notifyManager.notify(R.id.NOTIFICATION_DISCONNECTED, builder.build());
+    }
+
+    public void clear() {
+        buffers.clear();
+        highlightedBuffers.clear();
+        highlightedMessages.clear();
     }
 }

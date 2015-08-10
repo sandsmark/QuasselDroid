@@ -429,6 +429,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 autoCompleteButton.setEnabled(true);
                 inputField.setEnabled(true);
                 buffer.setDisplayed(true);
+                Log.d(TAG, String.format("Marking highlights for buffer %d read", buffer.getInfo().id));
                 BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
                 adapter.notifyDataSetInvalidated();
@@ -536,7 +537,7 @@ public class ChatFragment extends Fragment implements Serializable {
             if (buffer != null && backlogList.getChildCount()>0) {
                 buffer.setTopMessageShown(position);
                 buffer.setScrollState(scroll);
-                Log.e(TAG, "Success saving state " + position + " from "+ parent);
+                Log.d(TAG, "Success saving state " + position + " from "+ parent);
             } else {
                 Log.e(TAG, "Error saving state " + position + " from "+ parent);
             }
@@ -567,7 +568,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     Log.e(TAG, "Error loading state -1 from "+ parent);
                 } else {
                     setListTopMessage(buffer.getTopMessageShown(),buffer.getScrollState());
-                    Log.e(TAG, "Success loading state " + buffer.getTopMessageShown() + " from "+ parent);
+                    Log.d(TAG, "Success loading state " + buffer.getTopMessageShown() + " from "+ parent);
                 }
             }
         }
