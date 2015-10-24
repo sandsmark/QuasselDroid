@@ -179,7 +179,7 @@ public class QuasseldroidNotificationManager {
     }
 
     public void notifyHighlights() {
-        synchronized (highlightedMessages) {
+        synchronized (highlightedBuffers) {
 
             boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text), true);
 
