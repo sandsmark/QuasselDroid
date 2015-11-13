@@ -351,7 +351,7 @@ public class QuasseldroidNotificationManager {
             }
 
             Intent launch = new Intent(context, MainActivity.class);
-            launch.putExtra("extraBufferId", buffers.peek());
+            if (!buffers.empty()) launch.putExtra("extraBufferId", buffers.peek());
             launch.putExtra("extraDrawer", false);
 
             Uri.Builder uriBuilder = new Uri.Builder();

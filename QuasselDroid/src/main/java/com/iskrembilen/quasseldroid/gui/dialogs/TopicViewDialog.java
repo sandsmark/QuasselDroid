@@ -76,6 +76,10 @@ public class TopicViewDialog extends DialogFragment {
             setTopic(mBuffer.getTopic());
         }
         Buffer buffer = Client.getInstance().getNetworks().getBufferById(event.bufferId);
+        if (buffer == null) {
+            dismiss();
+            return;
+        }
         setTopic(buffer.getTopic());
     }
 
