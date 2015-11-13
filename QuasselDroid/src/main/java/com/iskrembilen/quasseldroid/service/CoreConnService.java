@@ -943,6 +943,7 @@ public class CoreConnService extends Service {
     public void doManageChannel(ManageChannelEvent event) {
         if (coreConn==null) {
             reconnect("");
+            return;
         }
 
         if (event.action == ChannelAction.DELETE) {

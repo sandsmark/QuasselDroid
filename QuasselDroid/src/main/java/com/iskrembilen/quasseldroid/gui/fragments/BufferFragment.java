@@ -548,8 +548,6 @@ public class BufferFragment extends Fragment implements Serializable {
             holder.stateView.setColorFilter(BufferUtils.getBufferIconColor(getActivity(), entry), PorterDuff.Mode.SRC_IN);
             holder.bufferView.setText(entry.getInfo().name);
 
-            BufferUtils.setBufferActive(entry);
-
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
             return convertView;
         }
@@ -673,10 +671,23 @@ public class BufferFragment extends Fragment implements Serializable {
                 network.deleteObserver(this);
         }
 
+        public void init() {
+            for (Network network : this.networks.getNetworkList()) {
+                for (Buffer buffer : network.getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
+                    BufferUtils.setBufferActive(buffer);
+                }
+            }
+        }
+
         public void setFilters(Set<Predicate<Buffer>> filters) {
             this.filters = filters;
+            init();
             update(networks);
         }
+    }
+
+    public void init() {
+        bufferListAdapter.setFilters(bufferListAdapter.filters);
     }
 
     class ActionModeData {

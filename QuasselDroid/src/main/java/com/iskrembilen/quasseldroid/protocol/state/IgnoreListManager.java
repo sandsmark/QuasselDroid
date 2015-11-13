@@ -152,6 +152,7 @@ public class IgnoreListManager extends SyncableObject implements Observer {
 
         public void setIgnoreRule(String ignoreRule) {
             this.ignoreRule = ignoreRule;
+            this.regEx.setPattern(ignoreRule);
             this.setChanged();
             this.notifyObservers();
         }
@@ -219,6 +220,7 @@ public class IgnoreListManager extends SyncableObject implements Observer {
         public IgnoreListItem(IgnoreType type, String ignoreRule, boolean isRegEx, StrictnessType strictness, ScopeType scope, String scopeRule, boolean isActive) {
             this.type = type;
             this.ignoreRule = ignoreRule;
+            this.regEx.setPattern(ignoreRule);
             this.isRegEx = isRegEx;
             this.strictness = strictness;
             this.scope = scope;
@@ -256,6 +258,7 @@ public class IgnoreListManager extends SyncableObject implements Observer {
         public void setAttributes(IgnoreType type, String ignoreRule, boolean isRegEx, StrictnessType strictness, ScopeType scope, String scopeRule, boolean isActive) {
             this.type = type;
             this.ignoreRule = ignoreRule;
+            this.regEx.setPattern(ignoreRule);
             this.isRegEx = isRegEx;
             this.strictness = strictness;
             this.scope = scope;
@@ -346,31 +349,33 @@ public class IgnoreListManager extends SyncableObject implements Observer {
     }
 
     public boolean matches(IrcMessage msg) {
-        Network network = Client.getInstance().getNetworks().getNetworkById(msg.bufferInfo.networkId);
-        Buffer buffer;
-        if (msg.bufferInfo.type==BufferInfo.Type.StatusBuffer) {
-            buffer = network.getStatusBuffer();
-        } else {
-            buffer = network.getBuffers().getBuffer(msg.bufferInfo.id);
-        }
+        synchronized (ignoreList) {
+            Network network = Client.getInstance().getNetworks().getNetworkById(msg.bufferInfo.networkId);
+            Buffer buffer;
+            if (msg.bufferInfo.type == BufferInfo.Type.StatusBuffer) {
+                buffer = network.getStatusBuffer();
+            } else {
+                buffer = network.getBuffers().getBuffer(msg.bufferInfo.id);
+            }
 
-        if (msg.type != IrcMessage.Type.Plain && msg.type != IrcMessage.Type.Action && msg.type != IrcMessage.Type.Notice)
-            return false;
+            if (msg.type != IrcMessage.Type.Plain && msg.type != IrcMessage.Type.Action && msg.type != IrcMessage.Type.Notice)
+                return false;
 
-        for (IgnoreListItem item : ignoreList) {
-            if (!item.isActive || item.type == IgnoreType.CTCP_IGNORE)
-               continue;
-            if (item.scope==ScopeType.GLOBAL_SCOPE
-                    || (item.scope == ScopeType.NETWORK_SCOPE && item.matchScope(network.getName()))
-                    || (item.scope == ScopeType.CHANNEL_SCOPE && item.matchScope(buffer.getInfo().name))) {
-                String str;
-                if (item.type == IgnoreType.MESSAGE_IGNORE)
-                    str = msg.content.toString();
-                else
-                    str = msg.getSender();
+            for (IgnoreListItem item : ignoreList) {
+                if (!item.isActive || item.type == IgnoreType.CTCP_IGNORE)
+                    continue;
+                if (item.scope == ScopeType.GLOBAL_SCOPE
+                        || (item.scope == ScopeType.NETWORK_SCOPE && item.matchScope(network.getName()))
+                        || (item.scope == ScopeType.CHANNEL_SCOPE && item.matchScope(buffer.getInfo().name))) {
+                    String str;
+                    if (item.type == IgnoreType.MESSAGE_IGNORE)
+                        str = msg.content.toString();
+                    else
+                        str = msg.getSender();
 
-                if (item.matchIgnore(str)) {
-                    return true;
+                    if (item.matchIgnore(str)) {
+                        return true;
+                    }
                 }
             }
         }

@@ -54,15 +54,18 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.iskrembilen.quasseldroid.gui.settings.IgnoreListFragment;
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
@@ -97,6 +100,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.PriorityQueue;
@@ -105,11 +109,13 @@ import de.kuschku.util.HelperUtils;
 
 public class ChatFragment extends Fragment implements Serializable {
 
+    public static ChatFragment chatFragment;
+
     private static final String BUFFER_ID = "bufferid";
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String BUFFER_NAME = "buffername";
     private SharedPreferences preferences;
-    private BacklogAdapter adapter;
+    public BacklogAdapter adapter;
     private ListView backlogList;
     private EditText inputField;
     private ImageButton autoCompleteButton;
@@ -127,7 +133,8 @@ public class ChatFragment extends Fragment implements Serializable {
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
     public static ChatFragment newInstance() {
-        return new ChatFragment();
+        chatFragment = new ChatFragment();
+        return chatFragment;
     }
 
     @Override
@@ -514,7 +521,7 @@ public class ChatFragment extends Fragment implements Serializable {
 
         private LayoutInflater inflater;
         private Buffer buffer;
-
+        public List<IrcMessage> backlogData;
 
         public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
             inflater = LayoutInflater.from(context);
@@ -527,19 +534,10 @@ public class ChatFragment extends Fragment implements Serializable {
             backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
         }
 
-
         public void storeScrollState(int position, int scroll) {
-            String parent = Thread.currentThread().getStackTrace()[3].getMethodName();
-            int i = 4;
-            while (parent.equals("storeScrollState"))
-                parent = Thread.currentThread().getStackTrace()[i++].getMethodName();
-
             if (buffer != null && backlogList.getChildCount()>0) {
                 buffer.setTopMessageShown(position);
                 buffer.setScrollState(scroll);
-                Log.d(TAG, "Success saving state " + position + " from "+ parent);
-            } else {
-                Log.e(TAG, "Error saving state " + position + " from "+ parent);
             }
         }
 
@@ -571,23 +569,26 @@ public class ChatFragment extends Fragment implements Serializable {
                     Log.d(TAG, "Success loading state " + buffer.getTopMessageShown() + " from "+ parent);
                 }
             }
+
         }
 
         @Override
         public int getCount() {
-            if (this.buffer == null) return 0;
-            return buffer.getSize();
+            int count = 0;
+            if (this.backlogData != null) count = backlogData.size();
+            Log.d(TAG, "Showing the count! "+count);
+            return count;
         }
 
         @Override
         public IrcMessage getItem(int position) {
             //TODO: PriorityQueue is fucked, we don't want to convert to array here, so change later
-            return buffer.getBacklogEntry(position);
+            return backlogData.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            return buffer.getBacklogEntry(position).messageId;
+            return getItem(position).messageId;
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -624,6 +625,8 @@ public class ChatFragment extends Fragment implements Serializable {
             holder.messageID = entry.messageId;
             holder.timeView.setText(entry.getTime(getTimeFormatter()));
 
+            holder.timeView.setTextColor(entry.isFiltered() ? getResources().getColor(R.color.ircmessage_red) : ThemeUtil.Color.chatTimestamp);
+
             if (!preferences.getBoolean(getString(R.string.preference_colored_text), false)) {
                 entry.content = new SpannableString(entry.content.toString());
             }
@@ -645,7 +648,7 @@ public class ChatFragment extends Fragment implements Serializable {
             if (detailedActions)
                 hostmask = " ("+entry.getHostmask()+") ";
 
-            MessageFormattingHelper.NickFormatter formatter = new MessageFormattingHelper.NickFormatter(nickBrackets, networks.getNetworkById(entry.bufferInfo.networkId).getMyNick(), new String[] {"<", ">"});
+            MessageFormattingHelper.NickFormatter formatter = new MessageFormattingHelper.NickFormatter(nickBrackets, new String[] {"<", ">"});
 
             switch (entry.type) {
                 case Action:
@@ -653,7 +656,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatPlainBg);
 
                     CharSequence contentSpan = MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors);
-                    contentSpan = SpanFormatter.format(getString(R.string.message_action), formatter.formatNick(entry.getNick()), contentSpan);
+                    contentSpan = SpanFormatter.format(getString(R.string.message_action), formatter.formatNick(entry.getNick(), entry.isSelf()), contentSpan);
                     SpanUtils.setFullSpan(new SpannableString(contentSpan), new StyleSpan(Typeface.ITALIC));
                     holder.msgView.setText(contentSpan);
                     break;
@@ -675,7 +678,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     break;
                 case Notice:
                     holder.msgView.setText(TextUtils.concat(
-                            formatter.formatNick(entry.getNick(), new String[] {"[","]"}),
+                            formatter.formatNick(entry.getNick(), entry.isSelf(), new String[] {"[","]"}),
                             " ",
                             MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
@@ -685,7 +688,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_join),
-                            TextUtils.concat(formatter.formatNick(nick), hostmask)));
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
@@ -694,7 +697,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_leave),
-                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
                             MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -704,7 +707,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_quit),
-                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
                             MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -714,7 +717,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kill),
-                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
                             MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -732,8 +735,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     }
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kick),
-                            formatter.formatNick(entry.getNick()),
-                            TextUtils.concat(formatter.formatNick(nick), hostmask),
+                            formatter.formatNick(entry.getNick(), entry.isSelf()),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
                             reasonSequence));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -742,7 +745,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 case Mode:
                     String[] raw = entry.content.toString().split(" ");
                     SpannableStringBuilder builder = new SpannableStringBuilder();
-                    CharSequence nickSpannable = MessageFormattingHelper.formatNick(getActivity(), entry.getNick(), true);
+                    CharSequence nickSpannable = MessageFormattingHelper.formatNick(getActivity(), entry.getNick(), entry.isSelf(), true);
                     if (raw.length==2) {
                         builder.append(raw[0]).append(" ");
                         builder.append(raw[1]).append(" ");
@@ -751,7 +754,7 @@ public class ChatFragment extends Fragment implements Serializable {
                         builder.append(raw[0]).append(" ");
                         builder.append(raw[1]).append(" ");
                         for (String s : Arrays.copyOfRange(raw, 2, raw.length)) {
-                            builder.append(MessageFormattingHelper.formatNick(getActivity(), s, true)).append(", ");
+                            builder.append(MessageFormattingHelper.formatNick(getActivity(), s, entry.isSelf(), true)).append(", ");
                         }
                         spannable = new SpannableString(builder.subSequence(0,builder.length()-", ".length()));
                     }
@@ -766,7 +769,7 @@ public class ChatFragment extends Fragment implements Serializable {
                         holder.msgView.setText(new SpannableString(rawText));
                     } else {
                         CharSequence text = SpanFormatter.format(getString(R.string.message_nick_other),
-                                formatter.formatNick(entry.getNick()), formatter.formatNick(entry.content.toString()));
+                                formatter.formatNick(entry.getNick(), false), formatter.formatNick(entry.content.toString(), false));
 
                         holder.msgView.setText(text);
                     }
@@ -818,6 +821,7 @@ public class ChatFragment extends Fragment implements Serializable {
         @Override
         public void update(Observable observable, Object data) {
             if (data == null) {
+                backlogData = buffer.getBacklog();
                 notifyDataSetChanged();
                 return;
             }
@@ -897,12 +901,16 @@ public class ChatFragment extends Fragment implements Serializable {
                 buffer.deleteObserver(this);
                 buffer.setDisplayed(false);
                 buffer = null;
+                backlogData = null;
                 notifyDataSetChanged();
             }
         }
 
         public int getBufferId() {
-            return buffer.getInfo().id;
+            if (buffer != null && buffer.getInfo() != null)
+                return buffer.getInfo().id;
+            else
+                return -1;
         }
 
         public void getMoreBacklog() {

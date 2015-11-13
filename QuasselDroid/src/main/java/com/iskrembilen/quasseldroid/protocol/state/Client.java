@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.protocol.state;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -44,6 +45,7 @@ public class Client implements Observer {
     private IdentityCollection identities = new IdentityCollection();
     private ObjectCollection objects = new ObjectCollection();
     private IgnoreListManager ignoreListManager = new IgnoreListManager();
+    private Activity activity;
     public ConnectionChangedEvent.Status status;
 
     private Client() {
@@ -55,6 +57,10 @@ public class Client implements Observer {
             instance = new Client();
 
         return instance;
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     public IdentityCollection getIdentities() {
@@ -86,6 +92,10 @@ public class Client implements Observer {
         if (observable == ignoreListManager) {
             networks.updateIgnore();
         }
+    }
+
+    public void runOnUiThread(Runnable runnable) {
+        activity.runOnUiThread(runnable);
     }
 
     @Subscribe

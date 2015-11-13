@@ -262,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
 
         setTitleAndMenu();
         manager.hideKeyboard();
+        Client.getInstance().setActivity(this);
     }
 
     private void loadBufferAndDrawerState() {
@@ -367,6 +368,8 @@ public class MainActivity extends AppCompatActivity {
 
             manager.hideKeyboard();
             setTitleAndMenu();
+
+            ((BufferFragment) manager.bufferFragment).init();
         } else if (currentFragment == null || !connectionEstablished && currentFragment.getClass()!=ConnectingFragment.class) {
             Log.d(TAG, "Showing progress");
             showInitProgress();
@@ -391,11 +394,9 @@ public class MainActivity extends AppCompatActivity {
             subtitle = topic;
         }
 
-        subtitle = openedBuffer + " " + subtitle;
-
         actionbar.setSubtitle(subtitle);
         actionbar.setTitleClickable(bufferHasTopic);
-        actionbar.setSubtitleVisible(true || showLag || !emptyString(topic));
+        actionbar.setSubtitleVisible(showLag || !emptyString(topic));
     }
 
     private boolean emptyString(CharSequence topic) {

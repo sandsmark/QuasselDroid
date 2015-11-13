@@ -64,6 +64,7 @@ import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -224,6 +225,8 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 }
             }, 1);
         }
+
+        Client.getInstance().setActivity(this);
     }
 
     @Override

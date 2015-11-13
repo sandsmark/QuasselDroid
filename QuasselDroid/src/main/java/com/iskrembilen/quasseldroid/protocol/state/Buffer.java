@@ -26,13 +26,17 @@ package com.iskrembilen.quasseldroid.protocol.state;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
+import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
+import java.util.concurrent.Executor;
 
 /**
  * Class holds all the data for a Quassel buffer, this includes all the messages in the buffer, as well as the different states for the buffer.
@@ -126,7 +130,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param message the message to add to the buffer
      */
-    public void addMessage(IrcMessage message) {
+    public synchronized void addMessage(IrcMessage message) {
         newBufferEntry(message);
         notifyObservers(R.id.BUFFERUPDATE_NEWMESSAGE);
     }
@@ -137,7 +141,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param message message to place in the buffer list
      */
-    private void newBufferEntry(IrcMessage message) {
+    private synchronized void newBufferEntry(IrcMessage message) {
         if (message.isHighlighted() && message.messageId > lastHighlightMessageId) {
             lastHighlightMessageId = message.messageId;
             this.setChanged();
@@ -159,7 +163,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
     /**
      * Inserts a message into the correct position in a buffer
      */
-    private void insertMessageInBufferList(final ArrayList<IrcMessage> list, IrcMessage msg) {
+    private synchronized void insertMessageInBufferList(final ArrayList<IrcMessage> list, IrcMessage msg) {
         if (list.isEmpty()) {
             list.add(msg);
             this.setChanged();
@@ -181,7 +185,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @param msg the ircmessage to check
      * @return true if the message should be filtered, false if it shouldn't
      */
-    public boolean isMessageFiltered(IrcMessage msg) {
+    public synchronized boolean isMessageFiltered(IrcMessage msg) {
         return (filterTypes.contains(msg.type) || msg.isFiltered());
     }
 
@@ -190,7 +194,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param message the backlog message to add
      */
-    public void addBacklogMessage(IrcMessage message) {
+    public synchronized void addBacklogMessage(IrcMessage message) {
         newBufferEntry(message);
         notifyObservers(R.id.BUFFERUPDATE_BACKLOG);
     }
@@ -200,7 +204,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param messageList the backlog messages to add
      */
-    public void addBacklogMessages(List<IrcMessage> messageList) {
+    public synchronized void addBacklogMessages(List<IrcMessage> messageList) {
         for (IrcMessage message : messageList) {
             newBufferEntry(message);
         }
@@ -212,7 +216,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param backlogPending whether backlog is pending
      */
-    public void setBacklogPending(boolean backlogPending) {
+    public synchronized void setBacklogPending(boolean backlogPending) {
         this.backlogPending = backlogPending;
     }
 
@@ -221,7 +225,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return true if buffer is waiting for backlog, otherwise false
      */
-    public boolean hasPendingBacklog() {
+    public synchronized boolean hasPendingBacklog() {
         return backlogPending;
     }
 
@@ -230,14 +234,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return true if buffer has unseen highlights, otherwise false
      */
-    public boolean hasUnseenHighlight() {
+    public synchronized boolean hasUnseenHighlight() {
         return (filteredBacklog.size() != 0 && lastSeenMessage != 0 && lastHighlightMessageId > lastSeenMessage);
     }
 
     /**
      * Checks if the buffer has any unread messages, not including joins/parts/quits etc
      */
-    public boolean hasUnreadMessage() {
+    public synchronized boolean hasUnreadMessage() {
         return (filteredBacklog.size() != 0 && lastSeenMessage != 0 && lastPlainMessageId > lastSeenMessage);
     }
 
@@ -246,7 +250,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return true if buffer has unread activity, false otherwise
      */
-    public boolean hasUnreadActivity() {
+    public synchronized boolean hasUnreadActivity() {
         //Last message in the backlog has a bigger messageId than the last seen message
         return ((filteredBacklog.size() != 0 && lastSeenMessage != 0 && lastSeenMessage < filteredBacklog.get(filteredBacklog.size() - 1).messageId) ||
                 (lastSeenMessage == -1));
@@ -257,7 +261,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param lastSeenMessage the msgid of the last seen message on te buffer
      */
-    public void setLastSeenMessage(int lastSeenMessage) {
+    public synchronized void setLastSeenMessage(int lastSeenMessage) {
         this.lastSeenMessage = lastSeenMessage;
         this.setChanged();
         notifyObservers();
@@ -268,7 +272,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param markerLineMessage the msgid for the marker line, line will be placed under this message
      */
-    public void setMarkerLineMessage(int markerLineMessage) {
+    public synchronized void setMarkerLineMessage(int markerLineMessage) {
         this.markerLineMessage = markerLineMessage;
         for (IrcMessage msg : backlog) {
             if (msg.messageId == markerLineMessage) {
@@ -284,7 +288,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return the information object for this buffer
      */
-    public BufferInfo getInfo() {
+    public synchronized BufferInfo getInfo() {
         return info;
     }
 
@@ -294,7 +298,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @param pos the position of the message in this buffer
      * @return the Ircmessage at pos
      */
-    public IrcMessage getBacklogEntry(int pos) {
+    public synchronized IrcMessage getBacklogEntry(int pos) {
         return filteredBacklog.get(pos);
     }
 
@@ -305,8 +309,12 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @param pos the position
      * @return the IrcMessage at pos in the original backlog
      */
-    public IrcMessage getUnfilteredBacklogEntry(int pos) {
+    public synchronized IrcMessage getUnfilteredBacklogEntry(int pos) {
         return backlog.get(pos);
+    }
+
+    public List<IrcMessage> getBacklog() {
+        return filteredBacklog;
     }
 
     /**
@@ -314,7 +322,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return msgid of last seen message
      */
-    public int getLastSeenMessage() {
+    public synchronized int getLastSeenMessage() {
         return lastSeenMessage;
     }
 
@@ -323,7 +331,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return msgid of ircmessage above marker line
      */
-    public int getMarkerLineMessage() {
+    public synchronized int getMarkerLineMessage() {
         return markerLineMessage;
     }
 
@@ -333,7 +341,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * @param message the ircmessage to check
      * @return true if buffer has message, false otherwise
      */
-    public boolean hasMessage(IrcMessage message) {
+    public synchronized boolean hasMessage(IrcMessage message) {
         return Collections.binarySearch(backlog, message) >= 0;
     }
 
@@ -343,7 +351,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return number of messages in buffer
      */
-    public int getSize() {
+    public synchronized int getSize() {
         return filteredBacklog.size();
     }
 
@@ -352,14 +360,14 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return int
      */
-    public int getUnfilteredSize() {
+    public synchronized int getUnfilteredSize() {
         return backlog.size();
     }
 
     /**
      * Set this buffer as read TODO: we don't really know what this means atm
      */
-    public void setRead() {
+    public synchronized void setRead() {
         if (backlog.isEmpty())
             return;
 
@@ -374,11 +382,11 @@ public class Buffer extends Observable implements Comparable<Buffer> {
 //		this.nicks = nicks;
 //	}
 
-    public int getScrollState() {
+    public synchronized int getScrollState() {
         return scrollState;
     }
 
-    public void setScrollState(int scrollState) {
+    public synchronized void setScrollState(int scrollState) {
         this.scrollState = scrollState;
     }
 
@@ -387,7 +395,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return myNick list
      */
-    public UserCollection getUsers() {
+    public synchronized UserCollection getUsers() {
         return users;
     }
 
@@ -396,7 +404,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param topic the topic to set
      */
-    public void setTopic(String topic) {
+    public synchronized void setTopic(String topic) {
         this.topic = topic;
         this.setChanged();
         notifyObservers(R.id.BUFFERUPDATE_TOPICCHANGED);
@@ -407,7 +415,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return a string with the topic
      */
-    public String getTopic() {
+    public synchronized String getTopic() {
         return topic;
     }
 
@@ -416,7 +424,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param name the buffer name
      */
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         info.name = name;
         this.setChanged();
         notifyObservers();
@@ -428,7 +436,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return the msgid of the message that was on top
      */
-    public int getTopMessageShown() {
+    public synchronized int getTopMessageShown() {
         return topMessageShown;
     }
 
@@ -438,49 +446,49 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param topMessageShown the msgid for the message at the top
      */
-    public void setTopMessageShown(int topMessageShown) {
+    public synchronized void setTopMessageShown(int topMessageShown) {
         this.topMessageShown = topMessageShown;
     }
 
     @Override
-    public int compareTo(@NonNull Buffer another) {
+    public synchronized int compareTo(@NonNull Buffer another) {
         return BufferUtils.compareBuffers(this, another);
     }
 
-    public void setTemporarilyHidden(boolean temporarilyHidden) {
+    public synchronized void setTemporarilyHidden(boolean temporarilyHidden) {
         this.temporarilyHidden = temporarilyHidden;
         this.setChanged();
         notifyObservers(R.id.BUFFER_HIDDEN_CHANGED);
     }
 
-    public boolean isTemporarilyHidden() {
+    public synchronized boolean isTemporarilyHidden() {
         return temporarilyHidden;
     }
 
-    public void setPermanentlyHidden(boolean permanentlyHidden) {
+    public synchronized void setPermanentlyHidden(boolean permanentlyHidden) {
         this.permanentlyHidden = permanentlyHidden;
         this.setChanged();
         notifyObservers(R.id.BUFFER_HIDDEN_CHANGED);
     }
 
-    public boolean isPermanentlyHidden() {
+    public synchronized boolean isPermanentlyHidden() {
         return permanentlyHidden;
     }
 
-    public void setOrder(int order) {
+    public synchronized void setOrder(int order) {
         this.order = order;
         this.setChanged();
         notifyObservers(R.id.BUFFER_ORDER_CHANGED);
     }
 
-    public int getOrder() {
+    public synchronized int getOrder() {
         return order;
     }
 
     /**
      * Add a new IrcMessage type that this buffer should filter(hidden type)
      */
-    public void addFilterType(IrcMessage.Type type) {
+    public synchronized void addFilterType(IrcMessage.Type type) {
         filterTypes.add(type);
         dbHelper.open();
         dbHelper.addHiddenEvent(type, getInfo().id);
@@ -495,7 +503,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param type
      */
-    public void removeFilterType(IrcMessage.Type type) {
+    public synchronized void removeFilterType(IrcMessage.Type type) {
         filterTypes.remove(type);
         dbHelper.open();
         dbHelper.deleteHiddenEvent(type, getInfo().id);
@@ -505,11 +513,11 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         notifyObservers();
     }
 
-    public ArrayList<IrcMessage.Type> getFilters() {
+    public synchronized ArrayList<IrcMessage.Type> getFilters() {
         return filterTypes;
     }
 
-    private void loadFilters() {
+    private synchronized void loadFilters() {
         dbHelper.open();
         IrcMessage.Type[] filteredEvents = dbHelper.getHiddenEvents(getInfo().id);
         if (filteredEvents != null) {
@@ -524,7 +532,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      * Filter buffer, creates the filteredBacklog list from scratch. Should be called
      * if some of the filter types have changed, so we can build the list again
      */
-    public void filterBuffer() {
+    public synchronized void filterBuffer() {
         filteredBacklog.clear();
         for (IrcMessage msg : backlog) {
             if (!isMessageFiltered(msg)) {
@@ -532,22 +540,50 @@ public class Buffer extends Observable implements Comparable<Buffer> {
                 filteredBacklog.add(msg);
             } else if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = true;
         }
+        notifyObservers();
     }
 
     public void updateIgnore() {
-        filteredBacklog.clear();
-        synchronized (backlog){
-            for (IrcMessage msg : backlog) {
-                msg.setFiltered(Client.getInstance().getIgnoreListManager().matches(msg));
-                if (!isMessageFiltered(msg)) {
-                    if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = false;
-                    filteredBacklog.add(msg);
-                } else if (getMarkerLineMessage() == msg.messageId) isMarkerLineFiltered = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final ArrayList<IrcMessage> newBacklog;
+                synchronized (backlog) {
+                    newBacklog = new ArrayList<>(backlog);
+                }
+
+                boolean newisMarkerLineFiltered = false;
+
+
+                for (int i = 0; i < newBacklog.size(); i++) {
+                    IrcMessage msg = newBacklog.get(i);
+                    msg.setFiltered(Client.getInstance().getIgnoreListManager().matches(msg));
+                    if (!isMessageFiltered(msg)) {
+                        if (getMarkerLineMessage() == msg.messageId)
+                            newisMarkerLineFiltered = false;
+                    } else {
+                        if (getMarkerLineMessage() == msg.messageId)
+                            newisMarkerLineFiltered = true;
+                        newBacklog.remove(msg);
+                    }
+                }
+
+                final boolean copy_of_newisMarkerLineFiltered = newisMarkerLineFiltered;
+
+                Client.getInstance().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        filteredBacklog = newBacklog;
+                        isMarkerLineFiltered = copy_of_newisMarkerLineFiltered;
+                        ChatFragment.chatFragment.adapter.backlogData = newBacklog;
+                        ChatFragment.chatFragment.adapter.notifyDataSetChanged();
+                    }
+                });
             }
-        }
+        }).start();
     }
 
-    public boolean isMarkerLineFiltered() {
+    public synchronized boolean isMarkerLineFiltered() {
         return isMarkerLineFiltered;
     }
 
@@ -556,7 +592,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @return true if active
      */
-    public boolean isActive() {
+    public synchronized boolean isActive() {
         return this.active;
     }
 
@@ -565,17 +601,17 @@ public class Buffer extends Observable implements Comparable<Buffer> {
      *
      * @param active true if buffer is active, false if parted
      */
-    public void setActive(boolean active) {
+    public synchronized void setActive(boolean active) {
         this.active = active;
         this.setChanged();
         notifyObservers();
     }
 
-    public void setDisplayed(boolean isDisplayed) {
+    public synchronized void setDisplayed(boolean isDisplayed) {
         this.isDisplayed = isDisplayed;
     }
 
-    public boolean isDisplayed() {
+    public synchronized boolean isDisplayed() {
         return isDisplayed;
     }
 }

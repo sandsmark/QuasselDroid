@@ -71,8 +71,6 @@ public class QuasseldroidNotificationManager {
     private boolean pendingHighlightNotification;
     private PendingIntent contentIntent;
 
-    private int intentid = 0;
-
     public QuasseldroidNotificationManager(Context context) {
         this.context = context;
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -201,8 +199,6 @@ public class QuasseldroidNotificationManager {
             buffers.removeElement(message.bufferInfo.id);
         }
         buffers.push(message.bufferInfo.id);
-
-        Log.d(getClass().getSimpleName(), buffers.toString());
 
         pendingHighlightNotification = true;
 
@@ -354,13 +350,9 @@ public class QuasseldroidNotificationManager {
                 builder.setCategory(NotificationCompat.CATEGORY_SOCIAL);
             }
 
-            Log.d(getClass().getSimpleName(), buffers.toString());
-
             Intent launch = new Intent(context, MainActivity.class);
             launch.putExtra("extraBufferId", buffers.peek());
             launch.putExtra("extraDrawer", false);
-            launch.putExtra("intentId", intentid);
-            intentid++;
 
             Uri.Builder uriBuilder = new Uri.Builder();
             uriBuilder.scheme("content");

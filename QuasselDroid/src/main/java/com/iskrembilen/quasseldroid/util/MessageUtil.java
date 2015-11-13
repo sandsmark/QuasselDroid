@@ -60,11 +60,11 @@ public class MessageUtil {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx.getApplicationContext());
 
-        String highlightNickPreference = preferences.getString("preference_nick_highlight_type","current");
+        String highlightNickPreference = preferences.getString("preference_highlight_type", "current");
         String highlightNickPreferenceAll = ctx.getResources().getStringArray(R.array.entryvalues_highlight_preference)[0];
         String highlightNickPreferenceCurrent = ctx.getResources().getStringArray(R.array.entryvalues_highlight_preference)[1];
 
-        boolean preferenceNickCaseSensitive = preferences.getBoolean("preference_nick_highlight_case_sensitive",false);
+        boolean preferenceNickCaseSensitive = preferences.getBoolean("perference_highlight_casesensitive",false);
 
         // TODO: Cache this (per network)
         Network net = Client.getInstance().getNetworks().getNetworkById(msg.bufferInfo.networkId);
@@ -137,7 +137,10 @@ public class MessageUtil {
      * @param message the message to check
      */
     public static void processMessage(Context ctx, QuasseldroidNotificationManager notificationManager, IrcMessage message) {
-        checkForHighlight(ctx,message);
+        // Set the message filtered if it matches ignore rules
+        message.setFiltered(Client.getInstance().getIgnoreListManager().matches(message));
+
+        checkForHighlight(ctx, message);
 
         // All messages that match a highlight pattern or are in queries will trigger a notification
         if (message.isHighlighted() || message.bufferInfo.type == BufferInfo.Type.QueryBuffer && !message.isSelf()) {
@@ -154,12 +157,9 @@ public class MessageUtil {
                 return;
 
             // If the message wasn’t read yet, we want to add a notification
-            if (buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden())
+            if (buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden() && !message.isFiltered())
                 notificationManager.addMessage(message);
         }
-
-        // Set the message filtered if it matches ignore rules
-        message.setFiltered(Client.getInstance().getIgnoreListManager().matches(message));
     }
 
     /**

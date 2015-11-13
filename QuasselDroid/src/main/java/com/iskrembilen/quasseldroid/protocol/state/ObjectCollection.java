@@ -23,6 +23,8 @@
 
 package com.iskrembilen.quasseldroid.protocol.state;
 
+import android.util.Log;
+
 import com.iskrembilen.quasseldroid.protocol.state.serializers.SyncableObject;
 
 import java.util.HashMap;

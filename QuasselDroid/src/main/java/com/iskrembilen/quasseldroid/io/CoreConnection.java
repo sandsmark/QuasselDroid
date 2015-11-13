@@ -1233,7 +1233,7 @@ public final class CoreConnection {
 							 * A class representing another user on a given IRC network.
 							 */
                             } else if (className.equals("IrcUser")) {
-                                Log.d(TAG, "InitData: IrcUser");
+                                Log.d(TAG, "InitData: IrcUser " + objectName);
                                 Map<String, QVariant<?>> userMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
                                 Bundle bundle = new Bundle();
                                 bundle.putString("awayMessage", (String) userMap.get("awayMessage").getData());
@@ -1438,13 +1438,15 @@ public final class CoreConnection {
                                         String nick = (String) packedFunc.remove(0).getData();
                                         IrcUser user = new IrcUser();
                                         user.nick = nick.split("!")[0];
+                                        user.networkId = Integer.parseInt(objectName);
+                                        Log.d(TAG, "Network::addIrcUser("+objectName + "/" + user.nick+")");
                                         //If not done then we can add it right here, if we try to send it we might crash because service don't have the network yet
                                         if (!initComplete) {
                                             networks.get(Integer.parseInt(objectName)).onUserJoined(user);
                                         } else {
                                             handler.obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
                                         }
-                                        sendInitRequest("IrcUser", objectName + "/" + nick.split("!")[0]);
+                                        sendInitRequest("IrcUser", objectName + "/" + user.nick);
                                         break;
                                     case "setConnectionState":
                                         Log.d(TAG, "Sync: Network -> setConnectionState");

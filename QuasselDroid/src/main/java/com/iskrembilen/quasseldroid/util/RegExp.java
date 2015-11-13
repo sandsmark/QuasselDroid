@@ -67,7 +67,7 @@ public class RegExp {
         // ^ and $ mean it will only match full strings, not parts
         // Then we replace every instance of * (matches 0 or more characters) with the appropriate
         // RegEx (.*) and replace ? (matches one character) with (.)
-        return "^\\Q"+pattern.replace("*", "\\E\\S*?\\Q").replace("(?<!\\\\S\\*)\\?", "\\E\\S?\\Q")+"\\E$";
+        return "^\\Q"+pattern.replace("*", "\\E.*\\Q").replace("\\?", "\\E.\\Q")+"\\E$";
     }
 
     public Pattern getPattern() {

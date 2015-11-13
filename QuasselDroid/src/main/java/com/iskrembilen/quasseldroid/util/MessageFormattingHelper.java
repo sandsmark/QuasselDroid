@@ -81,34 +81,32 @@ public class MessageFormattingHelper {
 
     public static class NickFormatter {
         private boolean useBrackets;
-        private String self;
         private String[] defaultBrackets;
 
-        public NickFormatter(boolean useBrackets, String self, String[] defaultBrackets) {
+        public NickFormatter(boolean useBrackets, String[] defaultBrackets) {
             this.useBrackets = useBrackets;
-            this.self = self;
             this.defaultBrackets = defaultBrackets;
         }
 
-        public CharSequence formatNick(String nick) {
-            return formatNick(nick, false);
+        public CharSequence formatNick(String nick, boolean self) {
+            return formatNick(nick, self, false);
         }
 
-        public CharSequence formatNick(String nick, String[] brackets) {
-            return formatNick(nick, false, brackets);
+        public CharSequence formatNick(String nick, boolean self, String[] brackets) {
+            return formatNick(nick, self, false, brackets);
         }
 
-        public CharSequence formatNick(String nick, boolean reduced) {
-            return formatNick(nick, reduced, defaultBrackets);
+        public CharSequence formatNick(String nick, boolean self, boolean reduced) {
+            return formatNick(nick, self, reduced, defaultBrackets);
         }
 
-        public CharSequence formatNick(String nick, boolean reduced, String[] brackets) {
+        public CharSequence formatNick(String nick, boolean self, boolean reduced, String[] brackets) {
             Spannable nickSpan;
 
             nickSpan = new SpannableString(nick);
             SpanUtils.setFullSpan(nickSpan, new StyleSpan(Typeface.BOLD));
 
-            if (nick.equals(self))
+            if (self)
                 SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(ThemeUtil.Color.nickSelfColor));
             else if (reduced)
                 SpanUtils.setFullSpan(nickSpan, new ForegroundColorSpan(getSenderColor(nick, 1.4F, 0.4F)));
@@ -123,16 +121,15 @@ public class MessageFormattingHelper {
     }
 
     public static CharSequence formatNick(IrcMessage entry, String[] nickBrackets, boolean useBrackets) {
-        String self = Client.getInstance().getNetworks().getNetworkById(entry.bufferInfo.networkId).getMyNick();
         boolean reduced = entry.isHighlighted();
 
-        return new NickFormatter(useBrackets, self, new String[] {"<",">"}).formatNick(entry.getNick(), reduced);
+        return new NickFormatter(useBrackets, new String[] {"<",">"}).formatNick(entry.getNick(), entry.isSelf(), reduced);
     }
 
-    public static CharSequence formatNick(Context ctx, String nick, boolean reduced) {
+    public static CharSequence formatNick(Context ctx, String nick, boolean self, boolean reduced) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
         boolean useBrackets = preferences.getBoolean(ctx.getString(R.string.preference_nickbrackets), false);
 
-        return new NickFormatter(useBrackets, null, new String[] {"<",">"}).formatNick(nick);
+        return new NickFormatter(useBrackets, new String[] {"<",">"}).formatNick(nick, self);
     }
 }
