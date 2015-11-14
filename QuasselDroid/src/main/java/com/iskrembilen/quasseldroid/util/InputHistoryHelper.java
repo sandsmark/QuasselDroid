@@ -70,4 +70,8 @@ public class InputHistoryHelper {
     public static boolean isViewingHistory() {
         return (currentIndex >= 0);
     }
+
+    public static String[] getHistory() {
+        return history.toArray(new String[history.size()]);
+    }
 }

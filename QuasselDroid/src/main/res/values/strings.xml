@@ -115,6 +115,7 @@
     <string name="dialog_title_nick_add">Add nickname</string>
     <string name="dialog_title_nick_edit">Edit nickname</string>
     <string name="dialog_title_error">Error</string>
+    <string name="dialog_title_input_history">Input History</string>
 
     <string name="dialog_message_join_no_channel">No channel selected</string>
     <string name="dialog_message_delete_buffer">Are you sure you want to delete this buffer permanently? This action cannot be undone.</string>

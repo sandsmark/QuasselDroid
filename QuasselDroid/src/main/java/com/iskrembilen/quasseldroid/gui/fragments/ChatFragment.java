@@ -25,7 +25,9 @@ package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -298,6 +300,33 @@ public class ChatFragment extends Fragment implements Serializable {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        inputField.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                final String[] items = InputHistoryHelper.getHistory();
+                builder.setTitle(getResources().getString(R.string.dialog_title_input_history));
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String item = items[which];
+                        inputField.setText(item);
+                        inputField.setSelection(item.length());
+                        dialog.dismiss();
+                    }
+                });
+
+                if (!inputField.getText().toString().equals("")) {
+                    InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
+                    inputField.setText("");
+                }
+
+                builder.show();
+
+                return true;
             }
         });
 
