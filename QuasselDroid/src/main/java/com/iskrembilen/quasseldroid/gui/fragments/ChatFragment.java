@@ -303,7 +303,7 @@ public class ChatFragment extends Fragment implements Serializable {
             }
         });
 
-        inputField.setOnLongClickListener(new View.OnLongClickListener() {
+        autoCompleteButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 if (!inputField.getText().toString().equals("")) {
