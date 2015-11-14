@@ -306,8 +306,14 @@ public class ChatFragment extends Fragment implements Serializable {
         inputField.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                if (!inputField.getText().toString().equals("")) {
+                    InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
+                    inputField.setText("");
+                }
+
                 final String[] items = InputHistoryHelper.getHistory();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(getResources().getString(R.string.dialog_title_input_history));
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
@@ -318,11 +324,6 @@ public class ChatFragment extends Fragment implements Serializable {
                         dialog.dismiss();
                     }
                 });
-
-                if (!inputField.getText().toString().equals("")) {
-                    InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
-                    inputField.setText("");
-                }
 
                 builder.show();
 
