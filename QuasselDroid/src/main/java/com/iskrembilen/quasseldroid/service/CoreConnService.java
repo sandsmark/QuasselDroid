@@ -361,6 +361,10 @@ public class CoreConnService extends Service {
         initDone = false;
         isConnecting = false;
         if (notificationManager != null) {
+            notificationManager.clear();
+            notificationManager = null;
+
+            notificationManager = new QuasseldroidNotificationManager(getApplicationContext());
             notificationManager.notifyDisconnected();
             notificationManager.clear();
             notificationManager = null;

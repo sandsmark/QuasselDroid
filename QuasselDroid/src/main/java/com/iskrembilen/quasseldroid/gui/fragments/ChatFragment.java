@@ -606,7 +606,6 @@ public class ChatFragment extends Fragment implements Serializable {
         public int getCount() {
             int count = 0;
             if (this.backlogData != null) count = backlogData.size();
-            Log.d(TAG, "Showing the count! "+count);
             return count;
         }
 

@@ -349,6 +349,7 @@ public class IgnoreListManager extends SyncableObject implements Observer {
     }
 
     public boolean matches(IrcMessage msg) {
+        /*
         synchronized (ignoreList) {
             Network network = Client.getInstance().getNetworks().getNetworkById(msg.bufferInfo.networkId);
             Buffer buffer;
@@ -379,8 +380,10 @@ public class IgnoreListManager extends SyncableObject implements Observer {
                 }
             }
         }
+        */
 
         return false;
+
     }
 
     int indexOf(String ignore) {
