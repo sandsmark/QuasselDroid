@@ -735,8 +735,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     }
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kick),
-                            formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()),
-                            TextUtils.concat(formatter.formatNick(nick, entry.isHighlighted()), hostmask),
+                            TextUtils.concat(formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()), hostmask),
+                            formatter.formatNick(nick, entry.isHighlighted()),
                             reasonSequence));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
