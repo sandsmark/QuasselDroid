@@ -40,6 +40,7 @@ import android.widget.EditText;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.MessageUtil;
 
 public class TopicEditDialog extends DialogFragment {
 
@@ -85,7 +86,7 @@ public class TopicEditDialog extends DialogFragment {
         final EditText topicField = (EditText) dialog.findViewById(R.id.dialog_simple_text);
         this.topicField = topicField;
         topicField.setHint(R.string.hint_topic_edit);
-        topicField.setText(topic);
+        topicField.setText(MessageUtil.parseStyleCodes(getActivity(), topic.toString(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text), true)));
         if (preferences.getBoolean(getString(R.string.preference_monospace), false)) {
             topicField.setTypeface(Typeface.MONOSPACE);
         }

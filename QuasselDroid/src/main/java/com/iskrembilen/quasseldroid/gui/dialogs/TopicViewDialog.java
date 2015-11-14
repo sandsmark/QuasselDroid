@@ -43,6 +43,7 @@ import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.squareup.otto.Subscribe;
 
 public class TopicViewDialog extends DialogFragment {
@@ -71,16 +72,16 @@ public class TopicViewDialog extends DialogFragment {
 
     @Subscribe
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
-        if (event.bufferId == id) {
+        if (event.bufferId == id && mBuffer != null) {
             mDialog.setTitle(mBuffer.getInfo().name);
             setTopic(mBuffer.getTopic());
         }
-        Buffer buffer = Client.getInstance().getNetworks().getBufferById(event.bufferId);
-        if (buffer == null) {
+        if (Client.getInstance() == null || Client.getInstance().getNetworks() == null || Client.getInstance().getNetworks().getBufferById(event.bufferId) == null) {
             dismiss();
-            return;
+        } else {
+            Buffer buffer = Client.getInstance().getNetworks().getBufferById(event.bufferId);
+            setTopic(buffer.getTopic());
         }
-        setTopic(buffer.getTopic());
     }
 
     public void setTopic(CharSequence topic) {
@@ -104,7 +105,7 @@ public class TopicViewDialog extends DialogFragment {
 
         View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_simple_view, null);
         TextView topicField = (TextView) view.findViewById(R.id.dialog_simple_text);
-        topicField.setText(mBuffer.getTopic());
+        topicField.setText(MessageUtil.parseStyleCodes(getActivity(), mBuffer.getTopic(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true)));
         if (preferences.getBoolean(getString(R.string.preference_monospace), false)) {
             topicField.setTypeface(Typeface.MONOSPACE);
         }

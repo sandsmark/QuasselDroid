@@ -82,10 +82,7 @@ import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.service.InFocus;
-import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
-import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
-import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import com.iskrembilen.quasseldroid.util.*;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
@@ -95,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String BUFFER_STATE = "buffer_state";
     private static final String DRAWER_SELECTION = "drawer_selection";
+
+    public static MainActivity instance;
 
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
@@ -127,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_ACTION_MODE_OVERLAY);
         super.onCreate(savedInstanceState);
         currentTheme = ThemeUtil.themeNoActionBarDrawStatusBar;
+
+        instance = this;
 
         setContentView(R.layout.layout_main);
 
@@ -391,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (showLag) {
             subtitle = TextUtils.concat(Helper.formatLatency(lag, getResources()), " — ", topic);
         } else {
-            subtitle = topic;
+            subtitle = MessageUtil.parseStyleCodes(this, topic.toString(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text), true));
         }
 
         actionbar.setSubtitle(subtitle);

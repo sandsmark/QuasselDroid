@@ -656,7 +656,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatPlainBg);
 
                     CharSequence contentSpan = MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors);
-                    contentSpan = SpanFormatter.format(getString(R.string.message_action), formatter.formatNick(entry.getNick(), entry.isSelf()), contentSpan);
+                    contentSpan = SpanFormatter.format(getString(R.string.message_action), formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()), contentSpan);
                     SpanUtils.setFullSpan(new SpannableString(contentSpan), new StyleSpan(Typeface.ITALIC));
                     holder.msgView.setText(contentSpan);
                     break;
@@ -678,7 +678,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     break;
                 case Notice:
                     holder.msgView.setText(TextUtils.concat(
-                            formatter.formatNick(entry.getNick(), entry.isSelf(), new String[] {"[","]"}),
+                            formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted(), new String[] {"[","]"}),
                             " ",
                             MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
@@ -688,7 +688,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_join),
-                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask)));
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
@@ -697,7 +697,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_leave),
-                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask),
                             MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -707,7 +707,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_quit),
-                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask),
                             MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -717,7 +717,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     nick = entry.getNick();
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kill),
-                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask),
                             MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -735,8 +735,8 @@ public class ChatFragment extends Fragment implements Serializable {
                     }
 
                     holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kick),
-                            formatter.formatNick(entry.getNick(), entry.isSelf()),
-                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf()), hostmask),
+                            formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isHighlighted()), hostmask),
                             reasonSequence));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
@@ -804,7 +804,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 default:
                     holder.msgView.setTextColor(ThemeUtil.Color.chatPlain);
 
-                    holder.msgView.setText(TextUtils.concat(formatter.formatNick(entry.getNick(), entry.isHighlighted()), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setText(TextUtils.concat(formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
 
                     holder.parent.setBackgroundColor(android.graphics.Color.TRANSPARENT);
                     break;

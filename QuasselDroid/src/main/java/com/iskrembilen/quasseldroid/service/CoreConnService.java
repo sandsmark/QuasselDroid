@@ -360,6 +360,7 @@ public class CoreConnService extends Service {
         stopForeground(true);
         initDone = false;
         isConnecting = false;
+        notificationManager.notifyDisconnected();
         if (notificationManager != null) {
             notificationManager.clear();
             notificationManager = null;

@@ -24,6 +24,7 @@
 package com.iskrembilen.quasseldroid.util;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.google.common.base.Optional;
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
@@ -110,7 +112,7 @@ public class QuasseldroidNotificationManager {
                     .setSmallIcon(R.drawable.stat_normal)
                     .setContentTitle(context.getText(R.string.app_name))
                     .setContentText(context.getText(R.string.notification_connected))
-                    .setOngoing(true)
+                    .setAutoCancel(true)
                     .setPriority(preferences.getBoolean("notifypersistence", false) ? NotificationCompat.PRIORITY_MIN : NotificationCompat.PRIORITY_LOW)
                     .setCategory(NotificationCompat.CATEGORY_SERVICE)
                     .setWhen(System.currentTimeMillis());
@@ -159,11 +161,14 @@ public class QuasseldroidNotificationManager {
     }
 
     public Notification getConnectingNotification() {
+        return getConnectingNotification(Optional.<String>absent());
+    }
+
+    public Notification getConnectingNotification(Optional<String> status) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.stat_connecting)
                 .setContentTitle(context.getText(R.string.app_name))
-                .setContentText(context.getText(R.string.notification_connecting))
-                .setOngoing(true)
+                .setContentText(status.or(context.getText(R.string.notification_connecting).toString()))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setWhen(System.currentTimeMillis());
 
@@ -178,8 +183,12 @@ public class QuasseldroidNotificationManager {
     }
 
     public void notifyConnecting() {
+        notifyConnecting(Optional.<String>absent());
+    }
+
+    public void notifyConnecting(Optional<String> status) {
         // Send the notification.
-        notifyManager.notify(R.id.NOTIFICATION, getConnectingNotification());
+        notifyManager.notify(R.id.NOTIFICATION, getConnectingNotification(status));
     }
 
     public void addMessage(IrcMessage message) {
@@ -217,6 +226,10 @@ public class QuasseldroidNotificationManager {
     }
 
     public void notifyHighlights() {
+        System.out.printf("Connected: %b\n", connected);
+
+        if (!connected) return;
+
         synchronized (highlightedMessages) {
             boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text), true);
 
@@ -229,7 +242,6 @@ public class QuasseldroidNotificationManager {
             // Building the base notification
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
             builder.setSmallIcon(R.drawable.stat_highlight)
-                    .setOngoing(true)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setWhen(System.currentTimeMillis())
                     .setNumber(highlightedMessageCount);
@@ -415,6 +427,8 @@ public class QuasseldroidNotificationManager {
     public void onInitProgressed(InitProgressEvent event) {
         if (event.done && getHighlightedMessageCount()>0) {
             notifyHighlights();
+        } else if (!event.done) {
+            notifyConnecting(Optional.of(event.progress));
         }
     }
 
