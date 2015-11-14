@@ -29,12 +29,7 @@ import android.util.Pair;
 
 import com.iskrembilen.quasseldroid.R;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 public class UserCollection extends Observable implements Observer {
 
@@ -60,7 +55,7 @@ public class UserCollection extends Observable implements Observer {
         update(null, null);
     }
 
-    public void addUsers(ArrayList<Pair<IrcUser, String>> usersWithModes) {
+    public void addUsers(List<Pair<IrcUser, String>> usersWithModes) {
         for (Pair<IrcUser, String> user : usersWithModes) {
             for (IrcMode mode : IrcMode.values()) {
                 if (user.second.contains(mode.shortModeName)) {
@@ -94,7 +89,7 @@ public class UserCollection extends Observable implements Observer {
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
     }
 
-    public void removeUsers(ArrayList<IrcUser> users) {
+    public void removeUsers(List<IrcUser> users) {
         for (IrcUser user : users) {
             for (IrcMode mode : IrcMode.values()) {
                 removeUserFromModeList(mode, user);
@@ -116,7 +111,7 @@ public class UserCollection extends Observable implements Observer {
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
     }
 
-    public void removeUsersByNick(ArrayList<String> nicks) {
+    public void removeUsersByNick(List<String> nicks) {
         for (String nick : nicks) {
             for (IrcMode mode : IrcMode.values()) {
                 for (IrcUser user : users.get(mode)) {

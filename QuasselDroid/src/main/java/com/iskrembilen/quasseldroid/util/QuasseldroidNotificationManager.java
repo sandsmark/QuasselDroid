@@ -24,7 +24,6 @@
 package com.iskrembilen.quasseldroid.util;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -56,7 +55,8 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class QuasseldroidNotificationManager {
 
@@ -66,7 +66,7 @@ public class QuasseldroidNotificationManager {
     private SharedPreferences preferences;
     private final List<Integer> highlightedBuffers = new ArrayList<>();
     private final SparseArray<List<IrcMessage>> highlightedMessages = new SparseArray<>();
-    private Stack<Integer> buffers = new Stack<>();
+    private List<Integer> buffers = new ArrayList<>();
 
     android.app.NotificationManager notifyManager;
     private boolean connected = false;
@@ -89,7 +89,7 @@ public class QuasseldroidNotificationManager {
             if (highlightedBuffers.contains(bufferId)) {
                 highlightedMessages.remove(bufferId);
                 highlightedBuffers.remove(bufferId);
-                buffers.removeElement(bufferId);
+                buffers.remove((Integer) bufferId);
                 if (highlightedBuffers.size() == 0) {
                     notifyConnected(false);
                 } else if (!connected) {
@@ -205,9 +205,9 @@ public class QuasseldroidNotificationManager {
         }
 
         if (buffers.contains(message.bufferInfo.id)) {
-            buffers.removeElement(message.bufferInfo.id);
+            buffers.remove((Integer) message.bufferInfo.id);
         }
-        buffers.push(message.bufferInfo.id);
+        buffers.add(message.bufferInfo.id);
 
         pendingHighlightNotification = true;
 
@@ -363,7 +363,7 @@ public class QuasseldroidNotificationManager {
             }
 
             Intent launch = new Intent(context, MainActivity.class);
-            if (!buffers.empty()) launch.putExtra("extraBufferId", buffers.peek());
+            if (!buffers.isEmpty()) launch.putExtra("extraBufferId", buffers.get(0));
             launch.putExtra("extraDrawer", false);
 
             Uri.Builder uriBuilder = new Uri.Builder();
