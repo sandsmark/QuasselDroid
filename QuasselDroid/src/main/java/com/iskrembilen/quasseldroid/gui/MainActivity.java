@@ -392,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (showLag) {
             subtitle = TextUtils.concat(Helper.formatLatency(lag, getResources()), " — ", topic);
         } else {
-            subtitle = MessageUtil.parseStyleCodes(this, topic.toString(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text), true));
+            subtitle = topic;
         }
 
         actionbar.setSubtitle(subtitle);
@@ -487,6 +487,7 @@ public class MainActivity extends AppCompatActivity {
                     manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     topic = buffer.getTopic();
             }
+            if (topic != null) topic = MessageUtil.parseStyleCodes(this, topic.toString(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text), true));
         }
         updateSubtitle();
         invalidateOptionsMenu();
