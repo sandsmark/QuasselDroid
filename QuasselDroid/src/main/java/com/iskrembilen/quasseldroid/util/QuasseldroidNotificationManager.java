@@ -238,7 +238,7 @@ public class QuasseldroidNotificationManager {
 
         if (!connected) return;
 
-        synchronized (highlightedMessages) {
+        synchronized (highlightedBuffers) {
             boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text), true);
 
             int defaults = 0;
