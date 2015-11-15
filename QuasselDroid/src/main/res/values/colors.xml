@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <resources>
     <color name="primary">#0271B3</color>
     <color name="primary_dark">#085f92</color>
@@ -28,33 +50,32 @@
     <color name="ircmessage_dark_gray">#808080</color>
     <color name="ircmessage_light_gray">#C0C0C0</color>
 
-    <color name="action_title_color">#ffffff</color>
-    <color name="action_subtitle_color">#bebebe</color>
-
     <color name="marker_line">#d01716</color>
 
 
     <color name="buffer_highlight_color_light">#ffab00</color>
     <color name="buffer_unread_color_light">#1976d2</color>
-    <color name="buffer_activity_color_light">#00c853</color>
+    <color name="buffer_activity_color_light">#6BB84D</color>
     <color name="buffer_read_color_light">#333333</color>
     <color name="buffer_parted_color_light">#999999</color>
     <color name="buffer_status_active_light">#0097a7</color>
-    <color name="buffer_status_away_light">#094e50</color>
+    <color name="buffer_status_away_light">#888888</color>
     <color name="buffer_status_parted_light">#888888</color>
     <color name="buffer_status_perm_light">#b71c1c</color>
-    <color name="buffer_status_temp_light">#ff3d00</color>
+    <color name="buffer_status_temp_light">#ffab00</color>
     <color name="buffer_invalid_light">#ff333333</color>
 
-    <color name="nick_owner_light">#fff9c4</color>
-    <color name="nick_admin_light">#f3e5f5</color>
-    <color name="nick_operator_light">#fde0dc</color>
-    <color name="nick_halfop_light">#fff3e0</color>
-    <color name="nick_voice_light">#f1f8e9</color>
-    <color name="nick_user_light">#e7e9fd</color>
+    <color name="nick_owner_light">#20fbc02d</color>
+    <color name="nick_admin_light">#20512da8</color>
+    <color name="nick_operator_light">#20d01716</color>
+    <color name="nick_halfop_light">#20f57c00</color>
+    <color name="nick_voice_light">#20689f38</color>
+    <color name="nick_user_light">#00888888</color>
+    <color name="nick_self_light">@color/chat_line_plain_light</color>
 
     <color name="chat_line_plain_light">@android:color/primary_text_light</color>
-    <color name="chat_line_action_light">@android:color/secondary_text_light</color>
+    <color name="chat_line_action_light">#1a237e</color>
+    <color name="chat_line_server_light">@android:color/secondary_text_light</color>
     <color name="chat_line_error_light">#d63838</color>
     <color name="chat_line_highlight_light">#ff9100</color>
     <color name="chat_line_timestamp_light">@android:color/tertiary_text_light</color>
@@ -64,25 +85,27 @@
 
     <color name="buffer_highlight_color_dark">#ffab00</color>
     <color name="buffer_unread_color_dark">#1976d2</color>
-    <color name="buffer_activity_color_dark">#00c853</color>
+    <color name="buffer_activity_color_dark">#6BB84D</color>
     <color name="buffer_read_color_dark">#dddddd</color>
     <color name="buffer_parted_color_dark">#888888</color>
     <color name="buffer_status_active_dark">#0097a7</color>
-    <color name="buffer_status_away_dark">#094e50</color>
+    <color name="buffer_status_away_dark">#888888</color>
     <color name="buffer_status_parted_dark">#888888</color>
     <color name="buffer_status_perm_dark">#b71c1c</color>
-    <color name="buffer_status_temp_dark">#ff3d00</color>
+    <color name="buffer_status_temp_dark">#ffab00</color>
     <color name="buffer_invalid_dark">#ffcccccc</color>
 
-    <color name="nick_owner_dark">#ff785a42</color>
-    <color name="nick_admin_dark">#ff2d2945</color>
-    <color name="nick_operator_dark">#ff572e2e</color>
-    <color name="nick_halfop_dark">#ff734b39</color>
-    <color name="nick_voice_dark">#ff283623</color>
-    <color name="nick_user_dark">#ff2a3e4d</color>
+    <color name="nick_owner_dark">#20fbc02d</color>
+    <color name="nick_admin_dark">#20512da8</color>
+    <color name="nick_operator_dark">#20d01716</color>
+    <color name="nick_halfop_dark">#20f57c00</color>
+    <color name="nick_voice_dark">#20689f38</color>
+    <color name="nick_user_dark">#00888888</color>
+    <color name="nick_self_dark">@color/chat_line_plain_dark</color>
 
     <color name="chat_line_plain_dark">@android:color/primary_text_dark</color>
-    <color name="chat_line_action_dark">@android:color/secondary_text_dark</color>
+    <color name="chat_line_action_dark">#7986cb</color>
+    <color name="chat_line_server_dark">@android:color/secondary_text_dark</color>
     <color name="chat_line_error_dark">#d63838</color>
     <color name="chat_line_highlight_dark">#E68D1A</color>
     <color name="chat_line_timestamp_dark">@android:color/tertiary_text_dark</color>

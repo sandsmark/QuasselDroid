@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<resources>
+    <string name="preference_category_appearance">Appearance</string>
+        <string name="preference_dialog_theme">Choose application theme</string>
+        <string name="preference_summary_theme">The application theme</string>
+        <string name="preference_title_theme">Theme</string>
+        <string name="preference_theme" translatable="false">selectedtheme</string>
+        <string-array name="entries_theme_preference">
+            <item>Light</item>
+            <item>Dark</item>
+        </string-array>
+
+        <string name="preference_dialog_timestamp">Select Time format</string>
+        <string name="preference_summary_timestamp">How should the time be displayed?</string>
+        <string name="preference_message_timestamp">Select a custom timeformat. If left empty will use system default</string>
+        <string name="preference_title_timestamp">Time Format</string>
+        <string name="preference_timestamp" translatable="false">timestamp</string>
+
+        <string name="preference_dialog_fontsize">Choose fontsize for the chat</string>
+        <string name="preference_summary_fontsize">The fontsize of the chat</string>
+        <string name="preference_title_fontsize">Chat fontsize</string>
+        <string name="preference_fontsize" translatable="false">fontsizeChannelList</string>
+        <string-array name="entries_fontsize_preference">
+            <item>Tiny</item>
+            <item>Small</item>
+            <item>Normal</item>
+            <item>Big</item>
+            <item>Huge</item>
+        </string-array>
+
+        <string name="preference_summary_on_colored_text">Display mIRC encoded text with colors</string>
+        <string name="preference_summary_off_colored_text">Display all text monochrome</string>
+        <string name="preference_title_colored_text">Allow colored text</string>
+        <string name="preference_colored_text" translatable="false">allowcoloredtext</string>
+
+        <string name="preference_summary_on_monospace">Display text in monospace</string>
+        <string name="preference_summary_off_monospace">Display text with proportional fonts</string>
+        <string name="preference_title_monospace">Use monospace font</string>
+        <string name="preference_monospace" translatable="false">monospace</string>
+
+        <string name="preference_summary_on_nickbrackets">Display nicknames in brackets &lt; &gt;</string>
+        <string name="preference_summary_off_nickbrackets">Display nicks without decoration</string>
+        <string name="preference_title_nickbrackets">Show Nicks in classic style</string>
+        <string name="preference_nickbrackets" translatable="false">shownickbrackets</string>
+
+        <string name="preference_summary_on_hostname">Show nick!ident@host in each server action (kick/join/etc.)</string>
+        <string name="preference_summary_off_hostname">Only show the nickname in server actions</string>
+        <string name="preference_title_hostname">Show User Hostnames</string>
+        <string name="preference_hostname" translatable="false">detailed_actions</string>
+
+        <string name="preference_summary_on_lag">Show latency between Client and Core in the ActionBar</string>
+        <string name="preference_summary_off_lag">Don’t show the latency</string>
+        <string name="preference_title_lag">Show Lag</string>
+        <string name="preference_lag" translatable="false">showlag</string>
+
+    <string name="preference_category_connection">Connection</string>
+        <string name="preference_summary_on_fetch_to_last_seen">Fetch all unseen messages on connect.</string>
+        <string name="preference_summary_off_fetch_to_last_seen">Fetch only the initial limit of messages on connect.</string>
+        <string name="preference_title_fetch_to_last_seen">Unread messages per chat</string>
+        <string name="preference_fetch_to_last_seen" translatable="false">getallunseenbacklog</string>
+
+        <string name="preference_summary_initial_backlog_limit">How many lines to fetch on connect</string>
+        <string name="preference_title_initial_backlog_limit">Initial backlog amount</string>
+        <string name="preference_initial_backlog_limit" translatable="false">backlogLimit</string>
+
+        <string name="preference_summary_dynamic_backlog">How many lines to fetch on scroll</string>
+        <string name="preference_title_dynamic_backlog">Dynamic backlog amount</string>
+        <string name="preference_dynamic_backlog" translatable="false">dynamicBacklog</string>
+
+        <string name="preference_wakelock_summary">Use more battery when you turn off the screen, to keep connections alive</string>
+        <string name="preference_wakelock_title">Use a wake-lock to inhibit sleep</string>
+        <string name="preference_wake_lock" translatable="false">wakelock</string>
+
+    <string name="preference_category_reconnect">Automatic Reconnect</string>
+        <string name="preference_summary_on_reconnect">Reconnect automatically when connection is lost</string>
+        <string name="preference_summary_off_reconnect">Never reconnect</string>
+        <string name="preference_title_reconnect">Reconnect</string>
+        <string name="preference_reconnect" translatable="false">reconnect</string>
+
+        <string name="preference_summary_on_reconnect_wifi">Reconnect only if wifi is available</string>
+        <string name="preference_summary_off_reconnect_wifi">Always reconnect</string>
+        <string name="preference_title_wifi">Reconnect with wifi only</string>
+        <string name="preference_reconnect_wifi" translatable="false">reconnect_on_wifi_only</string>
+
+        <string name="preference_summary_on_metered">Reconnect on mobile hotspots</string>
+        <string name="preference_summary_off_metered">Only reconnect on normal WiFi</string>
+        <string name="preference_title_metered">Reconnect on metered wifi</string>
+        <string name="preference_reconnect_metered" translatable="false">reconnect_on_metered</string>
+
+        <string name="preference_summary_reconnect_interval">How many min between each reconnect attempt</string>
+        <string name="preference_title_reconnect_interval">Reconnect interval</string>
+        <string name="preference_reconnect_interval" translatable="false">reconnectInterval</string>
+
+    <string name="preference_category_highlight">Highlight</string>
+        <string name="preference_dialog_highlight_type">Highlight Nicks</string>
+        <string name="preference_title_highlight_type">Highlight Nicks</string>
+        <string name="preference_highlight_type" translatable="false">preference_highlight_type</string>
+        <string-array name="entries_highlight_preference">
+            <item>All nicks from identity</item>
+            <item>Current nick</item>
+            <item>None</item>
+        </string-array>
+
+        <string name="perference_title_highlight_casesensitive">Case sensitive nicks</string>
+        <string name="perference_highlight_casesensitive" translatable="false">preference_nick_highlight_case_sensitive</string>
+
+    <string name="preference_category_notifications">Notifications</string>
+        <string name="preference_title_notify_connect">Notify on connect</string>
+        <string name="preference_notify_connect" translatable="false">notifyconnect</string>
+
+        <string name="preference_summary_on_notify_hide_persistence">Only show an icon if there are unread notifications</string>
+        <string name="preference_summary_off_notify_hide_persistence">Always show an icon</string>
+        <string name="preference_title_notify_hide_persistence">Hide icon</string>
+        <string name="preference_notify_hide_persistence" translatable="false">notifypersistence</string>
+
+        <string name="preference_title_notification_vibrate">Vibrate on notification</string>
+        <string name="preference_notification_vibrate" translatable="false">notificationvibrate</string>
+
+        <string name="preference_title_notification_light">Use light on notification</string>
+        <string name="preference_notification_light" translatable="false">notificationlight</string>
+
+        <string name="preference_title_notification_sound">Play sound on notification</string>
+        <string name="preference_notification_sound" translatable="false">notificationsound</string>
+
+        <string name="preference_title_notification_sound_active">Sound only when unfocused</string>
+        <string name="preference_notification_sound_active" translatable="false">notificationsoundactive</string>
+
+        <string name="preference_title_notification_sound_file">Notification sound</string>
+        <string name="preference_notification_sound_file" translatable="false">notificationsoundfile</string>
+
+        <string name="preference_title_notification_connect_sound_file">Connection sound</string>
+        <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
+
+        <string name="preference_ringtone_silent">Silent</string>
+
+    <string name="preference_category_identities">Identities</string>
+    <string name="identity_tab_nicks">Names</string>
+        <string name="identity_ident">Ident</string>
+        <string name="identity_real_name">Real Name</string>
+
+    <string name="identity_tab_advanced">Advanced</string>
+        <string name="identity_kick_reason">Kick Reason</string>
+        <string name="identity_part_reason">Part Reason</string>
+        <string name="identity_quit_reason">Quit Reason</string>
+        <string name="identity_away_reason">Away Reason</string>
+        <string name="identity_away_nickname">Away Nickname</string>
+        <string name="identity_auto_away_time">Auto Away Time</string>
+        <string name="identity_auto_away_reason">Auto Away Reason</string>
+        <string name="identity_detach_away_enabled">Detach Away Enabled</string>
+        <string name="identity_detach_away_reason">Detach Away Reason</string>
+
+    <string name="preference_category_ignore_list">Ignore List</string>
+        <string name="preference_ignoreitem_strictness">Strictness</string>
+        <string-array name="ignoreitem_strictness">
+            <item>Unmatched</item>
+            <item>Dynamic</item>
+            <item>Permanent</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_ruletype">Rule Type</string>
+        <string-array name="ignoreitem_ruletypes">
+            <item>Sender</item>
+            <item>Message</item>
+            <item>CTCP</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_rule">Ignore Rule</string>
+        <string-array name="ignoreitem_matching">
+            <item>Wildcard</item>
+            <item>Regular Expression</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_scope">Scope</string>
+        <string-array name="ignoreitem_scopeType">
+            <item>Global</item>
+            <item>Network</item>
+            <item>Channel</item>
+        </string-array>
+
+</resources>

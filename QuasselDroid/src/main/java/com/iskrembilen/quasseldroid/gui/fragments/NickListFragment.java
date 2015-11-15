@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.os.Bundle;
@@ -10,12 +33,12 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.idunnololz.widgets.AnimatedExpandableListView;
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.IrcMode;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMode;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.UserCollection;
+import com.iskrembilen.quasseldroid.protocol.state.UserCollection;
 import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
@@ -34,8 +57,6 @@ public class NickListFragment extends Fragment implements Serializable {
     private AnimatedExpandableListView list;
     private int bufferId = -1;
     private NetworkCollection networks;
-    private static final int[] EXPANDED_STATE = {android.R.attr.state_expanded};
-    private static final int[] NOT_EXPANDED_STATE = {android.R.attr.state_empty};
     private final String TAG = NickListFragment.class.getSimpleName();
     public String topic;
 
@@ -233,8 +254,8 @@ public class NickListFragment extends Fragment implements Serializable {
             }
             Pair<IrcMode, List<IrcUser>> group = getGroup(groupPosition);
             convertView.setBackgroundColor(ThemeUtil.getNickBg(group.first));
-            holder.nameView.setTextColor(ThemeUtil.getNickColor(group.first));
-            holder.countView.setTextColor(ThemeUtil.getNickColor(group.first));
+            holder.nameView.setTextColor(ThemeUtil.getModeColor(group.first));
+            holder.countView.setTextColor(ThemeUtil.getModeColor(group.first));
 
             if (group.second.size() < 1) {
                 convertView.setVisibility(View.GONE);
@@ -244,7 +265,7 @@ public class NickListFragment extends Fragment implements Serializable {
                 convertView.setVisibility(View.VISIBLE);
                 holder.nameView.setVisibility(View.VISIBLE);
                 holder.countView.setVisibility(View.VISIBLE);
-                holder.nameView.setText(group.first.modeName);
+                holder.nameView.setText(getResources().getQuantityString(group.first.modeName, group.second.size()));
                 holder.countView.setText(group.first.icon + " " + group.second.size());
             }
             return convertView;

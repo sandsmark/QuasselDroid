@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="light"
+        android:dialogTitle="@string/preference_dialog_theme"
+        android:entries="@array/entries_theme_preference"
+        android:entryValues="@array/entryvalues_theme_preference"
+        android:key="@string/preference_theme"
+        android:summary="@string/preference_summary_theme"
+        android:title="@string/preference_title_theme" />
+
+    <EditTextPreference
+        android:defaultValue=""
+        android:dialogTitle="@string/preference_dialog_timestamp"
+        android:dialogMessage="@string/preference_message_timestamp"
+        android:key="@string/preference_timestamp"
+        android:summary="@string/preference_summary_timestamp"
+        android:title="@string/preference_title_timestamp" />
+
+    <ListPreference
+        android:defaultValue="14"
+        android:dialogTitle="@string/preference_dialog_fontsize"
+        android:entries="@array/entries_fontsize_preference"
+        android:entryValues="@array/entryvalues_fontsize_preference"
+        android:key="@string/preference_fontsize"
+        android:summary="@string/preference_summary_fontsize"
+        android:title="@string/preference_title_fontsize" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/preference_colored_text"
+        android:summaryOn="@string/preference_summary_on_colored_text"
+        android:summaryOff="@string/preference_summary_off_colored_text"
+        android:title="@string/preference_title_colored_text" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_monospace"
+        android:summaryOn="@string/preference_summary_on_monospace"
+        android:summaryOff="@string/preference_summary_off_monospace"
+        android:title="@string/preference_title_monospace" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_nickbrackets"
+        android:summaryOn="@string/preference_summary_on_nickbrackets"
+        android:summaryOff="@string/preference_summary_off_nickbrackets"
+        android:title="@string/preference_title_nickbrackets" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_hostname"
+        android:summaryOn="@string/preference_summary_on_hostname"
+        android:summaryOff="@string/preference_summary_off_hostname"
+        android:title="@string/preference_title_hostname" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_lag"
+        android:summaryOn="@string/preference_summary_on_lag"
+        android:summaryOff="@string/preference_summary_off_lag"
+        android:title="@string/preference_title_lag" />
+</PreferenceScreen>

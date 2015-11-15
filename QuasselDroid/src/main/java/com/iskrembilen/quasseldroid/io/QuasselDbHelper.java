@@ -1,24 +1,24 @@
-/**
- QuasselDroid - Quassel client for Android
- Copyright (C) 2011 Ken Børge Viktil
- Copyright (C) 2011 Magnus Fjell
- Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
- This program is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the Free
- Software Foundation, either version 3 of the License, or (at your option)
- any later version, or under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either version 2.1 of
- the License, or (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License and the
- GNU Lesser General Public License along with this program. If not, see
- <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
  */
 
 package com.iskrembilen.quasseldroid.io;
@@ -32,7 +32,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
 
 public class QuasselDbHelper {
     public static final String KEY_ID = "_id";
@@ -116,31 +116,23 @@ public class QuasselDbHelper {
         dbHelper = null;
     }
 
-    public void addCore(String name, String address, int port) {
-        try {
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_NAME, name);
-            initialValues.put(KEY_ADDRESS, address);
-            initialValues.put(KEY_PORT, port);
-            db.insert(CORE_TABLE, null, initialValues);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void addCore(String name, String address, int port) throws SQLException {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_NAME, name);
+        initialValues.put(KEY_ADDRESS, address);
+        initialValues.put(KEY_PORT, port);
+        db.insert(CORE_TABLE, null, initialValues);
     }
 
 
-    public void deleteCore(long rowId) {
+    public void deleteCore(long rowId) throws SQLException {
         db.delete(CORE_TABLE, KEY_ID + "=" + rowId, null);
     }
 
     public boolean hasCores() {
         Cursor c = db.query(CORE_TABLE, new String[]{KEY_ID, KEY_NAME}, null, null, null, null, null);
         boolean hasCores;
-        if (c != null && c.getCount() > 0) {
-            hasCores = true;
-        } else {
-            hasCores = false;
-        }
+        hasCores = (c != null && c.getCount() > 0);
 
         if (c != null) c.close();
         return hasCores;
@@ -163,7 +155,7 @@ public class QuasselDbHelper {
         return b;
     }
 
-    public void updateCore(long rowId, String name, String address, int port) {
+    public void updateCore(long rowId, String name, String address, int port) throws SQLException {
         ContentValues args = new ContentValues();
         args.put(KEY_NAME, name);
         args.put(KEY_ADDRESS, address);
@@ -172,17 +164,13 @@ public class QuasselDbHelper {
         //TODO: need to make sure that core names are unique, and send back som error to the user if its not, or we get problems if names are the same
     }
 
-    public void storeCertificate(String certificateHash, long coreId) {
-        try {
-            ContentValues value = new ContentValues();
-            value.put(KEY_CERTIFICATE, certificateHash);
-            value.put(KEY_COREIDREFERENCE, coreId);
-            long res = db.insert(CERTIFICATE_TABLE, null, value);
-            if (res == -1) {
-                db.replace(CERTIFICATE_TABLE, null, value);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void storeCertificate(String certificateHash, long coreId) throws SQLException {
+        ContentValues value = new ContentValues();
+        value.put(KEY_CERTIFICATE, certificateHash);
+        value.put(KEY_COREIDREFERENCE, coreId);
+        long res = db.insert(CERTIFICATE_TABLE, null, value);
+        if (res == -1) {
+            db.replace(CERTIFICATE_TABLE, null, value);
         }
     }
 
@@ -197,30 +185,22 @@ public class QuasselDbHelper {
         return cert;
     }
 
-    public void addHiddenEvent(IrcMessage.Type event, int bufferId) {
-        try {
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_EVENT, event.name());
-            initialValues.put(KEY_BUFFERID, bufferId);
-            db.insert(HIDDENEVENTS_TABLE, null, initialValues);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void addHiddenEvent(IrcMessage.Type event, int bufferId) throws SQLException {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_EVENT, event.name());
+        initialValues.put(KEY_BUFFERID, bufferId);
+        db.insert(HIDDENEVENTS_TABLE, null, initialValues);
     }
 
-    public void addUser(String userName, String password, long coreId) {
-        try {
-            db.delete(USER_TABLE, KEY_COREIDREFERENCE + "=" + coreId, null);
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(KEY_USERNAME, userName);
-            initialValues.put(KEY_PASSWORD, password);
-            initialValues.put(KEY_COREIDREFERENCE, coreId);
-            long res = db.insert(USER_TABLE, null, initialValues);
-            if (res == -1) {
-                db.replace(USER_TABLE, null, initialValues);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void addUser(String userName, String password, long coreId) throws SQLException {
+        db.delete(USER_TABLE, KEY_COREIDREFERENCE + "=" + coreId, null);
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_USERNAME, userName);
+        initialValues.put(KEY_PASSWORD, password);
+        initialValues.put(KEY_COREIDREFERENCE, coreId);
+        long res = db.insert(USER_TABLE, null, initialValues);
+        if (res == -1) {
+            db.replace(USER_TABLE, null, initialValues);
         }
     }
 
@@ -246,7 +226,8 @@ public class QuasselDbHelper {
             return;
         StringBuilder list = new StringBuilder("(");
         for (int id : bufferids) {
-            list.append(id + ",");
+            list.append(id);
+            list.append(",");
         }
         list.deleteCharAt(list.length() - 1);
         list.append(")");
@@ -275,12 +256,4 @@ public class QuasselDbHelper {
         }
         return events;
     }
-
-    /**
-     * ONLY USED FOR TESTING!
-     */
-    public SQLiteDatabase getDatabase() {
-        return db;
-    }
-
 }

@@ -1,9 +1,33 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.gui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +62,7 @@ public class JoinChannelDialog extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(@NonNull Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
@@ -49,11 +73,11 @@ public class JoinChannelDialog extends DialogFragment {
 
         builder.setView(dialog)
                 .setTitle(getResources().getString(R.string.dialog_title_channel))
-                .setPositiveButton(getResources().getString(R.string.dialog_action_join), new DialogInterface.OnClickListener() {
+                .setPositiveButton(getResources().getString(R.string.action_join), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String channelName = channelNameField.getText().toString().trim();
-                        if (channelName != null && !channelName.trim().equalsIgnoreCase("")) {
+                        if (!channelName.trim().equalsIgnoreCase("")) {
                             String networkSelected = (String) networkSpinner.getSelectedItem();
                             BusProvider.getInstance().post(new JoinChannelEvent(networkSelected, channelName));
                             dismiss();
@@ -61,7 +85,7 @@ public class JoinChannelDialog extends DialogFragment {
                             Toast.makeText(getActivity(),R.string.dialog_message_join_no_channel,Toast.LENGTH_SHORT).show();
                         }
                     }
-                }).setNegativeButton(getResources().getString(R.string.dialog_action_cancel), new DialogInterface.OnClickListener() {
+                }).setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 getDialog().dismiss();

@@ -1,9 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:background="?attr/listSelector">
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
 
     <View
         android:id="@+id/buffer_divider"
@@ -11,20 +33,34 @@
         android:layout_height="1dp"
         android:background="?attr/dividerColor"/>
 
-    <TextView
-        android:id="@+id/buffer_list_item_name"
-        android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_gravity="start|fill_vertical"
-        android:layout_weight="1"
-        android:padding="12dp"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:layout_marginLeft="32dp"
-        android:layout_marginStart="32dp"
-        android:duplicateParentState="false"
-        android:gravity="start|center_vertical"
-        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
-        android:textStyle="bold" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp"
+        android:orientation="horizontal"
+        android:background="?attr/listSelector">
 
+        <TextView
+            android:id="@+id/buffer_list_item_name"
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:layout_gravity="start|center_vertical"
+            android:textSize="16sp"/>
+
+        <ImageView
+            android:id="@+id/buffer_list_item_indicator"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="start|center_vertical"
+            android:src="?attr/ic_expand"/>
+
+    </LinearLayout>
 </LinearLayout>

@@ -1,7 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
     android:orientation="horizontal"
     android:background="?attr/listSelector">
     
@@ -9,20 +33,21 @@
         android:id="@+id/buffer_status"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_gravity="start|center_vertical"
         android:src="@drawable/ic_status"/>
+
     <TextView
         android:id="@+id/buffer_list_item_name"
-        android:layout_width="fill_parent"
+        android:layout_width="0dip"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="10dp"
         android:ellipsize="end"
         android:singleLine="true"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_gravity="start|center_vertical"
-        android:textAppearance="@style/TextAppearance.AppCompat.Menu"/>
+        android:textSize="16sp"/>
 
 </LinearLayout>

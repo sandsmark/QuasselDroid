@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_notify_hide_persistence"
+        android:title="@string/preference_title_notify_hide_persistence"
+        android:summaryOn="@string/preference_summary_on_notify_hide_persistence"
+        android:summaryOff="@string/preference_summary_off_notify_hide_persistence"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_notify_connect"
+        android:title="@string/preference_title_notify_connect" />
+
+    <SwitchPreference
+        android:key="@string/preference_notification_vibrate"
+        android:title="@string/preference_title_notification_vibrate" />
+
+    <SwitchPreference
+        android:key="@string/preference_notification_light"
+        android:title="@string/preference_title_notification_light" />
+
+    <SwitchPreference
+        android:key="@string/preference_notification_sound"
+        android:title="@string/preference_title_notification_sound" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_notification_sound_active"
+        android:title="@string/preference_title_notification_sound_active" />
+
+    <RingtonePreference
+        android:key="@string/preference_notification_sound_file"
+        android:ringtoneType="notification"
+        android:showDefault="true"
+        android:showSilent="true"
+        android:title="@string/preference_title_notification_sound_file"/>
+
+    <RingtonePreference
+        android:key="@string/preference_notification_connect_sound_file"
+        android:ringtoneType="notification"
+        android:showDefault="true"
+        android:showSilent="true"
+        android:title="@string/preference_title_notification_connect_sound_file"/>
+
+    <PreferenceCategory android:title="@string/preference_category_highlight">
+
+        <ListPreference
+            android:defaultValue="current"
+            android:dialogTitle="@string/preference_dialog_highlight_type"
+            android:entries="@array/entries_highlight_preference"
+            android:entryValues="@array/entryvalues_highlight_preference"
+            android:key="@string/preference_highlight_type"
+            android:title="@string/preference_title_highlight_type" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/perference_highlight_casesensitive"
+            android:title="@string/perference_title_highlight_casesensitive" />
+    </PreferenceCategory>
+</PreferenceScreen>

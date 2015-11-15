@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_fetch_to_last_seen"
+        android:summaryOn="@string/preference_summary_on_fetch_to_last_seen"
+        android:summaryOff="@string/preference_summary_off_fetch_to_last_seen"
+        android:title="@string/preference_title_fetch_to_last_seen"
+        android:disableDependentsState="true" />
+
+    <EditTextPreference
+        android:defaultValue="10"
+        android:key="@string/preference_initial_backlog_limit"
+        android:numeric="integer"
+        android:summary="@string/preference_summary_initial_backlog_limit"
+        android:title="@string/preference_title_initial_backlog_limit"
+        android:dependency="@string/preference_fetch_to_last_seen" />
+
+    <EditTextPreference
+        android:defaultValue="20"
+        android:key="@string/preference_dynamic_backlog"
+        android:numeric="integer"
+        android:summary="@string/preference_summary_dynamic_backlog"
+        android:title="@string/preference_title_dynamic_backlog" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/preference_wake_lock"
+        android:summary="@string/preference_wakelock_summary"
+        android:title="@string/preference_wakelock_title" />
+
+    <PreferenceCategory android:title="@string/preference_category_reconnect">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect"
+            android:summaryOn="@string/preference_summary_on_reconnect"
+            android:summaryOff="@string/preference_summary_off_reconnect"
+            android:title="@string/preference_title_reconnect"
+            android:disableDependentsState="false" />
+        <EditTextPreference
+            android:defaultValue="5"
+            android:key="@string/preference_reconnect_interval"
+            android:numeric="integer"
+            android:summary="@string/preference_summary_reconnect_interval"
+            android:title="@string/preference_title_reconnect_interval"
+            android:dependency="@string/preference_reconnect" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_wifi"
+            android:summaryOn="@string/preference_summary_on_reconnect_wifi"
+            android:summaryOff="@string/preference_summary_off_reconnect_wifi"
+            android:title="@string/preference_title_wifi"
+            android:dependency="@string/preference_reconnect" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/preference_reconnect_metered"
+            android:summaryOn="@string/preference_summary_on_metered"
+            android:summaryOff="@string/preference_summary_off_metered"
+            android:title="@string/preference_title_metered"
+            android:dependency="@string/preference_reconnect_wifi" />
+    </PreferenceCategory>
+</PreferenceScreen>

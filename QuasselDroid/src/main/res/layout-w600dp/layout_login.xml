@@ -1,108 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="600dp"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:layout_gravity="center_horizontal|fill_vertical">
+    android:layout_width="match_parent"
+    android:background="#1000"
+    android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/connect_layout"
-        android:layout_alignParentTop="true">
+    <RelativeLayout
+        android:layout_width="600dp"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:elevation="4dp"
+        android:background="?attr/backgroundColor"
+        android:layout_gravity="center_horizontal|fill_vertical">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:text="@string/title_login"
-                android:layout_marginBottom="24dp"/>
+            android:layout_above="@+id/connect_layout"
+            android:layout_alignParentTop="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="16dp">
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:orientation="vertical">
 
-                <Spinner
-                    android:id="@+id/serverSpinner"
-                    android:layout_width="0dip"
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|fill_horizontal"
-                    android:layout_weight="1"/>
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:text="@string/title_login"
+                    android:layout_marginBottom="24dp"/>
 
-                <ImageButton
-                    android:id="@+id/core_menu"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center_vertical"
-                    android:src="?attr/ic_overflow"
-                    android:scaleType="fitCenter" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="16dp">
+
+                    <Spinner
+                        android:id="@+id/serverSpinner"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical|fill_horizontal"
+                        android:layout_weight="1"/>
+
+                    <ImageButton
+                        android:id="@+id/core_menu"
+                        style="@style/Widget.AppCompat.ActionButton"
+                        android:layout_width="@dimen/abc_action_button_min_height_material"
+                        android:layout_height="@dimen/abc_action_button_min_width_material"
+                        android:layout_gravity="center_vertical"
+                        android:src="?attr/ic_overflow"
+                        android:scaleType="fitCenter" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:text="@string/hint_identity_username"/>
+                <EditText
+                    android:id="@+id/usernameField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="16sp"
+                    android:singleLine="true"
+                    android:inputType="textNoSuggestions" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:text="@string/hint_identity_password"/>
+                <EditText
+                    android:id="@+id/passwordField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="16sp"
+                    android:singleLine="true"
+                    android:inputType="textPassword" />
+
+                <CheckBox
+                    android:id="@+id/remember_me_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:checked="false"
+                    android:text="@string/checkbox_remember_me" />
             </LinearLayout>
+        </ScrollView>
 
-            <EditText
-                android:id="@+id/usernameField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|fill_horizontal"
-                android:layout_weight="1"
-                android:hint="@string/hint_identity_username"
-                android:singleLine="true"
-                android:inputType="textNoSuggestions">
-
-                <requestFocus />
-            </EditText>
-
-
-            <EditText
-                android:id="@+id/passwordField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|fill_horizontal"
-                android:layout_weight="1"
-                android:hint="@string/hint_identity_password"
-                android:inputType="textPassword"
-                android:singleLine="true"/>
-
-            <CheckBox
-                android:id="@+id/remember_me_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:checked="false"
-                android:text="@string/checkbox_remember_me" />
-        </LinearLayout>
-    </ScrollView>
-
-    <RelativeLayout
-        android:id="@+id/connect_layout"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true">
-
-        <View
+        <LinearLayout
+            android:id="@+id/connect_layout"
             android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="4dip"
-            android:layout_marginRight="4dip"
-            android:background="?android:attr/dividerVertical" />
-
-        <Button
-            android:id="@+id/connect_button"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:text="@string/action_connect" />
-    </RelativeLayout>
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical" >
 
-</RelativeLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:background="?android:attr/dividerVertical" />
+
+            <Button
+                android:id="@+id/connect_button"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:text="@string/action_connect" />
+        </LinearLayout>
+
+    </RelativeLayout>
+</FrameLayout>

@@ -1,8 +1,8 @@
 /*
     QuasselDroid - Quassel client for Android
- 	Copyright (C) 2011 Ken Børge Viktil
- 	Copyright (C) 2011 Magnus Fjell
- 	Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
     This program is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -11,10 +11,10 @@
     License as published by the Free Software Foundation; either version 2.1 of
     the License, or (at your option) any later version.
 
- 	This program is distributed in the hope that it will be useful,
- 	but WITHOUT ANY WARRANTY; without even the implied warranty of
- 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- 	GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License and the
     GNU Lesser General Public License along with this program.  If not, see
@@ -36,12 +36,11 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,7 +62,9 @@ import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.LoginProgressDialog;
+import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.iskrembilen.quasseldroid.service.InFocus;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -79,17 +80,16 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     public static final String PREFS_ACCOUNT = "AccountPreferences";
     public static final String PREFS_CORE = "coreSelection";
 
-    SharedPreferences settings;
-    QuasselDbHelper dbHelper;
+    private SharedPreferences settings;
+    private QuasselDbHelper dbHelper;
 
-    Spinner core;
-    EditText usernameField;
-    EditText passwordField;
-    CheckBox rememberMe;
-    Button connect;
-    EditText portField;
-    EditText nameField;
-    EditText addressField;
+    private Spinner core;
+    private EditText usernameField;
+    private EditText passwordField;
+    private CheckBox rememberMe;
+    private EditText portField;
+    private EditText nameField;
+    private EditText addressField;
 
     private String hashedCert;//ugly
     private int currentTheme;
@@ -133,7 +133,9 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // TODO Auto-generated method stub
+                usernameField.setText("");
+                passwordField.setText("");
+                rememberMe.setChecked(false);
             }
         });
 
@@ -160,7 +162,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         if (core.getCount() > settings.getInt(PREFS_CORE, 0))
             core.setSelection(settings.getInt(PREFS_CORE, 0));
 
-        connect = (Button) findViewById(R.id.connect_button);
+        Button connect = (Button) findViewById(R.id.connect_button);
         connect.setOnClickListener(onConnect);
     }
 
@@ -223,6 +225,8 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 }
             }, 1);
         }
+
+        Client.getInstance().setActivity(this);
     }
 
     @Override
@@ -261,7 +265,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_preferences:
-                Intent i = new Intent(LoginActivity.this, PreferenceView.class);
+                Intent i = new Intent(LoginActivity.this, SettingsActivity.class);
                 startActivity(i);
                 break;
         }
@@ -269,7 +273,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     }
 
     @Override
-    protected void onPrepareDialog(int id, Dialog dialog) {
+    protected void onPrepareDialog(int id, @NonNull Dialog dialog) {
         switch (id) {
             case R.id.DIALOG_ADD_CORE:
                 portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
@@ -301,7 +305,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 portField.setText(String.valueOf(getResources().getInteger(R.integer.default_port)));
                 builder.setView(root);
                 builder.setTitle(getResources().getString(R.string.dialog_title_core_add));
-                builder.setPositiveButton(getResources().getString(R.string.dialog_action_save), new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(getResources().getString(R.string.action_save), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String name = nameField.getText().toString().trim();
@@ -318,7 +322,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                         dialogInterface.dismiss();
                     }
                 });
-                builder.setNegativeButton(getResources().getString(R.string.dialog_action_cancel), new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(getResources().getString(R.string.action_cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         nameField.setText("");
@@ -335,13 +339,13 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setMessage(certificateMessage + "\n" + hashedCert)
                         .setCancelable(false)
-                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.storeCertificate(hashedCert, core.getSelectedItemId());
                                 onConnect.onClick(null);
                             }
                         })
-                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -353,13 +357,13 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 builder.setTitle(getResources().getString(R.string.dialog_title_delete_buffer))
                         .setMessage(getResources().getString(R.string.dialog_message_delete_buffer))
                         .setCancelable(false)
-                        .setPositiveButton(getResources().getString(R.string.dialog_action_yes), new DialogInterface.OnClickListener() {
+                        .setPositiveButton(getResources().getString(R.string.action_yes), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dbHelper.deleteCore(core.getSelectedItemId());
                                 updateCoreSpinner();
                             }
                         })
-                        .setNegativeButton(getResources().getString(R.string.dialog_action_no), new DialogInterface.OnClickListener() {
+                        .setNegativeButton(getResources().getString(R.string.action_no), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
@@ -403,7 +407,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 dbHelper.deleteUser(core.getSelectedItemId());
 
             }
-            settingsedit.commit();
+            settingsedit.apply();
             //dbHelper.open();
             Bundle res = dbHelper.getCore(core.getSelectedItemId());
 
@@ -464,7 +468,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
             finish();
         } else if (event.status == Status.Disconnected) {
             dismissLoginDialog();
-            if (event.reason != "") {
+            if (!event.reason.trim().equals("")) {
                 Toast.makeText(LoginActivity.this, event.reason, Toast.LENGTH_LONG).show();
             }
         }

@@ -1,16 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="abc_action_bar_default_height">48.0dip</dimen>
-    <dimen name="abc_action_bar_icon_vertical_padding">8.0dip</dimen>
-    <dimen name="abc_action_bar_progress_bar_size">40.0dip</dimen>
-    <dimen name="abc_action_bar_stacked_max_height">48.0dip</dimen>
-    <dimen name="abc_action_bar_stacked_tab_max_width">180.0dip</dimen>
-    <dimen name="abc_action_bar_subtitle_bottom_margin">5.0dip</dimen>
-    <dimen name="abc_action_bar_subtitle_text_size">14.0dip</dimen>
-    <dimen name="abc_action_bar_subtitle_top_margin">-3.0dip</dimen>
-    <dimen name="abc_action_bar_title_text_size">18.0dip</dimen>
-    <dimen name="abc_action_button_min_width">56.0dip</dimen>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<resources>
     <dimen name="message_spacing">1dp</dimen>
     <dimen name="markerline_height">1dp</dimen>
+
+    <dimen name="status_bar_height">0dp</dimen>
+    <dimen name="toast_offset">8dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_diameter">56dp</dimen>
+
+    <!-- Weight of the left pane in a multi-pane preference layout. -->
+    <integer name="preferences_left_pane_weight">4</integer>
+    <!-- Weight of the right pane in a multi-pane preference layout. So the split is 40:60 -->
+    <integer name="preferences_right_pane_weight">6</integer>
+    <!-- outsideOverlay -->
+    <integer name="preference_screen_header_scrollbarStyle">0x02000000</integer>
+    <!-- Preference activity side margins -->
+    <dimen name="preference_screen_side_margin">0dp</dimen>
+    <!-- Preference activity side margins negative-->
+    <dimen name="preference_screen_side_margin_negative">0dp</dimen>
+    <!-- Preference activity, vertical padding for the header list -->
+    <dimen name="preference_screen_header_vertical_padding">0dp</dimen>
 </resources>

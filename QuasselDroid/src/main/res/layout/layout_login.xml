@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -46,29 +68,44 @@
                     android:scaleType="fitCenter" />
             </LinearLayout>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="@string/hint_identity_username"/>
             <EditText
                 android:id="@+id/usernameField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|fill_horizontal"
-                android:layout_weight="1"
-                android:hint="@string/hint_identity_username"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="8dp"
+                android:textSize="16sp"
                 android:singleLine="true"
-                android:inputType="textNoSuggestions">
-
-                <requestFocus />
-            </EditText>
+                android:inputType="textNoSuggestions" />
 
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:text="@string/hint_identity_password"/>
             <EditText
                 android:id="@+id/passwordField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|fill_horizontal"
-                android:layout_weight="1"
-                android:hint="@string/hint_identity_password"
-                android:inputType="textPassword"
-                android:singleLine="true"/>
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="8dp"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:inputType="textPassword" />
 
             <CheckBox
                 android:id="@+id/remember_me_checkbox"
@@ -81,18 +118,16 @@
         </LinearLayout>
     </ScrollView>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/connect_layout"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical" >
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dip"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="4dip"
-            android:layout_marginRight="4dip"
             android:background="?android:attr/dividerVertical" />
 
         <Button
@@ -102,6 +137,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:text="@string/action_connect" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

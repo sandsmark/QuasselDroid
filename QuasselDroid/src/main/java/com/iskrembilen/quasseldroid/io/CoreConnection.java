@@ -1,29 +1,30 @@
-/**
- QuasselDroid - Quassel client for Android
- Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
- This program is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the Free
- Software Foundation, either version 3 of the License, or (at your option)
- any later version, or under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either version 2.1 of
- the License, or (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License and the
- GNU Lesser General Public License along with this program.  If not, see
- <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
  */
 
 package com.iskrembilen.quasseldroid.io;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -31,27 +32,35 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
-import android.widget.AbsListView;
+import android.util.SparseArray;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.CoreInfo;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.events.RequestRemoteSyncEvent;
+import com.iskrembilen.quasseldroid.protocol.packets.ObjectRenamedRequest;
+import com.iskrembilen.quasseldroid.protocol.packets.RpcRequest;
+import com.iskrembilen.quasseldroid.protocol.packets.SyncMethodMessage;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.BufferCollection;
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.CoreInfo;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
+import com.iskrembilen.quasseldroid.protocol.state.IdentityCollection;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.Network;
+import com.iskrembilen.quasseldroid.protocol.state.Network.ConnectionState;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.exceptions.UnsupportedProtocolException;
 import com.iskrembilen.quasseldroid.io.CustomTrustManager.NewCertificateException;
-import com.iskrembilen.quasseldroid.qtcomm.EmptyQVariantException;
-import com.iskrembilen.quasseldroid.qtcomm.QDataInputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QDataOutputStream;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaType;
-import com.iskrembilen.quasseldroid.qtcomm.QMetaTypeRegistry;
-import com.iskrembilen.quasseldroid.qtcomm.QVariant;
-import com.iskrembilen.quasseldroid.qtcomm.QVariantType;
-import com.iskrembilen.quasseldroid.service.CoreConnService;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QDataInputStream;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QDataOutputStream;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QMetaType;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QMetaTypeRegistry;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
+import de.kuschku.util.BetterSparseArray;
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
@@ -80,7 +89,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -96,9 +104,9 @@ public final class CoreConnection {
     private SwitchableDeflaterOutputStream deflater;
     private SwitchableInflaterInputStream inflater;
 
-    private Map<Integer, Buffer> buffers;
+    private BetterSparseArray<Buffer> buffers;
     private CoreInfo coreInfo;
-    private Map<Integer, Network> networks;
+    private BetterSparseArray<Network> networks;
 
     private long coreId;
     private String address;
@@ -116,7 +124,6 @@ public final class CoreConnection {
     private boolean initComplete;
     private int networkInitsLeft;
     private boolean networkInitComplete;
-    private LinkedList<List<QVariant<?>>> packageQueue;
     private String errorMessage;
 
     private int bufferViewId;
@@ -128,7 +135,6 @@ public final class CoreConnection {
     private boolean usingCompression = false;
 
     private ExecutorService outputExecutor;
-
 
     public CoreConnection(long coreId, String address, int port, String username,
                           String password, String clientVersion, Handler serviceHandler,
@@ -338,7 +344,6 @@ public final class CoreConnection {
         if (buffers.get(buffer).getUnfilteredSize() == 0) {
             requestBacklog(buffer, -1, -1, amount);
         } else {
-//			Log.e(TAG, "GETTING: "+buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId);
             requestBacklog(buffer, -1, buffers.get(buffer).getUnfilteredBacklogEntry(0).messageId, amount);
         }
     }
@@ -373,6 +378,54 @@ public final class CoreConnection {
             sendQVariantList(retFunc);
         } catch (IOException e) {
             Log.e(TAG, "IOException while requesting backlog", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
+    public void requestRemoteSync(RequestRemoteSyncEvent event) {
+        Log.d(TAG,"Requesting remote sync: "+event.className + "::" + event.functionName);
+        List<QVariant<?>> retFunc = new LinkedList<>();
+        retFunc.add(new QVariant<>(RequestType.Sync.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<>(event.className, QVariantType.String));
+        retFunc.add(new QVariant<>(event.objectName, QVariantType.String));
+        retFunc.add(new QVariant<>(event.functionName, QVariantType.String));
+        retFunc.add(event.args);
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while requesting remote sync", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
+    public void requestCreateIdentity(int identityId, QVariant<?> identity, QVariant<?> ssldata) {
+        List<QVariant<?>> retFunc = new LinkedList<>();
+        retFunc.add(new QVariant<>(RequestType.RpcCall.getValue(), QVariantType.Int));
+
+        retFunc.add(new QVariant<>("2identityCreated(Identity)", QVariantType.String));
+        retFunc.add(new QVariant<>(new HashMap<String,Object>(),"Identity"));
+
+        Log.d(TAG,retFunc.toString());
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while updating identity", e);
+            onDisconnected("Lost connection");
+        }
+    }
+
+    public void requestRemoveIdentity(int identityId) {
+        List<QVariant<?>> retFunc = new LinkedList<>();
+        retFunc.add(new QVariant<>(RequestType.RpcCall.getValue(), QVariantType.Int));
+        retFunc.add(new QVariant<>("2identityRemoved(IdentityId)", QVariantType.String));
+        retFunc.add(new QVariant<>(identityId, QVariantType.Int));
+
+        try {
+            sendQVariantList(retFunc);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while updating identity", e);
             onDisconnected("Lost connection");
         }
     }
@@ -579,15 +632,28 @@ public final class CoreConnection {
 		}*/
 
         Map<String, QVariant<?>> sessionState = (Map<String, QVariant<?>>) reply.get("SessionState").getData();
+
         List<QVariant<?>> networkIds = (List<QVariant<?>>) sessionState.get("NetworkIds").getData();
-        networks = new HashMap<Integer, Network>(networkIds.size());
+        networks = new BetterSparseArray<>(networkIds.size());
         for (QVariant<?> networkId : networkIds) {
             Integer id = (Integer) networkId.getData();
             networks.put(id, new Network(id));
         }
 
+        List<QVariant<?>> identities = (List<QVariant<?>>) sessionState.get("Identities").getData();
+        List<Identity> identityList = new ArrayList<>(identities.size());
+        Client.getInstance().getIdentities().clear();
+        Identity identity;
+        for (QVariant<?> identityRaw : identities) {
+            identity = new Identity();
+            identity.fromVariantMap((QVariant<Map<String,QVariant<?>>>) identityRaw);
+
+            Client.getInstance().getIdentities().putIdentity(identity);
+        }
+
         List<QVariant<?>> bufferInfos = (List<QVariant<?>>) sessionState.get("BufferInfos").getData();
-        buffers = new HashMap<Integer, Buffer>(bufferInfos.size());
+        buffers = new BetterSparseArray<>(bufferInfos.size());
+
         QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
         ArrayList<Integer> bufferIds = new ArrayList<Integer>();
         for (QVariant<?> bufferInfoQV : bufferInfos) {
@@ -694,6 +760,13 @@ public final class CoreConnection {
         HeartBeat(5),
         HeartBeatReply(6);
 
+        static SparseArray<RequestType> types = new SparseArray<>(6);
+        static {
+            for (RequestType t : RequestType.values()) {
+                types.put(t.value,t);
+            }
+        }
+
         // Below this line; java sucks. Hard.
         int value;
 
@@ -706,11 +779,7 @@ public final class CoreConnection {
         }
 
         public static RequestType getForVal(int val) {
-            for (RequestType type : values()) {
-                if (type.value == val)
-                    return type;
-            }
-            return Invalid;
+            return types.get(val,Invalid);
         }
     }
 
@@ -789,8 +858,8 @@ public final class CoreConnection {
         inStream.readUInt(32);
         QVariant<Map<String, QVariant<?>>> v = (QVariant<Map<String, QVariant<?>>>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
-        Map<String, QVariant<?>> ret = (Map<String, QVariant<?>>) v.getData();
-        //		System.out.println(ret.toString());
+        Map<String, QVariant<?>> ret = v.getData();
+
         if (!readThread.running)
             throw new IOException(); //Stops crashing while connecting if we are told to disconnect, so 2 instances are not reading the network
         return ret;
@@ -805,8 +874,8 @@ public final class CoreConnection {
         inStream.readUInt(32); // Length
         QVariant<List<QVariant<?>>> v = (QVariant<List<QVariant<?>>>) QMetaTypeRegistry.unserialize(QMetaType.Type.QVariant, inStream);
 
-        List<QVariant<?>> ret = (List<QVariant<?>>) v.getData();
-        //		System.out.println(ret.toString());
+        List<QVariant<?>> ret = v.getData();
+
         return ret;
     }
 
@@ -839,10 +908,14 @@ public final class CoreConnection {
         handler.obtainMessage(R.id.INIT_DONE).sendToTarget();
     }
 
-    private class ReadThread extends Thread {
-        boolean running = false;
+    // FIXME: FIX THIS MONSTER
+    // TODO: Abandon hope all ye who enter this place.
 
-        CountDownTimer checkAlive = new CountDownTimer(45000, 45000) {
+    private class ReadThread extends Thread {
+        public static final int TIMEOUT = 45000;
+        private boolean running = false;
+
+        private CountDownTimer checkAlive = new CountDownTimer(TIMEOUT, TIMEOUT) {
             @Override
             public void onTick(long millisUntilFinished) {
                 //Do nothing, no use
@@ -900,7 +973,7 @@ public final class CoreConnection {
         public String doRun() throws EmptyQVariantException {
             this.running = true;
             errorMessage = null;
-            packageQueue = new LinkedList<List<QVariant<?>>>();
+            LinkedList<List<QVariant<?>>> packageQueue = new LinkedList<List<QVariant<?>>>();
 
             try {
                 connect();
@@ -973,7 +1046,6 @@ public final class CoreConnection {
                     RequestType type = RequestType.getForVal((Integer) packedFunc.remove(0).getData());
                     String className = "", objectName;
 	
-	
 					/*
 					 * Here we handle different calls from the core.
 					 */
@@ -1014,7 +1086,7 @@ public final class CoreConnection {
                             // The class name and name of the object we are about to create
                             className = (String) packedFunc.remove(0).getData();
                             objectName = (String) packedFunc.remove(0).getData();
-	
+
 						/*
 						 * An object representing an IRC network, containing users and channels ("buffers"). 
 						 */
@@ -1024,11 +1096,13 @@ public final class CoreConnection {
                                 Network network = networks.get(networkId);
 
                                 Map<String, QVariant<?>> initMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
-                                // Store the network name and associated nick for "our" user
-                                network.setNick((String) initMap.get("myNick").getData());
-                                network.setName((String) initMap.get("networkName").getData());
+
+                                // Store the network name and associated myNick for "our" user
+                                network.setMyNick((String) initMap.get("myNick").getData());
+                                network.setNetworkName((String) initMap.get("networkName").getData());
                                 network.setLatency((Integer) initMap.get("latency").getData());
-                                network.setServer((String) initMap.get("currentServer").getData());
+                                network.setCurrentServer((String) initMap.get("currentServer").getData());
+                                network.setIdentity((Integer) initMap.get("identityId").getData());
                                 boolean isConnected = (Boolean) initMap.get("isConnected").getData();
                                 if (isConnected) network.setConnected(true);
                                 else network.setConnectionState(ConnectionState.Disconnected);
@@ -1037,7 +1111,6 @@ public final class CoreConnection {
 
                                 //we got enough info to tell service we are parsing network
                                 Log.i(TAG, "Started parsing network " + network.getName());
-                                updateInitProgress("Receiving network: " + network.getName());
 
                                 // Horribly nested maps
                                 Map<String, QVariant<?>> usersAndChans = (Map<String, QVariant<?>>) initMap.get("IrcUsersAndChannels").getData();
@@ -1050,18 +1123,12 @@ public final class CoreConnection {
                                 for (Map.Entry<String, QVariant<?>> element : userObjs.entrySet()) {
                                     IrcUser user = new IrcUser();
                                     user.name = element.getKey();
-                                    Map<String, QVariant<?>> map = (Map<String, QVariant<?>>) element.getValue().getData();
-                                    user.away = (Boolean) map.get("away").getData();
-                                    user.awayMessage = (String) map.get("awayMessage").getData();
-                                    user.ircOperator = (String) map.get("ircOperator").getData();
-                                    user.nick = (String) map.get("nick").getData();
-                                    if (map.containsKey("realName")) {
-                                        user.realName = (String) map.get("realName").getData();
-                                    }
-                                    user.channels = (List<String>) map.get("channels").getData();
+                                    user.fromVariantMap((QVariant<Map<String, QVariant<?>>>) element.getValue());
+                                    user.networkId = networkId;
 
                                     ircUsers.add(user);
                                     userTempMap.put(user.nick, user);
+                                    user.register();
                                 }
                                 network.setUserList(ircUsers);
 
@@ -1073,24 +1140,21 @@ public final class CoreConnection {
                                     String topic = (String) chan.get("topic").getData();
 
                                     boolean foundChannel = false;
-                                    for (Buffer buffer : network.getBuffers().getBufferList(true)) {
+                                    for (Buffer buffer : network.getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                                         if (buffer.getInfo().name.equalsIgnoreCase(chanName)) {
                                             buffer.setTopic(topic);
                                             buffer.setActive(true);
                                             ArrayList<Pair<IrcUser, String>> usersToAdd = new ArrayList<Pair<IrcUser, String>>();
                                             for (Entry<String, QVariant<?>> nick : userModes.entrySet()) {
                                                 IrcUser user = userTempMap.get(nick.getKey());
-                                                if (user == null) {
-                                                    Log.e(TAG, "Channel has nick that is does not match any user on the network: " + nick);
-                                                    //TODO: WHY THE FUCK IS A  USER NULL HERE? HAPPENS ON MY OWN CORE, BUT NOT ON DEBUG CORE CONNECTED TO SAME CHANNEL. QUASSEL BUG? WHAT TO DO ABOUT IT
+                                                // TODO: Replace this with a less ugly hack
+                                                if (user == null)
+                                                    user = userTempMap.get(nick.getKey().replace("(^[\\\\d-]+|[^A-Za-z0-9\\x5b-\\x60\\x7b-\\x7d])",""));
 
-                                                    //this sync request did not seem to do anything
-                                                    //
-                                                    //												sendInitRequest("IrcUser", network.getId()+"/" +nick.getKey());
+                                                // If the user is still null, switch to the next
+                                                if (user == null)
                                                     continue;
-                                                    //
 
-                                                }
                                                 usersToAdd.add(new Pair<IrcUser, String>(user, (String) nick.getValue().getData()));
                                             }
                                             buffer.getUsers().addUsers(usersToAdd);
@@ -1107,10 +1171,10 @@ public final class CoreConnection {
 
 
                                 //sendInitRequest("BufferSyncer", "");
-							/*sendInitRequest("BufferViewManager", "");
-								sendInitRequest("AliasManager", "");
-								sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
-								sendInitRequest("IgnoreListManager", "");*/
+							    //sendInitRequest("BufferViewManager", "");
+                                //sendInitRequest("AliasManager", "");
+                                //sendInitRequest("NetworkConfig", "GlobalNetworkConfig");
+								sendInitRequest("IgnoreListManager", "");
 
                                 List<QVariant<?>> reqPackedFunc = new LinkedList<QVariant<?>>();
                                 reqPackedFunc.add(new QVariant<Integer>(RequestType.Sync.getValue(), QVariantType.Int));
@@ -1141,17 +1205,13 @@ public final class CoreConnection {
                                 for (int i = 0; i < lastSeen.size(); i += 2) {
                                     int bufferId = (Integer) lastSeen.get(i).getData();
                                     int msgId = (Integer) lastSeen.get(i + 1).getData();
-                                    if (buffers.containsKey(bufferId)) { // We only care for buffers we have open
-                                        if (PreferenceManager.getDefaultSharedPreferences(applicationContext).getBoolean(applicationContext.getString(R.string.preference_fetch_to_last_seen), false)) {
-                                            requestBacklog(bufferId, msgId);
-                                        }
-                                        Message msg = handler.obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
-                                        msg.arg1 = bufferId;
-                                        msg.arg2 = msgId;
-                                        msg.sendToTarget();
-                                    } else {
-                                        Log.e(TAG, "Getting last seen message for buffer we don't have " + bufferId);
+                                    if (PreferenceManager.getDefaultSharedPreferences(applicationContext).getBoolean(applicationContext.getString(R.string.preference_fetch_to_last_seen), false)) {
+                                        requestBacklog(bufferId, msgId);
                                     }
+                                    Message msg = handler.obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
+                                    msg.arg1 = bufferId;
+                                    msg.arg2 = msgId;
+                                    msg.sendToTarget();
                                 }
                                 // Parse out the marker lines for buffers if the core supports them
                                 QVariant<?> rawMarkerLines = ((Map<String, QVariant<?>>) packedFunc.get(0).getData()).get("MarkerLines");
@@ -1160,14 +1220,10 @@ public final class CoreConnection {
                                     for (int i = 0; i < markerLines.size(); i += 2) {
                                         int bufferId = (Integer) markerLines.get(i).getData();
                                         int msgId = (Integer) markerLines.get(i + 1).getData();
-                                        if (buffers.containsKey(bufferId)) {
-                                            Message msg = handler.obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
-                                            msg.arg1 = bufferId;
-                                            msg.arg2 = msgId;
-                                            msg.sendToTarget();
-                                        } else {
-                                            Log.e(TAG, "Getting markerlinemessage for buffer we don't have " + bufferId);
-                                        }
+                                        Message msg = handler.obtainMessage(R.id.SET_MARKERLINE_TO_SERVICE);
+                                        msg.arg1 = bufferId;
+                                        msg.arg2 = msgId;
+                                        msg.sendToTarget();
                                     }
                                 } else {
                                     Log.e(TAG, "Marker lines are null in BufferSyncer, should not happen");
@@ -1177,7 +1233,7 @@ public final class CoreConnection {
 							 * A class representing another user on a given IRC network.
 							 */
                             } else if (className.equals("IrcUser")) {
-                                Log.d(TAG, "InitData: IrcUser");
+                                Log.d(TAG, "InitData: IrcUser " + objectName);
                                 Map<String, QVariant<?>> userMap = (Map<String, QVariant<?>>) packedFunc.remove(0).getData();
                                 Bundle bundle = new Bundle();
                                 bundle.putString("awayMessage", (String) userMap.get("awayMessage").getData());
@@ -1236,7 +1292,6 @@ public final class CoreConnection {
                                 BufferCollection.orderAlphabetical = (Boolean) map.get("sortAlphabetically").getData();
                                 Log.w(TAG, "Setting alphabetical order to: "+Boolean.toString(BufferCollection.orderAlphabetical));
 
-
                                 //TODO: maybe send this in a bulk to the service so it wont sort and shit every time
                                 for (QVariant bufferId : tempList) {
                                     if (!buffers.containsKey(bufferId.getData())) {
@@ -1266,10 +1321,7 @@ public final class CoreConnection {
                                     if (id > maxBufferId) {
                                         maxBufferId = id;
                                     }
-                                    if (!buffers.containsKey(id)) {
-                                        Log.w(TAG, "Got buffer info for non-existent buffer id: " + id);
-                                        continue;
-                                    }
+
                                     Message msg = handler.obtainMessage(R.id.SET_BUFFER_ORDER);
                                     msg.arg1 = id;
                                     msg.arg2 = order;
@@ -1291,12 +1343,14 @@ public final class CoreConnection {
                                     order++;
                                 }
                                 updateInitDone();
+                            } else if (className.equals("IgnoreListManager")) {
+                                Client.getInstance().getIgnoreListManager().fromVariantMap((Map<String, QVariant<?>>) packedFunc.get(0).getData());
                             }
 						/*
 						 * There are several objects that we don't care about (at the moment).
 						 */
                             else {
-                                Log.i(TAG, "Unparsed InitData: " + className + "(" + objectName + ").");
+                                Log.e(TAG, "UNHANDLED: Unparsed InitData: " + className + "(" + objectName + ").");
                             }
                             break;
 						/*
@@ -1356,10 +1410,9 @@ public final class CoreConnection {
 
                                         if (!buffer.hasMessage(msg)) {
                                             /**
-                                             * Check if we are highlighted in the message, TODO: Add
-                                             * support for custom highlight masks
+                                             * Check if we are highlighted in the message
                                              */
-                                            MessageUtil.checkMessageForHighlight(notificationManager, networks.get(buffer.getInfo().networkId).getNick(), buffer, msg);
+                                            MessageUtil.processMessage(applicationContext, notificationManager, msg);
                                             buffer.addBacklogMessage(msg);
                                         } else {
                                             Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
@@ -1379,133 +1432,117 @@ public final class CoreConnection {
 							 * The addIrcUser function in the Network class is called whenever a new
 							 * IRC user appears on a given network. 
 							 */
-                            } else if (className.equals("Network") && function.equals("addIrcUser")) {
-                                Log.d(TAG, "Sync: Network -> addIrcUser");
-                                String nick = (String) packedFunc.remove(0).getData();
-                                IrcUser user = new IrcUser();
-                                user.nick = nick.split("!")[0];
-                                //If not done then we can add it right here, if we try to send it we might crash because service don't have the network yet
-                                if (!initComplete) {
-                                    networks.get(Integer.parseInt(objectName)).onUserJoined(user);
-                                } else {
-                                    handler.obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
-                                }
-                                sendInitRequest("IrcUser", objectName + "/" + nick.split("!")[0]);
-                            } else if (className.equals("Network") && function.equals("setConnectionState")) {
-                                Log.d(TAG, "Sync: Network -> setConnectionState");
-                                int networkId = Integer.parseInt(objectName);
-                                Network.ConnectionState state = ConnectionState.getForValue((Integer) packedFunc.remove(0).getData());
-                                //If network has no status buffer it is the first time we are connecting to it
-                                if (state == ConnectionState.Connecting && networks.get(networkId).getStatusBuffer() == null) {
-                                    //Create the new buffer object for status buffer
-                                    QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
-                                    BufferInfo info = new BufferInfo();
-                                    maxBufferId += 1;
-                                    info.id = maxBufferId;
-                                    info.networkId = networkId;
-                                    info.type = BufferInfo.Type.StatusBuffer;
-                                    Buffer buffer = new Buffer(info, dbHelper);
-                                    buffers.put(info.id, buffer);
-                                    handler.obtainMessage(R.id.SET_STATUS_BUFFER, networkId, 0, buffer).sendToTarget();
-                                }
-                                handler.obtainMessage(R.id.SET_CONNECTION_STATE, networkId, 0, state).sendToTarget();
-                            } else if (className.equals("Network") && function.equals("addIrcChannel")) {
-                                Log.d(TAG, "Sync: Network -> addIrcChannel");
-                                int networkId = Integer.parseInt(objectName);
-                                String bufferName = (String) packedFunc.remove(0).getData();
-                                System.out.println(bufferName);
-                                boolean hasBuffer = networks.get(networkId).getBuffers().hasBuffer(bufferName);
+                            } else if (className.equals("Network")) {
+                                switch(function) {
+                                    case "addIrcUser":
+                                        String nick = (String) packedFunc.remove(0).getData();
+                                        IrcUser user = new IrcUser();
+                                        user.nick = nick.split("!")[0];
+                                        user.networkId = Integer.parseInt(objectName);
+                                        Log.d(TAG, "Network::addIrcUser("+objectName + "/" + user.nick+")");
+                                        //If not done then we can add it right here, if we try to send it we might crash because service don't have the network yet
+                                        if (!initComplete) {
+                                            networks.get(Integer.parseInt(objectName)).onUserJoined(user);
+                                        } else {
+                                            handler.obtainMessage(R.id.NEW_USER_ADDED, Integer.parseInt(objectName), 0, user).sendToTarget();
+                                        }
+                                        sendInitRequest("IrcUser", objectName + "/" + user.nick);
+                                        break;
+                                    case "setConnectionState":
+                                        Log.d(TAG, "Sync: Network -> setConnectionState");
+                                        int networkId = Integer.parseInt(objectName);
+                                        Network.ConnectionState state = ConnectionState.getForValue((Integer) packedFunc.remove(0).getData());
+                                        //If network has no status buffer it is the first time we are connecting to it
+                                        if (state == ConnectionState.Connecting && networks.get(networkId).getStatusBuffer() == null) {
+                                            //Create the new buffer object for status buffer
+                                            QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
+                                            BufferInfo info = new BufferInfo();
+                                            maxBufferId += 1;
+                                            info.id = maxBufferId;
+                                            info.networkId = networkId;
+                                            info.type = BufferInfo.Type.StatusBuffer;
+                                            Buffer buffer = new Buffer(info, dbHelper);
+                                            buffers.put(info.id, buffer);
+                                            handler.obtainMessage(R.id.SET_STATUS_BUFFER, networkId, 0, buffer).sendToTarget();
+                                        }
+                                        handler.obtainMessage(R.id.SET_CONNECTION_STATE, networkId, 0, state).sendToTarget();
+                                        break;
+                                    case "addIrcChannel":
+                                        Log.d(TAG, "Sync: Network -> addIrcChannel");
+                                        networkId = Integer.parseInt(objectName);
+                                        String bufferName = (String) packedFunc.remove(0).getData();
+                                        System.out.println(bufferName);
+                                        boolean hasBuffer = networks.get(networkId).getBuffers().hasBuffer(bufferName);
 
-                                if (!hasBuffer) {
-                                    //Create the new buffer object
-                                    QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
-                                    BufferInfo info = new BufferInfo();
-                                    info.name = bufferName;
-                                    info.id = -1;
-                                    info.networkId = networkId;
-                                    info.type = BufferInfo.Type.ChannelBuffer;
-                                    Buffer buffer = new Buffer(info, dbHelper);
-                                    Message msg = handler.obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
-                                    msg.sendToTarget();
+                                        if (!hasBuffer) {
+                                            //Create the new buffer object
+                                            QuasselDbHelper dbHelper = new QuasselDbHelper(applicationContext);
+                                            BufferInfo info = new BufferInfo();
+                                            info.name = bufferName;
+                                            info.id = -1;
+                                            info.networkId = networkId;
+                                            info.type = BufferInfo.Type.ChannelBuffer;
+                                            Buffer buffer = new Buffer(info, dbHelper);
+                                            Message msg = handler.obtainMessage(R.id.NEW_BUFFER_TO_SERVICE, buffer);
+                                            msg.sendToTarget();
+                                        }
+                                        sendInitRequest("IrcChannel", objectName + "/" + bufferName);
+                                        break;
+                                    case "setConnected":
+                                    case "setMyNick":
+                                    case "setLatency":
+                                    case "setNetworkName":
+                                    case "setIdentity":
+                                    case "setCurrentServer":
+                                        try {
+                                            SyncMethodMessage p = new SyncMethodMessage();
+                                            p.from(className, objectName, function, packedFunc);
+
+                                            Message msg = handler.obtainMessage(R.id.DIRECT_MESSAGE);
+                                            msg.obj = (SyncMethodMessage) p;
+                                            msg.sendToTarget();
+                                        } catch (ArrayIndexOutOfBoundsException|NullPointerException e) {
+                                            e.printStackTrace();
+                                        }
+                                        break;
                                 }
-                                sendInitRequest("IrcChannel", objectName + "/" + bufferName);
-                            } else if (className.equals("Network") && function.equals("setConnected")) {
-                                Log.d(TAG, "Sync: Network -> setConnected");
-                                boolean connected = (Boolean) packedFunc.remove(0).getData();
-                                int networkId = Integer.parseInt(objectName);
-                                handler.obtainMessage(R.id.SET_CONNECTED, networkId, 0, connected).sendToTarget();
-                            } else if (className.equals("Network") && function.equals("setMyNick")) {
-                                Log.d(TAG, "Sync: Network -> setMyNick");
-                                String nick = (String) packedFunc.remove(0).getData();
-                                int networkId = Integer.parseInt(objectName);
-                                handler.obtainMessage(R.id.SET_MY_NICK, networkId, 0, nick).sendToTarget();
-                            } else if (className.equals("Network") && function.equals("setLatency")) {
-                                Log.d(TAG, "Sync: Network -> setLatency");
-                                int networkLatency = (Integer) packedFunc.remove(0).getData();
-                                int networkId = Integer.parseInt(objectName);
-                                handler.obtainMessage(R.id.SET_NETWORK_LATENCY, networkId, networkLatency, null).sendToTarget();
-                            } else if (className.equals("Network") && function.equals("setNetworkName")) {
-                                Log.d(TAG, "Sync: Network -> setNetworkName");
-                                String networkName = (String) packedFunc.remove(0).getData();
-                                int networkId = Integer.parseInt(objectName);
-                                handler.obtainMessage(R.id.SET_NETWORK_NAME, networkId, 0, networkName).sendToTarget();
-                            } else if (className.equals("Network") && function.equals("setCurrentServer")) {
-                                Log.d(TAG, "Sync: Network -> setCurrentServer");
-                                String currentServer = (String) packedFunc.remove(0).getData();
-                                int networkId = Integer.parseInt(objectName);
-                                handler.obtainMessage(R.id.SET_NETWORK_CURRENT_SERVER, networkId, 0, currentServer).sendToTarget();
-                            } else if (className.equals("IrcUser") && function.equals("partChannel")) {
-                                Log.d(TAG, "Sync: IrcUser -> partChannel");
-                                String[] tmp = objectName.split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                String userName = tmp[1];
-                                Bundle bundle = new Bundle();
-                                bundle.putString("nick", userName);
-                                bundle.putString("buffer", (String) packedFunc.remove(0).getData());
-                                handler.obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
-                            } else if (className.equals("IrcUser") && function.equals("quit")) {
-                                Log.d(TAG, "Sync: IrcUser -> quit");
-                                String[] tmp = objectName.split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                String userName = tmp[1];
-                                handler.obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
-                            } else if (className.equals("IrcUser") && function.equals("setNick")) {
-                                Log.d(TAG, "Sync: IrcUser -> setNick");
-							/*
-							 * Does nothing, Why would we need a sync call, when we got a RPC call about renaming the user object
-							 */
-                            } else if (className.equals("IrcUser") && function.equals("setServer")) {
-                                Log.d(TAG, "Sync: IrcUser -> setServer");
-                                String[] tmp = objectName.split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("nick", tmp[1]);
-                                bundle.putString("server", (String) packedFunc.remove(0).getData());
-                                handler.obtainMessage(R.id.SET_USER_SERVER, networkId, 0, bundle).sendToTarget();
-                            } else if (className.equals("IrcUser") && function.equals("setAway")) {
-                                Log.d(TAG, "Sync: IrcUser -> setAway");
-                                String[] tmp = objectName.split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("nick", tmp[1]);
-                                bundle.putBoolean("away", (Boolean) packedFunc.remove(0).getData());
-                                handler.obtainMessage(R.id.SET_USER_AWAY, networkId, 0, bundle).sendToTarget();
-                            } else if (className.equals("IrcUser") && function.equals("setAwayMessage")) {
-                                Log.d(TAG, "Sync: IrcUser -> setAwayMessage");
-                                String[] tmp = objectName.split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("nick", tmp[1]);
-                                bundle.putString("awayMessage", (String) packedFunc.remove(0).getData());
-                                handler.obtainMessage(R.id.SET_USER_AWAY_MESSAGE, networkId, 0, bundle).sendToTarget();
-                            } else if (className.equals("IrcUser") && function.equals("setRealName")) {
-                                Log.d(TAG, "Sync: IrcUser -> setRealName");
-                                String[] tmp = objectName.split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("nick", tmp[1]);
-                                bundle.putString("realname", (String) packedFunc.remove(0).getData());
-                                handler.obtainMessage(R.id.SET_USER_REALNAME, networkId, 0, bundle).sendToTarget();
+                            } else if (className.equals("IrcUser")) {
+                                switch (function) {
+                                    case "partChannel":
+                                        Log.d(TAG, "Sync: IrcUser -> partChannel");
+                                        String[] tmp = objectName.split("/", 2);
+                                        int networkId = Integer.parseInt(tmp[0]);
+                                        String userName = tmp[1];
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("nick", userName);
+                                        bundle.putString("buffer", (String) packedFunc.remove(0).getData());
+                                        handler.obtainMessage(R.id.USER_PARTED, networkId, 0, bundle).sendToTarget();
+                                        break;
+                                    case "quit":
+                                        Log.d(TAG, "Sync: IrcUser -> quit");
+                                        tmp = objectName.split("/", 2);
+                                        networkId = Integer.parseInt(tmp[0]);
+                                        userName = tmp[1];
+                                        handler.obtainMessage(R.id.USER_QUIT, networkId, 0, userName).sendToTarget();
+                                        break;
+                                    case "setNick":
+                                    case "setServer":
+                                    case "setAway":
+                                    case "setAwayMessage":
+                                    case "setRealName":
+                                        Log.d(TAG, "Sync: "+className+" -> "+function);
+                                        try {
+                                            SyncMethodMessage p = new SyncMethodMessage();
+                                            p.from(className, objectName, function, packedFunc);
+
+                                            Message msg = handler.obtainMessage(R.id.DIRECT_MESSAGE);
+                                            msg.obj = (SyncMethodMessage) p;
+                                            msg.sendToTarget();
+                                        } catch (ArrayIndexOutOfBoundsException|NullPointerException e) {
+                                            e.printStackTrace();
+                                        }
+                                        break;
+                                }
                             } else if (className.equals("IrcChannel") && function.equals("joinIrcUsers")) {
                                 Log.d(TAG, "Sync: IrcChannel -> joinIrcUsers");
                                 List<String> nicks = (List<String>) packedFunc.remove(0).getData();
@@ -1570,6 +1607,7 @@ public final class CoreConnection {
                                 Log.d(TAG, "Sync: BufferSyncer -> setLastSeenMsg");
                                 int bufferId = (Integer) packedFunc.remove(0).getData();
                                 int msgId = (Integer) packedFunc.remove(0).getData();
+
                                 Message msg = handler.obtainMessage(R.id.SET_LAST_SEEN_TO_SERVICE);
                                 msg.arg1 = bufferId;
                                 msg.arg2 = msgId;
@@ -1657,8 +1695,27 @@ public final class CoreConnection {
                                 msg.obj = true;
                                 msg.sendToTarget();
 
+                            } else if (className.equals("Identity") && function.equals("update")) {
+                                Log.d(TAG, "Sync: "+className+" -> "+function);
+                                try {
+                                    SyncMethodMessage p = new SyncMethodMessage();
+                                    p.from(className, objectName, function, packedFunc);
+
+                                    Message msg = handler.obtainMessage(R.id.DIRECT_MESSAGE);
+                                    msg.obj = (SyncMethodMessage) p;
+                                    msg.sendToTarget();
+                                } catch (ArrayIndexOutOfBoundsException|NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+                            } else if (className.equals("IgnoreListManager")) {
+                                SyncMethodMessage p = new SyncMethodMessage();
+                                p.from(Client.getInstance().getIgnoreListManager(), function, packedFunc);
+
+                                Message msg = handler.obtainMessage(R.id.DIRECT_MESSAGE);
+                                msg.obj = (SyncMethodMessage) p;
+                                msg.sendToTarget();
                             } else {
-                                Log.i(TAG, "Unparsed Sync request: " + className + "::" + function);
+                                Log.e(TAG, "UNHANDLED: Unparsed Sync request: " + className + "::" + function);
                             }
 
                             break;
@@ -1667,6 +1724,7 @@ public final class CoreConnection {
 						 * Remote procedure calls are direct calls that are not associated with any objects.
 						 */
                         case RpcCall:
+
                             // Contains a normalized function signature; see QMetaObject::normalizedSignature, I guess.
                             String functionName = packedFunc.remove(0).toString();
 	
@@ -1717,18 +1775,6 @@ public final class CoreConnection {
                                 msg.obj = message;
                                 msg.sendToTarget();
                                 //11-12 21:48:02.514: I/CoreConnection(277): Unhandled RpcCall: __objectRenamed__ ([IrcUser, 1/Kenji, 1/Kenj1]).
-                            } else if (functionName.equals("__objectRenamed__") && ((String) packedFunc.get(0).getData()).equals("IrcUser")) {
-                                packedFunc.remove(0); //Drop the "ircUser"
-                                String[] tmp = ((String) packedFunc.remove(0).getData()).split("/", 2);
-                                int networkId = Integer.parseInt(tmp[0]);
-                                String newNick = tmp[1];
-                                tmp = ((String) packedFunc.remove(0).getData()).split("/", 2);
-                                String oldNick = tmp[1];
-
-                                Bundle bundle = new Bundle();
-                                bundle.putString("oldNick", oldNick);
-                                bundle.putString("newNick", newNick);
-                                handler.obtainMessage(R.id.USER_CHANGEDNICK, networkId, -1, bundle).sendToTarget();
                             } else if (functionName.equals("2networkCreated(NetworkId)")) {
                                 Log.d(TAG, "RpcCall: " + "2networkCreated(NetworkId)");
                                 int networkId = ((Integer) packedFunc.remove(0).getData());
@@ -1740,12 +1786,33 @@ public final class CoreConnection {
                                 int networkId = ((Integer) packedFunc.remove(0).getData());
                                 networks.remove(networkId);
                                 handler.obtainMessage(R.id.NETWORK_REMOVED, networkId, 0).sendToTarget();
+                            } else if (functionName.equals("2identityCreated(Identity)")) {
+                                Log.d(TAG, "RpcCall: " + "2identityCreated(Identity)");
+                                Message msg = handler.obtainMessage(R.id.CREATE_IDENTITY, packedFunc.remove(0));
+                                msg.sendToTarget();
+                            } else if (functionName.equals("2identityRemoved(IdentityId)")) {
+                                Log.d(TAG, "RpcCall: " + "2identityRemoved(IdentityId)");
+                                Message msg = handler.obtainMessage(R.id.REMOVE_IDENTITY, packedFunc.remove(0));
+                                msg.sendToTarget();
+                            } else if (functionName.equals("__objectRenamed__")) {
+                                Log.d(TAG, "RpcCall: " + "__objectRenamed__("+packedFunc+")");
+
+                                RpcRequest p = new ObjectRenamedRequest();
+                                try {
+                                    p.setArgs(packedFunc.toArray(new QVariant[packedFunc.size()]));
+                                } catch (EmptyQVariantException e) {
+                                    e.printStackTrace();
+                                }
+
+                                Message msg = handler.obtainMessage(R.id.DIRECT_MESSAGE);
+                                msg.obj = (RpcRequest) p;
+                                msg.sendToTarget();
                             } else {
-                                Log.i(TAG, "Unhandled RpcCall: " + functionName + " (" + packedFunc + ").");
+                                Log.e(TAG, "UNHANDLED: RpcCall: " + functionName + " (" + packedFunc + ").");
                             }
                             break;
                         default:
-                            Log.i(TAG, "Unhandled request type: " + type.name());
+                            Log.e(TAG, "UNHANDLED: request type: " + type.name());
                     }
                     long end = System.currentTimeMillis();
                     if (end - start > 500) {

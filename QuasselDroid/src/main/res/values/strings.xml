@@ -1,11 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <resources>
     <!-- CONSTANTS -->
 
     <string name="default_port" translatable="false">4242</string>
-    <string name="title_lag">%1$s%2$s</string>
-    <string name="unit_milliseconds">ms</string>
-    <string name="unit_seconds">s</string>
+    <string name="title_lag" translatable="false">%1$s%2$s</string>
+    <string name="unit_milliseconds" translatable="false">ms</string>
+    <string name="unit_seconds" translatable="false">s</string>
     <string name="has_focus" translatable="false">hasfocus</string>
 
     <!-- APPLICATION -->
@@ -13,20 +35,33 @@
     <string name="app_name">Quasseldroid</string>
     <string name="app_description">An Android-based client for the decentralized Quassel IRC client.</string>
     <string name="app_description_long">Quassel is a distributed, decentralized IRC client, written using C++ and Qt. QuasselDroid is a pure-java client for the Quassel core, allowing you to connect to your Quassel core using your Android (TM) phone.</string>
-    <string name="app_links_github" translatable="false">GitHub:\nhttps://github.com/sandsmark/QuasselDroid</string>
-    <string name="app_links_community" translatable="false">Beta Builds:\nhttps://plus.google.com/communities/104094956084217666662</string>
+
+    <string name="app_link_github_title">GitHub</string>
+    <string name="app_link_github" translatable="false">https://github.com/sandsmark/QuasselDroid</string>
+    <string name="app_link_community_title">Beta Builds</string>
+    <string name="app_link_community" translatable="false">https://plus.google.com/communities/104094956084217666662</string>
 
     <!-- ACTIONS -->
 
-    <string name="action_about">About</string>
+    <string name="preference_category_about">About</string>
     <string name="action_preferences">Settings</string>
-    <string name="action_manage_cores">Manage cores</string>
+
     <string name="action_join_channel">Join Channel</string>
+    <string name="action_add_nick">Add Nick</string>
+
     <string name="action_hide_events">Hide Events</string>
-    <string name="action_unhide">Make Visible</string>
+    <string name="action_nick_list">Channel userlist</string>
 
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disconnect</string>
+
+    <string name="action_cancel">Cancel</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+
+    <string name="action_save">Save</string>
+    <string name="action_close">Close</string>
+    <string name="action_edit">Edit</string>
 
     <string name="action_join">Join</string>
     <string name="action_part">Part</string>
@@ -39,8 +74,15 @@
     <string name="action_hidden_display">Show hidden Buffers</string>
     <string name="action_hidden_hide">Hide hidden Buffers</string>
 
+    <string name="action_unhide">Make Visible</string>
     <string name="action_hide_temp">Hide Temporarily</string>
     <string name="action_hide_perm">Hide Permanently</string>
+
+    <string name="action_new_ignore">New Ignore Rule</string>
+
+    <string name="next_button_label">Next</string>
+    <string name="skip_button_label">Skip</string>
+    <string name="back_button_label">Back</string>
 
     <!-- UI STUFF -->
 
@@ -54,7 +96,9 @@
     <string name="hint_join_network">Network</string>
     <string name="hint_autocomplete">Autocomplete button</string>
     <string name="hint_status">Status</string>
-    <string name="hint_topic">Enter a topic for the channel</string>
+    <string name="hint_topic">Channel topic</string>
+    <string name="hint_topic_edit">Enter a topic for the channel</string>
+    <string name="hint_nick_edit">Enter a nickname</string>
     <string name="hint_core_name">Name</string>
     <string name="hint_core_address">Address</string>
     <string name="hint_core_port">Port</string>
@@ -62,22 +106,16 @@
     <string name="hint_identity_username">Username</string>
     <string name="hint_drawer_open">Open buffer list</string>
     <string name="hint_drawer_close">Close buffer list</string>
-    <string name="hint_select_core">Select Core</string>
 
     <string name="dialog_title_delete_buffer">Remove buffer permanently?</string>
     <string name="dialog_title_events">Hide Events</string>
     <string name="dialog_title_channel">Join Channel</string>
     <string name="dialog_title_core_add">Add new Core</string>
     <string name="dialog_title_core_edit">Edit Core</string>
+    <string name="dialog_title_nick_add">Add nickname</string>
+    <string name="dialog_title_nick_edit">Edit nickname</string>
     <string name="dialog_title_error">Error</string>
-
-    <string name="dialog_action_cancel">Cancel</string>
-    <string name="dialog_action_join">Join</string>
-    <string name="dialog_action_save">Save</string>
-    <string name="dialog_action_close">Close</string>
-    <string name="dialog_action_edit">Edit</string>
-    <string name="dialog_action_yes">Yes</string>
-    <string name="dialog_action_no">No</string>
+    <string name="dialog_title_input_history">Input History</string>
 
     <string name="dialog_message_join_no_channel">No channel selected</string>
     <string name="dialog_message_delete_buffer">Are you sure you want to delete this buffer permanently? This action cannot be undone.</string>
@@ -101,125 +139,51 @@
     </plurals>
 
     <plurals name="notification_on_x_buffers">
-        <item quantity="one">%1$d buffer</item>
-        <item quantity="other">%1$d buffers</item>
+        <item quantity="one">%1$d chat</item>
+        <item quantity="other">%1$d chats</item>
+    </plurals>
+    <plurals name="mode_owner">
+        <item quantity="other">Owner</item>
+    </plurals>
+    <plurals name="mode_admin">
+        <item quantity="one">Admin</item>
+        <item quantity="other">Admins</item>
+    </plurals>
+    <plurals name="mode_operator">
+        <item quantity="one">Op</item>
+        <item quantity="other">Ops</item>
+    </plurals>
+    <plurals name="mode_half_operator">
+        <item quantity="one">Half-Op</item>
+        <item quantity="other">Half-Ops</item>
+    </plurals>
+    <plurals name="mode_voice">
+        <item quantity="other">Voiced</item>
+    </plurals>
+    <plurals name="mode_user">
+        <item quantity="one">User</item>
+        <item quantity="other">Users</item>
     </plurals>
 
     <string name="notification_you_have_been_highlighted">You have been highlighted</string>
-    <string name="notification_hightlights_on_buffers">%1$s on %2$s</string>
+    <string name="notification_hightlights_on_buffers">%1$s in %2$s</string>
 
     <string name="notification_connecting">Connecting to core</string>
     <string name="notification_connected">Connected to core</string>
     <string name="notification_disconnected">Disconnected from core</string>
 
+    <string name="notification_report_crash">Reporting Crashes</string>
+
     <!-- MESSAGES -->
 
     <string name="message_join">%1$s joined</string>
-    <string name="message_leave">"%1$s left: "</string>
-    <string name="message_quit">"%1$s quit: "</string>
-    <string name="message_kill">"%1$s was killed: "</string>
-    <string name="message_kick">%1$s has kicked %2$s from %3$s: %4$s</string>
+    <string name="message_leave">"%1$s left: %2$s"</string>
+    <string name="message_quit">"%1$s quit: %2$s"</string>
+    <string name="message_kill">"%1$s was killed: %2$s"</string>
+    <string name="message_kick">%1$s has kicked %2$s: %3$s</string>
     <string name="message_mode">Mode %1$s by %2$s</string>
     <string name="message_nick_self">You changed your nick to %1$s</string>
     <string name="message_nick_other">%1$s is now known as %2$s</string>
     <string name="message_daychange">Day changed to %1$s</string>
-
-
-    <!-- PREFERENCES -->
-
-    <string name="preference_category_appearance">Appearance</string>
-        <string name="preference_dialog_theme">Choose application theme</string>
-        <string name="preference_summary_theme">The application theme</string>
-        <string name="preference_title_theme">Theme</string>
-        <string name="preference_theme" translatable="false">selectedtheme</string>
-
-        <string name="preference_dialog_timestamp">Show Seconds in Timestamp</string>
-        <string name="preference_summary_timestamp">When should the Timestamp contain seconds</string>
-        <string name="preference_title_timestamp">Timestamp</string>
-        <string name="preference_timestamp" translatable="false">timestamp_seconds</string>
-
-        <string name="preference_dialog_fontsize">Choose fontsize for the chat</string>
-        <string name="preference_summary_fontsize">The fontsize of the chat</string>
-        <string name="preference_title_fontsize">Chat fontsize</string>
-        <string name="preference_fontsize" translatable="false">fontsizeChannelList</string>
-            <string name="fontsize_tiny">Tiny</string>
-            <string name="fontsize_small">Small</string>
-            <string name="fontsize_normal">Normal</string>
-            <string name="fontsize_big">Big</string>
-            <string name="fontsize_huge">Huge</string>
-
-        <string name="preference_summary_colored_text">Turn on/off support for mirc color coded text</string>
-        <string name="preference_title_colored_text">Allow colored text</string>
-        <string name="preference_colored_text" translatable="false">allowcoloredtext</string>
-
-        <string name="preference_summary_nickbrackets">Display the nick with brackets at each side</string>
-        <string name="preference_title_nickbrackets">Show Nicks in classic style</string>
-        <string name="preference_nickbrackets" translatable="false">shownickbrackets</string>
-
-        <string name="preference_summary_hostname">Show the User’s nick@host in each server action (kick/join/etc.)</string>
-        <string name="preference_title_hostname">Show User Hostnames</string>
-        <string name="preference_hostname" translatable="false">detailed_actions</string>
-
-        <string name="preference_summary_lag">Show latency between the client and the Core</string>
-        <string name="preference_title_lag">Show Lag</string>
-        <string name="preference_lag" translatable="false">showlag</string>
-
-    <string name="preference_category_connection">Connection</string>
-        <string name="preference_summary_fetch_to_last_seen">Fetch all unseen messages on connect. This can take a very long time!</string>
-        <string name="preference_title_fetch_to_last_seen">Unread messages per chat</string>
-        <string name="preference_fetch_to_last_seen" translatable="false">getallunseenbacklog</string>
-
-        <string name="preference_summary_initial_backlog_limit">How many lines to fetch on connect</string>
-        <string name="preference_title_initial_backlog_limit">Initial backlog amount</string>
-        <string name="preference_initial_backlog_limit" translatable="false">backlogLimit</string>
-
-        <string name="preference_summary_dynamic_backlog">How many lines to fetch on scroll</string>
-        <string name="preference_title_dynamic_backlog">Dynamic backlog amount</string>
-        <string name="preference_dynamic_backlog" translatable="false">dynamicBacklog</string>
-
-        <string name="preference_wake_lock" translatable="false">wakelock</string>
-
-    <string name="preference_category_reconnect">Automatic Reconnect</string>
-        <string name="preference_summary_reconnect">Reconnect, when connection is lost</string>
-        <string name="preference_title_reconnect">Reconnect</string>
-        <string name="preference_reconnect" translatable="false">reconnect</string>
-
-        <string name="preference_summary_reconnect_wifi">Reconnect only if wifi is available</string>
-        <string name="preference_title_wifi">Reconnect with wifi only</string>
-        <string name="preference_reconnect_wifi" translatable="false">reconnect_on_wifi_only</string>
-
-        <string name="preference_summary_metered">Allow reconnect while connected to a mobile WiFi hotspot.</string>
-        <string name="preference_title_metered">Reconnect on metered wifi connection</string>
-        <string name="preference_reconnect_metered" translatable="false">reconnect_on_metered</string>
-
-        <string name="preference_summary_reconnect_periodically">Normally Quassel reconnects only if your phone’s connection breaks down. Try this option if your disconnects are caused by the core restarting or the core losing connection</string>
-        <string name="preference_title_reconnect_periodically">Reconnect periodically</string>
-        <string name="preference_reconnect_periodically" translatable="false">reconnect_periodically</string>
-
-        <string name="preference_summary_reconnect_interval">How many min between each reconnect attempt</string>
-        <string name="preference_title_reconnect_interval">Reconnect interval</string>
-        <string name="preference_reconnect_interval" translatable="false">reconnectInterval</string>
-
-    <string name="preference_category_notifications">Notifications</string>
-        <string name="preference_title_notify_connect">Notify on connect</string>
-        <string name="preference_notify_connect" translatable="false">notifyconnect</string>
-        <string name="preference_notify_hide_persistence" translatable="false">notifypersistence</string>
-        <string name="preference_title_notify_hide_persistence">Hide icon from notification area</string>
-        <string name="preference_title_notification_vibrate">Vibrate on notification</string>
-        <string name="preference_notification_vibrate" translatable="false">notificationvibrate</string>
-
-        <string name="preference_title_notification_light">Use light on notification</string>
-        <string name="preference_notification_light" translatable="false">notificationlight</string>
-
-        <string name="preference_title_notification_sound">Play sound on notification</string>
-        <string name="preference_notification_sound" translatable="false">notificationsound</string>
-
-        <string name="preference_title_notification_sound_active">Sound only when unfocused</string>
-        <string name="preference_notification_sound_active" translatable="false">notificationsoundactive</string>
-
-        <string name="preference_title_notification_sound_file">Notification sound</string>
-        <string name="preference_notification_sound_file" translatable="false">notificationsoundfile</string>
-
-        <string name="preference_title_notification_connect_sound_file">Connection sound</string>
-        <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
+    <string name="message_action">* %1$s %2$s</string>
 </resources>

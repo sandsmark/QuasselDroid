@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.os.Bundle;
@@ -7,11 +30,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.Network;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
@@ -32,7 +55,7 @@ public class DetailFragment extends Fragment implements Serializable {
     private TextView realname;
     private TextView status;
 
-    NicksObserver observer = new NicksObserver();
+    private NicksObserver observer = new NicksObserver();
 
     public static DetailFragment newInstance() {
         return new DetailFragment();
@@ -54,11 +77,6 @@ public class DetailFragment extends Fragment implements Serializable {
         realname = (TextView) root.findViewById(R.id.detail_about);
         status = (TextView) root.findViewById(R.id.detail_status);
         return root;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -114,7 +132,6 @@ public class DetailFragment extends Fragment implements Serializable {
 
     void updateView() {
         if (networks.getBufferById(bufferId).getInfo().type == BufferInfo.Type.QueryBuffer) {
-            Network network = networks.getNetworkById(networks.getBufferById(bufferId).getInfo().networkId);
             IrcUser user = observer.user;
 
             if (user != null) {

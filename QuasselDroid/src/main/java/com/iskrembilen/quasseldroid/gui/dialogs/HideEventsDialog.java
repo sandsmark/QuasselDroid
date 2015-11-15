@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.gui.dialogs;
 
 import android.app.AlertDialog;
@@ -5,10 +28,12 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.util.BusProvider;
@@ -17,18 +42,14 @@ import java.util.ArrayList;
 
 public class HideEventsDialog extends DialogFragment {
 
-    public static HideEventsDialog newInstance(Buffer buffer) {
+    public static @NonNull HideEventsDialog newInstance(Buffer buffer) {
         HideEventsDialog fragment = new HideEventsDialog();
 
         String[] filterList = IrcMessage.Type.getFilterList();
         boolean[] checked = new boolean[filterList.length];
         ArrayList<IrcMessage.Type> filters = buffer.getFilters();
         for (int i = 0; i < checked.length; i++) {
-            if (filters.contains(IrcMessage.Type.valueOf(filterList[i]))) {
-                checked[i] = true;
-            } else {
-                checked[i] = false;
-            }
+            checked[i] = (filters.contains(IrcMessage.Type.valueOf(filterList[i])));
         }
 
         Bundle args = new Bundle();
@@ -40,7 +61,7 @@ public class HideEventsDialog extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getResources().getString(R.string.dialog_title_events));
 

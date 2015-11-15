@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
-    <string-array name="entries_fontsize_preference">
-        <item>@string/fontsize_tiny</item>
-        <item>@string/fontsize_small</item>
-        <item>@string/fontsize_normal</item>
-        <item>@string/fontsize_big</item>
-        <item>@string/fontsize_huge</item>
-    </string-array>
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<resources>
     <string-array name="entryvalues_fontsize_preference">
         <item>10</item>
         <item>12</item>
@@ -16,40 +30,15 @@
         <item>18</item>
     </string-array>
 
-    <string-array name="entries_theme_preference">
-        <item>Light</item>
-        <item>Dark</item>
-    </string-array>
     <string-array name="entryvalues_theme_preference">
         <item>light</item>
         <item>dark</item>
     </string-array>
 
-    <string-array name="entries_timestamp_preference">
-        <item>Always</item>
-        <item>Depending on Orientation</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="entryvalues_timestamp_preference">
-        <item>always</item>
-        <item>orientation</item>
-        <item>never</item>
-    </string-array>
-
-    <string-array name="author_names">
-        <item>Frederik M. J. Vestre (freqmod)</item>
-        <item>Martin "Java Sucks" Sandsmark (sandsmark)</item>
-        <item>Magnus Fjell (magnuf)</item>
-        <item>Ken Børge Viktil (Kenji)</item>
-        <item>Janne Koschinski (justJanne)</item>
-    </string-array>
-
-    <string-array name="author_descriptions">
-        <item>(Initial qdatastream deserialization attempts)</item>
-        <item>(Protocol implementation, (de)serializers, project (de)moralizer)</item>
-        <item>(GUI, Android stuff)</item>
-        <item>(GUI, Android stuff)</item>
-        <item>(GUI, Bugfixes and Android stuff)</item>
+    <string-array name="entryvalues_highlight_preference">
+        <item>all</item>
+        <item>current</item>
+        <item>none</item>
     </string-array>
 
 </resources>

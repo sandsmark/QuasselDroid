@@ -1,69 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
-    <item name="DIALOG_ADD_CORE" type="id"></item>
-    <item name="DIALOG_EDIT_CORE" type="id"></item>
-    <item name="DIALOG_DELETE_CORE" type="id"></item>
-    <item name="DIALOG_CONNECTING" type="id"></item>
-    <item name="DIALOG_HIDE_EVENTS" type="id"></item>
-    <item name="DIALOG_JOIN_CHANNEL" type="id"></item>
-    <item name="DIALOG_CHANGED_CERTIFICATE" type="id"></item>
-    <item name="BUFFER_LIST_UPDATED" type="id"></item>
-    <item name="CHAT_MESSAGES_UPDATED" type="id"></item>
-    <item name="NOTIFICATION" type="id"></item>
-    <item name="NOTIFICATION_DISCONNECTED" type="id"></item>
-    <item name="NEW_MESSAGE_TO_SERVICE" type="id"></item>
-    <item name="NEW_BUFFER_TO_SERVICE" type="id"></item>
-    <item name="SET_LAST_SEEN_TO_SERVICE" type="id"></item>
-    <item name="SET_MARKERLINE_TO_SERVICE" type="id"></item>
-    <item name="NEW_USER_ADDED" type="id"></item>
-    <item name="NEW_USER_INFO" type="id"></item>
-    <item name="USER_PARTED" type="id"></item>
-    <item name="USER_QUIT" type="id"></item>
-    <item name="USER_JOINED" type="id"></item>
-    <item name="USER_CHANGEDNICK" type="id"></item>
-    <item name="USER_CHANGED" type="id"></item>
-    <item name="USER_ADD_MODE" type="id"></item>
-    <item name="USER_REMOVE_MODE" type="id"></item>
-    <item name="CHANNEL_TOPIC_CHANGED" type="id"></item>
-    <item name="NEW_USERLIST_ADDED" type="id"></item>
-    <item name="SET_BUFFER_ORDER" type="id"></item>
-    <item name="SET_BUFFER_ACTIVE" type="id"></item>
-    <item name="BUFFER_ORDER_CHANGED" type="id"></item>
-    <item name="BUFFER_HIDDEN_CHANGED" type="id"></item>
-    <item name="LOST_CONNECTION" type="id"></item>
-    <item name="ADD_MULTIPLE_BUFFERS" type="id"></item>
-    <item name="NEW_BACKLOGITEM_TO_SERVICE" type="id"></item>
-    <item name="BUFFERUPDATE_BACKLOG" type="id"></item>
-    <item name="BUFFERUPDATE_NEWMESSAGE" type="id"></item>
-    <item name="BUFFERUPDATE_USERSCHANGED" type="id"></item>
-    <item name="BUFFERUPDATE_TOPICCHANGED" type="id"></item>
-    <item name="DISCONNECTED" type="id"></item>
-    <item name="SET_BUFFER_PERM_HIDDEN" type="id"></item>
-    <item name="SET_BUFFER_TEMP_HIDDEN" type="id"></item>
-    <item name="INVALID_CERTIFICATE" type="id"></item>
-    <item name="NEW_CERTIFICATE" type="id"></item>
-    <item name="DIALOG_NEW_CERTIFICATE" type="id"></item>
-    <item name="NOTIFICATION_HIGHLIGHT" type="id"></item>
-    <item name="UNSUPPORTED_PROTOCOL" type="id"></item>
-    <item name="ADD_NETWORK" type="id"></item>
-    <item name="LAST_SEEN_CHANGED" type="id"></item>
-    <item name="INIT_PROGRESS" type="id"></item>
-    <item name="INIT_DONE" type="id"></item>
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<resources>
+    <item name="DIALOG_ADD_CORE" type="id" />
+    <item name="DIALOG_EDIT_CORE" type="id" />
+    <item name="DIALOG_DELETE_CORE" type="id" />
+    <item name="DIALOG_CONNECTING" type="id" />
+    <item name="DIALOG_HIDE_EVENTS" type="id" />
+    <item name="DIALOG_JOIN_CHANNEL" type="id" />
+    <item name="DIALOG_CHANGED_CERTIFICATE" type="id" />
+    <item name="BUFFER_LIST_UPDATED" type="id" />
+    <item name="CHAT_MESSAGES_UPDATED" type="id" />
+    <item name="NOTIFICATION" type="id" />
+    <item name="NOTIFICATION_DISCONNECTED" type="id" />
+    <item name="NEW_MESSAGE_TO_SERVICE" type="id" />
+    <item name="NEW_BUFFER_TO_SERVICE" type="id" />
+    <item name="SET_LAST_SEEN_TO_SERVICE" type="id" />
+    <item name="SET_MARKERLINE_TO_SERVICE" type="id" />
+    <item name="NEW_USER_ADDED" type="id" />
+    <item name="NEW_USER_INFO" type="id" />
+    <item name="USER_PARTED" type="id" />
+    <item name="USER_QUIT" type="id" />
+    <item name="USER_JOINED" type="id" />
+    <item name="USER_CHANGEDNICK" type="id" />
+    <item name="USER_CHANGED" type="id" />
+    <item name="USER_ADD_MODE" type="id" />
+    <item name="USER_REMOVE_MODE" type="id" />
+    <item name="CHANNEL_TOPIC_CHANGED" type="id" />
+    <item name="NEW_USERLIST_ADDED" type="id" />
+    <item name="SET_BUFFER_ORDER" type="id" />
+    <item name="SET_BUFFER_ACTIVE" type="id" />
+    <item name="BUFFER_ORDER_CHANGED" type="id" />
+    <item name="BUFFER_HIDDEN_CHANGED" type="id" />
+    <item name="LOST_CONNECTION" type="id" />
+    <item name="ADD_MULTIPLE_BUFFERS" type="id" />
+    <item name="NEW_BACKLOGITEM_TO_SERVICE" type="id" />
+    <item name="BUFFERUPDATE_BACKLOG" type="id" />
+    <item name="BUFFERUPDATE_NEWMESSAGE" type="id" />
+    <item name="BUFFERUPDATE_USERSCHANGED" type="id" />
+    <item name="BUFFERUPDATE_TOPICCHANGED" type="id" />
+    <item name="DISCONNECTED" type="id" />
+    <item name="SET_BUFFER_PERM_HIDDEN" type="id" />
+    <item name="SET_BUFFER_TEMP_HIDDEN" type="id" />
+    <item name="INVALID_CERTIFICATE" type="id" />
+    <item name="NEW_CERTIFICATE" type="id" />
+    <item name="DIALOG_NEW_CERTIFICATE" type="id" />
+    <item name="NOTIFICATION_HIGHLIGHT" type="id" />
+    <item name="UNSUPPORTED_PROTOCOL" type="id" />
+    <item name="ADD_NETWORK" type="id" />
+    <item name="LAST_SEEN_CHANGED" type="id" />
+    <item name="INIT_PROGRESS" type="id" />
+    <item name="INIT_DONE" type="id" />
     <item name="CONNECTING" type="id" />
     <item name="NETWORK_REMOVED" type="id" />
-    <item name="SET_CONNECTION_STATE" type="id"></item>
-    <item name="SET_STATUS_BUFFER" type="id"></item>
-    <item name="SET_CONNECTED" type="id"></item>
-    <item name="SET_MY_NICK" type="id"></item>
-    <item name="REMOVE_BUFFER" type="id"></item>
-    <item name="SET_CORE_LATENCY" type="id"></item>
-    <item name="SET_NETWORK_LATENCY" type="id"></item>
-    <item name="SET_NETWORK_NAME" type="id"></item>
-    <item name="SET_NETWORK_CURRENT_SERVER" type="id"></item>
-    <item name="RENAME_BUFFER" type="id"></item>
-    <item name="SET_USER_REALNAME" type="id"></item>
-    <item name="SET_USER_SERVER" type="id"></item>
-    <item name="SET_USER_AWAY" type="id"></item>
-    <item name="SET_USER_AWAY_MESSAGE" type="id"></item>
+    <item name="SET_CONNECTION_STATE" type="id" />
+    <item name="SET_STATUS_BUFFER" type="id" />
+    <item name="SET_CONNECTED" type="id" />
+    <item name="SET_MY_NICK" type="id" />
+    <item name="REMOVE_BUFFER" type="id" />
+    <item name="SET_CORE_LATENCY" type="id" />
+    <item name="SET_NETWORK_LATENCY" type="id" />
+    <item name="SET_NETWORK_NAME" type="id" />
+    <item name="SET_NETWORK_CURRENT_SERVER" type="id" />
+    <item name="RENAME_BUFFER" type="id" />
+    <item name="SET_USER_REALNAME" type="id" />
+    <item name="SET_USER_SERVER" type="id" />
+    <item name="SET_USER_AWAY" type="id" />
+    <item name="SET_USER_AWAY_MESSAGE" type="id" />
+    <item name="UPDATE_IDENTITY" type="id" />
+    <item name="CREATE_IDENTITY" type="id" />
+    <item name="REMOVE_IDENTITY" type="id" />
+    <item name="SET_NETWORK_IDENTITY" type="id" />
+    <item name="DIRECT_MESSAGE" type="id" />
+    <item name="RPC_MESSAGE" type="id" />
 </resources>

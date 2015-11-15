@@ -1,9 +1,34 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.gui.fragments;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,9 +38,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
+import android.text.format.DateFormat;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,20 +56,23 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcMessage.Type;
-import com.iskrembilen.quasseldroid.NetworkCollection;
-import com.iskrembilen.quasseldroid.Quasseldroid;
+import com.iskrembilen.quasseldroid.gui.settings.IgnoreListFragment;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage.Type;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
 import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
@@ -58,27 +87,37 @@ import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.HideEventsDialog;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.Helper;
 import com.iskrembilen.quasseldroid.util.InputHistoryHelper;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.NetsplitHelper;
 import com.iskrembilen.quasseldroid.util.NickCompletionHelper;
-import com.iskrembilen.quasseldroid.util.SenderColorHelper;
+import com.iskrembilen.quasseldroid.util.MessageFormattingHelper;
+import com.iskrembilen.quasseldroid.util.SpanUtils;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
 
+import org.oshkimaadziig.george.androidutils.SpanFormatter;
+
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.PriorityQueue;
+
+import de.kuschku.util.HelperUtils;
 
 public class ChatFragment extends Fragment implements Serializable {
 
-    public static final String BUFFER_ID = "bufferid";
+    public static ChatFragment chatFragment;
+
+    private static final String BUFFER_ID = "bufferid";
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String BUFFER_NAME = "buffername";
-    SharedPreferences preferences;
-    private BacklogAdapter adapter;
+    private SharedPreferences preferences;
+    public BacklogAdapter adapter;
     private ListView backlogList;
     private EditText inputField;
     private ImageButton autoCompleteButton;
@@ -87,12 +126,17 @@ public class ChatFragment extends Fragment implements Serializable {
     private int bufferId = -1;
     private boolean connected;
     private NetworkCollection networks;
-    private String timeFormat;
+    private String userFormat;
 
+    private boolean detailedActions;
+    private boolean nickBrackets;
+    private boolean parseColors;
+    private boolean monospace;
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
     public static ChatFragment newInstance() {
-        return new ChatFragment();
+        chatFragment = new ChatFragment();
+        return chatFragment;
     }
 
     @Override
@@ -101,39 +145,60 @@ public class ChatFragment extends Fragment implements Serializable {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         adapter = new BacklogAdapter(getActivity(), null);
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         if (savedInstanceState != null && savedInstanceState.containsKey(BUFFER_ID)) {
             bufferId = savedInstanceState.getInt(BUFFER_ID);
         }
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+        initPreferences();
+
         sharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (key.equals(getString(R.string.preference_timestamp))) {
-                    updateTimeFormat();
+                    initPreferences();
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_hostname))) {
+                    initPreferences();
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_colored_text))) {
+                    initPreferences();
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_nickbrackets))) {
+                    initPreferences();
+                    adapter.notifyDataSetChanged();
+                } else if (key.equals(getString(R.string.preference_monospace))) {
+                    initPreferences();
+                    updateInputField();
+                    adapter.notifyDataSetChanged();
                 }
             }
         };
+
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
 
-    public void updateTimeFormat() {
-        String timeType = preferences.getString(getResources().getString(R.string.preference_timestamp),"orientation");
+    private void initPreferences() {
+        detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
+        parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
+        nickBrackets = preferences.getBoolean(getString(R.string.preference_nickbrackets), false);
+        monospace = preferences.getBoolean(getString(R.string.preference_monospace), false);
+        userFormat = preferences.getString(getResources().getString(R.string.preference_timestamp),"");
+    }
 
-        if (timeType.equalsIgnoreCase("always")) {
-            timeFormat = "%02d:%02d:%02d";
-        } else if (timeType.equalsIgnoreCase("never")) {
-            timeFormat = "%02d:%02d";
-        } else if (timeType.equalsIgnoreCase("orientation")) {
-            if (getActivity().getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE) {
-                timeFormat = "%02d:%02d:%02d";
-            } else {
-                timeFormat = "%02d:%02d";
-            }
-        } else {
-            timeFormat = "%02d:%02d";
-        }
-        Log.d(TAG,"Setting time format to include seconds: "+ timeType + ", resulting format: "+ timeFormat);
+    private void updateInputField() {
+        if (monospace)
+            inputField.setTypeface(Typeface.MONOSPACE);
+        else
+            inputField.setTypeface(Typeface.DEFAULT);
+    }
+
+    public java.text.DateFormat getTimeFormatter() {
+        if (userFormat.isEmpty())
+            return DateFormat.getTimeFormat(getActivity());
+        else
+            return new SimpleDateFormat(userFormat);
     }
 
     @Override
@@ -144,7 +209,8 @@ public class ChatFragment extends Fragment implements Serializable {
         inputField = (EditText) root.findViewById(R.id.chat_input_view);
         autoCompleteButton = (ImageButton) root.findViewById(R.id.chat_auto_complete_button);
 
-        updateTimeFormat();
+        initPreferences();
+        updateInputField();
 
         backlogList.setAdapter(adapter);
         backlogList.setOnScrollListener(new BacklogScrollListener(5));
@@ -165,7 +231,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 if (lastItem==i) {
                     if ((currentTime-lastTime)<DOUBLE_CLICK_TIMESPAN) {
                         IrcMessage msg = adapter.getItem(i);
-                        inputField.getText().append(" "+msg.getNick());
+                        inputField.getText().append(" "+msg.getMyNick());
                         nickCompletionHelper.completeNick(inputField);
                         lastTime = 0;
                     } else {
@@ -193,7 +259,7 @@ public class ChatFragment extends Fragment implements Serializable {
                 if (actionId == EditorInfo.IME_ACTION_SEND || (event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
                         ((event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)))) {
                     if (!"" .equals(inputField.getText().toString().trim())) {
-                        for (CharSequence line : Helper.split(inputField.getText(),"\n")) {
+                        for (CharSequence line : HelperUtils.split(inputField.getText(), "\n")) {
                             BusProvider.getInstance().post(new SendMessageEvent(adapter.buffer.getInfo().id, line.toString()));
                         }
                         InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
@@ -237,6 +303,34 @@ public class ChatFragment extends Fragment implements Serializable {
             }
         });
 
+        autoCompleteButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (!inputField.getText().toString().equals("")) {
+                    InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
+                    inputField.setText("");
+                }
+
+                final String[] items = InputHistoryHelper.getHistory();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(getResources().getString(R.string.dialog_title_input_history));
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String item = items[which];
+                        inputField.setText(item);
+                        inputField.setSelection(item.length());
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.show();
+
+                return true;
+            }
+        });
+
         return root;
     }
 
@@ -261,9 +355,9 @@ public class ChatFragment extends Fragment implements Serializable {
     @Override
     public void onStart() {
         Log.d(TAG, "Starting fragment");
+        adapter.loadScrollState();
         super.onStart();
         dynamicBacklogAmount = Integer.parseInt(preferences.getString(getString(R.string.preference_dynamic_backlog), "10"));
-        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         autoCompleteButton.setEnabled(false);
         inputField.setEnabled(false);
         BusProvider.getInstance().register(this);
@@ -271,24 +365,48 @@ public class ChatFragment extends Fragment implements Serializable {
     }
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(TAG, "detaching fragment");
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        Log.d(TAG, "attaching fragment");
+        super.onAttach(activity);
+    }
+
+    @Override
     public void onPause() {
+        adapter.storeScrollState();
         super.onPause();
+        preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         Log.d(TAG, "pausing fragment");
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(TAG, "resuming fragment");
+        super.onResume();
+        preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        initPreferences();
+        updateInputField();
     }
 
     @Override
     public void onStop() {
         Log.d(TAG, "Stopping fragment");
+        adapter.storeScrollState();
         super.onStop();
-        if (Quasseldroid.status == ConnectionChangedEvent.Status.Connected && getUserVisibleHint()) updateRead();
+        if (Client.getInstance().status == ConnectionChangedEvent.Status.Connected && getUserVisibleHint()) updateRead();
         adapter.clearBuffer();
-        preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         BusProvider.getInstance().unregister(this);
         setUserVisibleHint(false);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "saving fragment");
         outState.putInt(BUFFER_ID, bufferId);
         super.onSaveInstanceState(outState);
     }
@@ -317,17 +435,11 @@ public class ChatFragment extends Fragment implements Serializable {
         if (adapter.buffer != null) {
             adapter.buffer.setDisplayed(false);
 
-            //Don't save position if list is at bottom
-            if (backlogList.getLastVisiblePosition() == adapter.getCount() - 1) {
-                adapter.buffer.setTopMessageShown(0);
-            } else {
-                adapter.buffer.setTopMessageShown(adapter.getListTopMessageId());
-            }
+            adapter.storeScrollState();
             if (adapter.buffer.getUnfilteredSize() != 0) {
                 BusProvider.getInstance().post(new ManageChannelEvent(adapter.getBufferId(), ChannelAction.MARK_AS_READ));
                 BusProvider.getInstance().post(new ManageMessageEvent(adapter.getBufferId(), adapter.buffer.getUnfilteredBacklogEntry(adapter.buffer.getUnfilteredSize() - 1).messageId, MessageAction.LAST_SEEN));
             }
-
         }
     }
 
@@ -339,8 +451,12 @@ public class ChatFragment extends Fragment implements Serializable {
         Log.d(TAG, "Setting buffer and chat is visible: " + getUserVisibleHint());
         this.bufferId = bufferId;
         if (adapter != null && networks != null) {
-            if (adapter.buffer != null && bufferId != adapter.buffer.getInfo().id) {
-                updateMarkerLine();
+            if (adapter.buffer != null) {
+                if (bufferId != adapter.buffer.getInfo().id) {
+                    updateMarkerLine();
+                }
+
+                adapter.storeScrollState();
             }
             adapter.clearBuffer();
             Buffer buffer = networks.getBufferById(bufferId);
@@ -350,17 +466,17 @@ public class ChatFragment extends Fragment implements Serializable {
                 autoCompleteButton.setEnabled(true);
                 inputField.setEnabled(true);
                 buffer.setDisplayed(true);
+                Log.d(TAG, String.format("Marking highlights for buffer %d read", buffer.getInfo().id));
                 BusProvider.getInstance().post(new ManageChannelEvent(buffer.getInfo().id, ChannelAction.HIGHLIGHTS_READ));
 
-                //Move list to correct position
-                if (adapter.buffer.getTopMessageShown() == 0) {
-                    backlogList.setSelection(adapter.getCount() - 1);
-                } else {
-                    adapter.setListTopMessage(adapter.buffer.getTopMessageShown());
-                }
+                adapter.notifyDataSetInvalidated();
+
             } else {
                 resetFragment();
             }
+
+            //Move list to correct position
+            adapter.loadScrollState();
         }
     }
 
@@ -435,11 +551,10 @@ public class ChatFragment extends Fragment implements Serializable {
 
         private LayoutInflater inflater;
         private Buffer buffer;
-
+        public List<IrcMessage> backlogData;
 
         public BacklogAdapter(Context context, ArrayList<IrcMessage> backlog) {
             inflater = LayoutInflater.from(context);
-
         }
 
         public void setBuffer(Buffer buffer, NetworkCollection networks) {
@@ -449,27 +564,66 @@ public class ChatFragment extends Fragment implements Serializable {
             backlogList.scrollTo(backlogList.getScrollX(), backlogList.getScrollY());
         }
 
+        public void storeScrollState(int position, int scroll) {
+            if (buffer != null && backlogList.getChildCount()>0) {
+                buffer.setTopMessageShown(position);
+                buffer.setScrollState(scroll);
+            }
+        }
+
+        public void storeScrollState() {
+            if (backlogList.getLastVisiblePosition() == getCount() - 1) {
+                storeScrollState(0, 0);
+            } else {
+                storeScrollState(getListTopMessageId(), getOffset());
+            }
+        }
+
+        private int getOffset() {
+            View v = backlogList.getChildAt(0);
+            return (v == null) ? 0 : (v.getTop() - backlogList.getPaddingTop());
+        }
+
+        public void loadScrollState() {
+            String parent = Thread.currentThread().getStackTrace()[3].getMethodName();
+            int i = 4;
+            while (parent.equals("loadScrollState"))
+                parent = Thread.currentThread().getStackTrace()[i++].getMethodName();
+
+            if (buffer != null) {
+                if (buffer.getTopMessageShown() == 0) {
+                    backlogList.setSelection(getCount() - 1);
+                    Log.e(TAG, "Error loading state -1 from "+ parent);
+                } else {
+                    setListTopMessage(buffer.getTopMessageShown(),buffer.getScrollState());
+                    Log.d(TAG, "Success loading state " + buffer.getTopMessageShown() + " from "+ parent);
+                }
+            }
+
+        }
+
         @Override
         public int getCount() {
-            if (this.buffer == null) return 0;
-            return buffer.getSize();
+            int count = 0;
+            if (this.backlogData != null) count = backlogData.size();
+            return count;
         }
 
         @Override
         public IrcMessage getItem(int position) {
             //TODO: PriorityQueue is fucked, we don't want to convert to array here, so change later
-            return buffer.getBacklogEntry(position);
+            return backlogData.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            return buffer.getBacklogEntry(position).messageId;
+            return getItem(position).messageId;
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder = null;
+            ViewHolder holder;
 
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.widget_backlog, null);
@@ -498,7 +652,9 @@ public class ChatFragment extends Fragment implements Serializable {
 
             IrcMessage entry = this.getItem(position);
             holder.messageID = entry.messageId;
-            holder.timeView.setText(entry.getTime(timeFormat));
+            holder.timeView.setText(entry.getTime(getTimeFormatter()));
+
+            holder.timeView.setTextColor(entry.isFiltered() ? getResources().getColor(R.color.ircmessage_red) : ThemeUtil.Color.chatTimestamp);
 
             if (!preferences.getBoolean(getString(R.string.preference_colored_text), false)) {
                 entry.content = new SpannableString(entry.content.toString());
@@ -507,225 +663,177 @@ public class ChatFragment extends Fragment implements Serializable {
             Spannable spannable;
             String rawText;
             String nick;
-            boolean detailedActions = preferences.getBoolean(getString(R.string.preference_hostname),false);
-            boolean parseColors = preferences.getBoolean(getResources().getString(R.string.preference_colored_text),true);
+            String hostmask = "";
+
+
+            if (monospace) {
+                holder.msgView.setTypeface(Typeface.MONOSPACE);
+                holder.timeView.setTypeface(Typeface.MONOSPACE);
+            } else {
+                holder.msgView.setTypeface(Typeface.DEFAULT);
+                holder.timeView.setTypeface(Typeface.DEFAULT);
+            }
+
+            if (detailedActions)
+                hostmask = " ("+entry.getHostmask()+") ";
+
+            MessageFormattingHelper.NickFormatter formatter = new MessageFormattingHelper.NickFormatter(nickBrackets, new String[] {"<", ">"});
 
             switch (entry.type) {
                 case Action:
                     holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.msgView.setTypeface(Typeface.DEFAULT);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatPlainBg);
 
-
-                    int color;
-                    if (entry.isSelf()) {
-                        color = ThemeUtil.Color.chatPlain;
-                    } else {
-                        color = entry.getSenderColor();
-                    }
-
-                    SpannableString nickSpan = new SpannableString(entry.getNick());
-                    SpannableString contentSpan = MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors);
-                    contentSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, contentSpan.length(), 0);
-                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    nickSpan.setSpan(new StyleSpan(Typeface.ITALIC), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", contentSpan));
+                    CharSequence contentSpan = MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors);
+                    contentSpan = SpanFormatter.format(getString(R.string.message_action), formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()), contentSpan);
+                    SpanUtils.setFullSpan(new SpannableString(contentSpan), new StyleSpan(Typeface.ITALIC));
+                    holder.msgView.setText(contentSpan);
                     break;
                 case Error:
                     holder.msgView.setText(entry.content);
                     holder.msgView.setTextColor(ThemeUtil.Color.chatError);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Server:
                 case Info:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Topic:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Notice:
-                    if (entry.isSelf() || entry.isHighlighted()) {
-                        color = ThemeUtil.Color.chatPlain;
-                    } else {
-                        color = entry.getSenderColor();
-                    }
-                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false)) {
-                        nickSpan = new SpannableString(TextUtils.concat("[", entry.getNick(), "]"));
-                    } else {
-                        nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
-                    }
-                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-
-                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setText(TextUtils.concat(
+                            formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted(), new String[] {"[","]"}),
+                            " ",
+                            MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Join:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getResources().getString(R.string.message_join), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_join),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask)));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Part:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getString(R.string.message_leave), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_leave),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask),
+                            MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Quit:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getString(R.string.message_quit), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_quit),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask),
+                            MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kill:
                     nick = entry.getNick();
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-                    spannable = new SpannableString(String.format(getString(R.string.message_kill), nick));
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(TextUtils.concat(spannable, MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kill),
+                            TextUtils.concat(formatter.formatNick(nick, entry.isSelf() || entry.isHighlighted()), hostmask),
+                            MessageUtil.parseStyleCodes(getActivity(), entry.content.toString(), parseColors)));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Kick:
-                    nick = "";
-                    String reason = "";
-
+                    CharSequence reasonSequence;
                     int nickEnd = entry.content.toString().indexOf(" ");
                     if (nickEnd >= 0) {
-                        nick = entry.content.toString().substring(0, nickEnd);
-                        reason = " (" + entry.content.toString().substring(nickEnd + 1) + ")";
+                        nick = entry.content.subSequence(0, nickEnd).toString();
+                        reasonSequence = MessageUtil.parseStyleCodes(getActivity(), entry.content.subSequence(nickEnd, entry.content.length()).toString(), parseColors);
                     } else {
                         nick = entry.content.toString();
+                        reasonSequence = "";
                     }
 
-                    if (detailedActions) {nick += " ("+entry.getHostmask()+")";}
-
-                    rawText = String.format(getString(R.string.message_kick), entry.getNick(), nick, entry.bufferInfo.name, reason);
-
-                    int color_nick;
-                    if (nick.equalsIgnoreCase(entry.getSender())) {
-                        color_nick = entry.getSenderColor();
-                    } else {
-                        color_nick = SenderColorHelper.getSenderColor(nick);
-                    }
-
-                    CharSequence parsedText = MessageUtil.parseStyleCodes(getActivity(),rawText,parseColors);
-                    spannable = new SpannableString(parsedText);
-                    spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    spannable.setSpan(new ForegroundColorSpan(color_nick), parsedText.toString().indexOf(nick), parsedText.toString().indexOf(nick) + nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_kick),
+                            TextUtils.concat(formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()), hostmask),
+                            formatter.formatNick(nick, entry.isHighlighted()),
+                            reasonSequence));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case Mode:
-                    int color_affected_nick;
-                    String affected_nick = null;
-
-                    rawText = String.format(getString(R.string.message_mode), entry.content.toString(), entry.getNick());
-                    spannable = new SpannableString(rawText);
-
-                    if (entry.content.toString().trim().length()-entry.content.toString().trim().replaceAll(" ","").length()==2 && entry.content.toString().startsWith("#")) {
-                        affected_nick = entry.content.toString().substring(entry.content.toString().lastIndexOf(" "), entry.content.toString().trim().length()).trim();
-                    } else if (!entry.content.toString().startsWith("#")&&entry.content.toString().trim().length()-entry.content.toString().trim().replaceAll(" ","").length()==1){
-                        affected_nick = entry.content.toString().substring(0, entry.content.toString().lastIndexOf(" ")).trim();
-                    }
-
-                    if (affected_nick!=null) {
-                        if (affected_nick.equalsIgnoreCase(entry.getSender())) {
-                            color_affected_nick = entry.getSenderColor();
-                        } else {
-                            color_affected_nick = SenderColorHelper.getSenderColor(affected_nick);
+                    String[] raw = entry.content.toString().split(" ");
+                    SpannableStringBuilder builder = new SpannableStringBuilder();
+                    CharSequence nickSpannable = MessageFormattingHelper.formatNick(getActivity(), entry.getNick(), entry.isSelf(), true);
+                    if (raw.length==2) {
+                        builder.append(raw[0]).append(" ");
+                        builder.append(raw[1]).append(" ");
+                        spannable = new SpannableString(builder);
+                    } else {
+                        builder.append(raw[0]).append(" ");
+                        builder.append(raw[1]).append(" ");
+                        for (String s : Arrays.copyOfRange(raw, 2, raw.length)) {
+                            builder.append(MessageFormattingHelper.formatNick(getActivity(), s, entry.isSelf(), true)).append(", ");
                         }
-                        spannable.setSpan(new ForegroundColorSpan(color_affected_nick), rawText.indexOf(affected_nick), rawText.indexOf(affected_nick) + affected_nick.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                        spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()), rawText.indexOf(affected_nick) + affected_nick.length() + rawText.substring(rawText.indexOf(affected_nick) + affected_nick.length()).indexOf(entry.getNick()) + entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        spannable = new SpannableString(builder.subSequence(0,builder.length()-", ".length()));
                     }
 
-                    holder.msgView.setText(spannable);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setText(SpanFormatter.format(getString(R.string.message_mode), spannable, nickSpannable));
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Nick:
                     if (entry.getNick().equals(entry.content.toString())) {
                         rawText = String.format(getString(R.string.message_nick_self), entry.content.toString());
-                        spannable = new SpannableString(rawText);
-                        holder.msgView.setText(spannable);
+                        holder.msgView.setText(new SpannableString(rawText));
                     } else {
-                        rawText = String.format(getString(R.string.message_nick_other), entry.getNick(), entry.content.toString());
-                        spannable = new SpannableString(rawText);
-                        spannable.setSpan(new ForegroundColorSpan(entry.getSenderColor()), 0, entry.getNick().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                        CharSequence text = SpanFormatter.format(getString(R.string.message_nick_other),
+                                formatter.formatNick(entry.getNick(), false), formatter.formatNick(entry.content.toString(), false));
 
-                        int color_new = SenderColorHelper.getSenderColor(entry.content.toString());
-
-                        spannable.setSpan(new ForegroundColorSpan(color_new), rawText.lastIndexOf(entry.content.toString()), rawText.lastIndexOf(entry.content.toString()) + entry.content.toString().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                        holder.msgView.setText(spannable);
+                        holder.msgView.setText(text);
                     }
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitJoin:
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatJoinMessage());
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case NetsplitQuit:
                     holder.msgView.setText(new NetsplitHelper(entry.content.toString()).formatQuitMessage());
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     nickCompletionHelper = new NickCompletionHelper(buffer.getUsers().getUniqueUsers());
                     break;
                 case DayChange:
                     SpannableString s = new SpannableString(String.format(getString(R.string.message_daychange), entry.content.toString()));
                     s.setSpan(new StyleSpan(Typeface.ITALIC),0,s.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     holder.msgView.setText(s);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                 case Invite:
                     holder.msgView.setText(entry.content);
-                    holder.msgView.setTextColor(ThemeUtil.Color.chatAction);
-                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatActionBg);
+                    holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
+                    holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Plain:
                 default:
-                    if (entry.isSelf() || entry.isHighlighted()) {
-                        color = ThemeUtil.Color.chatPlain;
-                    } else {
-                        color = entry.getSenderColor();
-                    }
                     holder.msgView.setTextColor(ThemeUtil.Color.chatPlain);
-                    holder.msgView.setTypeface(Typeface.DEFAULT);
 
-                    if (preferences.getBoolean(getString(R.string.preference_nickbrackets), false)) {
-                        nickSpan = new SpannableString(TextUtils.concat("<", entry.getNick(), ">"));
-                    } else {
-                        nickSpan = new SpannableString(TextUtils.concat(entry.getNick()));
-                    }
-                    nickSpan.setSpan(new StyleSpan(Typeface.BOLD), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    nickSpan.setSpan(new ForegroundColorSpan(color), 0, nickSpan.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-
-                    holder.msgView.setText(TextUtils.concat(nickSpan, " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
+                    holder.msgView.setText(TextUtils.concat(formatter.formatNick(entry.getNick(), entry.isSelf() || entry.isHighlighted()), " ", MessageUtil.parseStyleCodes(getActivity(),entry.content.toString(),parseColors)));
 
                     holder.parent.setBackgroundColor(android.graphics.Color.TRANSPARENT);
                     break;
@@ -742,6 +850,7 @@ public class ChatFragment extends Fragment implements Serializable {
         @Override
         public void update(Observable observable, Object data) {
             if (data == null) {
+                backlogData = buffer.getBacklog();
                 notifyDataSetChanged();
                 return;
             }
@@ -754,8 +863,9 @@ public class ChatFragment extends Fragment implements Serializable {
                     break;
                 case R.id.BUFFERUPDATE_BACKLOG:
                     int topId = getListTopMessageId();
+                    int scroll = getOffset();
                     notifyDataSetChanged();
-                    setListTopMessage(topId);
+                    setListTopMessage(topId, scroll);
                     break;
                 case R.id.BUFFERUPDATE_TOPICCHANGED:
                     notifyDataSetChanged();
@@ -766,26 +876,50 @@ public class ChatFragment extends Fragment implements Serializable {
 
         }
 
-        /*
+        private int indexOf(int messageid) {
+            for (int i = 0; i < adapter.getCount(); i++) {
+                if (adapter.getItemId(i) == messageid) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /**
          * Returns the messageid for the ircmessage that is currently at the top of the screen
          */
         public int getListTopMessageId() {
             int topId;
             if (backlogList.getChildCount() == 0) {
-                topId = 0;
+                topId = -1;
             } else {
                 topId = ((ViewHolder) backlogList.getChildAt(0).getTag()).messageID;
             }
             return topId;
         }
 
-        /*
+        /**
          * Sets what message from the adapter will be at the top of the visible screen
          */
         public void setListTopMessage(int messageid) {
+            setListTopMessage(messageid, 5);
+        }
+
+        public void setListTopMessage(int messageid, int scroll) {
+            backlogList.setAdapter(adapter);
             for (int i = 0; i < adapter.getCount(); i++) {
                 if (adapter.getItemId(i) == messageid) {
-                    backlogList.setSelectionFromTop(i, 5);
+                    backlogList.setSelectionFromTop(i, scroll);
+                    break;
+                }
+            }
+        }
+
+        public void scrollToFirstUnread() {
+            int messageid = buffer.getLastSeenMessage();
+            for (int i = 0; i < adapter.getCount(); i++) {
+                if (adapter.getItemId(i) == messageid) {
+                    backlogList.smoothScrollToPosition(i);
                     break;
                 }
             }
@@ -796,17 +930,21 @@ public class ChatFragment extends Fragment implements Serializable {
                 buffer.deleteObserver(this);
                 buffer.setDisplayed(false);
                 buffer = null;
+                backlogData = null;
                 notifyDataSetChanged();
             }
         }
 
         public int getBufferId() {
-            return buffer.getInfo().id;
+            if (buffer != null && buffer.getInfo() != null)
+                return buffer.getInfo().id;
+            else
+                return -1;
         }
 
         public void getMoreBacklog() {
-            adapter.buffer.setBacklogPending(true);
-            BusProvider.getInstance().post(new GetBacklogEvent(adapter.getBufferId(), dynamicBacklogAmount));
+            buffer.setBacklogPending(true);
+            BusProvider.getInstance().post(new GetBacklogEvent(getBufferId(), dynamicBacklogAmount));
         }
 
         public void removeFilter(Type type) {

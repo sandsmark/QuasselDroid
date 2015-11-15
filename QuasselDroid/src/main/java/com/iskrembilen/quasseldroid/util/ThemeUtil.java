@@ -1,3 +1,26 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.util;
 
 import android.content.Context;
@@ -6,12 +29,12 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.SparseIntArray;
 
-import com.iskrembilen.quasseldroid.IrcMode;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMode;
 import com.iskrembilen.quasseldroid.R;
 
 public class ThemeUtil {
 
-    public static int theme, themeNoActionBar;
+    public static int theme, themeNoActionBar, themeDrawStatusBar, themeNoActionBarDrawStatusBar;
     public static int[] nickBackgrounds;
     public static int[] nickColors;
     public static double[] nickConstants;
@@ -36,6 +59,7 @@ public class ThemeUtil {
                 resources.getColor(R.color.nick_user_color)
         };
         Color.defColor = resources.getColor(R.color.nick_user_color);
+        Color.transparent = resources.getColor(android.R.color.transparent);
 
         for (int i = 0; i<16; i++) {
             messageColor.put(resources.getColor(MessageUtil.mircCodeToColor(i)),i);
@@ -44,22 +68,25 @@ public class ThemeUtil {
         if (themeName.equals("light")) {
             theme = R.style.Theme_QuasselDroid_Material_Light;
             themeNoActionBar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar;
-
+            themeDrawStatusBar = R.style.Theme_QuasselDroid_Material_Light_DrawOverStatusBar;
+            themeNoActionBarDrawStatusBar = R.style.Theme_QuasselDroid_Material_Light_NoActionBar_DrawOverStatusBar;
 
             Color.chatPlain = resources.getColor(R.color.chat_line_plain_light);
             Color.chatError = resources.getColor(R.color.chat_line_error_light);
             Color.chatAction = resources.getColor(R.color.chat_line_action_light);
+            Color.chatServer = resources.getColor(R.color.chat_line_server_light);
             Color.chatTimestamp = resources.getColor(R.color.chat_line_timestamp_light);
             Color.chatHighlight = resources.getColor(R.color.chat_line_highlight_light);
 
-            Color.chatActionBg = resources.getColor(R.color.chat_bg_action_light);
-            Color.chatPlainBg = R.color.chat_line_plain_light;
+            Color.chatServerBg = resources.getColor(R.color.chat_bg_action_light);
+            Color.chatPlainBg = resources.getColor(android.R.color.transparent);
 
             Color.bufferRead = resources.getColor(R.color.buffer_read_color_light);
             Color.bufferParted = resources.getColor(R.color.buffer_parted_color_light);
             Color.bufferHighlight = resources.getColor(R.color.buffer_highlight_color_light);
             Color.bufferUnread = resources.getColor(R.color.buffer_unread_color_light);
             Color.bufferActivity = resources.getColor(R.color.buffer_activity_color_light);
+            Color.bufferFocused = resources.getColor(R.color.accent);
 
             Color.bufferStateTemp = resources.getColor(R.color.buffer_status_temp_light);
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_light);
@@ -76,25 +103,31 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_user_light)
             };
 
+            Color.nickSelfColor = resources.getColor(R.color.nick_self_light);
+
             nickConstants = new double[] {0.7, 0.5};
         } else if (themeName.equals("dark")) {
             theme = R.style.Theme_QuasselDroid_Material_Dark;
             themeNoActionBar = R.style.Theme_QuasselDroid_Material_Dark_NoActionBar;
+            themeDrawStatusBar = R.style.Theme_QuasselDroid_Material_Dark_DrawOverStatusBar;
+            themeNoActionBarDrawStatusBar = R.style.Theme_QuasselDroid_Material_Dark_NoActionBar_DrawOverStatusBar;
 
             Color.chatPlain = resources.getColor(R.color.chat_line_plain_dark);
             Color.chatError = resources.getColor(R.color.chat_line_error_dark);
             Color.chatAction = resources.getColor(R.color.chat_line_action_dark);
+            Color.chatServer = resources.getColor(R.color.chat_line_server_dark);
             Color.chatTimestamp = resources.getColor(R.color.chat_line_timestamp_dark);
             Color.chatHighlight = resources.getColor(R.color.chat_line_highlight_dark);
 
-            Color.chatActionBg = resources.getColor(R.color.chat_bg_action_dark);
-            Color.chatPlainBg = R.color.chat_line_plain_dark;
+            Color.chatServerBg = resources.getColor(R.color.chat_bg_action_dark);
+            Color.chatPlainBg = resources.getColor(android.R.color.transparent);
 
             Color.bufferRead = resources.getColor(R.color.buffer_read_color_dark);
             Color.bufferParted = resources.getColor(R.color.buffer_parted_color_dark);
             Color.bufferHighlight = resources.getColor(R.color.buffer_highlight_color_dark);
             Color.bufferUnread = resources.getColor(R.color.buffer_unread_color_dark);
             Color.bufferActivity = resources.getColor(R.color.buffer_activity_color_dark);
+            Color.bufferFocused = resources.getColor(R.color.accent);
 
             Color.bufferStateTemp = resources.getColor(R.color.buffer_status_temp_dark);
             Color.bufferStatePerm = resources.getColor(R.color.buffer_status_perm_dark);
@@ -111,6 +144,8 @@ public class ThemeUtil {
                     resources.getColor(R.color.nick_user_dark)
             };
 
+            Color.nickSelfColor = resources.getColor(R.color.nick_self_dark);
+
             nickConstants = new double[] {0.84, 0.71};
         } else {
             setTheme(context, "light");
@@ -121,10 +156,11 @@ public class ThemeUtil {
         public static int
                 chatPlain,
                 chatAction,
+                chatServer,
                 chatError,
                 chatHighlight,
                 chatTimestamp,
-                chatActionBg,
+                chatServerBg,
                 chatPlainBg;
 
         public static int
@@ -132,7 +168,8 @@ public class ThemeUtil {
                 bufferHighlight,
                 bufferUnread,
                 bufferActivity,
-                bufferRead;
+                bufferRead,
+                bufferFocused;
 
         public static int
                 bufferStateTemp,
@@ -141,10 +178,13 @@ public class ThemeUtil {
                 bufferStateAway,
                 bufferStateParted;
 
+        public static int nickSelfColor;
+
         public static int defColor;
+        public static int transparent;
     }
 
-    public static int getNickColor(IrcMode mode) {
+    public static int getModeColor(IrcMode mode) {
         switch (mode) {
             case OWNER:
                 return nickColors[0];
@@ -159,7 +199,7 @@ public class ThemeUtil {
             case USER:
                 return nickColors[5];
             default:
-                return Color.defColor;
+                return Color.nickSelfColor;
         }
     }
 

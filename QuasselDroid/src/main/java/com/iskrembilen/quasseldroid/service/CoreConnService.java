@@ -1,24 +1,24 @@
-/**
- QuasselDroid - Quassel client for Android
- Copyright (C) 2011 Ken Børge Viktil
- Copyright (C) 2011 Magnus Fjell
- Copyright (C) 2011 Martin Sandsmark <martin.sandsmark@kde.org>
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
 
- This program is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the Free
- Software Foundation, either version 3 of the License, or (at your option)
- any later version, or under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either version 2.1 of
- the License, or (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License and the
- GNU Lesser General Public License along with this program.  If not, see
- <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
  */
 
 package com.iskrembilen.quasseldroid.service;
@@ -42,21 +42,22 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.iskrembilen.quasseldroid.Buffer;
-import com.iskrembilen.quasseldroid.BufferCollection;
-import com.iskrembilen.quasseldroid.BufferInfo;
-import com.iskrembilen.quasseldroid.IrcMessage;
-import com.iskrembilen.quasseldroid.IrcUser;
-import com.iskrembilen.quasseldroid.Network;
-import com.iskrembilen.quasseldroid.Network.ConnectionState;
-import com.iskrembilen.quasseldroid.NetworkCollection;
+import com.iskrembilen.quasseldroid.events.RequestRemoteSyncEvent;
+import com.iskrembilen.quasseldroid.protocol.packets.Request;
+import com.iskrembilen.quasseldroid.protocol.state.Buffer;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
+import com.iskrembilen.quasseldroid.protocol.state.Network;
+import com.iskrembilen.quasseldroid.protocol.state.Network.ConnectionState;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
@@ -64,6 +65,7 @@ import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
 import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
+import com.iskrembilen.quasseldroid.events.RequestCreateIdentityEvent;
 import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
 import com.iskrembilen.quasseldroid.events.FilterMessagesEvent;
 import com.iskrembilen.quasseldroid.events.GetBacklogEvent;
@@ -79,9 +81,15 @@ import com.iskrembilen.quasseldroid.events.ManageNetworkEvent.NetworkAction;
 import com.iskrembilen.quasseldroid.events.NetworksAvailableEvent;
 import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
 import com.iskrembilen.quasseldroid.events.QueryUserEvent;
+import com.iskrembilen.quasseldroid.events.RequestRemoveIdentityEvent;
 import com.iskrembilen.quasseldroid.events.SendMessageEvent;
 import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
+import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.io.CoreConnection;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.EmptyQVariantException;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
+import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
+import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.MessageUtil;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
@@ -91,6 +99,7 @@ import com.squareup.otto.Subscribe;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
 
 /**
@@ -125,10 +134,10 @@ public class CoreConnService extends Service {
     private final IBinder binder = new LocalBinder();
     private boolean requestedDisconnect;
 
-    IncomingHandler incomingHandler;
-    Handler reconnectHandler;
+    private IncomingHandler incomingHandler;
+    private Handler reconnectHandler;
 
-    SharedPreferences preferences;
+    private SharedPreferences preferences;
 
     private NetworkCollection networks;
 
@@ -203,7 +212,7 @@ public class CoreConnService extends Service {
                 } else if (key.equals(getString(R.string.preference_wake_lock))) {
                     preferenceUseWakeLock = preferences.getBoolean(getString(R.string.preference_wake_lock), true);
                     if (!preferenceUseWakeLock) releaseWakeLockIfExists();
-                    else if (preferenceUseWakeLock && isConnected()) acquireWakeLockIfEnabled();
+                    else if (isConnected()) acquireWakeLockIfEnabled();
                 } else if (key.equals(getString(R.string.preference_reconnect))) {
                     preferenceReconnect = preferences.getBoolean(getString(R.string.preference_reconnect), false);
                 } else if (key.equals(getString(R.string.preference_reconnect_wifi))) {
@@ -244,8 +253,6 @@ public class CoreConnService extends Service {
 
     /**
      * Handle the data in the intent, and use it to connect with CoreConnect
-     *
-     * @param intent
      */
     private void handleIntent(Intent intent) {
         if (coreConn != null) {
@@ -259,7 +266,7 @@ public class CoreConnService extends Service {
         port = connectData.getInt("port");
         username = connectData.getString("username");
         password = connectData.getString("password");
-        networks = NetworkCollection.getInstance();
+        networks = Client.getInstance().getNetworks();
         networks.clear();
 
         acquireWakeLockIfEnabled();
@@ -297,6 +304,21 @@ public class CoreConnService extends Service {
 
     public void sendMessage(int bufferId, String message) {
         coreConn.sendMessage(bufferId, message);
+    }
+
+    @Subscribe
+    public void onRequestRemoteSync(RequestRemoteSyncEvent event) {
+        coreConn.requestRemoteSync(event);
+    }
+
+    @Subscribe
+    public void onRequestCreateIdentity(RequestCreateIdentityEvent event) {
+        coreConn.requestCreateIdentity(event.identityId, event.identity, null);
+    }
+
+    @Subscribe
+    public void onRequestRemoveIdentity(RequestRemoveIdentityEvent event) {
+        coreConn.requestRemoveIdentity(event.identityId);
     }
 
     public void queryUser(int bufferId, String nick) {
@@ -338,19 +360,31 @@ public class CoreConnService extends Service {
         stopForeground(true);
         initDone = false;
         isConnecting = false;
-        notificationManager = null;
+        if (notificationManager != null) {
+            notificationManager.clear();
+            notificationManager = null;
+        }
+        if (!requestedDisconnect) {
+            notificationManager = new QuasseldroidNotificationManager(getApplicationContext());
+            notificationManager.notifyDisconnected();
+            notificationManager = null;
+        }
         if(incomingHandler != null) {
             incomingHandler.disabled = true;
             incomingHandler.removeCallbacksAndMessages(null);
         }
         incomingHandler = null;
-        if(Quasseldroid.status != Status.Disconnected) {
+        if(Client.getInstance().status != Status.Disconnected) {
             BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected));
         }else{
             // The only time this could conceivably happen is if Android tells us the network is
             // disconnected while we are connecting.  In that case, let the user know the connection
             // was not successful.
             BusProvider.getInstance().post(new ConnectionChangedEvent(Status.Disconnected,"Connection failed!"));
+        }
+        if (requestedDisconnect) {
+            Log.d(TAG, "Stopping Service");
+            stopSelf();
         }
     }
 
@@ -361,7 +395,7 @@ public class CoreConnService extends Service {
             disconnectFromCore();
         }
         notificationManager = new QuasseldroidNotificationManager(this);
-        networks = NetworkCollection.getInstance();
+        networks = Client.getInstance().getNetworks();
         networks.clear();
         incomingHandler = new IncomingHandler();
         acquireWakeLockIfEnabled();
@@ -383,8 +417,8 @@ public class CoreConnService extends Service {
         public boolean disabled = false;
 
         @Override
-        public void handleMessage(Message msg) {
-            if (msg == null || coreConn == null || disabled == true) {
+        public void handleMessage(android.os.Message msg) {
+            if (msg == null || coreConn == null || disabled) {
                 return;
             }
             Buffer buffer;
@@ -410,17 +444,18 @@ public class CoreConnService extends Service {
                         }
 
                         /**
-                         * Check if we are highlighted in the message, TODO: Add
+                         * Check if we are highlighted in the message,
                          * support for custom highlight masks
                          */
                         for (IrcMessage curMessage : messageList) {
                             if (!buffer.hasMessage(curMessage)) {
-                                MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, curMessage);
+                                MessageUtil.processMessage(getBaseContext(), notificationManager, curMessage);
                             } else {
                                 Log.e(TAG, "Getting message buffer already have " + buffer.getInfo().name);
                             }
                         }
                         buffer.addBacklogMessages(messageList);
+                        buffer.setBacklogPending(false);
                     }
                     break;
                 case R.id.NEW_MESSAGE_TO_SERVICE:
@@ -437,10 +472,10 @@ public class CoreConnService extends Service {
 
                     if (!buffer.hasMessage(message)) {
                         /**
-                         * Check if we are highlighted in the message, TODO: Add
+                         * Check if we are highlighted in the message,
                          * support for custom highlight masks
                          */
-                        MessageUtil.checkMessageForHighlight(notificationManager, networks.getNetworkById(buffer.getInfo().networkId).getNick(), buffer, message);
+                        MessageUtil.processMessage(getBaseContext(), notificationManager, message);
 
                         buffer.addMessage(message);
 
@@ -472,8 +507,8 @@ public class CoreConnService extends Service {
                     networks.addNetwork((Network) msg.obj);
                     break;
                 case R.id.NETWORK_REMOVED:
-                    BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(msg.arg1).getStatusBuffer().getInfo().id));
                     networks.removeNetwork(msg.arg1);
+                    BusProvider.getInstance().post(new BufferRemovedEvent(networks.getNetworkById(msg.arg1).getStatusBuffer().getInfo().id));
                     break;
                 case R.id.SET_CONNECTION_STATE:
                     if (networks.getNetworkById(msg.arg1) != null) {
@@ -489,11 +524,9 @@ public class CoreConnService extends Service {
                     buffer = networks.getBufferById(msg.arg1);
                     if (buffer != null) {
                         buffer.setLastSeenMessage(msg.arg2);
-                        //if(buffer.hasUnseenHighlight()) {FIXME
                         notificationManager.notifyHighlightsRead(buffer.getInfo().id);
-                        //}
                     } else {
-                        Log.e(TAG, "Getting set last seen message on unknown buffer: " + msg.arg1);
+                        Log.e(TAG, "Getting last seen message for buffer we don't have " + msg.arg1);
                     }
                     break;
                 case R.id.SET_MARKERLINE_TO_SERVICE:
@@ -504,7 +537,7 @@ public class CoreConnService extends Service {
                     if (buffer != null) {
                         buffer.setMarkerLineMessage(msg.arg2);
                     } else {
-                        Log.e(TAG, "Getting set marker line message on unknown buffer: " + msg.arg1);
+                        Log.e(TAG, "Getting markerlinemessage for buffer we don't have " + msg.arg1);
                     }
                     break;
 
@@ -539,6 +572,7 @@ public class CoreConnService extends Service {
                      * New IrcUser added
                      */
                     user = (IrcUser) msg.obj;
+                    user.register();
                     networks.getNetworkById(msg.arg1).onUserJoined(user);
                     break;
                 case R.id.NEW_USER_INFO:
@@ -548,7 +582,13 @@ public class CoreConnService extends Service {
                         user.away = bundle.getBoolean("away");
                         user.awayMessage = bundle.getString("awayMessage");
                         user.ircOperator = bundle.getString("ircOperator");
-                        user.channels = (ArrayList<String>) bundle.getSerializable("channels");
+
+                        if (bundle.getSerializable("channels")==null)
+                            user.channels = new ArrayList<>();
+                        else
+                            user.channels = (List<String>) bundle.getSerializable("channels");
+
+
                         user.notifyObservers();
                     } else {
                         Log.e(TAG, "User not found for new user info");
@@ -559,27 +599,14 @@ public class CoreConnService extends Service {
                     /**
                      * Buffer order changed so set the new one
                      */
-                    //---- start debug stuff
-//				ArrayList<Integer> a = (((Bundle)msg.obj).getIntegerArrayList("keys"));
-//				ArrayList<Integer> b = ((Bundle)msg.obj).getIntegerArrayList("buffers");
-//				ArrayList<Integer> c = new ArrayList<Integer>();
-//				for(Network net : networks.getNetworkList()) {
-//					c.add(net.getStatusBuffer().getInfo().id);
-//					for(Buffer buf : net.getBuffers().getBufferList(true)) {
-//						c.add(buf.getInfo().id);
-//					}
-//				}
-//				Collections.sort(a);
-//				Collections.sort(b);
-//				Collections.sort(c);
-                    //---- end debug stuff
-
-                    if (networks == null)
+                    if (networks == null) {
                         throw new RuntimeException("Networks are null when setting buffer order");
-                    if (networks.getBufferById(msg.arg1) == null)
+                    } else if (networks.getBufferById(msg.arg1) == null) {
+                        Log.w(TAG, "Got buffer info for non-existent buffer id: " + msg.arg1);
                         return;
-                    //throw new RuntimeException("Buffer is null when setting buffer order, bufferid " + msg.arg1 + " order " + msg.arg2 + " for this buffers keys: " + a.toString() + " corecon buffers: " + b.toString() + " service buffers: " + c.toString());
-                    networks.getBufferById(msg.arg1).setOrder(msg.arg2);
+                    } else {
+                        networks.getBufferById(msg.arg1).setOrder(msg.arg2);
+                    }
                     break;
 
                 case R.id.SET_BUFFER_TEMP_HIDDEN:
@@ -668,27 +695,16 @@ public class CoreConnService extends Service {
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
                     String modes = (String) bundle.get("mode");
                     bufferName = (String) bundle.get("buffername");
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
-                        if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
-                            buf.getUsers().addUser(user, modes);
-                            return;
+                    if (user != null) {
+                        for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
+                            if (buf.getInfo().name.equalsIgnoreCase(bufferName)) {
+                                buf.getUsers().addUser(user, modes);
+                                return;
+                            }
                         }
                     }
                     //Did not find buffer in the network, something is wrong
                     Log.w(TAG, "joinIrcUser: Did not find buffer with name " + bufferName);
-                case R.id.USER_CHANGEDNICK:
-                    if (networks.getNetworkById(msg.arg1) == null) {
-                        Log.e(TAG, "Could not find network with id " + msg.arg1 + " for changing a user nick");
-                        return;
-                    }
-                    bundle = (Bundle) msg.obj;
-                    user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("oldNick"));
-                    if (user == null) {
-                        Log.e(TAG, "Unable to find user " + bundle.getString("oldNick") + " for changing nick");
-                        return;
-                    }
-                    user.changeNick(bundle.getString("newNick"));
-                    break;
                 case R.id.USER_ADD_MODE:
                     if (networks.getNetworkById(msg.arg1) == null) {
                         System.err.println("Unable to find buffer for message");
@@ -697,7 +713,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().addModeToUser(user, bundle.getString("mode"));
                             break;
@@ -712,7 +728,7 @@ public class CoreConnService extends Service {
                     bundle = (Bundle) msg.obj;
                     bufferName = bundle.getString("channel");
                     user = networks.getNetworkById(msg.arg1).getUserByNick(bundle.getString("nick"));
-                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(true)) {
+                    for (Buffer buf : networks.getNetworkById(msg.arg1).getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                         if (buf.getInfo().name.equals(bufferName)) {
                             buf.getUsers().removeModeFromUser(user, bundle.getString("mode"));
                             break;
@@ -726,7 +742,7 @@ public class CoreConnService extends Service {
                     networks.getNetworkById(msg.arg1).setConnected((Boolean) msg.obj);
                     break;
                 case R.id.SET_MY_NICK:
-                    networks.getNetworkById(msg.arg1).setNick((String) msg.obj);
+                    networks.getNetworkById(msg.arg1).setMyNick((String) msg.obj);
                     break;
                 case R.id.REMOVE_BUFFER:
                     BusProvider.getInstance().post(new BufferRemovedEvent(msg.arg2));
@@ -742,44 +758,46 @@ public class CoreConnService extends Service {
                     networks.getNetworkById(msg.arg1).setLatency(msg.arg2);
                     break;
                 case R.id.SET_NETWORK_NAME:
-                    networks.getNetworkById(msg.arg1).setName((String) msg.obj);
+                    networks.getNetworkById(msg.arg1).setNetworkName((String) msg.obj);
                     break;
                 case R.id.SET_NETWORK_CURRENT_SERVER:
-                    networks.getNetworkById(msg.arg1).setServer((String) msg.obj);
+                    networks.getNetworkById(msg.arg1).setCurrentServer((String) msg.obj);
+                    break;
+                case R.id.SET_NETWORK_IDENTITY:
+                    networks.getNetworkById(msg.arg1).setIdentity((int) msg.obj);
                     break;
                 case R.id.RENAME_BUFFER:
                     networks.getBufferById(msg.arg1).setName((String) msg.obj);
                     break;
-                case R.id.SET_USER_SERVER:
-                    bundle = (Bundle) msg.obj;
-                    Network networkServer = networks.getNetworkById(msg.arg1);
-                    if (networkServer != null) {
-                        IrcUser userServer = networkServer.getUserByNick(bundle.getString("nick"));
-                        if (userServer != null) {
-                            userServer.server = bundle.getString("server");
-                        }
+                case R.id.CREATE_IDENTITY:
+                    try {
+                        Identity identity = new Identity();
+                        identity.fromVariantMap((QVariant<Map<String,QVariant<?>>>)msg.obj);
+
+                        Client.getInstance().getIdentities().putIdentity(identity);
+                        BusProvider.getInstance().post(new UpdateIdentityEvent(identity));
+                    } catch (EmptyQVariantException e) {
+                        e.printStackTrace();
                     }
                     break;
-                case R.id.SET_USER_REALNAME:
-                    bundle = (Bundle) msg.obj;
-                    Network networkRealName = networks.getNetworkById(msg.arg1);
-                    if (networkRealName != null) {
-                        IrcUser userRealName = networkRealName.getUserByNick(bundle.getString("nick"));
-                        if (userRealName != null) {
-                            userRealName.realName = bundle.getString("realname");
+                case R.id.REMOVE_IDENTITY:
+                    try {
+                        if (((QVariant<?>) msg.obj).getType()== QVariantType.Map) {
+                            Identity identity = new Identity();
+                            identity.fromVariantMap((QVariant<Map<String,QVariant<?>>>)msg.obj);
+                            Client.getInstance().getIdentities().removeIdentity(identity.getIdentityId());
+                            Client.getInstance().getObjects().removeObject("Identity", String.valueOf(identity.getIdentityId()));
+                        } else if (((QVariant<?>) msg.obj).getType()== QVariantType.Int) {
+                            Client.getInstance().getIdentities().removeIdentity(((QVariant<Integer>) msg.obj).getData());
+                        } else {
+                            Log.d(TAG,"Encountered unknown identity type while sync:"+((QVariant<?>) msg.obj).getType().name());
                         }
+                    } catch (EmptyQVariantException e) {
+                        e.printStackTrace();
                     }
-                    break;
-                case R.id.SET_USER_AWAY:
-                    bundle = (Bundle) msg.obj;
-                    Network networkAway = networks.getNetworkById(msg.arg1);
-                    if (networkAway != null) {
-                        IrcUser userAway = networkAway.getUserByNick(bundle.getString("nick"));
-                        if (userAway != null) {
-                            userAway.away = bundle.getBoolean("away");
-                        }
-                    }
-                    break;
+                case R.id.DIRECT_MESSAGE:
+                    Request p = (Request) msg.obj;
+                    p.apply();
             }
         }
     }
@@ -840,12 +858,13 @@ public class CoreConnService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo info = cm.getNetworkInfo(intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, -1));
-            if(info.getState() == NetworkInfo.State.DISCONNECTED && isConnected()) {
+            NetworkInfo info = cm.getActiveNetworkInfo();
+
+            if((info == null || info.getState() == NetworkInfo.State.DISCONNECTED) && isConnected()) {
                 Log.d(TAG, "Current network is unavailable, disconnect from core");
                 notificationManager.notifyDisconnected();
                 disconnectFromCore();
-            } else if (!requestedDisconnect && info.getState() == NetworkInfo.State.CONNECTED && coreConn == null
+            } else if (!requestedDisconnect && info != null && info.getState() == NetworkInfo.State.CONNECTED && coreConn == null
                     && !isInitialConnectionAttempt() && satisfyReconnectConditions()) {
                 Log.d(TAG, "Reconnecting after network change");
                 reconnectHandler.removeCallbacksAndMessages(null);
@@ -855,8 +874,7 @@ public class CoreConnService extends Service {
     };
 
     public boolean isInitComplete() {
-        if (coreConn == null) return false;
-        return coreConn.isInitComplete();
+        return (coreConn != null) && coreConn.isInitComplete();
     }
 
     public Network getNetworkById(int networkId) {
@@ -929,6 +947,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doManageChannel(ManageChannelEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         if (event.action == ChannelAction.DELETE) {
             BusProvider.getInstance().post(new BufferRemovedEvent(event.bufferId));
             coreConn.requestRemoveBuffer(event.bufferId);

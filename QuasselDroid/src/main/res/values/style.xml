@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <resources>
     <style name="Theme.QuasselDroid.Material.Light.NoActionBar" parent="Theme.QuasselDroid.Material.Light">
         <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBarOverlay">true</item>
     </style>
 
     <style name="Theme.QuasselDroid.Material.Dark.NoActionBar" parent="Theme.QuasselDroid.Material.Dark">
         <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBarOverlay">true</item>
     </style>
 
-    <style name="Theme.QuasselDroid.Material.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.QuasselDroid.Material.Light" parent="Theme.QuasselDroid.Base.Light">
         <!-- Main theme colors -->
         <!--   your app branding color for the app bar -->
         <item name="colorPrimary">@color/primary</item>
@@ -28,12 +54,15 @@
         <item name="android:textColorSecondary">@color/secondary_text_default_material_light</item>
 
         <item name="ic_overflow">@drawable/ic_overflow_light</item>
+        <item name="ic_reorder">@drawable/ic_reorder_light</item>
         <item name="ic_search">@drawable/ic_search_light</item>
         <item name="ic_expand">@drawable/ic_expand_light</item>
         <item name="ic_collapse">@drawable/ic_collapse_light</item>
+
+        <item name="drawerArrowStyle">@style/Widget.DrawerArrowToggle</item>
     </style>
 
-    <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.AppCompat">
+    <style name="Theme.QuasselDroid.Material.Dark" parent="Theme.QuasselDroid.Base.Dark">
         <!-- Main theme colors -->
         <!--   your app branding color for the app bar -->
         <item name="colorPrimary">@color/primary</item>
@@ -41,7 +70,6 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">@color/accent</item>
-
 
         <item name="windowActionModeOverlay">true</item>
 
@@ -54,15 +82,82 @@
         <item name="android:textColorSecondary">@color/secondary_text_default_material_dark</item>
 
         <item name="ic_overflow">@drawable/ic_overflow_dark</item>
+        <item name="ic_reorder">@drawable/ic_reorder_dark</item>
         <item name="ic_search">@drawable/ic_search_dark</item>
         <item name="ic_expand">@drawable/ic_expand_dark</item>
         <item name="ic_collapse">@drawable/ic_collapse_dark</item>
+
+        <item name="drawerArrowStyle">@style/Widget.DrawerArrowToggle</item>
+    </style>
+
+    <style name="Theme.QuasselDroid.Material.Dark.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Dark">
+    </style>
+    <style name="Theme.QuasselDroid.Material.Light.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Light">
+    </style>
+    <style name="Theme.QuasselDroid.Material.Dark.NoActionBar.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Dark.NoActionBar">
+    </style>
+    <style name="Theme.QuasselDroid.Material.Light.NoActionBar.DrawOverStatusBar" parent="Theme.QuasselDroid.Material.Light.NoActionBar">
+    </style>
+
+    <style name="Theme.QuasselDroid.Base.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="drawable_oval">@drawable/oval</item>
+    </style>
+
+    <style name="Theme.QuasselDroid.Base.Dark" parent="Theme.AppCompat">
+        <item name="drawable_oval">@drawable/oval</item>
     </style>
 
     <style name="PopupMenu.Quasseldroid.Light" parent="@style/Widget.AppCompat.Light.ListPopupWindow"/>
     <style name="PopupMenu.Quasseldroid.Dark" parent="@style/Widget.AppCompat.ListPopupWindow"/>
 
-    <style name="SpinnerButton.Light" parent="@android:style/Widget.Holo.Light.Spinner" />
-    <style name="SpinnerButton.Dark" parent="@android:style/Widget.Holo.Spinner" />
+    <style name="SpinnerButton.Light" parent="@style/Widget.AppCompat.Spinner">
+        <item name="android:popupBackground">@drawable/abc_popup_background_mtrl_mult</item>
+        <item name="android:textColor">@color/primary_dark_material_light</item>
+    </style>
+    <style name="SpinnerButton.Dark" parent="@style/Widget.AppCompat.Spinner">
+        <item name="android:popupBackground">@drawable/abc_popup_background_mtrl_mult</item>
+        <item name="android:textColor">@color/primary_dark_material_dark</item>
+    </style>
 
+    <style name="Widget.Base.Toolbar">
+        <item name="android:layout_height">@dimen/abc_action_bar_default_height_material</item>
+        <item name="android:background">?colorPrimary</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="theme">@style/Theme.QuasselDroid.Material.Dark</item>
+        <item name="popupTheme">@style/Theme.AppCompat.Light</item>
+    </style>
+
+    <style name="Widget.DrawerArrowToggle" parent="Base.Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">false</item>
+    </style>
+
+    <style name="Widget.Toolbar" parent="Widget.Base.Toolbar"/>
+
+    <style name="Widget.Base"/>
+    <style name="Widget"/>
+
+    <!-- The attributes are overridden here because the x-large or large resources may have
+     changed the margins and background in the parent PreferencePanel style. -->
+    <style name="PreferencePanel">
+        <item name="android:layout_marginLeft">0dip</item>
+        <item name="android:layout_marginRight">0dip</item>
+        <item name="android:layout_marginTop">0dip</item>
+        <item name="android:layout_marginBottom">0dip</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="PreferenceHeaderList">
+        <item name="android:paddingLeft">@dimen/preference_screen_header_padding_side_material</item>
+        <item name="android:paddingRight">@dimen/preference_screen_header_padding_side_material</item>
+        <item name="android:scrollbarStyle">@integer/preference_screen_header_scrollbarStyle</item>
+    </style>
+
+    <style name="PreferenceHeaderPanel">
+        <item name="android:layout_marginLeft">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginRight">@dimen/preference_screen_side_margin_negative</item>
+        <item name="android:paddingTop">@dimen/preference_screen_header_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/preference_screen_header_vertical_padding</item>
+    </style>
+
+    <dimen name="preference_screen_header_padding_side_material">0dip</dimen>
 </resources>

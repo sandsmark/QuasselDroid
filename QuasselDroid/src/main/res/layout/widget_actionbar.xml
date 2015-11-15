@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
 <android.support.v7.widget.Toolbar
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/action_bar"
-    android:layout_height="@dimen/abc_action_bar_default_height_material"
-    android:layout_width="match_parent"
-    android:background="?colorPrimary"
-    app:theme="@style/Theme.QuasselDroid.Material.Dark"
-    app:popupTheme="@style/Theme.AppCompat.Light">
+    style="@style/Widget.Toolbar">
     <LinearLayout
         android:orientation="vertical"
         android:id="@+id/actionTitleArea"
@@ -17,11 +34,13 @@
         android:paddingEnd="3.0dp"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/abc_action_bar_default_height_material"
-        android:gravity="start|center_vertical">
+        android:gravity="start|center_vertical"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        style="@style/Widget.AppCompat.ActionButton">
         <TextView
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:id="@+id/title"
+            android:id="@+id/action_bar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
@@ -29,14 +48,13 @@
             android:text="@string/app_name"
             android:textColor="#ffffffff"/>
         <TextView
-            android:textSize="@dimen/abc_action_bar_subtitle_text_size"
             android:ellipsize="end"
             android:singleLine="true"
-            android:id="@+id/subtitle"
+            android:id="@+id/action_bar_subtitle"
             android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/abc_action_bar_subtitle_top_margin"
+            android:layout_marginTop="@dimen/abc_action_bar_subtitle_top_margin_material"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
             android:textColor="#b3ffffff"/>
     </LinearLayout>

@@ -1,16 +1,38 @@
+/*
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+ */
+
 package com.iskrembilen.quasseldroid.util;
 
+import android.content.Context;
 import android.content.res.Resources;
-import android.text.SpannableString;
 
-import com.iskrembilen.quasseldroid.Buffer;
 import com.iskrembilen.quasseldroid.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
 public class Helper {
 
@@ -28,34 +50,13 @@ public class Helper {
         return String.format(res.getString(R.string.title_lag), latency, unit);
     }
 
-    public static Map<String,String> parseModeChange(String modechange) {
-        //TODO: Implement proper UserModeChange parser
-        return null;
+    public static int getStatusBarHeight(Context ctx) {
+        int result = 0;
+        int resourceId = ctx.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = ctx.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
-    public static class AlphabeticalComparator implements Comparator<Buffer> {
-        public int compare(Buffer lhs, Buffer rhs)
-        {
-            return lhs.getInfo().name.compareToIgnoreCase(rhs.getInfo().name);
-        }
-    }
-
-    public static class OrderComparator implements Comparator<Buffer> {
-        @Override
-        public int compare(Buffer lhs, Buffer rhs) {
-            return lhs.getOrder() - rhs.getOrder();
-        }
-    }
-
-    public static CharSequence[] split(CharSequence string, String pattern) {
-        String[] parts = string.toString().split(pattern);
-        List<CharSequence> res = new ArrayList<>();
-        CharSequence temp = string;
-        int pos = 0;
-        for (String part : parts) {
-            res.add(string.subSequence(pos,pos+part.length()));
-            pos += part.length();
-        }
-        return res.toArray(new CharSequence[res.size()]);
-    }
 }

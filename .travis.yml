@@ -3,6 +3,13 @@ script:
   - ./gradlew clean check
 android:
   components:
-    - build-tools-21.1.2
-    - android-21
+    - build-tools-23.0.1
+    - android-23
     - extra-android-m2repository
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+sudo: false
