@@ -985,6 +985,8 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doManageMessage(ManageMessageEvent event) {
+        if (networks == null || coreConn == null) return;
+
         Buffer buffer = networks.getBufferById(event.bufferId);
         if (buffer != null) {
             if (event.action == MessageAction.LAST_SEEN) {
