@@ -125,9 +125,13 @@ public class DetailFragment extends Fragment implements Serializable {
 
     void updateObserver() {
         Buffer buffer = networks.getBufferById(bufferId);
-        Network network = networks.getNetworkById(buffer.getInfo().networkId);
-        IrcUser user = network.getUserByNick(buffer.getInfo().name);
-        observer.setUser(user);
+        if (buffer == null) {
+            observer.setUser(null);
+        } else {
+            Network network = networks.getNetworkById(buffer.getInfo().networkId);
+            IrcUser user = network.getUserByNick(buffer.getInfo().name);
+            observer.setUser(user);
+        }
     }
 
     void updateView() {
