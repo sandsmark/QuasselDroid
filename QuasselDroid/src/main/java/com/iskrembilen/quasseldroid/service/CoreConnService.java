@@ -363,10 +363,10 @@ public class CoreConnService extends Service {
         if (notificationManager != null) {
             notificationManager.clear();
             notificationManager = null;
-
+        }
+        if (!requestedDisconnect) {
             notificationManager = new QuasseldroidNotificationManager(getApplicationContext());
             notificationManager.notifyDisconnected();
-            notificationManager.clear();
             notificationManager = null;
         }
         if(incomingHandler != null) {
@@ -860,11 +860,11 @@ public class CoreConnService extends Service {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = cm.getActiveNetworkInfo();
 
-            if(info.getState() == NetworkInfo.State.DISCONNECTED && isConnected()) {
+            if((info == null || info.getState() == NetworkInfo.State.DISCONNECTED) && isConnected()) {
                 Log.d(TAG, "Current network is unavailable, disconnect from core");
                 notificationManager.notifyDisconnected();
                 disconnectFromCore();
-            } else if (!requestedDisconnect && info.getState() == NetworkInfo.State.CONNECTED && coreConn == null
+            } else if (!requestedDisconnect && info != null && info.getState() == NetworkInfo.State.CONNECTED && coreConn == null
                     && !isInitialConnectionAttempt() && satisfyReconnectConditions()) {
                 Log.d(TAG, "Reconnecting after network change");
                 reconnectHandler.removeCallbacksAndMessages(null);

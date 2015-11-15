@@ -289,6 +289,11 @@ public class BufferFragment extends Fragment implements Serializable {
                 bufferList.setItemChecked(actionModeData.index, true);
 
                 Buffer buffer = bufferListAdapter.getChild(groupPosition, childPosition);
+                if (buffer == null) {
+                    mode.finish();
+                    return false;
+                }
+
                 actionModeData.id = buffer.getInfo().id;
                 if (buffer.getInfo().type == BufferInfo.Type.QueryBuffer) {
                     actionModeData.actionMode.getMenu().findItem(R.id.context_menu_part).setVisible(false);
@@ -437,6 +442,8 @@ public class BufferFragment extends Fragment implements Serializable {
     }
 
     private void openBuffer(Buffer buffer) {
+        if (buffer == null) return;
+
         buffer.setTemporarilyHidden(false);
         BusProvider.getInstance().post(new BufferOpenedEvent(buffer.getInfo().id));
     }
@@ -533,7 +540,10 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public long getChildId(int groupPosition, int childPosition) {
-            return getChild(groupPosition,childPosition).getInfo().id;
+            if (getChild(groupPosition,childPosition) != null)
+                return getChild(groupPosition,childPosition).getInfo().id;
+            else
+                return -1;
         }
 
         @Override

@@ -20,6 +20,7 @@ dependencies {
     compile group: 'asia.ivity.android',    name: 'drag-sort-listview',     version: '1.0'
     compile group: 'com.melnykov',          name: 'floatingactionbutton',   version: '1.1.0'
     compile group: 'it.neokree',            name: 'MaterialTabs',           version: '0.11'
+    compile group: 'ch.acra',               name: 'acra',                   version: '4.5.0'
 }
 if(project.hasProperty("Android.signing")
         && new File((String) project.property("Android.signing") + ".gradle").exists()) {

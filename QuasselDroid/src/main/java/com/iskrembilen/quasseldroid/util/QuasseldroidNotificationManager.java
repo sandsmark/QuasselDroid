@@ -470,6 +470,9 @@ public class QuasseldroidNotificationManager {
     }
 
     public void clear() {
+        notifyManager.cancel(R.id.NOTIFICATION_DISCONNECTED);
+        notifyManager.cancel(R.id.NOTIFICATION_HIGHLIGHT);
+        notifyManager.cancel(R.id.NOTIFICATION);
         buffers.clear();
         highlightedBuffers.clear();
         highlightedMessages.clear();

@@ -37,6 +37,30 @@ import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Subscribe;
+import org.acra.ACRA;
+import org.acra.ReportField;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+
+@ReportsCrashes(
+        formUri = "http://kuschku.de:5984/acra-quasseldroid/_design/acra-storage/_update/report",
+        reportType = org.acra.sender.HttpSender.Type.JSON,
+        httpMethod = org.acra.sender.HttpSender.Method.PUT,
+        formUriBasicAuthLogin="reporter",
+        formUriBasicAuthPassword="88dacc03319bb900e6ef3749877f8a9f6c0a53427c3fe5e09ada6a6493bb4478a21de03bf34ff50ce37ba4a9b6619dd827b919bb32b2b42044eb5db6a34aa9d9",
+        formKey = "",
+        customReportContent = {
+                ReportField.APP_VERSION_CODE,
+                ReportField.APP_VERSION_NAME,
+                ReportField.ANDROID_VERSION,
+                ReportField.PACKAGE_NAME,
+                ReportField.REPORT_ID,
+                ReportField.BUILD,
+                ReportField.STACK_TRACE
+        },
+        mode = ReportingInteractionMode.TOAST,
+        resToastText = R.string.notification_report_crash
+)
 
 public class Quasseldroid extends Application {
     public Bundle savedInstanceState;
@@ -45,6 +69,8 @@ public class Quasseldroid extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        ACRA.init(this);
 
         applicationContext = getApplicationContext();
 
@@ -55,5 +81,6 @@ public class Quasseldroid extends Application {
 
         //Load current theme
         ThemeUtil.initTheme(this);
+
     }
 }

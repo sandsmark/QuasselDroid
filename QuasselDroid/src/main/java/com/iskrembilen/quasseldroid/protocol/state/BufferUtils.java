@@ -84,6 +84,8 @@ public class BufferUtils {
     }
 
     public static int getBufferIconColor(Context context, Buffer entry) {
+        if (entry == null) return ThemeUtil.Color.bufferStateParted;
+
         if(entry.isPermanentlyHidden()){
             return ThemeUtil.Color.bufferStatePerm;
         } else if (entry.isTemporarilyHidden()) {
@@ -112,6 +114,8 @@ public class BufferUtils {
     }
 
     public static Drawable getBufferIcon(Context context, Buffer entry) {
+        if (entry == null) return context.getResources().getDrawable(R.drawable.ic_status_offline);
+
         switch (entry.getInfo().type) {
             case QueryBuffer:
                 if (Client.getInstance().getNetworks().getNetworkById(entry.getInfo().networkId).hasNick(entry.getInfo().name))
@@ -133,6 +137,8 @@ public class BufferUtils {
     }
 
     public static void setBufferActive(Buffer entry) {
+        if (entry == null) return;
+
         if (entry.getInfo().type== BufferInfo.Type.QueryBuffer) {
             String nick = entry.getInfo().name;
             Network net = Client.getInstance().getNetworks().getNetworkById(entry.getInfo().networkId);

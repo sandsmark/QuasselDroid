@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.protocol.state;
 
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 
 import com.google.common.base.Function;
@@ -77,8 +78,11 @@ public class BufferCollection extends Observable implements Observer {
         return getBufferList(filters).size();
     }
 
-    public Buffer getPos(Set<Predicate<Buffer>> filters, int pos) {
-        return getBufferList(filters).get(pos);
+    public @Nullable Buffer getPos(Set<Predicate<Buffer>> filters, int pos) {
+        if (getBufferList(filters).size() > pos)
+            return getBufferList(filters).get(pos);
+        else
+            return null;
     }
 
     public Buffer getBuffer(int bufferId) {

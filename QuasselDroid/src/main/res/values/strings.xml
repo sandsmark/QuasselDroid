@@ -172,6 +172,8 @@
     <string name="notification_connected">Connected to core</string>
     <string name="notification_disconnected">Disconnected from core</string>
 
+    <string name="notification_report_crash">Reporting Crashes</string>
+
     <!-- MESSAGES -->
 
     <string name="message_join">%1$s joined</string>
