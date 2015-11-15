@@ -535,6 +535,9 @@ public class BufferFragment extends Fragment implements Serializable {
 
         @Override
         public Buffer getChild(int groupPosition, int childPosition) {
+            if (networks.getNetworkList().size() <= groupPosition) return null;
+            if (networks.getNetwork(groupPosition) == null) return null;
+            if (networks.getNetwork(groupPosition).getBuffers() == null) return null;
             return networks.getNetwork(groupPosition).getBuffers().getPos(filters,childPosition);
         }
 
