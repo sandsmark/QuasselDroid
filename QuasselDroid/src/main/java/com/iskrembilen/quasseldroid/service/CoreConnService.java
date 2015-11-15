@@ -258,20 +258,24 @@ public class CoreConnService extends Service {
         if (coreConn != null) {
             this.disconnectFromCore();
         }
-        requestedDisconnect = false;
-        hasBeenConnected = false;
         Bundle connectData = intent.getExtras();
-        coreId = connectData.getLong("id");
-        address = connectData.getString("address");
-        port = connectData.getInt("port");
-        username = connectData.getString("username");
-        password = connectData.getString("password");
-        networks = Client.getInstance().getNetworks();
-        networks.clear();
+        if (!connectData.containsKey("disconnect")) {
+            requestedDisconnect = false;
+            hasBeenConnected = false;
+            coreId = connectData.getLong("id");
+            address = connectData.getString("address");
+            port = connectData.getInt("port");
+            username = connectData.getString("username");
+            password = connectData.getString("password");
+            networks = Client.getInstance().getNetworks();
+            networks.clear();
 
-        acquireWakeLockIfEnabled();
+            acquireWakeLockIfEnabled();
 
-        connectToCore();
+            connectToCore();
+        } else {
+            requestedDisconnect = true;
+        }
     }
 
     private void acquireWakeLockIfEnabled() {
@@ -362,11 +366,6 @@ public class CoreConnService extends Service {
         isConnecting = false;
         if (notificationManager != null) {
             notificationManager.clear();
-            notificationManager = null;
-        }
-        if (!requestedDisconnect) {
-            notificationManager = new QuasseldroidNotificationManager(getApplicationContext());
-            notificationManager.notifyDisconnected();
             notificationManager = null;
         }
         if(incomingHandler != null) {
