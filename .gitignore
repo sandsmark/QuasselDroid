@@ -7,5 +7,5 @@ local.properties
 .gradle/*
 .idea/*
 gradle.properties
-**/version.properties
+QuasselDroid/version.properties
 deploy.sh
