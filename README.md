@@ -48,7 +48,7 @@ Authors
   - Ken Børge Viktil (Kenji)  
     (GUI, Android stuff)
   - Janne Koschinski (justJanne)  
-    (GUI, fixing minor bugs)
+    (GUI, Android stuff, magic-(de)serializers)
 
 
 Homepage: http://github.com/sandsmark/QuasselDroid  
