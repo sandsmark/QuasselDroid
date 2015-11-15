@@ -8,3 +8,4 @@ local.properties
 .idea/*
 gradle.properties
 **/version.properties
+deploy.sh
