@@ -74,4 +74,8 @@ public class InputHistoryHelper {
     public static String[] getHistory() {
         return history.toArray(new String[history.size()]);
     }
+
+    public static void removeItem() {
+        history.remove(0);
+    }
 }

@@ -33,6 +33,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.renderscript.ScriptGroup;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -306,25 +307,46 @@ public class ChatFragment extends Fragment implements Serializable {
         autoCompleteButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (!inputField.getText().toString().equals("")) {
-                    InputHistoryHelper.addHistoryEntry(inputField.getText().toString());
-                    inputField.setText("");
-                }
+                // Add current input to history if it’s not already the latest entry
+                String temporaryEntry = inputField.getText().toString();
+                boolean hasTemporary = !temporaryEntry.isEmpty() && !(InputHistoryHelper.getHistory().length > 0 && temporaryEntry.equals(InputHistoryHelper.getHistory()[0]));
 
+                // Empty the input field
+                inputField.setText("");
+
+                // Get all history entries, add temporaryEntry at beginning
+                if (hasTemporary) InputHistoryHelper.addHistoryEntry(temporaryEntry);
                 final String[] items = InputHistoryHelper.getHistory();
+                if (hasTemporary) InputHistoryHelper.removeItem();
 
+                // Build history dialog
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setTitle(getResources().getString(R.string.dialog_title_input_history));
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // Get selected item
                         String item = items[which];
+                        // Set input to item
                         inputField.setText(item);
+                        // Move cursor to end
                         inputField.setSelection(item.length());
+                        // Dismiss dialog
                         dialog.dismiss();
                     }
                 });
+                builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        // If input field is empty (as, if someone clicked on an item, it might not be)
+                        if (inputField.getText().toString().isEmpty()) {
+                            // Load latest item back into input field
+                            inputField.setText(items[0]);
+                        }
+                    }
+                });
 
+                // Show Dialog
                 builder.show();
 
                 return true;
