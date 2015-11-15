@@ -556,7 +556,7 @@ public class BufferFragment extends Fragment implements Serializable {
 
             holder.stateView.setImageDrawable(BufferUtils.getBufferIcon(getActivity(), entry));
             holder.stateView.setColorFilter(BufferUtils.getBufferIconColor(getActivity(), entry), PorterDuff.Mode.SRC_IN);
-            holder.bufferView.setText(entry.getInfo().name);
+            holder.bufferView.setText((entry == null) ? "" : entry.getInfo().name);
 
             BufferUtils.setBufferViewStatus(getActivity(), entry, holder.bufferView);
             return convertView;
