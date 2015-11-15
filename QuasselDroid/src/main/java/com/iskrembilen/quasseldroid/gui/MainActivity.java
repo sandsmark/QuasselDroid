@@ -445,12 +445,15 @@ public class MainActivity extends AppCompatActivity {
                 && networks.getBufferById(event.bufferId)!=null
                 && networks.getNetworkById(networks.getBufferById(event.bufferId).getInfo().networkId)!=null) {
             openedBuffer = event.bufferId;
+            ((ChatFragment) manager.chatFragment).setBuffer(event.bufferId);
             if (event.switchToBuffer) {
                 manager.closeDrawer(Side.BOTH);
                 ((BufferFragment)manager.bufferFragment).finishActionMode();
                 updateBufferRead();
                 setTitleAndMenu();
             }
+        } else {
+            Log.d(TAG, "Buffer Opened Event was faulty");
         }
     }
     private void setTitleAndMenu() {
