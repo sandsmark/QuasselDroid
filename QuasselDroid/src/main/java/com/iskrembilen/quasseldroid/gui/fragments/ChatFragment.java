@@ -639,6 +639,8 @@ public class ChatFragment extends Fragment implements Serializable {
                 holder = (ViewHolder) convertView.getTag();
             }
 
+            if (buffer == null) return convertView;
+
             //Set separator line here
             if (position != (getCount() - 1) && (buffer.getMarkerLineMessage() == getItem(position).messageId || (buffer.isMarkerLineFiltered() && getItem(position).messageId < buffer.getMarkerLineMessage() && getItem(position + 1).messageId > buffer.getMarkerLineMessage()))) {
                 holder.separatorView.getLayoutParams().height = Math.round(getResources().getDimension(R.dimen.markerline_height));
