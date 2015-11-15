@@ -65,7 +65,7 @@
             android:selectable="false" />
         <Preference
             android:title="Janne Koschinski (justJanne)"
-            android:summary="(GUI, Bugfixes and Android stuff)"
+            android:summary="(GUI, Android stuff, magic-(de)serializers)"
             android:selectable="false" />
     </PreferenceCategory>
 </PreferenceScreen>
