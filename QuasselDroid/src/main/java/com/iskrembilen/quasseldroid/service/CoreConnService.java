@@ -918,6 +918,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doJoinChannel(JoinChannelEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         int networksStatusBufferId = -1;
         for (Network network : networks.getNetworkList()) {
             if (network.getName().equals(event.networkName)) {
@@ -941,6 +946,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doSendMessage(SendMessageEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         sendMessage(event.bufferId, event.message);
     }
 
@@ -976,6 +986,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doManageNetwork(ManageNetworkEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         if (event.action == NetworkAction.CONNECT) {
             coreConn.requestConnectNetwork(event.networkId);
         } else if (event.action == NetworkAction.DISCONNECT) {
@@ -985,7 +1000,10 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doManageMessage(ManageMessageEvent event) {
-        if (networks == null || coreConn == null) return;
+        if (networks == null || coreConn == null) {
+            reconnect("");
+            return;
+        }
 
         Buffer buffer = networks.getBufferById(event.bufferId);
         if (buffer != null) {
@@ -1004,6 +1022,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void getGetBacklog(GetBacklogEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         if (event != null) {
             Log.d(TAG, "Fetching more backlog");
             coreConn.requestMoreBacklog(event.bufferId, event.backlogAmount);
@@ -1014,6 +1037,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void onFilterMessages(FilterMessagesEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         if (event.filtered)
             networks.getBufferById(event.bufferId).addFilterType(event.filterType);
         else
@@ -1022,6 +1050,11 @@ public class CoreConnService extends Service {
 
     @Subscribe
     public void doQueryUserEvent(QueryUserEvent event) {
+        if (coreConn==null) {
+            reconnect("");
+            return;
+        }
+
         queryUser(event.bufferId, event.nick);
     }
 
