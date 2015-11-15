@@ -145,7 +145,7 @@ public class QuasselDbHelper {
     public Bundle getCore(long rowId) throws SQLException {
         Cursor cursor = db.query(true, CORE_TABLE, new String[]{KEY_ADDRESS, KEY_PORT, KEY_NAME}, KEY_ID + "=" + rowId, null, null, null, null, null);
         Bundle b = new Bundle();
-        if (cursor != null) {
+        if (cursor != null && cursor.getCount() != 0) {
             cursor.moveToFirst();
             b.putString(KEY_NAME, cursor.getString(cursor.getColumnIndex(KEY_NAME)));
             b.putInt(KEY_PORT, cursor.getInt(cursor.getColumnIndex(KEY_PORT)));
