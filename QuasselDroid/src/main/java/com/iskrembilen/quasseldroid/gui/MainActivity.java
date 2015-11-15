@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarActivity;
@@ -254,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (Client.getInstance().status == Status.Disconnected) {
             Log.d(TAG, "Status is disconnected when resuming activity");
-            returnToLogin();
+            returnToLogin(true);
             return;
         } else if (Client.getInstance().status == Status.Connected) {
             loadBufferAndDrawerState();
@@ -416,15 +417,18 @@ public class MainActivity extends AppCompatActivity {
                 removeDialog(R.id.DIALOG_CONNECTING);
                 Toast.makeText(MainActivity.this.getApplicationContext(), event.reason, Toast.LENGTH_LONG).show();
             }
-            returnToLogin();
+            returnToLogin(false);
         }
     }
 
-    private void returnToLogin() {
+    private void returnToLogin(boolean skipAnimation) {
         Log.d(TAG, "Returning to login");
         finish();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (skipAnimation) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        }
         startActivity(intent);
     }
 
@@ -648,7 +652,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void onDrawerButtonClicked() {
-            if (rightDrawer.isDrawerVisible(Gravity.END)) {
+            if (rightDrawer.isDrawerVisible(GravityCompat.END)) {
                 closeDrawer(Side.RIGHT);
             } else {
                 openDrawer(Side.RIGHT);
@@ -668,12 +672,12 @@ public class MainActivity extends AppCompatActivity {
 
         public void openDrawer(Side side) {
             if (side==Side.RIGHT) {
-                rightDrawer.openDrawer(Gravity.END);
+                rightDrawer.openDrawer(GravityCompat.END);
             } else if (side==Side.LEFT&&leftDrawer!=null) {
-                if (rightDrawer.isDrawerVisible(Gravity.END))
+                if (rightDrawer.isDrawerVisible(GravityCompat.END))
                     rightDrawer.closeDrawers();
 
-                leftDrawer.openDrawer(Gravity.START);
+                leftDrawer.openDrawer(GravityCompat.START);
             }
         }
 
@@ -686,9 +690,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public Side getOpenDrawer() {
-            if (leftDrawer!=null && leftDrawer.isDrawerVisible(Gravity.START))
+            if (leftDrawer!=null && leftDrawer.isDrawerVisible(GravityCompat.START))
                 return Side.LEFT;
-            else if (rightDrawer.isDrawerVisible(Gravity.END))
+            else if (rightDrawer.isDrawerVisible(GravityCompat.END))
                 return Side.RIGHT;
             else
                 return Side.NONE;
@@ -802,5 +806,4 @@ public class MainActivity extends AppCompatActivity {
         BOTH,
         NONE
     }
-
 }
