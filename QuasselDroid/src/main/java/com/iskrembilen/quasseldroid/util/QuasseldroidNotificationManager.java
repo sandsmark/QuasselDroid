@@ -216,7 +216,9 @@ public class QuasseldroidNotificationManager {
             }
             if (!highlightedMessages.get(message.bufferInfo.id).contains(message)) {
                 highlightedMessages.get(message.bufferInfo.id).add(message);
-                pebbleNotification(message);
+
+                if (preferences.getBoolean(context.getString(R.string.preference_pebble_notification), false))
+                    pebbleNotification(message);
             }
         }
 

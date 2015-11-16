@@ -141,6 +141,9 @@
         <string name="preference_title_notification_light">Use light on notification</string>
         <string name="preference_notification_light" translatable="false">notificationlight</string>
 
+        <string name="preference_title_pebble_notification">Send notifications to Pebble</string>
+        <string name="preference_pebble_notification" translatable="false">notificationpebble</string>
+
         <string name="preference_title_notification_sound">Play sound on notification</string>
         <string name="preference_notification_sound" translatable="false">notificationsound</string>
 

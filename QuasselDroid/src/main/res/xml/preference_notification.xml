@@ -43,6 +43,10 @@
         android:title="@string/preference_title_notification_light" />
 
     <SwitchPreference
+        android:key="@string/preference_pebble_notification"
+        android:title="@string/preference_title_pebble_notification" />
+
+    <SwitchPreference
         android:key="@string/preference_notification_sound"
         android:title="@string/preference_title_notification_sound" />
 
