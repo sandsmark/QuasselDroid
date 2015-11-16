@@ -402,6 +402,7 @@ public class ChatFragment extends Fragment implements Serializable {
     public void onPause() {
         adapter.storeScrollState();
         super.onPause();
+        preferences.edit().putString(getString(R.string.storage_chatline_content), inputField.getText().toString()).apply();
         preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         Log.d(TAG, "pausing fragment");
     }
@@ -411,6 +412,7 @@ public class ChatFragment extends Fragment implements Serializable {
         Log.d(TAG, "resuming fragment");
         super.onResume();
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        inputField.setText(preferences.getString(getString(R.string.storage_chatline_content), ""));
         initPreferences();
         updateInputField();
     }

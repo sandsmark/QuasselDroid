@@ -199,4 +199,6 @@
             <item>Channel</item>
         </string-array>
 
+    <string name="storage_chatline_content" translatable="false">storagechatlinecontent</string>
+
 </resources>
