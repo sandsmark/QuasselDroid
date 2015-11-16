@@ -89,10 +89,7 @@ import com.iskrembilen.quasseldroid.io.CoreConnection;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
-import com.iskrembilen.quasseldroid.util.BufferCollectionHelper;
-import com.iskrembilen.quasseldroid.util.BusProvider;
-import com.iskrembilen.quasseldroid.util.MessageUtil;
-import com.iskrembilen.quasseldroid.util.QuasseldroidNotificationManager;
+import com.iskrembilen.quasseldroid.util.*;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
@@ -669,6 +666,11 @@ public class CoreConnService extends Service {
                     reconnectDelay = 0;
                     BusProvider.getInstance().post(new InitProgressEvent(true, ""));
                     BusProvider.getInstance().post(new NetworksAvailableEvent(networks));
+                    for (Network network : networks.getNetworkList()) {
+                        for (Buffer b : network.getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
+                            b.updateFilters();
+                        }
+                    }
                     break;
                 case R.id.USER_PARTED:
                     bundle = (Bundle) msg.obj;

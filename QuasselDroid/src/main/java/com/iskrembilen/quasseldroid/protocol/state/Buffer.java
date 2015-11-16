@@ -493,6 +493,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         dbHelper.open();
         dbHelper.addHiddenEvent(type, getInfo().id);
         dbHelper.close();
+        updateFilters();
+    }
+
+    public void updateFilters() {
         filterBuffer();
         this.setChanged();
         notifyObservers();
@@ -508,9 +512,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         dbHelper.open();
         dbHelper.deleteHiddenEvent(type, getInfo().id);
         dbHelper.close();
-        filterBuffer();
-        this.setChanged();
-        notifyObservers();
+        updateFilters();
     }
 
     public synchronized ArrayList<IrcMessage.Type> getFilters() {
