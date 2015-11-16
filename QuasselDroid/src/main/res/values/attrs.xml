@@ -31,6 +31,7 @@
     <attr name="ic_search" format="reference" />
     <attr name="ic_collapse" format="reference" />
     <attr name="ic_expand" format="reference" />
+    <attr name="ic_nickcomplete" format="reference" />
 
     <attr name="drawable_oval" format="reference" />
 

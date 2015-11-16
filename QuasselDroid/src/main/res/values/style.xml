@@ -58,6 +58,7 @@
         <item name="ic_search">@drawable/ic_search_light</item>
         <item name="ic_expand">@drawable/ic_expand_light</item>
         <item name="ic_collapse">@drawable/ic_collapse_light</item>
+        <item name="ic_nickcomplete">@drawable/ic_nickcomplete_light</item>
 
         <item name="drawerArrowStyle">@style/Widget.DrawerArrowToggle</item>
     </style>
@@ -86,6 +87,7 @@
         <item name="ic_search">@drawable/ic_search_dark</item>
         <item name="ic_expand">@drawable/ic_expand_dark</item>
         <item name="ic_collapse">@drawable/ic_collapse_dark</item>
+        <item name="ic_nickcomplete">@drawable/ic_nickcomplete_dark</item>
 
         <item name="drawerArrowStyle">@style/Widget.DrawerArrowToggle</item>
     </style>
