@@ -54,8 +54,14 @@ import com.iskrembilen.quasseldroid.gui.MainActivity;
 import com.iskrembilen.quasseldroid.service.CoreConnService;
 import com.squareup.otto.Subscribe;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -208,8 +214,10 @@ public class QuasseldroidNotificationManager {
                 if (highlightedMessages.get(message.bufferInfo.id) == null)
                     highlightedMessages.put(message.bufferInfo.id, new ArrayList<IrcMessage>());
             }
-            if (!highlightedMessages.get(message.bufferInfo.id).contains(message))
+            if (!highlightedMessages.get(message.bufferInfo.id).contains(message)) {
                 highlightedMessages.get(message.bufferInfo.id).add(message);
+                pebbleNotification(message);
+            }
         }
 
         if (buffers.contains(message.bufferInfo.id)) {
@@ -429,6 +437,21 @@ public class QuasseldroidNotificationManager {
             }
         }
         return false;
+    }
+
+    private void pebbleNotification(IrcMessage message) {
+        final Intent i = new Intent("com.getpebble.action.SEND_NOTIFICATION");
+
+        final Map data = new HashMap();
+        data.put("title", String.format("%s @ IRC", message.getNick()));
+        data.put("body", String.format("%s\n%s", message.getTime(new SimpleDateFormat("dd.MM. HH:mm")), message.content.toString()));
+        final JSONObject jsonData = new JSONObject(data);
+        final String notificationData = new JSONArray().put(jsonData).toString();
+
+        i.putExtra("messageType", "PEBBLE_ALERT");
+        i.putExtra("sender", "QuasselDroid");
+        i.putExtra("notificationData", notificationData);
+        context.sendBroadcast(i);
     }
 
     @Subscribe
