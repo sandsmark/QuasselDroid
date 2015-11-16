@@ -309,7 +309,7 @@ public class ChatFragment extends Fragment implements Serializable {
             public boolean onLongClick(View v) {
                 // Add current input to history if it’s not already the latest entry
                 String temporaryEntry = inputField.getText().toString();
-                boolean hasTemporary = !temporaryEntry.isEmpty() && !(InputHistoryHelper.getHistory().length > 0 && temporaryEntry.equals(InputHistoryHelper.getHistory()[0]));
+                final boolean hasTemporary = !temporaryEntry.isEmpty() && !(InputHistoryHelper.getHistory().length > 0 && temporaryEntry.equals(InputHistoryHelper.getHistory()[0]));
 
                 // Empty the input field
                 inputField.setText("");
@@ -339,7 +339,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         // If input field is empty (as, if someone clicked on an item, it might not be)
-                        if (inputField.getText().toString().isEmpty()) {
+                        if (inputField.getText().toString().isEmpty() && hasTemporary && items.length > 0) {
                             // Load latest item back into input field
                             inputField.setText(items[0]);
                         }
