@@ -141,6 +141,16 @@
         <string name="preference_title_notification_light">Use light on notification</string>
         <string name="preference_notification_light" translatable="false">notificationlight</string>
 
+        <string name="preference_title_notification_light_color">Color for notification light</string>
+        <string name="preference_notification_light_color" translatable="false">notificationlightcolor</string>
+        <string-array name="entries_notification_light_color">
+            <item>White</item>
+            <item>Red</item>
+            <item>Green</item>
+            <item>Blue</item>
+        </string-array>
+        <string name="notification_light_color_default">#ffffff</string>
+
         <string name="preference_title_notification_sound">Play sound on notification</string>
         <string name="preference_notification_sound" translatable="false">notificationsound</string>
 

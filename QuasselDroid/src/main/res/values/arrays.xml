@@ -41,4 +41,12 @@
         <item>none</item>
     </string-array>
 
+    <string-array name="entryvalues_notification_light_color">
+        <item>#ffffff</item>
+        <item>#ff0000</item>
+        <item>#00ff00</item>
+        <item>#0000ff</item>
+    </string-array>
+
+
 </resources>
