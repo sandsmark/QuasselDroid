@@ -149,7 +149,7 @@
             <item>Green</item>
             <item>Blue</item>
         </string-array>
-        <string name="notification_light_color_default">#ffffff</string>
+        <string name="notification_light_color_default" translatable="false">#ffffff</string>
 
         <string name="preference_title_notification_sound">Play sound on notification</string>
         <string name="preference_notification_sound" translatable="false">notificationsound</string>
