@@ -419,7 +419,7 @@ public class QuasseldroidNotificationManager {
 
                 if (defaults != 0) builder.setDefaults(defaults);
             }
-            
+
             builder.setColor(Color.parseColor(preferences.getString(context.getString(R.string.preference_notification_light_color), context.getString(R.string.notification_light_color_default))));
 
             // Send the notification.

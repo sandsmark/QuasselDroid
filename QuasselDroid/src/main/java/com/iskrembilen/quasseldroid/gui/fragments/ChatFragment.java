@@ -716,18 +716,18 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.msgView.setText(contentSpan);
                     break;
                 case Error:
-                    holder.msgView.setText(entry.content);
+                    holder.msgView.setText(MessageUtil.parseStyleCodes(getContext(), entry.content.toString(), parseColors));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatError);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Server:
                 case Info:
-                    holder.msgView.setText(entry.content);
+                    holder.msgView.setText(MessageUtil.parseStyleCodes(getContext(), entry.content.toString(), parseColors));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Topic:
-                    holder.msgView.setText(entry.content);
+                    holder.msgView.setText(MessageUtil.parseStyleCodes(getContext(), entry.content.toString(), parseColors));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
