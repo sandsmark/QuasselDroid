@@ -40,7 +40,17 @@
 
     <SwitchPreference
         android:key="@string/preference_notification_light"
-        android:title="@string/preference_title_notification_light" />
+        android:title="@string/preference_title_notification_light"
+        android:disableDependentsState="false" />
+
+    <!--<ListPreference
+        android:defaultValue="@string/notification_light_color_default"
+        android:dialogTitle="@string/preference_title_notification_light_color"
+        android:entries="@array/entries_notification_light_color"
+        android:entryValues="@array/entryvalues_notification_light_color"
+        android:key="@string/preference_notification_light_color"
+        android:title="@string/preference_title_notification_light_color"
+        android:dependency="@string/preference_notification_light" />-->
 
     <SwitchPreference
         android:key="@string/preference_pebble_notification"

@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -77,6 +78,7 @@ public class QuasseldroidNotificationManager {
 
     android.app.NotificationManager notifyManager;
     private boolean connected = false;
+    private boolean initDone = false;
     private boolean pendingHighlightNotification;
     private PendingIntent contentIntent;
 
@@ -87,6 +89,16 @@ public class QuasseldroidNotificationManager {
         //Remove any disconnect notification since we are connecting again
         notifyManager.cancel(R.id.NOTIFICATION_DISCONNECTED);
         BusProvider.getInstance().register(this);
+        SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(QuasseldroidNotificationManager.this.context.getResources().getString(R.string.preference_notify_hide_persistence))
+                        && connected
+                        && highlightedMessages.size() == 0) {
+                    notifyConnected(false);
+                }
+            }
+        };
         PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(sharedPreferenceListener);
     }
 
@@ -244,9 +256,7 @@ public class QuasseldroidNotificationManager {
     }
 
     public void notifyHighlights() {
-        System.out.printf("Connected: %b\n", connected);
-
-        if (!connected) return;
+        if (!connected || !initDone) return;
 
         synchronized (highlightedBuffers) {
             boolean displayColors = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(R.string.preference_colored_text), true);
@@ -420,6 +430,8 @@ public class QuasseldroidNotificationManager {
                 if (defaults != 0) builder.setDefaults(defaults);
             }
 
+            //builder.setColor(Color.parseColor(preferences.getString(context.getString(R.string.preference_notification_light_color), context.getString(R.string.notification_light_color_default))));
+
             // Send the notification.
             notifyManager.notify(R.id.NOTIFICATION, builder.build());
 
@@ -458,23 +470,13 @@ public class QuasseldroidNotificationManager {
 
     @Subscribe
     public void onInitProgressed(InitProgressEvent event) {
-        if (event.done && getHighlightedMessageCount()>0) {
-            notifyHighlights();
-        } else if (!event.done) {
+        if (event.done) {
+            initDone = true;
+            if(getHighlightedMessageCount()>0) notifyHighlights();
+        } else {
             notifyConnecting(Optional.of(event.progress));
         }
     }
-
-    private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals(context.getResources().getString(R.string.preference_notify_hide_persistence))
-                    && connected
-                    && highlightedMessages.size()==0) {
-                notifyConnected(false);
-            }
-        }
-    };
 
     public void notifyDisconnected() {
         connected = false;

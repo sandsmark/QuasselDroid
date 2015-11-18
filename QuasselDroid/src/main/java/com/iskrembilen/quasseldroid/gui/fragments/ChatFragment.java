@@ -309,7 +309,7 @@ public class ChatFragment extends Fragment implements Serializable {
             public boolean onLongClick(View v) {
                 // Add current input to history if it’s not already the latest entry
                 String temporaryEntry = inputField.getText().toString();
-                boolean hasTemporary = !temporaryEntry.isEmpty() && !(InputHistoryHelper.getHistory().length > 0 && temporaryEntry.equals(InputHistoryHelper.getHistory()[0]));
+                final boolean hasTemporary = !temporaryEntry.isEmpty() && !(InputHistoryHelper.getHistory().length > 0 && temporaryEntry.equals(InputHistoryHelper.getHistory()[0]));
 
                 // Empty the input field
                 inputField.setText("");
@@ -339,7 +339,7 @@ public class ChatFragment extends Fragment implements Serializable {
                     @Override
                     public void onCancel(DialogInterface dialog) {
                         // If input field is empty (as, if someone clicked on an item, it might not be)
-                        if (inputField.getText().toString().isEmpty()) {
+                        if (inputField.getText().toString().isEmpty() && hasTemporary && items.length > 0) {
                             // Load latest item back into input field
                             inputField.setText(items[0]);
                         }
@@ -402,6 +402,7 @@ public class ChatFragment extends Fragment implements Serializable {
     public void onPause() {
         adapter.storeScrollState();
         super.onPause();
+        preferences.edit().putString(getString(R.string.storage_chatline_content), inputField.getText().toString()).apply();
         preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         Log.d(TAG, "pausing fragment");
     }
@@ -411,6 +412,7 @@ public class ChatFragment extends Fragment implements Serializable {
         Log.d(TAG, "resuming fragment");
         super.onResume();
         preferences.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        inputField.setText(preferences.getString(getString(R.string.storage_chatline_content), ""));
         initPreferences();
         updateInputField();
     }
@@ -714,18 +716,18 @@ public class ChatFragment extends Fragment implements Serializable {
                     holder.msgView.setText(contentSpan);
                     break;
                 case Error:
-                    holder.msgView.setText(entry.content);
+                    holder.msgView.setText(MessageUtil.parseStyleCodes(getContext(), entry.content.toString(), parseColors));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatError);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Server:
                 case Info:
-                    holder.msgView.setText(entry.content);
+                    holder.msgView.setText(MessageUtil.parseStyleCodes(getContext(), entry.content.toString(), parseColors));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;
                 case Topic:
-                    holder.msgView.setText(entry.content);
+                    holder.msgView.setText(MessageUtil.parseStyleCodes(getContext(), entry.content.toString(), parseColors));
                     holder.msgView.setTextColor(ThemeUtil.Color.chatServer);
                     holder.parent.setBackgroundColor(ThemeUtil.Color.chatServerBg);
                     break;

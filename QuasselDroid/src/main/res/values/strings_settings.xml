@@ -141,6 +141,16 @@
         <string name="preference_title_notification_light">Use light on notification</string>
         <string name="preference_notification_light" translatable="false">notificationlight</string>
 
+        <string name="preference_title_notification_light_color">Color for notification light</string>
+        <string name="preference_notification_light_color" translatable="false">notificationlightcolor</string>
+        <string-array name="entries_notification_light_color">
+            <item>White</item>
+            <item>Red</item>
+            <item>Green</item>
+            <item>Blue</item>
+        </string-array>
+        <string name="notification_light_color_default" translatable="false">#ffffff</string>
+
         <string name="preference_title_pebble_notification">Send notifications to Pebble</string>
         <string name="preference_pebble_notification" translatable="false">notificationpebble</string>
 
@@ -201,5 +211,7 @@
             <item>Network</item>
             <item>Channel</item>
         </string-array>
+
+    <string name="storage_chatline_content" translatable="false">storagechatlinecontent</string>
 
 </resources>

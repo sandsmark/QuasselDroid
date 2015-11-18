@@ -79,6 +79,10 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     private static final String TAG = LoginActivity.class.getSimpleName();
     public static final String PREFS_ACCOUNT = "AccountPreferences";
     public static final String PREFS_CORE = "coreSelection";
+    public static final String STORE_SELECTED_CORE = "SELECTED_CORE";
+    public static final String STORE_PASSWORD = "PASSWORD";
+    public static final String STORE_USERNAME = "USERNAME";
+    public static final String STORE_REMEMBER = "REMEMBER";
 
     private SharedPreferences settings;
     private QuasselDbHelper dbHelper;
@@ -91,6 +95,8 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     private EditText nameField;
     private EditText addressField;
 
+    private boolean hasLoadedFromSavedInstanceState = true;
+
     private String hashedCert;//ugly
     private int currentTheme;
 
@@ -98,7 +104,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
      * Called when the activity is first created.
      */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         Log.d(TAG, "Creating activity");
         setTheme(ThemeUtil.theme);
         super.onCreate(savedInstanceState);
@@ -124,6 +130,19 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                     usernameField.setText(username);
                     passwordField.setText(password);
                     rememberMe.setChecked(true);
+
+                    if (!hasLoadedFromSavedInstanceState) {
+                        if (savedInstanceState.containsKey(STORE_PASSWORD)) {
+                            passwordField.setText(savedInstanceState.getString(STORE_PASSWORD));
+                        }
+                        if (savedInstanceState.containsKey(STORE_USERNAME)) {
+                            usernameField.setText(savedInstanceState.getString(STORE_USERNAME));
+                        }
+                        if(savedInstanceState.containsKey(STORE_REMEMBER)) {
+                            rememberMe.setChecked(savedInstanceState.getBoolean(STORE_REMEMBER));
+                        }
+                        hasLoadedFromSavedInstanceState = true;
+                    }
                 } else {
                     usernameField.setText("");
                     passwordField.setText("");
@@ -164,6 +183,20 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
         Button connect = (Button) findViewById(R.id.connect_button);
         connect.setOnClickListener(onConnect);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(STORE_SELECTED_CORE)) {
+            core.setSelection(savedInstanceState.getInt(STORE_SELECTED_CORE, -1));
+            hasLoadedFromSavedInstanceState = false;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STORE_SELECTED_CORE, core.getSelectedItemPosition());
+        outState.putString(STORE_USERNAME, usernameField.getText().toString());
+        outState.putString(STORE_PASSWORD, passwordField.getText().toString());
+        outState.putBoolean(STORE_REMEMBER, rememberMe.isChecked());
     }
 
 
