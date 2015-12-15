@@ -58,7 +58,6 @@ import com.squareup.otto.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -458,7 +457,7 @@ public class QuasseldroidNotificationManager {
 
         final Map data = new HashMap();
         data.put("title", String.format("%s @ IRC", message.getNick()));
-        data.put("body", String.format("%s\n%s", message.getTime(new SimpleDateFormat("dd.MM. HH:mm")), message.content.toString()));
+        data.put("body", String.format("%s", message.content.toString()));
         final JSONObject jsonData = new JSONObject(data);
         final String notificationData = new JSONArray().put(jsonData).toString();
 
