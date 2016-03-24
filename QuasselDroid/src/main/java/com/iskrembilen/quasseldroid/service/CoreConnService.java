@@ -272,6 +272,7 @@ public class CoreConnService extends Service {
             connectToCore();
         } else {
             requestedDisconnect = true;
+            disconnectFromCore();
         }
     }
 
