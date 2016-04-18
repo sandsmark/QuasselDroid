@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    QuasselDroid - Quassel client for Android
+    Copyright (C) 2015 Ken Børge Viktil
+    Copyright (C) 2015 Magnus Fjell
+    Copyright (C) 2015 Martin Sandsmark <martin.sandsmark@kde.org>
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version, or under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either version 2.1 of
+    the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License and the
+    GNU Lesser General Public License along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+-->
+<resources>
+    <string name="preference_category_appearance">Apariencia</string>
+        <string name="preference_dialog_theme">Elegir el tema de la aplicación</string>
+        <string name="preference_summary_theme">El tema de la aplicación</string>
+        <string name="preference_title_theme">Tema</string>
+        <string name="preference_theme" translatable="false">selectedtheme</string>
+        <string-array name="entries_theme_preference">
+            <item>Claro</item>
+            <item>Oscuro</item>
+        </string-array>
+
+        <string name="preference_dialog_timestamp">Elegir el formato de hora</string>
+        <string name="preference_summary_timestamp">¿Cómo debería mostrarse la hora?</string>
+        <string name="preference_message_timestamp">Elegir un formato de hora personalizado. Si se deja en blanco se usará el predeterminado del sistema</string>
+        <string name="preference_title_timestamp">Formato de hora</string>
+        <string name="preference_timestamp" translatable="false">timestamp</string>
+
+        <string name="preference_dialog_fontsize">Elegir el tipo de letra para el chat</string>
+        <string name="preference_summary_fontsize">El tipo de letra del chat</string>
+        <string name="preference_title_fontsize">Tamaño de la letra del chat</string>
+        <string name="preference_fontsize" translatable="false">fontsizeChannelList</string>
+        <string-array name="entries_fontsize_preference">
+            <item>Mini</item>
+            <item>Pequeño</item>
+            <item>Normal</item>
+            <item>Grande</item>
+            <item>Gigante</item>
+        </string-array>
+
+        <string name="preference_summary_on_colored_text">Mostrar texto codificado como mIRC con colores</string>
+        <string name="preference_summary_off_colored_text">Mostrar todo el texto monocromo</string>
+        <string name="preference_title_colored_text">Permitir texto coloreado</string>
+        <string name="preference_colored_text" translatable="false">allowcoloredtext</string>
+
+        <string name="preference_summary_on_monospace">Mostrar texto en letra de ancho fijo</string>
+        <string name="preference_summary_off_monospace">Mostrar texto con tipos de letra proporcionales</string>
+        <string name="preference_title_monospace">Usar ancho fijo</string>
+        <string name="preference_monospace" translatable="false">monospace</string>
+
+        <string name="preference_summary_on_nickbrackets">Mostrar apodos entre corchetes &lt; &gt;</string>
+        <string name="preference_summary_off_nickbrackets">Mostrar apodos sin decoración</string>
+        <string name="preference_title_nickbrackets">Mostrar apodos en estilo clásico</string>
+        <string name="preference_nickbrackets" translatable="false">shownickbrackets</string>
+
+        <string name="preference_summary_on_hostname">Mostrar apodo!ident@host en cada acción de servidor (echar/unirse/etc.)</string>
+        <string name="preference_summary_off_hostname">Solo mostrar el apodo en las acciones de servidor</string>
+        <string name="preference_title_hostname">Mostrar los nombres de máquina de los usuarios</string>
+        <string name="preference_hostname" translatable="false">detailed_actions</string>
+
+        <string name="preference_summary_on_lag">Mostrar latencia entre el cliente y el núcleo en la barra de acciones</string>
+        <string name="preference_summary_off_lag">No mostrar la latencia</string>
+        <string name="preference_title_lag">Mostrar la latencia</string>
+        <string name="preference_lag" translatable="false">showlag</string>
+
+    <string name="preference_category_connection">Conexión</string>
+        <string name="preference_summary_on_fetch_to_last_seen">Cargar todos los mensajes no leídos al conectarse.</string>
+        <string name="preference_summary_off_fetch_to_last_seen">Cargar solamente un límite de mensajes al conectarse.</string>
+        <string name="preference_title_fetch_to_last_seen">Mensajes no leídos por chat</string>
+        <string name="preference_fetch_to_last_seen" translatable="false">getallunseenbacklog</string>
+
+        <string name="preference_summary_initial_backlog_limit">Cuántas líneas cargar al conectarse</string>
+        <string name="preference_title_initial_backlog_limit">Cantidad de historial inicial</string>
+        <string name="preference_initial_backlog_limit" translatable="false">backlogLimit</string>
+
+        <string name="preference_summary_dynamic_backlog">Cuántas líneas cargar al desplazarse</string>
+        <string name="preference_title_dynamic_backlog">Cantidad de historial dinámico</string>
+        <string name="preference_dynamic_backlog" translatable="false">dynamicBacklog</string>
+
+        <string name="preference_wakelock_summary">Usar más batería cuando se apaga la pantalla, para mantener vivas las conexiones</string>
+        <string name="preference_wakelock_title">Usar un bloqueo para inhibir el modo de reposo</string>
+        <string name="preference_wake_lock" translatable="false">wakelock</string>
+
+    <string name="preference_category_reconnect">Reconexión automática</string>
+        <string name="preference_summary_on_reconnect">Reconectar automáticamente cuando se pierde la conexión</string>
+        <string name="preference_summary_off_reconnect">Nunca reconectar</string>
+        <string name="preference_title_reconnect">Reconectar</string>
+        <string name="preference_reconnect" translatable="false">reconnect</string>
+
+        <string name="preference_summary_on_reconnect_wifi">Reconectar solamente si la wifi está disponible</string>
+        <string name="preference_summary_off_reconnect_wifi">Siempre reconectar</string>
+        <string name="preference_title_wifi">Reconectar solo con wifi</string>
+        <string name="preference_reconnect_wifi" translatable="false">reconnect_on_wifi_only</string>
+
+        <string name="preference_summary_on_metered">Reconectar en puntos de acceso móviles</string>
+        <string name="preference_summary_off_metered">Sólo reconectar en WiFi normal</string>
+        <string name="preference_title_metered">Reconectar en wifi gestionada</string>
+        <string name="preference_reconnect_metered" translatable="false">reconnect_on_metered</string>
+
+        <string name="preference_summary_reconnect_interval">Cuántos minutos entre cada intento de reconexión</string>
+        <string name="preference_title_reconnect_interval">Intervalo de reconexión</string>
+        <string name="preference_reconnect_interval" translatable="false">reconnectInterval</string>
+
+    <string name="preference_category_highlight">Menciones</string>
+        <string name="preference_dialog_highlight_type">Marcar las menciones de apodos</string>
+        <string name="preference_title_highlight_type">Marcar las menciones de apodos</string>
+        <string name="preference_highlight_type" translatable="false">preference_highlight_type</string>
+        <string-array name="entries_highlight_preference">
+            <item>Todos los apodos de la identidad</item>
+            <item>Apodo actual</item>
+            <item>Ninguno</item>
+        </string-array>
+
+        <string name="perference_title_highlight_casesensitive">Mayúsculas/minúsculas en apodos</string>
+        <string name="perference_highlight_casesensitive" translatable="false">preference_nick_highlight_case_sensitive</string>
+
+    <string name="preference_category_notifications">Notificaciones</string>
+        <string name="preference_title_notify_connect">Notificar al conectar</string>
+        <string name="preference_notify_connect" translatable="false">notifyconnect</string>
+
+        <string name="preference_summary_on_notify_hide_persistence">Solomostrar un icono si hay notificaciones sin leer</string>
+        <string name="preference_summary_off_notify_hide_persistence">Siempre mostrar un icono</string>
+        <string name="preference_title_notify_hide_persistence">Ocultar icono</string>
+        <string name="preference_notify_hide_persistence" translatable="false">notifypersistence</string>
+
+        <string name="preference_title_notification_vibrate">Vibrar en las notificaciones</string>
+        <string name="preference_notification_vibrate" translatable="false">notificationvibrate</string>
+
+        <string name="preference_title_notification_light">Usar luz en las notificaciones</string>
+        <string name="preference_notification_light" translatable="false">notificationlight</string>
+
+        <string name="preference_title_notification_light_color">Color de la luz para la notificación</string>
+        <string name="preference_notification_light_color" translatable="false">notificationlightcolor</string>
+        <string-array name="entries_notification_light_color">
+            <item>Blanco</item>
+            <item>Rojo</item>
+            <item>Verde</item>
+            <item>Azul</item>
+        </string-array>
+        <string name="notification_light_color_default" translatable="false">#ffffff</string>
+
+        <string name="preference_title_notification_sound">Emitir un sonido en las notificaciones</string>
+        <string name="preference_notification_sound" translatable="false">notificationsound</string>
+
+        <string name="preference_title_notification_sound_active">Sonido solo cuando no está en foco</string>
+        <string name="preference_notification_sound_active" translatable="false">notificationsoundactive</string>
+
+        <string name="preference_title_notification_sound_file">Sonido de notificación</string>
+        <string name="preference_notification_sound_file" translatable="false">notificationsoundfile</string>
+
+        <string name="preference_title_notification_connect_sound_file">Sonido de conexión</string>
+        <string name="preference_notification_connect_sound_file" translatable="false">notificationconnectsoundfile</string>
+
+        <string name="preference_ringtone_silent">Silencio</string>
+
+    <string name="preference_category_identities">Identidades</string>
+    <string name="identity_tab_nicks">Nombres</string>
+        <string name="identity_ident">Identidad</string>
+        <string name="identity_real_name">Nombre real</string>
+
+    <string name="identity_tab_advanced">Avanzado</string>
+        <string name="identity_kick_reason">Mensaje para echar</string>
+        <string name="identity_part_reason">Mensaje para dejar</string>
+        <string name="identity_quit_reason">Mensaje para cerrar</string>
+        <string name="identity_away_reason">Mensaje para ausente</string>
+        <string name="identity_away_nickname">Apodo de ausente</string>
+        <string name="identity_auto_away_time">Hora de auto-ausente</string>
+        <string name="identity_auto_away_reason">Mensaje de auto-ausente</string>
+        <string name="identity_detach_away_enabled">Habilitado ausente al desconectar</string>
+        <string name="identity_detach_away_reason">Mensaje de ausente al desconectar</string>
+
+    <string name="preference_category_ignore_list">Lista de ignorados</string>
+        <string name="preference_ignoreitem_strictness">Exactitud</string>
+        <string-array name="ignoreitem_strictness">
+            <item>Sin coincidencia</item>
+            <item>Dinámica</item>
+            <item>Permanente</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_ruletype">Tipo de regla</string>
+        <string-array name="ignoreitem_ruletypes">
+            <item>Remitente</item>
+            <item>Mensaje</item>
+            <item>CTCP</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_rule">Regla para ignorar</string>
+        <string-array name="ignoreitem_matching">
+            <item>Comodín</item>
+            <item>Expresión regular</item>
+        </string-array>
+
+        <string name="preference_ignoreitem_scope">Ámbito</string>
+        <string-array name="ignoreitem_scopeType">
+            <item>Global</item>
+            <item>Red</item>
+            <item>Canales</item>
+        </string-array>
+
+    <string name="storage_chatline_content" translatable="false">storagechatlinecontent</string>
+
+</resources>
