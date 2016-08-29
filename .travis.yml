@@ -4,7 +4,7 @@ script:
 android:
   components:
     - build-tools-24.0.0
-    - android-24
+    - android
     - extra-android-m2repository
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
