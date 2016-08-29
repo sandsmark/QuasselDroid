@@ -613,7 +613,9 @@ public class BufferFragment extends Fragment implements Serializable {
             holder.networkId = entry.getId();
 
             TypedArray ta = getActivity().obtainStyledAttributes(new int[]{R.attr.ic_collapse, R.attr.ic_expand});
+            //noinspection ResourceType
             Drawable collapse = ta.getDrawable(0);
+            //noinspection ResourceType
             Drawable expand = ta.getDrawable(1);
             ta.recycle();
 

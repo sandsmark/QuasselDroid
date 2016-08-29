@@ -65,7 +65,7 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
         setTitle(parentTitle());
         actionbar.setOnMenuItemClickListener(this);
         actionbar.setNavigationOnClickListener(this);
-        actionbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        actionbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material);
         onCreateOptionsMenu();
     }
 
