@@ -135,7 +135,8 @@ public class DetailFragment extends Fragment implements Serializable {
     }
 
     void updateView() {
-        if (networks.getBufferById(bufferId).getInfo().type == BufferInfo.Type.QueryBuffer) {
+        Buffer bufferById = networks.getBufferById(bufferId);
+        if (bufferById != null && bufferById.getInfo().type == BufferInfo.Type.QueryBuffer) {
             IrcUser user = observer.user;
 
             if (user != null) {
@@ -154,10 +155,14 @@ public class DetailFragment extends Fragment implements Serializable {
                     realname.setText("");
                 }
             } else {
-                nick.setText(networks.getBufferById(bufferId).getInfo().name);
+                nick.setText(bufferById.getInfo().name);
                 status.setText("Offline");
                 realname.setText("No Data Available");
             }
+        } else {
+            nick.setText("Unknown");
+            status.setText("Offline");
+            realname.setText("No Data Available");
         }
     }
 

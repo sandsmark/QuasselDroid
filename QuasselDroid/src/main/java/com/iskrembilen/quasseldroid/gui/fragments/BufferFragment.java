@@ -687,6 +687,7 @@ public class BufferFragment extends Fragment implements Serializable {
         }
 
         public void init() {
+            if (this.networks != null)
             for (Network network : this.networks.getNetworkList()) {
                 for (Buffer buffer : network.getBuffers().getBufferList(BufferCollectionHelper.FILTER_SET_ALL)) {
                     BufferUtils.setBufferActive(buffer);

@@ -577,8 +577,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
                     public void run() {
                         filteredBacklog = newBacklog;
                         isMarkerLineFiltered = copy_of_newisMarkerLineFiltered;
-                        ChatFragment.chatFragment.adapter.backlogData = newBacklog;
-                        ChatFragment.chatFragment.adapter.notifyDataSetChanged();
+                        if (ChatFragment.chatFragment != null && ChatFragment.chatFragment.adapter != null) {
+                            ChatFragment.chatFragment.adapter.backlogData = newBacklog;
+                            ChatFragment.chatFragment.adapter.notifyDataSetChanged();
+                        }
                     }
                 });
             }

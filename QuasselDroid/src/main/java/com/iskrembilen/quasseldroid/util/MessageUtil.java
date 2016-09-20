@@ -153,7 +153,7 @@ public class MessageUtil {
             Buffer buffer = Client.getInstance().getNetworks().getBufferById(message.bufferInfo.id);
 
             // We want to ignore the currently focused buffer
-            if (buffer.isDisplayed())
+            if (buffer == null || buffer.isDisplayed())
                 return;
 
             // If the message wasn’t read yet, we want to add a notification
