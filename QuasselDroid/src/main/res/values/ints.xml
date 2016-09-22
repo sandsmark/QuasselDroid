@@ -21,6 +21,7 @@
     GNU Lesser General Public License along with this program.  If not, see
     <http://www.gnu.org/licenses/>.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <integer name="default_port">4242</integer>
+    <integer name="design_snackbar_text_max_lines" tools:override="true">4</integer>
 </resources>
