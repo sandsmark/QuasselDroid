@@ -181,6 +181,17 @@
         <string name="identity_detach_away_enabled">Detach Away Enabled</string>
         <string name="identity_detach_away_reason">Detach Away Reason</string>
 
+
+
+    <string name="preference_category_support">Support</string>
+
+        <string name="preference_report_crashes" translatable="false">report_crashes</string>
+        <string name="preference_summary_on_report_crashes">The app will report crashes in the background (Applies after a restart)</string>
+        <string name="preference_summary_off_report_crashes">Ask every time if a crash should be reported (Applies after a restart)</string>
+        <string name="preference_title_report_crashes">Report crashes automatically</string>
+
+        <string name="user_knows_about_crashreporter" translatable="false">user_knows_about_crashreporter</string>
+
     <string name="preference_category_ignore_list">Ignore List</string>
         <string name="preference_ignoreitem_strictness">Strictness</string>
         <string-array name="ignoreitem_strictness">

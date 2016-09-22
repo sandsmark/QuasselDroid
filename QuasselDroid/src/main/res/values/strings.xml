@@ -186,4 +186,5 @@
     <string name="message_nick_other">%1$s is now known as %2$s</string>
     <string name="message_daychange">Day changed to %1$s</string>
     <string name="message_action">* %1$s %2$s</string>
+    <string name="info_message_crash_reporter">Crashes will be automatically reported. See Settings › Support.</string>
 </resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/preference_report_crashes"
+        android:summaryOn="@string/preference_summary_on_report_crashes"
+        android:summaryOff="@string/preference_summary_off_report_crashes"
+        android:title="@string/preference_title_report_crashes" />
+
+    <Preference
+        android:title="Data that will be transferred"
+        android:summary="The app will transmit android version, manufacturer of your device, app version, and which piece of code caused the crash."
+        android:selectable="false" />
+
+    <Preference
+        android:title="Eligibility for support"
+        android:summary="You will only get support if you report a crash, or collect a log from Android Logcat manually."
+        android:selectable="false" />
+</PreferenceScreen>

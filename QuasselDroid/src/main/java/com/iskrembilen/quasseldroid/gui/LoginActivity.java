@@ -36,7 +36,9 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.PopupMenu;
@@ -99,6 +101,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
 
     private String hashedCert;//ugly
     private int currentTheme;
+    private SharedPreferences sharedPreferences;
 
     /**
      * Called when the activity is first created.
@@ -187,6 +190,20 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         if (savedInstanceState != null && savedInstanceState.containsKey(STORE_SELECTED_CORE)) {
             core.setSelection(savedInstanceState.getInt(STORE_SELECTED_CORE, -1));
             hasLoadedFromSavedInstanceState = false;
+        }
+
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!sharedPreferences.getBoolean(getString(R.string.user_knows_about_crashreporter), false)) {
+            Snackbar.make(core, R.string.info_message_crash_reporter, Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Dismiss", new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            SharedPreferences.Editor edit = sharedPreferences.edit();
+                            edit.putBoolean(getString(R.string.preference_report_crashes), true);
+                            edit.putBoolean(getString(R.string.user_knows_about_crashreporter), true);
+                            edit.apply();
+                        }
+                    }).show();
         }
     }
 
@@ -439,6 +456,10 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                 settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
                 dbHelper.deleteUser(core.getSelectedItemId());
 
+            }
+            if (!sharedPreferences.getBoolean(getString(R.string.user_knows_about_crashreporter), false)) {
+                settingsedit.putBoolean(getString(R.string.preference_report_crashes), true);
+                settingsedit.putBoolean(getString(R.string.user_knows_about_crashreporter), true);
             }
             settingsedit.apply();
             //dbHelper.open();
