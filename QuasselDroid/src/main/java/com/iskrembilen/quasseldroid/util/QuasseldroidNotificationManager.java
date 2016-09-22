@@ -75,6 +75,7 @@ public class QuasseldroidNotificationManager {
     private boolean initDone = false;
     private boolean pendingHighlightNotification;
     private PendingIntent contentIntent;
+    private String init_progress;
 
     public QuasseldroidNotificationManager(Context context) {
         this.context = context;
@@ -448,8 +449,9 @@ public class QuasseldroidNotificationManager {
         if (event.done) {
             initDone = true;
             if(getHighlightedMessageCount()>0) notifyHighlights();
-        } else {
+        } else if (!Objects.equals(event.progress, this.init_progress)){
             notifyConnecting(Optional.of(event.progress));
+            this.init_progress = event.progress;
         }
     }
 

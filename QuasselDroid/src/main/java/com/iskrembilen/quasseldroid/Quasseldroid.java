@@ -48,7 +48,7 @@ import org.acra.annotation.ReportsCrashes;
                 ReportField.BUILD,
                 ReportField.STACK_TRACE
         },
-        mode = ReportingInteractionMode.TOAST,
+        mode = ReportingInteractionMode.NOTIFICATION,
         resToastText = R.string.notification_report_crash
 )
 public class Quasseldroid extends Application {
