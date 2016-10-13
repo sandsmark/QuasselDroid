@@ -214,6 +214,11 @@ public class QuasseldroidNotificationManager {
 
     public void addMessage(IrcMessage message) {
         synchronized (highlightedBuffers) {
+
+            Buffer buffer = Client.getInstance().getNetworks().getBufferById(message.bufferInfo.id);
+            if (buffer.getLastSeenMessage() >= message.messageId)
+                return;
+
             // If the buffer in question isn’t in the list of highlighted buffers, add it
             if (!highlightedBuffers.contains(message.bufferInfo.id)) {
                 highlightedBuffers.add(message.bufferInfo.id);

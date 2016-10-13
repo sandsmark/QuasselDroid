@@ -156,8 +156,8 @@ public class MessageUtil {
             if (buffer == null || buffer.isDisplayed())
                 return;
 
-            // If the message wasn’t read yet, we want to add a notification
-            if (buffer.getLastSeenMessage() < message.messageId && !buffer.isPermanentlyHidden() && !message.isFiltered())
+            // notificationManager will check if the message was already read
+            if (!buffer.isPermanentlyHidden() && !message.isFiltered())
                 notificationManager.addMessage(message);
         }
     }
