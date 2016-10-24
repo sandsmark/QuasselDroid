@@ -28,12 +28,9 @@ import com.iskrembilen.quasseldroid.protocol.qtcomm.QDataInputStream;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QDataOutputStream;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QMetaTypeSerializer;
 import com.iskrembilen.quasseldroid.util.StringReaderUtil;
-
 import java.io.IOException;
 
 public class QString implements QMetaTypeSerializer<String> {
-
-    StringReaderUtil stringReader = new StringReaderUtil("UTF-16BE");
 
     @Override
     public void serialize(QDataOutputStream stream, String data,
@@ -53,6 +50,15 @@ public class QString implements QMetaTypeSerializer<String> {
         if (len == 0xFFFFFFFF)
             return "";
 
-        return stringReader.readString(stream, len);
+        //return stringReader.readString(stream, len);
+        // this is friggin UTF-16BE... we can do better:
+        byte[] bytes = new byte[len];
+        stream.readFully(bytes);
+        char[] chars = new char[len / 2];
+        for (int i = 0; i < chars.length; i++) {
+            int bi = i << 1;
+            chars[i] = (char) ((char) bytes[bi] << 8 | bytes[bi + 1] & 0xff);
+        }
+        return new String(chars);
     }
 }

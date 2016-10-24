@@ -1,7 +1,6 @@
 package com.iskrembilen.quasseldroid.protocol.state.serializers;
 
 import android.util.Log;
-
 import com.iskrembilen.quasseldroid.events.RequestRemoteSyncEvent;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.EmptyQVariantException;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariant;
@@ -10,7 +9,7 @@ import com.iskrembilen.quasseldroid.protocol.qtcomm.QVariantType;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.Identity;
 import com.iskrembilen.quasseldroid.util.BusProvider;
-
+import de.kuschku.util.HelperUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,11 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-
-import de.kuschku.util.HelperUtils;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class SyncableObject extends Observable {
-
     public void register() {
         register(getObjectName());
     }
@@ -40,12 +39,30 @@ public abstract class SyncableObject extends Observable {
         Client.getInstance().getObjects().removeObject(getClassName(),name);
     }
 
-    public String getClassName() {
-        return getClass().getSimpleName();
+    private String className; // = null
+
+    protected String getClassName() {
+        // copy to local variable for JMM thread safety
+        String classNameLocal = className;
+        if (classNameLocal == null) {
+            className = classNameLocal = getClass().getSimpleName();
+        }
+        return classNameLocal;
     }
 
+    private static final AtomicInteger nextUniqueId = new AtomicInteger(1);
+
+    private volatile String objectName; // = null
+
     public String getObjectName() {
-        return String.valueOf(this.hashCode());
+        if (objectName == null) {
+            synchronized (this) {
+                if (objectName == null) {
+                    objectName = String.valueOf(nextUniqueId.getAndIncrement());
+                }
+            }
+        }
+        return objectName;
     }
 
     /** Stores the object's state into a QVariantMap.
@@ -93,35 +110,38 @@ public abstract class SyncableObject extends Observable {
         fromVariantMap(packedMap.getData());
     }
 
+    private static final ConcurrentMap<Class<? extends SyncableObject>, Map<String, Field>> syncableFieldCache =
+            new ConcurrentHashMap<>();
+
     /** Initialize the object's state from a given QVariantMap.
      *  see toVariantMap for important information concerning this method.
      *  @param map Map of field name to QVariant of value for the field
      */
     public void fromVariantMap(Map<String,QVariant<?>> map) throws EmptyQVariantException {
         // Iterate through all attributes of the class
-        for (Field field : this.getClass().getDeclaredFields()) {
-            try {
-                Syncable annotation = field.getAnnotation(Syncable.class);
-                // If the attribute is syncable
-                if (annotation != null) {
-                    // Set the attribute accessible
+        Map<String, Field> fields = syncableFieldCache.get(getClass());
+        if (fields == null) {
+            fields = new HashMap<>();
+            for (Field field : getClass().getDeclaredFields()) {
+                Syncable syncable = field.getAnnotation(Syncable.class);
+                if (syncable != null) {
+                    String name = syncable.name().isEmpty() ? field.getName() : syncable.name();
                     field.setAccessible(true);
-
-                    // Use field name if no custom name is set
-                    String name;
-                    if (annotation.name().isEmpty()) {
-                        name = field.getName();
-                    } else {
-                        name = annotation.name();
-                    }
-
-                    // Set the value from the QVariantMap
-                    if (map.containsKey(name)) {
-                        field.set(this, map.get(name).getData());
-                    }
+                    fields.put(name, field);
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            }
+            syncableFieldCache.put(getClass(), fields);
+        }
+
+        // we iterate over fields and then use input.get so we can cache the entrySet
+        for (Map.Entry<String, Field> entry : fields.entrySet()) {
+            QVariant<?> value = map.get(entry.getKey());
+            if (value != null) {
+                try {
+                    entry.getValue().set(this, value.getData());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

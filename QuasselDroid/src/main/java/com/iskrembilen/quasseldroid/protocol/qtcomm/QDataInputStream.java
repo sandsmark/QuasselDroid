@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.protocol.qtcomm;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +32,7 @@ public class QDataInputStream extends DataInputStream {
     byte[] buf = new byte[4];
 
     public QDataInputStream(InputStream base) {
-        super(base);
+        super(new BufferedInputStream(base));
     }
 
     public QVariant readQVariant() {
