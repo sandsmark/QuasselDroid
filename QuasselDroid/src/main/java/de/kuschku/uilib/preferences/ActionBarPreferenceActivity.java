@@ -39,6 +39,9 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
     private static final String BACK_STACK_PREFS = ":android:prefs";
     private Toolbar actionbar;
     private boolean mSinglePane;
+    private String app_name;
+    private View headers;
+    private View prefFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +62,6 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
         } else if (initialFragment != null) {
             switchToHeader(initialFragment, initialArguments);
             findViewById(R.id.headers).setVisibility(View.GONE);
-            mPrefsContainer.setVisibility(View.VISIBLE);
         }
 
         setTitle(parentTitle());
@@ -167,6 +169,10 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
         showBreadCrumbs(header);
     }
 
+    public void showBreadCrumbs(CharSequence title, CharSequence shortTitle) {
+        super.showBreadCrumbs(title, shortTitle);
+    }
+
     private void showBreadCrumbs(Header header) {
         if (header != null) {
             CharSequence title = header.getBreadCrumbTitle(getResources());
@@ -180,6 +186,17 @@ public class ActionBarPreferenceActivity extends PreferenceActivity implements T
 
     @Override
     public void setTitle(CharSequence title) {
+        if (app_name == null)
+            app_name = getString(R.string.app_name);
+        if (headers == null)
+            headers = findViewById(R.id.headers);
+        if (prefFrame == null)
+            prefFrame = findViewById(R.id.prefs_frame);
+
+        boolean isList = title.equals(app_name);
+        headers.setVisibility(isList ? View.VISIBLE : View.GONE);
+        prefFrame.setVisibility(!isList ? View.VISIBLE : View.GONE);
+
         if (actionbar!=null) ((TextView) actionbar.findViewById(R.id.action_bar_title)).setText(title);
         super.setTitle(title);
     }
