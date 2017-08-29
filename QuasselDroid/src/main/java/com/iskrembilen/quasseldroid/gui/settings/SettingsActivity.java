@@ -23,22 +23,17 @@
 
 package com.iskrembilen.quasseldroid.gui.settings;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-
-import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
+import de.kuschku.uilib.preferences.ActionBarPreferenceActivity;
 
 import java.util.List;
 
-import de.kuschku.uilib.preferences.ActionBarPreferenceActivity;
-
-public class SettingsActivity extends ActionBarPreferenceActivity implements Toolbar.OnMenuItemClickListener{
+public class SettingsActivity extends ActionBarPreferenceActivity {
     CharSequence parentTitle;
 
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -66,7 +61,7 @@ public class SettingsActivity extends ActionBarPreferenceActivity implements Too
     }
 
     @Override
-    public boolean isValidFragment(String fragmentName){
+    public boolean isValidFragment(String fragmentName) {
         return true;
     }
 

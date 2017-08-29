@@ -25,31 +25,25 @@ package com.iskrembilen.quasseldroid.gui.settings;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.IgnoreListManager;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 
-public class IgnoreItemActivity extends ActionBarActivity {
+public class IgnoreItemActivity extends AppCompatActivity {
 
-    Spinner  ruleType;
-    Spinner  strictness;
+    Spinner ruleType;
+    Spinner strictness;
 
-    Spinner  matching;
+    Spinner matching;
     EditText ignoreRule;
 
-    Spinner  scopeType;
+    Spinner scopeType;
     EditText scopeRule;
 
     IgnoreListManager.IgnoreListItem item;
@@ -88,7 +82,7 @@ public class IgnoreItemActivity extends ActionBarActivity {
         SpinnerAdapter scopeTypeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.ignoreitem_scopeType));
         scopeType.setAdapter(scopeTypeAdapter);
 
-        if (item!=null) {
+        if (item != null) {
             ruleType.setSelection(item.getType().ordinal());
             strictness.setSelection(item.getStrictness().ordinal());
             matching.setSelection(item.isRegEx() ? 1 : 0);
@@ -138,7 +132,7 @@ public class IgnoreItemActivity extends ActionBarActivity {
         String dataIgnoreRule = ignoreRule.getText().toString();
         String dataScopeRule = scopeRule.getText().toString();
 
-        if (item!=null) {
+        if (item != null) {
             boolean originalIsActive = item.isActive();
             item.setAttributes(dataRuleType, dataIgnoreRule, dataIsRegEx, dataStrictness, dataScopeType, dataScopeRule, originalIsActive);
         } else {

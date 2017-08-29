@@ -23,7 +23,6 @@
 
 package com.iskrembilen.quasseldroid.gui.settings;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -33,51 +32,38 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.TabHost;
-import android.widget.Toast;
-
-import com.iskrembilen.quasseldroid.protocol.state.Client;
-import com.iskrembilen.quasseldroid.protocol.state.Identity;
+import android.view.*;
+import android.widget.*;
 import com.iskrembilen.quasseldroid.R;
 import com.iskrembilen.quasseldroid.events.UpdateIdentityEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.EditNickDialog;
+import com.iskrembilen.quasseldroid.protocol.state.Client;
+import com.iskrembilen.quasseldroid.protocol.state.Identity;
 import com.iskrembilen.quasseldroid.util.BusProvider;
 import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.melnykov.fab.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.squareup.otto.Subscribe;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import it.neokree.materialtabs.MaterialTab;
 import it.neokree.materialtabs.MaterialTabHost;
 import it.neokree.materialtabs.MaterialTabListener;
 
-public class IdentityActivity extends ActionBarActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class IdentityActivity extends AppCompatActivity {
     static final String TAG = IdentityActivity.class.getSimpleName();
 
     MyPageAdapter pageAdapter;
-    private ViewPager mViewPager;
-    private MaterialTabHost tabStrip;
-
     NicksFragment nicksFragment;
     MessagesFragment messagesFragment;
-
     int identityId;
+    private ViewPager mViewPager;
+    private MaterialTabHost tabStrip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +84,7 @@ public class IdentityActivity extends ActionBarActivity {
 
         // Fragments and ViewPager Initialization
         List<Fragment> fragments = getFragments();
-        pageAdapter = new MyPageAdapter(getSupportFragmentManager(), fragments, new String[] {getString(R.string.identity_tab_nicks), getString(R.string.identity_tab_advanced)});
+        pageAdapter = new MyPageAdapter(getSupportFragmentManager(), fragments, new String[]{getString(R.string.identity_tab_nicks), getString(R.string.identity_tab_advanced)});
         MaterialTabListener tabListener = new MaterialTabListener() {
             @Override
             public void onTabSelected(MaterialTab materialTab) {
@@ -166,10 +152,11 @@ public class IdentityActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private @NonNull List<Fragment> getFragments(){
+    private @NonNull
+    List<Fragment> getFragments() {
         List<Fragment> fList = new ArrayList<>();
         Bundle bundle = new Bundle();
-        bundle.putInt("identityId",identityId);
+        bundle.putInt("identityId", identityId);
 
         nicksFragment = new NicksFragment();
         nicksFragment.setArguments(bundle);
@@ -180,32 +167,6 @@ public class IdentityActivity extends ActionBarActivity {
         fList.add(messagesFragment);
 
         return fList;
-    }
-
-    public class MyPageAdapter extends FragmentPagerAdapter {
-        private List<Fragment> fragments;
-        private String[] titles;
-
-        public MyPageAdapter(@NonNull FragmentManager fm, @NonNull List<Fragment> fragments, @NonNull String[] titles) {
-            super(fm);
-            this.fragments = fragments;
-            this.titles = titles;
-        }
-
-        @Override
-        public String getPageTitle(int position) {
-            return this.titles[position];
-        }
-
-        @Override
-        public @Nullable Fragment getItem(int position) {
-            return this.fragments.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return this.fragments.size();
-        }
     }
 
     public static class NicksFragment extends Fragment {
@@ -240,7 +201,7 @@ public class IdentityActivity extends ActionBarActivity {
         public void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            if (savedInstanceState!=null)
+            if (savedInstanceState != null)
                 fromBundle(savedInstanceState);
 
             BusProvider.getInstance().register(this);
@@ -253,10 +214,11 @@ public class IdentityActivity extends ActionBarActivity {
 
         @Override
         public void onSaveInstanceState(@NonNull Bundle outState) {
-            outState.putInt(IDENTITY_ID,identityId);
+            outState.putInt(IDENTITY_ID, identityId);
         }
 
-        public @NonNull DragSortController buildController(DragSortListView dslv) {
+        public @NonNull
+        DragSortController buildController(DragSortListView dslv) {
             DragSortController controller = new DragSortController(dslv);
             controller.setDragHandleId(R.id.list_drag_handle);
             controller.setRemoveEnabled(true);
@@ -268,17 +230,18 @@ public class IdentityActivity extends ActionBarActivity {
         }
 
         @Override
-        public @NonNull View onCreateView(@NonNull LayoutInflater inflater,
-                                          @Nullable ViewGroup container,
-                                          @Nullable Bundle savedInstanceState) {
-            if (savedInstanceState!=null)
+        public @NonNull
+        View onCreateView(@NonNull LayoutInflater inflater,
+                          @Nullable ViewGroup container,
+                          @Nullable Bundle savedInstanceState) {
+            if (savedInstanceState != null)
                 fromBundle(savedInstanceState);
 
             View root = inflater.inflate(R.layout.fragment_identity_nicklist, container, false);
             initElements(root);
 
             View header = inflater.inflate(R.layout.fragment_identity_nicks_header, nickList, false);
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),R.layout.widget_identity_nick, R.id.text);
+            final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.widget_identity_nick, R.id.text);
             nicks = new ArrayList<>();
 
             nickList.addHeaderView(header);
@@ -294,20 +257,20 @@ public class IdentityActivity extends ActionBarActivity {
             nickList.setDropListener(new DragSortListView.DropListener() {
                 @Override
                 public void drop(int from, int to) {
-                if (from != to) {
-                    Log.d(TAG,"Requesting nick reorder");
+                    if (from != to) {
+                        Log.d(TAG, "Requesting nick reorder");
 
-                    String item = adapter.getItem(from);
-                    nicks.remove(from);
-                    nicks.add(to, item);
-                    updateAdapter();
-                }
+                        String item = adapter.getItem(from);
+                        nicks.remove(from);
+                        nicks.add(to, item);
+                        updateAdapter();
+                    }
                 }
             });
             nickList.setRemoveListener(new DragSortListView.RemoveListener() {
                 @Override
                 public void remove(int i) {
-                    Log.d(TAG,"Requesting nick remove");
+                    Log.d(TAG, "Requesting nick remove");
 
                     nicks.remove(i);
                     updateAdapter();
@@ -330,7 +293,7 @@ public class IdentityActivity extends ActionBarActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                     // TODO: Refactor this into using the nicklist directly
-                    EditNickDialog dialog = EditNickDialog.newInstance(position-nickList.getHeaderViewsCount(), identityId);
+                    EditNickDialog dialog = EditNickDialog.newInstance(position - nickList.getHeaderViewsCount(), identityId);
                     dialog.setOnResultListener(new EditNickDialog.OnResultListener<String>() {
                         @Override
                         public void onClick(String result) {
@@ -372,10 +335,10 @@ public class IdentityActivity extends ActionBarActivity {
         }
 
         private void initElements(@NonNull View view) {
-            floatingAction =    (FloatingActionButton)  view.findViewById(R.id.fab);
-            realName =          (EditText)              view.findViewById(R.id.identity_realname);
-            ident =             (EditText)              view.findViewById(R.id.identity_ident);
-            nickList =          (DragSortListView)      view.findViewById(R.id.list);
+            floatingAction = (FloatingActionButton) view.findViewById(R.id.fab);
+            realName = (EditText) view.findViewById(R.id.identity_realname);
+            ident = (EditText) view.findViewById(R.id.identity_ident);
+            nickList = (DragSortListView) view.findViewById(R.id.list);
         }
 
         private void initData() {
@@ -383,12 +346,12 @@ public class IdentityActivity extends ActionBarActivity {
 
             if (identityId == -1) {
                 Log.d(TAG, "Identity empty");
-                Toast.makeText(getActivity().getApplicationContext(),"Error: Identity could not be found",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), "Error: Identity could not be found", Toast.LENGTH_SHORT).show();
                 getActivity().finish();
                 return;
             } else if (identity == null) {
                 Log.d(TAG, "Identity nonexistent");
-                Toast.makeText(getActivity().getApplicationContext(),"Error: Identity could not be found",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), "Error: Identity could not be found", Toast.LENGTH_SHORT).show();
                 getActivity().finish();
                 return;
             }
@@ -407,6 +370,7 @@ public class IdentityActivity extends ActionBarActivity {
             adapter.addAll(nicks);
         }
     }
+
     public static class MessagesFragment extends Fragment {
         public static final String IDENTITY_ID = "identityId";
 
@@ -464,12 +428,12 @@ public class IdentityActivity extends ActionBarActivity {
             Identity identity = Client.getInstance().getIdentities().getIdentity(identityId);
             if (identityId == -1) {
                 Log.d(TAG, "Identity empty");
-                Toast.makeText(getActivity().getApplicationContext(),"Error: Identity could not be found",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), "Error: Identity could not be found", Toast.LENGTH_SHORT).show();
                 getActivity().finish();
                 return;
             } else if (identity == null) {
                 Log.d(TAG, "Identity nonexistent");
-                Toast.makeText(getActivity().getApplicationContext(),"Error: Identity could not be found",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity().getApplicationContext(), "Error: Identity could not be found", Toast.LENGTH_SHORT).show();
                 getActivity().finish();
                 return;
             }
@@ -521,13 +485,40 @@ public class IdentityActivity extends ActionBarActivity {
         }
 
         public void fromBundle(Bundle bundle) {
-            if (bundle!=null && bundle.containsKey(IDENTITY_ID))
+            if (bundle != null && bundle.containsKey(IDENTITY_ID))
                 identityId = bundle.getInt(IDENTITY_ID);
         }
 
         @Override
         public void onSaveInstanceState(Bundle outState) {
-            outState.putInt(IDENTITY_ID,identityId);
+            outState.putInt(IDENTITY_ID, identityId);
+        }
+    }
+
+    public class MyPageAdapter extends FragmentPagerAdapter {
+        private List<Fragment> fragments;
+        private String[] titles;
+
+        public MyPageAdapter(@NonNull FragmentManager fm, @NonNull List<Fragment> fragments, @NonNull String[] titles) {
+            super(fm);
+            this.fragments = fragments;
+            this.titles = titles;
+        }
+
+        @Override
+        public String getPageTitle(int position) {
+            return this.titles[position];
+        }
+
+        @Override
+        public @Nullable
+        Fragment getItem(int position) {
+            return this.fragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return this.fragments.size();
         }
     }
 }

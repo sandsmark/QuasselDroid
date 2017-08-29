@@ -23,11 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -40,15 +36,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.ViewDragHelper;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,69 +49,56 @@ import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.samples.apps.iosched.ui.widget.ScrimInsetsFrameLayout;
 import com.iskrembilen.quasseldroid.Quasseldroid;
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.events.BufferDetailsChangedEvent;
-import com.iskrembilen.quasseldroid.events.BufferOpenedEvent;
-import com.iskrembilen.quasseldroid.events.BufferRemovedEvent;
-import com.iskrembilen.quasseldroid.events.CompleteNickEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.*;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
-import com.iskrembilen.quasseldroid.events.InitProgressEvent;
-import com.iskrembilen.quasseldroid.events.JoinChannelEvent;
-import com.iskrembilen.quasseldroid.events.LatencyChangedEvent;
-import com.iskrembilen.quasseldroid.events.ManageChannelEvent;
-import com.iskrembilen.quasseldroid.events.UpdateReadBufferEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.TopicViewDialog;
-import com.iskrembilen.quasseldroid.gui.fragments.BufferFragment;
-import com.iskrembilen.quasseldroid.gui.fragments.ChatFragment;
-import com.iskrembilen.quasseldroid.gui.fragments.ConnectingFragment;
-import com.iskrembilen.quasseldroid.gui.fragments.DetailFragment;
-import com.iskrembilen.quasseldroid.gui.fragments.NickListFragment;
+import com.iskrembilen.quasseldroid.gui.fragments.*;
 import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
 import com.iskrembilen.quasseldroid.protocol.state.Buffer;
 import com.iskrembilen.quasseldroid.protocol.state.Client;
 import com.iskrembilen.quasseldroid.protocol.state.NetworkCollection;
 import com.iskrembilen.quasseldroid.service.InFocus;
-import com.iskrembilen.quasseldroid.util.*;
+import com.iskrembilen.quasseldroid.util.BusProvider;
+import com.iskrembilen.quasseldroid.util.Helper;
+import com.iskrembilen.quasseldroid.util.MessageUtil;
+import com.iskrembilen.quasseldroid.util.ThemeUtil;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
-
     public static final String BUFFER_STATE = "buffer_state";
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final String DRAWER_SELECTION = "drawer_selection";
 
     public static MainActivity instance;
 
     SharedPreferences preferences;
     OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
+    private ClickableActionBar actionbar;
+    private QuasselDroidFragmentManager manager = new QuasselDroidFragmentManager();
+    private int currentTheme;
+    private Boolean showLag = false;
+    private int lag = 0;
+    private int openedBuffer = -1;
+    private Side openedDrawer = Side.NONE;
+    private CharSequence topic;
+    private boolean bufferHasTopic;
+    private boolean connectionEstablished = false;
+    private ServiceConnection focusConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName cn, IBinder service) {
+        }
+
+        public void onServiceDisconnected(ComponentName cn) {
+        }
+    };
 
     public ClickableActionBar getActionbar() {
         return actionbar;
     }
-
-    private ClickableActionBar actionbar;
-
-    private QuasselDroidFragmentManager manager = new QuasselDroidFragmentManager();
-
-    private int currentTheme;
-    private Boolean showLag = false;
-
-    private int lag = 0;
-
-    private int openedBuffer = -1;
-    private Side openedDrawer = Side.NONE;
-
-    private CharSequence topic;
-    private boolean bufferHasTopic;
-
-    private boolean connectionEstablished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.layout_main);
 
-        actionbar = new ClickableActionBar(getApplicationContext(),(Toolbar) findViewById(R.id.action_bar));
+        actionbar = new ClickableActionBar(getApplicationContext(), (Toolbar) findViewById(R.id.action_bar));
         setSupportActionBar(actionbar.getWrappedToolbar());
 
         actionbar.setOnTitleClickListener(new View.OnClickListener() {
@@ -143,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
         manager.preInit();
 
-        if (savedInstanceState==null) {
+        if (savedInstanceState == null) {
             manager.init();
         } else {
             manager.initMainFragment();
@@ -176,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void onBufferDetailsChanged(BufferDetailsChangedEvent event) {
-        if (event.bufferId==openedBuffer) {
+        if (event.bufferId == openedBuffer) {
             topic = Client.getInstance().getNetworks().getBufferById(openedBuffer).getTopic();
             setTitleAndMenu();
         }
@@ -186,10 +166,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        if (((Quasseldroid) getApplication()).savedInstanceState!=null) {
+        if (((Quasseldroid) getApplication()).savedInstanceState != null) {
             getState(((Quasseldroid) getApplication()).savedInstanceState);
 
-            Log.d(TAG,"Loaded state: BUFFER="+openedBuffer+"; DRAWER="+openedDrawer);
+            Log.d(TAG, "Loaded state: BUFFER=" + openedBuffer + "; DRAWER=" + openedDrawer);
 
             ((Quasseldroid) getApplication()).savedInstanceState = null;
         }
@@ -204,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if (intent!=null) {
+        if (intent != null) {
             int requestOpenBuffer = intent.getIntExtra("extraBufferId", -1);
             boolean requestOpenDrawer = intent.getBooleanExtra("extraDrawer", false);
             if (requestOpenBuffer != -1) {
@@ -226,9 +206,9 @@ public class MainActivity extends AppCompatActivity {
         bindService(new Intent(this, InFocus.class), focusConnection, Context.BIND_AUTO_CREATE);
 
         Log.d(TAG, "Current themes: "
-                        + ((ThemeUtil.themeNoActionBar==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT ":"DARK ")
-                        + ((ThemeUtil.themeNoActionBar == currentTheme) ? "== " : "!= ")
-                        + ((currentTheme==R.style.Theme_QuasselDroid_Material_Light_NoActionBar)?"LIGHT":"DARK")
+                + ((ThemeUtil.themeNoActionBar == R.style.Theme_QuasselDroid_Material_Light_NoActionBar) ? "LIGHT " : "DARK ")
+                + ((ThemeUtil.themeNoActionBar == currentTheme) ? "== " : "!= ")
+                + ((currentTheme == R.style.Theme_QuasselDroid_Material_Light_NoActionBar) ? "LIGHT" : "DARK")
         );
     }
 
@@ -276,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
                 manager.openDrawer(Side.LEFT);
             } else {
-                Log.d(TAG, "Loading state: "+openedBuffer);
+                Log.d(TAG, "Loading state: " + openedBuffer);
                 manager.openDrawer(openedDrawer);
                 BusProvider.getInstance().post(new BufferOpenedEvent(openedBuffer, true));
             }
@@ -311,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG,"Saving state: BUFFER="+openedBuffer+"; DRAWER="+manager.getOpenDrawer());
+        Log.d(TAG, "Saving state: BUFFER=" + openedBuffer + "; DRAWER=" + manager.getOpenDrawer());
         super.onSaveInstanceState(outState);
         storeState(outState);
     }
@@ -372,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
             setTitleAndMenu();
 
             ((BufferFragment) manager.bufferFragment).init();
-        } else if (currentFragment == null || !connectionEstablished && currentFragment.getClass()!=ConnectingFragment.class) {
+        } else if (currentFragment == null || !connectionEstablished && currentFragment.getClass() != ConnectingFragment.class) {
             Log.d(TAG, "Showing progress");
             showInitProgress();
         }
@@ -402,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean emptyString(CharSequence topic) {
-        return topic==null || topic.toString().trim().equals("");
+        return topic == null || topic.toString().trim().equals("");
     }
 
     private void showDetailPopup() {
@@ -442,13 +422,13 @@ public class MainActivity extends AppCompatActivity {
         NetworkCollection networks = Client.getInstance().getNetworks();
 
         if (event.bufferId != -1
-                && networks.getBufferById(event.bufferId)!=null
-                && networks.getNetworkById(networks.getBufferById(event.bufferId).getInfo().networkId)!=null) {
+                && networks.getBufferById(event.bufferId) != null
+                && networks.getNetworkById(networks.getBufferById(event.bufferId).getInfo().networkId) != null) {
             openedBuffer = event.bufferId;
             ((ChatFragment) manager.chatFragment).setBuffer(event.bufferId);
             if (event.switchToBuffer) {
                 manager.closeDrawer(Side.BOTH);
-                ((BufferFragment)manager.bufferFragment).finishActionMode();
+                ((BufferFragment) manager.bufferFragment).finishActionMode();
                 updateBufferRead();
                 setTitleAndMenu();
             }
@@ -456,13 +436,14 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Buffer Opened Event was faulty");
         }
     }
+
     private void setTitleAndMenu() {
         NetworkCollection networks = Client.getInstance().getNetworks();
         Buffer buffer = networks.getBufferById(openedBuffer);
 
         manager.chatFragment.setMenuVisibility(true);
 
-        if (buffer==null) {
+        if (buffer == null) {
             bufferHasTopic = false;
             actionbar.setTitle(getResources().getString(R.string.app_name));
             topic = null;
@@ -471,30 +452,31 @@ public class MainActivity extends AppCompatActivity {
                 case QueryBuffer:
                     bufferHasTopic = false;
                     manager.setFragment(R.id.right_drawer, manager.detailFragment);
-                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_UNLOCKED);
+                    manager.lockDrawer(Side.RIGHT, DrawerLayout.LOCK_MODE_UNLOCKED);
                     actionbar.setTitle(buffer.getInfo().name);
                     topic = buffer.getTopic();
                     break;
                 case StatusBuffer:
                     bufferHasTopic = true;
-                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    manager.lockDrawer(Side.RIGHT, DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     actionbar.setTitle(networks.getNetworkById(buffer.getInfo().networkId).getName());
                     topic = buffer.getTopic();
                     break;
                 case ChannelBuffer:
                     bufferHasTopic = true;
                     manager.setFragment(R.id.right_drawer, manager.nickFragment);
-                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_UNLOCKED);
+                    manager.lockDrawer(Side.RIGHT, DrawerLayout.LOCK_MODE_UNLOCKED);
                     actionbar.setTitle(buffer.getInfo().name);
                     topic = buffer.getTopic();
                     break;
                 default:
                     bufferHasTopic = false;
                     actionbar.setTitle(buffer.getInfo().name);
-                    manager.lockDrawer(Side.RIGHT,DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    manager.lockDrawer(Side.RIGHT, DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     topic = buffer.getTopic();
             }
-            if (topic != null) topic = MessageUtil.parseStyleCodes(this, topic.toString(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text), true));
+            if (topic != null)
+                topic = MessageUtil.parseStyleCodes(this, topic.toString(), preferences.getBoolean(getResources().getString(R.string.preference_colored_text), true));
         }
         updateSubtitle();
         invalidateOptionsMenu();
@@ -512,6 +494,19 @@ public class MainActivity extends AppCompatActivity {
             BusProvider.getInstance().post(new BufferOpenedEvent(-1, false));
             manager.openDrawer(Side.LEFT);
         }
+    }
+
+    private void updateBufferRead() {
+        if (openedBuffer != -1) {
+            BusProvider.getInstance().post(new UpdateReadBufferEvent());
+        }
+    }
+
+    public enum Side {
+        LEFT,
+        RIGHT,
+        BOTH,
+        NONE
     }
 
     class QuasselDroidFragmentManager {
@@ -533,28 +528,28 @@ public class MainActivity extends AppCompatActivity {
 
             FragmentManager manager = getSupportFragmentManager();
 
-            if (chatFragment==null) {
+            if (chatFragment == null) {
                 if (manager.findFragmentById(R.id.main_content_container) instanceof ChatFragment)
                     chatFragment = manager.findFragmentById(R.id.main_content_container);
                 else
                     chatFragment = ChatFragment.newInstance();
                 ((ChatFragment) chatFragment).setNetworks(Client.getInstance().getNetworks());
             }
-            if (nickFragment==null) {
+            if (nickFragment == null) {
                 if (manager.findFragmentById(R.id.right_drawer) instanceof NickListFragment)
                     nickFragment = manager.findFragmentById(R.id.right_drawer);
                 else
                     nickFragment = NickListFragment.newInstance();
                 ((NickListFragment) nickFragment).setNetworks(Client.getInstance().getNetworks());
             }
-            if (detailFragment==null) {
+            if (detailFragment == null) {
                 if (manager.findFragmentById(R.id.right_drawer) instanceof DetailFragment)
                     detailFragment = manager.findFragmentById(R.id.right_drawer);
                 else
                     detailFragment = DetailFragment.newInstance();
                 ((DetailFragment) detailFragment).setNetworks(Client.getInstance().getNetworks());
             }
-            if (bufferFragment==null) {
+            if (bufferFragment == null) {
                 if (manager.findFragmentById(R.id.left_drawer) instanceof BufferFragment)
                     bufferFragment = manager.findFragmentById(R.id.left_drawer);
                 else
@@ -564,7 +559,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         void init() {
-            Log.d(getClass().getSimpleName(),"Initializing Side and Main panels");
+            Log.d(getClass().getSimpleName(), "Initializing Side and Main panels");
 
             setFragment(R.id.right_drawer, nickFragment);
 
@@ -578,15 +573,15 @@ public class MainActivity extends AppCompatActivity {
         void setFragment(int id, Fragment fragment) {
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction ft = manager.beginTransaction();
-            Fragment currentFragment = (drawers.get(id)==null) ? manager.findFragmentById(id) : drawers.get(id);
+            Fragment currentFragment = (drawers.get(id) == null) ? manager.findFragmentById(id) : drawers.get(id);
 
-            boolean menuVisbility = currentFragment!=null && currentFragment.isMenuVisible();
-            if (currentFragment!=null) currentFragment.setMenuVisibility(false);
+            boolean menuVisbility = currentFragment != null && currentFragment.isMenuVisible();
+            if (currentFragment != null) currentFragment.setMenuVisibility(false);
 
             String from = (currentFragment == null) ? "NULL" : currentFragment.getClass().getSimpleName();
             String to = (fragment == null) ? "NULL" : fragment.getClass().getSimpleName();
 
-            if (fragment==currentFragment) {
+            if (fragment == currentFragment) {
                 // Replace stuff with itself: Do nothing!
             } else if (fragment == null) {
                 ft.remove(currentFragment);
@@ -612,10 +607,10 @@ public class MainActivity extends AppCompatActivity {
             leftDrawer = (DrawerLayout) findViewById(R.id.main_drawer);
             rightDrawer = (DrawerLayout) findViewById(R.id.nick_drawer);
 
-            if (leftDrawer!=null) {
+            if (leftDrawer != null) {
                 leftDrawer.setStatusBarBackgroundColor(getResources().getColor(R.color.primary_dark));
 
-                if (extensibleDrawerToggle==null) {
+                if (extensibleDrawerToggle == null) {
                     extensibleDrawerToggle = new ExtensibleDrawerToggle(leftDrawer, new ActionBarDrawerToggle(
                             MainActivity.this, /* host Activity */
                             leftDrawer, /* DrawerLayout object */
@@ -663,20 +658,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void closeDrawer(Side side) {
-            if (side==Side.RIGHT||side==Side.BOTH) {
+            if (side == Side.RIGHT || side == Side.BOTH) {
                 rightDrawer.closeDrawers();
             }
 
-            if (leftDrawer!=null&&(side==Side.LEFT||side==Side.BOTH)) {
+            if (leftDrawer != null && (side == Side.LEFT || side == Side.BOTH)) {
                 leftDrawer.closeDrawers();
             }
         }
 
 
         public void openDrawer(Side side) {
-            if (side==Side.RIGHT) {
+            if (side == Side.RIGHT) {
                 rightDrawer.openDrawer(GravityCompat.END);
-            } else if (side==Side.LEFT&&leftDrawer!=null) {
+            } else if (side == Side.LEFT && leftDrawer != null) {
                 if (rightDrawer.isDrawerVisible(GravityCompat.END))
                     rightDrawer.closeDrawers();
 
@@ -685,15 +680,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void lockDrawer(Side side, int lockMode) {
-            if (side==Side.RIGHT) {
+            if (side == Side.RIGHT) {
                 rightDrawer.setDrawerLockMode(lockMode);
-            } else if (side==Side.LEFT&&leftDrawer!=null) {
+            } else if (side == Side.LEFT && leftDrawer != null) {
                 leftDrawer.setDrawerLockMode(lockMode);
             }
         }
 
         public Side getOpenDrawer() {
-            if (leftDrawer!=null && leftDrawer.isDrawerVisible(GravityCompat.START))
+            if (leftDrawer != null && leftDrawer.isDrawerVisible(GravityCompat.START))
                 return Side.LEFT;
             else if (rightDrawer.isDrawerVisible(GravityCompat.END))
                 return Side.RIGHT;
@@ -709,12 +704,6 @@ public class MainActivity extends AppCompatActivity {
             view.requestFocus();
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-        }
-    }
-
-    private void updateBufferRead() {
-        if (openedBuffer != -1) {
-            BusProvider.getInstance().post(new UpdateReadBufferEvent());
         }
     }
 
@@ -770,12 +759,12 @@ public class MainActivity extends AppCompatActivity {
             return ((TextView) wrappedToolbar.findViewById(R.id.action_bar_title)).getText();
         }
 
-        public void setOnTitleClickListener(View.OnClickListener listener) {
-            wrappedToolbar.findViewById(R.id.actionTitleArea).setOnClickListener(listener);
-        }
-
         public void setTitle(CharSequence subtitle) {
             ((TextView) wrappedToolbar.findViewById(R.id.action_bar_title)).setText(subtitle);
+        }
+
+        public void setOnTitleClickListener(View.OnClickListener listener) {
+            wrappedToolbar.findViewById(R.id.actionTitleArea).setOnClickListener(listener);
         }
 
         public CharSequence getSubtitle() {
@@ -793,20 +782,5 @@ public class MainActivity extends AppCompatActivity {
         public void setTitleClickable(boolean clickable) {
             wrappedToolbar.findViewById(R.id.actionTitleArea).setClickable(clickable);
         }
-    }
-
-    private ServiceConnection focusConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName cn, IBinder service) {
-        }
-
-        public void onServiceDisconnected(ComponentName cn) {
-        }
-    };
-
-    public enum Side {
-        LEFT,
-        RIGHT,
-        BOTH,
-        NONE
     }
 }

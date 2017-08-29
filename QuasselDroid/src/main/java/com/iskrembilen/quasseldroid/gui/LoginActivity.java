@@ -25,12 +25,7 @@ package com.iskrembilen.quasseldroid.gui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -40,29 +35,18 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.SimpleCursorAdapter;
-import android.widget.Spinner;
-import android.widget.Toast;
-
 import com.iskrembilen.quasseldroid.R;
-import com.iskrembilen.quasseldroid.events.CertificateChangedEvent;
-import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent;
+import com.iskrembilen.quasseldroid.events.*;
 import com.iskrembilen.quasseldroid.events.ConnectionChangedEvent.Status;
-import com.iskrembilen.quasseldroid.events.DisconnectCoreEvent;
-import com.iskrembilen.quasseldroid.events.NewCertificateEvent;
-import com.iskrembilen.quasseldroid.events.UnsupportedProtocolEvent;
 import com.iskrembilen.quasseldroid.gui.dialogs.LoginProgressDialog;
 import com.iskrembilen.quasseldroid.gui.settings.SettingsActivity;
 import com.iskrembilen.quasseldroid.io.QuasselDbHelper;
@@ -76,16 +60,15 @@ import com.squareup.otto.Subscribe;
 import java.util.Observable;
 import java.util.Observer;
 
-public class LoginActivity extends ActionBarActivity implements Observer, LoginProgressDialog.Callbacks {
+public class LoginActivity extends AppCompatActivity implements Observer, LoginProgressDialog.Callbacks {
 
-    private static final String TAG = LoginActivity.class.getSimpleName();
     public static final String PREFS_ACCOUNT = "AccountPreferences";
     public static final String PREFS_CORE = "coreSelection";
     public static final String STORE_SELECTED_CORE = "SELECTED_CORE";
     public static final String STORE_PASSWORD = "PASSWORD";
     public static final String STORE_USERNAME = "USERNAME";
     public static final String STORE_REMEMBER = "REMEMBER";
-
+    private static final String TAG = LoginActivity.class.getSimpleName();
     private SharedPreferences settings;
     private QuasselDbHelper dbHelper;
 
@@ -102,6 +85,74 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
     private String hashedCert;//ugly
     private int currentTheme;
     private SharedPreferences sharedPreferences;
+    private OnClickListener onConnect = new OnClickListener() {
+        public void onClick(View v) {
+            if (usernameField.getText().length() == 0 ||
+                    passwordField.getText().length() == 0 ||
+                    core.getCount() == 0) {
+
+                AlertDialog.Builder diag = new AlertDialog.Builder(LoginActivity.this);
+                diag.setMessage("Error, connection information not filled out properly");
+                diag.setCancelable(false);
+
+                diag.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+                AlertDialog dg = diag.create();
+                dg.setOwnerActivity(LoginActivity.this);
+                dg.show();
+                return;
+            }
+            SharedPreferences.Editor settingsedit = settings.edit();
+            if (rememberMe.isChecked()) {//save info
+                settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
+                dbHelper.addUser(usernameField.getText().toString(), passwordField.getText().toString(), core.getSelectedItemId());
+
+            } else {
+                settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
+                dbHelper.deleteUser(core.getSelectedItemId());
+
+            }
+            if (!sharedPreferences.getBoolean(getString(R.string.user_knows_about_crashreporter), false)) {
+                settingsedit.putBoolean(getString(R.string.preference_report_crashes), true);
+                settingsedit.putBoolean(getString(R.string.user_knows_about_crashreporter), true);
+            }
+            settingsedit.apply();
+            //dbHelper.open();
+            Bundle res = dbHelper.getCore(core.getSelectedItemId());
+
+            //TODO: quick fix for checking if we have internet before connecting, should remove some force closes, not sure if we should do it in another place tho, maybe in CoreConn
+            //Check that the phone has either mobile or wifi connection to query the bus oracle
+            ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
+                Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            //Make intent to send to the CoreConnect service, with connection data
+            Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
+            connectIntent.putExtra("id", core.getSelectedItemId());
+            connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
+            connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
+            connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
+            connectIntent.putExtra("username", usernameField.getText().toString().trim());
+            connectIntent.putExtra("password", passwordField.getText().toString());
+
+            startService(connectIntent);
+
+            LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
+        }
+    };
+    private ServiceConnection focusConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName cn, IBinder service) {
+        }
+
+        public void onServiceDisconnected(ComponentName cn) {
+        }
+    };
 
     /**
      * Called when the activity is first created.
@@ -141,7 +192,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
                         if (savedInstanceState.containsKey(STORE_USERNAME)) {
                             usernameField.setText(savedInstanceState.getString(STORE_USERNAME));
                         }
-                        if(savedInstanceState.containsKey(STORE_REMEMBER)) {
+                        if (savedInstanceState.containsKey(STORE_REMEMBER)) {
                             rememberMe.setChecked(savedInstanceState.getBoolean(STORE_REMEMBER));
                         }
                         hasLoadedFromSavedInstanceState = true;
@@ -216,7 +267,6 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         outState.putBoolean(STORE_REMEMBER, rememberMe.isChecked());
     }
 
-
     public void showCoreContextMenu(Context context, View v) {
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -243,7 +293,7 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
             }
         });
         popup.inflate(R.menu.context_core);
-        if (core.getCount()==0) {
+        if (core.getCount() == 0) {
             popup.getMenu().findItem(R.id.menu_edit_core).setEnabled(false);
             popup.getMenu().findItem(R.id.menu_delete_core).setEnabled(false);
         }
@@ -266,11 +316,9 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         if (ThemeUtil.theme != currentTheme) {
             Log.d(TAG, "Changing theme");
             Handler handler = new Handler();
-            handler.postDelayed(new Runnable()
-            {
+            handler.postDelayed(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     recreate();
                 }
             }, 1);
@@ -427,68 +475,6 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         return dialog;
     }
 
-    private OnClickListener onConnect = new OnClickListener() {
-        public void onClick(View v) {
-            if (usernameField.getText().length() == 0 ||
-                    passwordField.getText().length() == 0 ||
-                    core.getCount() == 0) {
-
-                AlertDialog.Builder diag = new AlertDialog.Builder(LoginActivity.this);
-                diag.setMessage("Error, connection information not filled out properly");
-                diag.setCancelable(false);
-
-                diag.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-
-                AlertDialog dg = diag.create();
-                dg.setOwnerActivity(LoginActivity.this);
-                dg.show();
-                return;
-            }
-            SharedPreferences.Editor settingsedit = settings.edit();
-            if (rememberMe.isChecked()) {//save info
-                settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-                dbHelper.addUser(usernameField.getText().toString(), passwordField.getText().toString(), core.getSelectedItemId());
-
-            } else {
-                settingsedit.putInt(PREFS_CORE, core.getSelectedItemPosition());
-                dbHelper.deleteUser(core.getSelectedItemId());
-
-            }
-            if (!sharedPreferences.getBoolean(getString(R.string.user_knows_about_crashreporter), false)) {
-                settingsedit.putBoolean(getString(R.string.preference_report_crashes), true);
-                settingsedit.putBoolean(getString(R.string.user_knows_about_crashreporter), true);
-            }
-            settingsedit.apply();
-            //dbHelper.open();
-            Bundle res = dbHelper.getCore(core.getSelectedItemId());
-
-            //TODO: quick fix for checking if we have internet before connecting, should remove some force closes, not sure if we should do it in another place tho, maybe in CoreConn
-            //Check that the phone has either mobile or wifi connection to query the bus oracle
-            ConnectivityManager conn = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (conn.getActiveNetworkInfo() == null || !conn.getActiveNetworkInfo().isConnected()) {
-                Toast.makeText(LoginActivity.this, "This application requires an internet connection", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-
-            //Make intent to send to the CoreConnect service, with connection data
-            Intent connectIntent = new Intent(LoginActivity.this, CoreConnService.class);
-            connectIntent.putExtra("id", core.getSelectedItemId());
-            connectIntent.putExtra("name", res.getString(QuasselDbHelper.KEY_NAME));
-            connectIntent.putExtra("address", res.getString(QuasselDbHelper.KEY_ADDRESS));
-            connectIntent.putExtra("port", res.getInt(QuasselDbHelper.KEY_PORT));
-            connectIntent.putExtra("username", usernameField.getText().toString().trim());
-            connectIntent.putExtra("password", passwordField.getText().toString());
-
-            startService(connectIntent);
-
-            LoginProgressDialog.newInstance().show(getSupportFragmentManager(), "dialog");
-        }
-    };
-
     public void updateCoreSpinner() {
         ((SimpleCursorAdapter) core.getAdapter()).getCursor().requery();
     }
@@ -547,12 +533,4 @@ public class LoginActivity extends ActionBarActivity implements Observer, LoginP
         dismissLoginDialog();
         Toast.makeText(LoginActivity.this, "Protocol version not supported, Quassel core is to old", Toast.LENGTH_LONG).show();
     }
-
-    private ServiceConnection focusConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName cn, IBinder service) {
-        }
-
-        public void onServiceDisconnected(ComponentName cn) {
-        }
-    };
 }

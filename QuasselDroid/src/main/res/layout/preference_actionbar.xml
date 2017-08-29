@@ -64,7 +64,7 @@
             android:layout_height="match_parent"
             android:layout_weight="@integer/preferences_right_pane_weight"
             android:orientation="vertical"
-            android:visibility="gone" >
+            android:visibility="gone">
 
             <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
                 android:layout_width="match_parent"

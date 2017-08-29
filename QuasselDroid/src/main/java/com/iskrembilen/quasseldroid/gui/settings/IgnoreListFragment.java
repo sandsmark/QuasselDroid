@@ -23,6 +23,7 @@
 
 package com.iskrembilen.quasseldroid.gui.settings;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -50,13 +51,10 @@ import com.melnykov.fab.FloatingActionButton;
 import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.*;
 
 public class IgnoreListFragment extends PreferenceFragment implements Observer {
+    public static Map<Context, IgnoreListFragment> instances = new HashMap<>();
 
     DragSortListView list;
     SimpleListAdapter<IgnoreListManager.IgnoreListItem> adapter;
@@ -76,6 +74,16 @@ public class IgnoreListFragment extends PreferenceFragment implements Observer {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        instances.put(getActivity(), this);
+    }
+
+    @Override
+    public void onDetach() {
+        instances.remove(getActivity());
     }
 
     @Override
