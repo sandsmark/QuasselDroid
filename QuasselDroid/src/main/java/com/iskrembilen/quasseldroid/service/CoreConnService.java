@@ -278,12 +278,12 @@ public class CoreConnService extends Service {
 
     private void acquireWakeLockIfEnabled() {
         if (preferenceUseWakeLock) {
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "quasseldroid wakelock");
             wakeLock.acquire();
             Log.i(TAG, "WakeLock acquired");
 
-            WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "quasseldroid wifilock");
             wifiLock.acquire();
             Log.i(TAG, "WifiLock acquired");

@@ -113,10 +113,10 @@ public class MessageFormattingHelper {
     }
 
     private static int[] senderColors = {
-            0x00cc0000, 0x00006cad, 0x004d9900, 0x006600cc,
-            0x00a67d00, 0x00009927, 0x000030c0, 0x00cc009a,
-            0x00b94600, 0x00869900, 0x00149900, 0x00009960,
-            0x00006cad, 0x000099cc, 0x00b300cc, 0x00cc004d,
+            0xFFcc0000, 0xFF006cad, 0xFF4d9900, 0xFF6600cc,
+            0xFFa67d00, 0xFF009927, 0xFF0030c0, 0xFFcc009a,
+            0xFFb94600, 0xFF869900, 0xFF149900, 0xFF009960,
+            0xFF006cad, 0xFF0099cc, 0xFFb300cc, 0xFFcc004d,
     };
 
     public static int getSenderColor(String nick) {
@@ -137,13 +137,7 @@ public class MessageFormattingHelper {
         }
 
         public CharSequence formatNick(String nick, boolean reduced, String[] brackets) {
-            Spannable nickSpan;
-
-            if (nick.startsWith("xn--")) {
-                nick = IDN.toUnicode(nick, IDN.ALLOW_UNASSIGNED);
-            }
-
-            nickSpan = new SpannableString(nick);
+            Spannable nickSpan = new SpannableString(nick);
             SpanUtils.setFullSpan(nickSpan, new StyleSpan(Typeface.BOLD));
 
             if (reduced)
