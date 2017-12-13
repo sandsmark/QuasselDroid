@@ -115,11 +115,13 @@ public class LoginActivity extends AppCompatActivity implements Observer, LoginP
                 dbHelper.deleteUser(core.getSelectedItemId());
 
             }
+            /*
             if (!sharedPreferences.getBoolean(getString(R.string.user_knows_about_crashreporter), false)) {
                 settingsedit.putBoolean(getString(R.string.preference_report_crashes), true);
                 settingsedit.putBoolean(getString(R.string.user_knows_about_crashreporter), true);
             }
             settingsedit.apply();
+            */
             //dbHelper.open();
             Bundle res = dbHelper.getCore(core.getSelectedItemId());
 
@@ -243,6 +245,7 @@ public class LoginActivity extends AppCompatActivity implements Observer, LoginP
             hasLoadedFromSavedInstanceState = false;
         }
 
+        /*
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.getBoolean(getString(R.string.user_knows_about_crashreporter), false)) {
             Snackbar.make(core, R.string.info_message_crash_reporter, Snackbar.LENGTH_INDEFINITE)
@@ -256,6 +259,7 @@ public class LoginActivity extends AppCompatActivity implements Observer, LoginP
                         }
                     }).show();
         }
+        */
     }
 
     @Override

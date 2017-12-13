@@ -36,6 +36,7 @@ import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.acra.config.ConfigurationBuilder;
 
+/*
 @ReportsCrashes(
         formUri = "https://reports.kuschku.de/report/1/",
         reportType = org.acra.sender.HttpSender.Type.JSON,
@@ -52,6 +53,7 @@ import org.acra.config.ConfigurationBuilder;
         mode = ReportingInteractionMode.NOTIFICATION,
         resToastText = R.string.notification_report_crash
 )
+*/
 public class Quasseldroid extends Application {
     public Bundle savedInstanceState;
     public static Context applicationContext;
@@ -60,10 +62,12 @@ public class Quasseldroid extends Application {
     public void onCreate() {
         super.onCreate();
 
+        /*
         boolean report_crashes = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.preference_report_crashes), true);
         ACRA.init(this, new ConfigurationBuilder(this).setReportingInteractionMode(
                 report_crashes ? ReportingInteractionMode.TOAST : ReportingInteractionMode.NOTIFICATION
         ));
+        */
 
         applicationContext = getApplicationContext();
 

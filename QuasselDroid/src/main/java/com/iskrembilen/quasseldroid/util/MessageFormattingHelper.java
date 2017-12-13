@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -42,41 +43,84 @@ import com.iskrembilen.quasseldroid.protocol.state.IrcMode;
 import com.iskrembilen.quasseldroid.protocol.state.IrcUser;
 import com.iskrembilen.quasseldroid.protocol.state.Network;
 
+import java.net.IDN;
+import java.nio.charset.Charset;
+import java.util.Locale;
+
 public class MessageFormattingHelper {
+    public static class IrcUserUtils {
+        private IrcUserUtils() {
+
+        }
+
+        static int getSenderColor(@NonNull String nick) {
+            nick = trimEnd(nick, '_').toLowerCase(Locale.US);
+            byte[] data = nick.getBytes(Charset.forName("ISO-8859-1"));
+            return (0xf & CRCUtils.qChecksum(data));
+        }
+
+        @NonNull
+        private static String trimEnd(@NonNull String str, char character) {
+            char[] val = str.toCharArray();
+            int len = val.length;
+            while ((0 < len) && (val[len - 1] == character)) {
+                len--;
+            }
+            return ((len < val.length)) ? str.substring(0, len) : str;
+        }
+
+        static class CRCUtils {
+            private CRCUtils() {
+
+            }
+
+            static int qChecksum(@NonNull byte[] data) {
+                int crc = 0xffff;
+                int crcHighBitMask = 0x8000;
+
+                for (byte b : data) {
+                    int c = reflect(b, 8);
+                    for (int j = 0x80; j > 0; j >>= 1) {
+                        int highBit = crc & crcHighBitMask;
+                        crc <<= 1;
+                        if ((c & j) > 0) {
+                            highBit ^= crcHighBitMask;
+                        }
+                        if (highBit > 0) {
+                            crc ^= 0x1021;
+                        }
+                    }
+                }
+
+                crc = reflect(crc, 16);
+                crc ^= 0xffff;
+                crc &= 0xffff;
+
+                return crc;
+            }
+
+            private static int reflect(int crc, int n) {
+                int j = 1, crcout = 0;
+                for (int i = (1 << (n - 1)); i > 0; i >>= 1) {
+                    if ((crc & i) > 0) {
+                        crcout |= j;
+                    }
+                    j <<= 1;
+                }
+                return crcout;
+            }
+        }
+    }
+
+    private static int[] senderColors = {
+            0x00cc0000, 0x00006cad, 0x004d9900, 0x006600cc,
+            0x00a67d00, 0x00009927, 0x000030c0, 0x00cc009a,
+            0x00b94600, 0x00869900, 0x00149900, 0x00009960,
+            0x00006cad, 0x000099cc, 0x00b300cc, 0x00cc004d,
+    };
 
     public static int getSenderColor(String nick) {
-        return getSenderColor(nick, 1.0F, 1.0F);
-    }
-
-    public static int getSenderColor(String nick, float saturationMultiplicator, float luminosityMultiplicator) {
-        double INTEGER_RANGE = 1L << 32;
-        double doubleHash = ((long) nick.hashCode() - Integer.MIN_VALUE) / INTEGER_RANGE;
-        return hslToRgb(doubleHash, ThemeUtil.nickConstants[0] * saturationMultiplicator, ThemeUtil.nickConstants[1] * luminosityMultiplicator); //Last to values comes from trial and error
-    }
-
-    private static double hue2rgb(double p, double q, double t) {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1.0 / 6.0) return p + (q - p) * 6 * t;
-        if (t < 1.0 / 2.0) return q;
-        if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
-        return p;
-    }
-
-    private static int hslToRgb(double h, double s, double l) {
-        double r, g, b;
-
-        if (s == 0) {
-            r = g = b = l; // achromatic
-        } else {
-            double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-            double p = 2 * l - q;
-            r = hue2rgb(p, q, h + 1.0 / 3.0);
-            g = hue2rgb(p, q, h);
-            b = hue2rgb(p, q, h - 1.0 / 3.0);
-        }
-        return Color.rgb((int) (r * 255), (int) (g * 255), (int) (b * 255));
-
+        return senderColors[IrcUserUtils.getSenderColor(nick) % senderColors.length];
     }
 
     public static class NickFormatter {
@@ -94,6 +138,10 @@ public class MessageFormattingHelper {
 
         public CharSequence formatNick(String nick, boolean reduced, String[] brackets) {
             Spannable nickSpan;
+
+            if (nick.startsWith("xn--")) {
+                nick = IDN.toUnicode(nick, IDN.ALLOW_UNASSIGNED);
+            }
 
             nickSpan = new SpannableString(nick);
             SpanUtils.setFullSpan(nickSpan, new StyleSpan(Typeface.BOLD));
