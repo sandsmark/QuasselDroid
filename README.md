@@ -1,5 +1,8 @@
-QuasselDroid
-============
+QuasselDroid Legacy
+===================
+
+This is the repository for the legacy version of Quasseldroid. This version is not maintained anymore.
+Please open all new issues on the rewrite at https://git.kuschku.de/justJanne/QuasselDroid-ng/
 
 Quassel is a distributed, decentralized IRC client, written using C++ and Qt.
 QuasselDroid is a pure-java client for the Quassel core, allowing you to
