@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Class holds all the data for a Quassel buffer, this includes all the messages in the buffer, as well as the different states for the buffer.
@@ -545,8 +546,10 @@ public class Buffer extends Observable implements Comparable<Buffer> {
         notifyObservers();
     }
 
+    private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);
+
     public void updateIgnore() {
-        new Thread(new Runnable() {
+        EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
                 final ArrayList<IrcMessage> newBacklog;
@@ -584,7 +587,7 @@ public class Buffer extends Observable implements Comparable<Buffer> {
                     }
                 });
             }
-        }).start();
+        });
     }
 
     public synchronized boolean isMarkerLineFiltered() {

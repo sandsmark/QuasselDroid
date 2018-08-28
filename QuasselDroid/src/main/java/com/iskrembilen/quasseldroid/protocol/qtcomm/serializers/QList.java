@@ -41,18 +41,14 @@ public class QList<T> implements QMetaTypeSerializer<List<T>> {
         this.elementType = elementType;
     }
 
-    protected List<T> makeList() {
-        return new ArrayList<T>();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public List<T> deserialize(QDataInputStream stream, DataStreamVersion version)
             throws IOException, EmptyQVariantException {
-        List<T> list = makeList();
         int len = (int) stream.readUInt(32);
         serializer = (QMetaTypeSerializer<T>) QMetaTypeRegistry.instance().getTypeForName(elementType).getSerializer();
 
+        List<T> list = new ArrayList<>(len);
         for (int i = 0; i < len; i++) {
             list.add(serializer.deserialize(stream, version));
         }

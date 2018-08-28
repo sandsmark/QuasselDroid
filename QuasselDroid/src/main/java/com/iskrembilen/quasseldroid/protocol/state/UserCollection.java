@@ -26,21 +26,27 @@ package com.iskrembilen.quasseldroid.protocol.state;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
-
 import com.iskrembilen.quasseldroid.R;
-
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Set;
 
 public class UserCollection extends Observable implements Observer {
 
     private static final String TAG = UserCollection.class.getSimpleName();
-    private Map<IrcMode, ArrayList<IrcUser>> users = new HashMap<>();
-    private Map<IrcMode, ArrayList<IrcUser>> uniqueUsers = new HashMap<>();
+    private Map<IrcMode, List<IrcUser>> users = new HashMap<>();
+    private Map<IrcMode, List<IrcUser>> uniqueUsers = new HashMap<>();
 
     public UserCollection() {
         for (IrcMode mode : IrcMode.values()) {
-            users.put(mode, new ArrayList<IrcUser>());
-            uniqueUsers.put(mode, new ArrayList<IrcUser>());
+            users.put(mode, new AutoSortedList<IrcUser>());
+            uniqueUsers.put(mode, new AutoSortedList<IrcUser>());
         }
     }
 
@@ -72,11 +78,9 @@ public class UserCollection extends Observable implements Observer {
         if (user==null) {
             Log.e(TAG, "NULL user added with mode " + mode.name());
             return false;
-        } else if (users.get(mode).contains(user)) {
-            return false;
         } else {
-            users.get(mode).add(user);
-            Collections.sort(users.get(mode));
+            List<IrcUser> usersOfMode = users.get(mode);
+            if (!usersOfMode.add(user)) { return false; }
             this.setChanged();
             return true;
         }
@@ -173,15 +177,13 @@ public class UserCollection extends Observable implements Observer {
         ArrayList<IrcUser> uniqueUsers = new ArrayList<IrcUser>();
         for (IrcMode mode : IrcMode.values()) {
             for (IrcUser user : users.get(mode)) {
-                if (!uniqueUsers.contains(user)) {
-                    uniqueUsers.add(user);
-                }
+                uniqueUsers.add(user);
             }
         }
         return uniqueUsers;
     }
 
-    public ArrayList<IrcUser> getUniqueUsersWithMode(IrcMode mode) {
+    public List<IrcUser> getUniqueUsersWithMode(IrcMode mode) {
         return uniqueUsers.get(mode);
     }
 
@@ -231,11 +233,7 @@ public class UserCollection extends Observable implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        for (IrcMode mode : IrcMode.values()) {
-            Collections.sort(users.get(mode));
-            Collections.sort(uniqueUsers.get(mode));
-            this.setChanged();
-        }
+        this.setChanged();
         notifyObservers(R.id.BUFFERUPDATE_USERSCHANGED);
     }
 
@@ -245,5 +243,52 @@ public class UserCollection extends Observable implements Observer {
                 return mode;
         }
         return IrcMode.USER;
+    }
+
+    private static class AutoSortedList<E extends Comparable<E>> extends AbstractList<E> implements Set<E> {
+        private final List<E> list = new ArrayList<>();
+
+        @Override
+        public E get(int i) {
+            return list.get(i);
+        }
+
+        @Override
+        public int size() {
+            return list.size();
+        }
+
+        @Override
+        public boolean add(E e) {
+            int i = binarySearch(e);
+            if (i < 0) {
+                list.add(~i, e);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean remove(Object o) {
+            int i = binarySearch((E) o);
+            if (i >= 0) {
+                list.remove(i);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean contains(Object o) {
+            return binarySearch((E) o) > 0;
+        }
+
+        private int binarySearch(E e) {
+            return Collections.binarySearch(list, e);
+        }
     }
 }

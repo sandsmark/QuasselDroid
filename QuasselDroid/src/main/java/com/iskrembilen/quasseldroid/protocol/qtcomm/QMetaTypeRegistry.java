@@ -23,9 +23,6 @@
 
 package com.iskrembilen.quasseldroid.protocol.qtcomm;
 
-import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
-import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
-import com.iskrembilen.quasseldroid.protocol.state.NetworkServer;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.QMetaType.Type;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.Bool;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.QByteArray;
@@ -40,7 +37,10 @@ import com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.UnsignedInteger;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.quassel.BufferInfoSerializer;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.quassel.MessageSerializer;
 import com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.quassel.NetworkServerSerializer;
-
+import com.iskrembilen.quasseldroid.protocol.state.BufferInfo;
+import com.iskrembilen.quasseldroid.protocol.state.IrcMessage;
+import com.iskrembilen.quasseldroid.protocol.state.NetworkServer;
+import de.kuschku.util.BetterSparseArray;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -48,19 +48,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.kuschku.util.BetterSparseIntArray;
-
 
 public class QMetaTypeRegistry {
-    static QMetaTypeRegistry singleton = null;
-    List<QMetaType<?>> types = null;
-    Map<String, Integer> lookupName;
-    Map<Integer, Integer> lookupId;
+    private static final QMetaTypeRegistry singleton = new QMetaTypeRegistry();
+
+    private final Map<String, QMetaType<?>> lookupName = new HashMap<>();
+    private final Map<Integer, QMetaType<?>> lookupId = new BetterSparseArray<>();
 
     private QMetaTypeRegistry() {
-        types = new ArrayList<QMetaType<?>>();
-        lookupName = new HashMap<String, Integer>();
-        lookupId = new BetterSparseIntArray();
+        List<QMetaType<?>> types = new ArrayList<>();
         //:%s/QT_ADD_STATIC_METATYPE(\(\"[^\"]\+\"\)\, QMetaType::\([^)]\+\)),/types.add(new QMetaType(QMetaType.Type.\2.getValue(),\1));/g
         types.add(new QMetaType<java.lang.Void>(QMetaType.Type.Void.getValue(), "void", new com.iskrembilen.quasseldroid.protocol.qtcomm.serializers.Void()));
         types.add(new QMetaType<Boolean>(QMetaType.Type.Bool.getValue(), "bool", new Bool()));
@@ -164,39 +160,32 @@ public class QMetaTypeRegistry {
         types.add(new QMetaType<Object>(QMetaType.Type.QReal.getValue(), "qreal"));
 
         for (int i = 0; i < types.size(); i++) {
-            lookupName.put(types.get(i).name, i);
-            if (!lookupId.containsKey(types.get(i).id)) { //NB:  Several names map to the same key so don't override it
-                lookupId.put(types.get(i).id, i);
+            QMetaType<?> type = types.get(i);
+            lookupName.put(type.name, type);
+            if (!lookupId.containsKey(type.id)) { //NB:  Several names map to the same key so don't override it
+                lookupId.put(type.id, type);
             }
         }
     }
 
     public static QMetaTypeRegistry instance() {
-        if (singleton == null) {
-            singleton = new QMetaTypeRegistry();
-        }
         return singleton;
     }
 
-    public synchronized int getIdForName(String name) {
-        if (lookupName.containsKey(name)) return types.get(lookupName.get(name)).id;
-        throw new IllegalArgumentException();
+    public int getIdForName(String name) {
+        return getTypeForName(name).id;
     }
 
-    public synchronized QMetaType getTypeForId(int id) {
-        //		Log.d("AAAAAA", types.get(lookupId.get(id)).toString());
-        //		for(QMetaType type: types){
-        //			if(type.id == id) {
-        //				return type;
-        //			}
-        //		}
-        if (lookupId.containsKey(id)) return types.get(lookupId.get(id));
-        throw new IllegalArgumentException("Illegal id " + id);
+    public QMetaType getTypeForId(int id) {
+        QMetaType<?> i = lookupId.get(id);
+        if (i == null) { throw new IllegalArgumentException("Illegal id " + id); }
+        return i;
     }
 
-    public synchronized QMetaType getTypeForName(String name) {
-        if (lookupName.containsKey(name)) return types.get(lookupName.get(name));
-        throw new IllegalArgumentException("Unable to find meta type: " + name);
+    public QMetaType getTypeForName(String name) {
+        QMetaType<?> i = lookupName.get(name);
+        if (i == null) { throw new IllegalArgumentException("Unable to find meta type: " + name); }
+        return i;
     }
 
     public static Object unserialize(Type type, QDataInputStream stream, DataStreamVersion version) throws IOException, EmptyQVariantException {
