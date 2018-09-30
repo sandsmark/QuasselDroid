@@ -89,7 +89,7 @@
         <string name="preference_title_dynamic_backlog">Dynamic backlog amount</string>
         <string name="preference_dynamic_backlog" translatable="false">dynamicBacklog</string>
 
-        <string name="preference_wakelock_summary">Use more battery when you turn off the screen, to keep connections alive</string>
+        <string name="preference_wakelock_summary">Use more battery when you turn off the screen, to keep connections alive (Android &lt;= 2.3)</string>
         <string name="preference_wakelock_title">Use a wake-lock to inhibit sleep</string>
         <string name="preference_wake_lock" translatable="false">wakelock</string>
 
